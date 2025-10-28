@@ -1,96 +1,410 @@
-import { Buffer } from "node:buffer";
-import type { AuthRequest, ClientInfo } from "@cloudflare/workers-oauth-provider"; // Adjust path if necessary
+// workers-oauth-utils.ts
+// OAuth utility functions with CSRF and state validation security fixes
 
-const COOKIE_NAME = "mcp-approved-clients";
+import type { AuthRequest, ClientInfo } from "@cloudflare/workers-oauth-provider";
+
 const ONE_YEAR_IN_SECONDS = 31536000;
 
 /**
- * Imports a secret key string for HMAC-SHA256 signing.
+ * OAuth 2.1 compliant error class.
+ * Represents errors that occur during OAuth operations with standardized error codes and descriptions.
  */
-async function importKey(secret: string): Promise<CryptoKey> {
-	if (!secret) {
-		throw new Error(
-			"COOKIE_ENCRYPTION_KEY is not defined. A secret key is required for signing cookies.",
+export class OAuthError extends Error {
+	/**
+	 * Creates a new OAuthError
+	 * @param code - The OAuth error code (e.g., "invalid_request", "invalid_grant")
+	 * @param description - Human-readable error description
+	 * @param statusCode - HTTP status code to return (defaults to 400)
+	 */
+	constructor(
+		public code: string,
+		public description: string,
+		public statusCode = 400,
+	) {
+		super(description);
+		this.name = "OAuthError";
+	}
+
+	/**
+	 * Converts the error to a standardized OAuth error response
+	 * @returns HTTP Response with JSON error body
+	 */
+	toResponse(): Response {
+		return new Response(
+			JSON.stringify({
+				error: this.code,
+				error_description: this.description,
+			}),
+			{
+				status: this.statusCode,
+				headers: { "Content-Type": "application/json" },
+			},
 		);
 	}
-	return crypto.subtle.importKey(
-		"raw",
-		Buffer.from(secret),
-		{ hash: "SHA-256", name: "HMAC" },
-		false, // not extractable
-		["sign", "verify"], // key usages
-	);
 }
 
 /**
- * Parses the signed cookie and verifies its integrity.
+ * Configuration options for OAuth utilities
  */
-async function getApprovedClientsFromCookie(
-	cookieHeader: string | null,
-	secret: string,
-): Promise<string[] | null> {
-	if (!cookieHeader) return null;
+export interface OAuthUtilsConfig {
+	/**
+	 * Cloudflare KV namespace for storing OAuth state data
+	 */
+	kv: KVNamespace;
 
-	const cookies = cookieHeader.split(";").map((c) => c.trim());
-	const targetCookie = cookies.find((c) => c.startsWith(`${COOKIE_NAME}=`));
+	/**
+	 * Secret key used for signing and verifying cookie data.
+	 * Should be a long, random string kept secure.
+	 */
+	cookieSecret: string;
 
-	if (!targetCookie) return null;
+	/**
+	 * Optional client identifier to namespace cookies and KV keys.
+	 * Useful when running multiple OAuth providers in the same Worker.
+	 *
+	 * Examples:
+	 * - "github" → cookies: __Host-CSRF_TOKEN-github, KV: oauth:github:state:...
+	 * - "google" → cookies: __Host-CSRF_TOKEN-google, KV: oauth:google:state:...
+	 *
+	 * Must contain only alphanumeric characters, hyphens, or underscores.
+	 * Defaults to "mcp" for Model Context Protocol OAuth flows.
+	 */
+	clientName?: string;
 
-	const cookieValue = targetCookie.substring(COOKIE_NAME.length + 1);
-	const parts = cookieValue.split(".");
+	/**
+	 * Time-to-live for OAuth state in seconds.
+	 * Defaults to 600 (10 minutes)
+	 */
+	stateTTL?: number;
+}
 
-	if (parts.length !== 2) {
-		console.warn("Invalid cookie format received.");
-		return null; // Invalid format
+/**
+ * Result from createOAuthState containing the state token and cookie header
+ */
+export interface OAuthStateResult {
+	/**
+	 * The generated state token to be used in OAuth authorization requests
+	 */
+	stateToken: string;
+
+	/**
+	 * Set-Cookie header value to send to the client
+	 */
+	setCookie: string;
+}
+
+/**
+ * Result from validateOAuthState containing the original OAuth request info and cookie to clear
+ */
+export interface ValidateStateResult {
+	/**
+	 * The original OAuth request information that was stored with the state token
+	 */
+	oauthReqInfo: AuthRequest;
+
+	/**
+	 * Set-Cookie header value to clear the state cookie
+	 */
+	clearCookie: string;
+}
+
+/**
+ * Result from generateCSRFProtection containing the CSRF token and cookie header
+ */
+export interface CSRFProtectionResult {
+	/**
+	 * The generated CSRF token to be embedded in forms
+	 */
+	token: string;
+
+	/**
+	 * Set-Cookie header value to send to the client
+	 */
+	setCookie: string;
+}
+
+/**
+ * Result from validateCSRFToken containing the cookie to clear
+ */
+export interface ValidateCSRFResult {
+	/**
+	 * Set-Cookie header value to clear the CSRF cookie (one-time use per RFC 9700)
+	 */
+	clearCookie: string;
+}
+
+/**
+ * Sanitizes text content for safe display in HTML by escaping special characters.
+ * Use this for client names, descriptions, and other text content.
+ *
+ * @param text - The unsafe text that might contain HTML special characters
+ * @returns A safe string with HTML special characters escaped
+ *
+ * @example
+ * ```typescript
+ * const safeName = sanitizeText("<script>alert('xss')</script>");
+ * // Returns: "&lt;script&gt;alert(&#039;xss&#039;)&lt;/script&gt;"
+ * ```
+ */
+export function sanitizeText(text: string): string {
+	return text
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#039;");
+}
+
+/**
+ * Validates a URL for security.
+ *
+ * Implements RFC compliance:
+ * - RFC 3986: Rejects control characters (not in allowed character set)
+ * - RFC 3986: Validates URI structure using URL parser
+ * - RFC 7591 §2: Client metadata URIs must point to valid web resources
+ * - RFC 7591 §5: Protect users from malicious content (whitelist approach)
+ *
+ * Uses whitelist security: Only allows https: and http: schemes.
+ * All other schemes (javascript:, data:, file:, etc.) are rejected.
+ *
+ * NOTE: This function only validates the URL structure and scheme. It does NOT
+ * perform HTML escaping. If you need to use the URL in HTML context (href, src),
+ * you must also call sanitizeText() on the result.
+ *
+ * @param url - The URL to validate
+ * @returns The validated URL string, or empty string if validation fails
+ *
+ * @example
+ * ```typescript
+ * const validUrl = sanitizeUrl("https://example.com");
+ * // Returns: "https://example.com"
+ *
+ * const blocked = sanitizeUrl("javascript:alert('xss')");
+ * // Returns: "" (rejected - not in whitelist)
+ *
+ * // For use in HTML, also escape:
+ * const htmlSafeUrl = sanitizeText(sanitizeUrl(userInput));
+ * ```
+ */
+export function sanitizeUrl(url: string): string {
+	const normalized = url.trim();
+
+	if (normalized.length === 0) {
+		return "";
 	}
 
-	const [signatureHex, base64Payload] = parts;
-	const payload = Buffer.from(base64Payload, "base64url");
-
-	const key = await importKey(secret);
-	const isValid = await crypto.subtle.verify(
-		"HMAC",
-		key,
-		Buffer.from(signatureHex, "hex"),
-		payload,
-	);
-
-	if (!isValid) {
-		console.warn("Cookie signature verification failed.");
-		return null; // Signature invalid
+	// RFC 3986: Control characters are not in the allowed character set
+	// Check C0 (0x00-0x1F) and C1 (0x7F-0x9F) control characters
+	for (let i = 0; i < normalized.length; i++) {
+		const code = normalized.charCodeAt(i);
+		if ((code >= 0x00 && code <= 0x1f) || (code >= 0x7f && code <= 0x9f)) {
+			return "";
+		}
 	}
 
+	// RFC 3986: Validate URI structure (scheme and path required)
+	let parsedUrl: URL;
 	try {
-		const approvedClients = JSON.parse(payload.toString());
-		if (!Array.isArray(approvedClients)) {
-			console.warn("Cookie payload is not an array.");
-			return null; // Payload isn't an array
-		}
-		// Ensure all elements are strings
-		if (!approvedClients.every((item) => typeof item === "string")) {
-			console.warn("Cookie payload contains non-string elements.");
-			return null;
-		}
-		return approvedClients as string[];
-	} catch (e) {
-		console.error("Error parsing cookie payload:", e);
-		return null; // JSON parsing failed
+		parsedUrl = new URL(normalized);
+	} catch {
+		return "";
 	}
+
+	// RFC 7591 §2: Client metadata URIs must point to valid web pages/resources
+	// RFC 7591 §5: Protect users from malicious content
+	// Whitelist only http/https schemes for web resources
+	const allowedSchemes = ["https", "http"];
+
+	const scheme = parsedUrl.protocol.slice(0, -1).toLowerCase();
+	if (!allowedSchemes.includes(scheme)) {
+		return "";
+	}
+
+	// Return validated URL without HTML escaping
+	// Caller should use sanitizeText() if HTML escaping is needed
+	return normalized;
 }
 
 /**
- * Checks if a given client ID has already been approved by the user,
- * based on a signed cookie.
+ * Generates a new CSRF token and corresponding cookie for form protection
+ * @param config - OAuth utilities configuration
+ * @returns Object containing the token and Set-Cookie header value
  */
-export async function clientIdAlreadyApproved(
+export function generateCSRFProtection(config: OAuthUtilsConfig): CSRFProtectionResult {
+	const clientName = config.clientName || "mcp";
+	validateClientName(clientName);
+	const csrfCookieName = `__Host-CSRF_TOKEN-${clientName}`;
+
+	const token = crypto.randomUUID();
+	const setCookie = `${csrfCookieName}=${token}; HttpOnly; Secure; Path=/authorize; SameSite=Lax; Max-Age=600`;
+	return { token, setCookie };
+}
+
+/**
+ * Validates that the CSRF token from the form matches the token in the cookie.
+ * Per RFC 9700 Section 2.1, CSRF tokens must be one-time use.
+ *
+ * @param request - The HTTP request containing form data and cookies
+ * @param config - OAuth utilities configuration
+ * @returns Object containing clearCookie header to invalidate the token
+ * @throws {OAuthError} If CSRF token is missing or mismatched
+ */
+export async function validateCSRFToken(
+	request: Request,
+	config: OAuthUtilsConfig,
+): Promise<ValidateCSRFResult> {
+	const clientName = config.clientName || "mcp";
+	validateClientName(clientName);
+	const csrfCookieName = `__Host-CSRF_TOKEN-${clientName}`;
+
+	const formData = await request.formData();
+	const tokenFromForm = formData.get("csrf_token");
+
+	if (!tokenFromForm || typeof tokenFromForm !== "string") {
+		throw new OAuthError("invalid_request", "Missing CSRF token in form data", 400);
+	}
+
+	const cookieHeader = request.headers.get("Cookie") || "";
+	const cookies = cookieHeader.split(";").map((c) => c.trim());
+	const csrfCookie = cookies.find((c) => c.startsWith(`${csrfCookieName}=`));
+	const tokenFromCookie = csrfCookie ? csrfCookie.substring(csrfCookieName.length + 1) : null;
+
+	if (!tokenFromCookie) {
+		throw new OAuthError("invalid_request", "Missing CSRF token cookie", 400);
+	}
+
+	if (tokenFromForm !== tokenFromCookie) {
+		throw new OAuthError("invalid_request", "CSRF token mismatch", 400);
+	}
+
+	// RFC 9700: CSRF tokens must be one-time use
+	// Clear the cookie to prevent reuse
+	const clearCookie = `${csrfCookieName}=; HttpOnly; Secure; Path=/authorize; SameSite=Lax; Max-Age=0`;
+
+	return { clearCookie };
+}
+
+/**
+ * Creates and stores OAuth state information, returning a state token and cookie
+ * @param oauthReqInfo - OAuth request information to store with the state
+ * @param config - OAuth utilities configuration
+ * @returns Object containing the state token and Set-Cookie header value
+ */
+export async function createOAuthState(
+	oauthReqInfo: AuthRequest,
+	config: OAuthUtilsConfig,
+): Promise<OAuthStateResult> {
+	const clientName = config.clientName || "mcp";
+	validateClientName(clientName);
+	const stateCookieName = `__Host-CONSENTED_STATE-${clientName}`;
+	const stateTTL = config.stateTTL || 600;
+
+	const stateToken = crypto.randomUUID();
+
+	await config.kv.put(`oauth:${clientName}:state:${stateToken}`, JSON.stringify(oauthReqInfo), {
+		expirationTtl: stateTTL,
+	});
+
+	const setCookie = `${stateCookieName}=${stateToken}; HttpOnly; Secure; Path=/callback; SameSite=Lax; Max-Age=${stateTTL}`;
+
+	return { stateToken, setCookie };
+}
+
+/**
+ * Validates OAuth state from the request, ensuring the state parameter matches the cookie
+ * and retrieving the stored OAuth request information
+ * @param request - The HTTP request containing state parameter and cookies
+ * @param config - OAuth utilities configuration
+ * @returns Object containing the original OAuth request info and cookie to clear
+ * @throws {OAuthError} If state is missing, mismatched, or expired
+ */
+export async function validateOAuthState(
+	request: Request,
+	config: OAuthUtilsConfig,
+): Promise<ValidateStateResult> {
+	const clientName = config.clientName || "mcp";
+	validateClientName(clientName);
+	const stateCookieName = `__Host-CONSENTED_STATE-${clientName}`;
+
+	const url = new URL(request.url);
+	const stateFromQuery = url.searchParams.get("state");
+
+	if (!stateFromQuery) {
+		throw new OAuthError("invalid_request", "Missing state parameter", 400);
+	}
+
+	const cookieHeader = request.headers.get("Cookie") || "";
+	const cookies = cookieHeader.split(";").map((c) => c.trim());
+	const stateCookie = cookies.find((c) => c.startsWith(`${stateCookieName}=`));
+	const stateFromCookie = stateCookie ? stateCookie.substring(stateCookieName.length + 1) : null;
+
+	if (!stateFromCookie) {
+		throw new OAuthError("invalid_request", "Missing consent state cookie", 400);
+	}
+
+	if (stateFromQuery !== stateFromCookie) {
+		throw new OAuthError("invalid_request", "State mismatch", 400);
+	}
+
+	const storedDataJson = await config.kv.get(`oauth:${clientName}:state:${stateFromQuery}`);
+	if (!storedDataJson) {
+		throw new OAuthError("invalid_request", "Invalid or expired state", 400);
+	}
+
+	let oauthReqInfo: AuthRequest;
+	try {
+		oauthReqInfo = JSON.parse(storedDataJson) as AuthRequest;
+	} catch (_e) {
+		throw new OAuthError("server_error", "Invalid state data", 500);
+	}
+
+	await config.kv.delete(`oauth:${clientName}:state:${stateFromQuery}`);
+
+	const clearCookie = `${stateCookieName}=; HttpOnly; Secure; Path=/callback; SameSite=Lax; Max-Age=0`;
+
+	return { oauthReqInfo, clearCookie };
+}
+
+/**
+ * Checks if a client has been previously approved by the user
+ * @param request - The HTTP request containing cookies
+ * @param clientId - The OAuth client ID to check
+ * @param config - OAuth utilities configuration
+ * @returns True if the client is in the user's approved clients list
+ */
+export async function isClientApproved(
 	request: Request,
 	clientId: string,
-	cookieSecret: string,
+	config: OAuthUtilsConfig,
 ): Promise<boolean> {
-	if (!clientId) return false;
-	const cookieHeader = request.headers.get("cookie");
-	const approvedClients = await getApprovedClientsFromCookie(cookieHeader, cookieSecret);
+	const approvedClients = await getApprovedClientsFromCookie(request, config);
 	return approvedClients?.includes(clientId) ?? false;
+}
+
+/**
+ * Adds a client to the user's list of approved clients
+ * @param request - The HTTP request containing existing cookies
+ * @param clientId - The OAuth client ID to add
+ * @param config - OAuth utilities configuration
+ * @returns Set-Cookie header value with the updated approved clients list
+ */
+export async function addApprovedClient(
+	request: Request,
+	clientId: string,
+	config: OAuthUtilsConfig,
+): Promise<string> {
+	const clientName = config.clientName || "mcp";
+	validateClientName(clientName);
+	const approvedClientsCookieName = `__Host-MCP_APPROVED_CLIENTS-${clientName}`;
+
+	const existingApprovedClients = (await getApprovedClientsFromCookie(request, config)) || [];
+	const updatedApprovedClients = Array.from(new Set([...existingApprovedClients, clientId]));
+
+	const payload = JSON.stringify(updatedApprovedClients);
+	const signature = await signData(payload, config.cookieSecret);
+	const cookieValue = `${signature}.${btoa(payload)}`;
+
+	return `${approvedClientsCookieName}=${cookieValue}; HttpOnly; Secure; Path=/; SameSite=Lax; Max-Age=${ONE_YEAR_IN_SECONDS}`;
 }
 
 /**
@@ -115,72 +429,54 @@ export interface ApprovalDialogOptions {
 	 */
 	state: Record<string, any>;
 	/**
-	 * Name of the cookie to use for storing approvals
-	 * @default "mcp_approved_clients"
+	 * CSRF token to include in the form
 	 */
-	cookieName?: string;
+	csrfToken: string;
 	/**
-	 * Secret used to sign cookies for verification
-	 * Can be a string or Uint8Array
-	 * @default Built-in Uint8Array key
+	 * Set-Cookie header for the CSRF token
 	 */
-	cookieSecret?: string | Uint8Array;
-	/**
-	 * Cookie domain
-	 * @default current domain
-	 */
-	cookieDomain?: string;
-	/**
-	 * Cookie path
-	 * @default "/"
-	 */
-	cookiePath?: string;
-	/**
-	 * Cookie max age in seconds
-	 * @default 30 days
-	 */
-	cookieMaxAge?: number;
+	setCookie: string;
 }
 
 /**
- * Renders an approval dialog for OAuth authorization
+ * Renders an approval dialog for OAuth authorization with CSRF protection
  * The dialog displays information about the client and server
- * and includes a form to submit approval
+ * and includes a form to submit approval with CSRF protection
  *
  * @param request - The HTTP request
  * @param options - Configuration for the approval dialog
  * @returns A Response containing the HTML approval dialog
  */
 export function renderApprovalDialog(request: Request, options: ApprovalDialogOptions): Response {
-	const { client, server, state } = options;
+	const { client, server, state, csrfToken, setCookie } = options;
 
-	// Encode state for form submission
-	const encodedState = Buffer.from(JSON.stringify(state)).toString("base64url");
+	const encodedState = btoa(JSON.stringify(state));
 
-	// Sanitize any untrusted content
-	const serverName = sanitizeHtml(server.name);
-	const clientName = client?.clientName ? sanitizeHtml(client.clientName) : "Unknown MCP Client";
-	const serverDescription = server.description ? sanitizeHtml(server.description) : "";
+	const serverName = sanitizeText(server.name);
+	const clientName = client?.clientName ? sanitizeText(client.clientName) : "Unknown MCP Client";
+	const serverDescription = server.description ? sanitizeText(server.description) : "";
 
-	// Safe URLs
-	const logoUrl = server.logo ? sanitizeHtml(server.logo) : "";
-	const clientUri = client?.clientUri ? sanitizeHtml(client.clientUri) : "";
-	const policyUri = client?.policyUri ? sanitizeHtml(client.policyUri) : "";
-	const tosUri = client?.tosUri ? sanitizeHtml(client.tosUri) : "";
+	// Validate URLs then HTML-escape for safe use in attributes
+	const logoUrl = server.logo ? sanitizeText(sanitizeUrl(server.logo)) : "";
+	const clientUri = client?.clientUri ? sanitizeText(sanitizeUrl(client.clientUri)) : "";
+	const policyUri = client?.policyUri ? sanitizeText(sanitizeUrl(client.policyUri)) : "";
+	const tosUri = client?.tosUri ? sanitizeText(sanitizeUrl(client.tosUri)) : "";
 
-	// Client contacts
 	const contacts =
 		client?.contacts && client.contacts.length > 0
-			? sanitizeHtml(client.contacts.join(", "))
+			? sanitizeText(client.contacts.join(", "))
 			: "";
 
-	// Get redirect URIs
 	const redirectUris =
 		client?.redirectUris && client.redirectUris.length > 0
-			? client.redirectUris.map((uri) => sanitizeHtml(uri))
+			? client.redirectUris
+					.map((uri) => {
+						const validated = sanitizeUrl(uri);
+						return validated ? sanitizeText(validated) : "";
+					})
+					.filter((uri) => uri !== "")
 			: [];
 
-	// Generate HTML for the approval dialog
 	const htmlContent = `
     <!DOCTYPE html>
     <html lang="en">
@@ -189,7 +485,6 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>${clientName} | Authorization Request</title>
         <style>
-          /* Modern, responsive styling with system fonts */
           :root {
             --primary-color: #0070f3;
             --error-color: #f44336;
@@ -332,7 +627,6 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
             color: var(--text-color);
           }
 
-          /* Responsive adjustments */
           @media (max-width: 640px) {
             .container {
               margin: 1rem auto;
@@ -459,6 +753,7 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
 
             <form method="post" action="${new URL(request.url).pathname}">
               <input type="hidden" name="state" value="${encodedState}">
+              <input type="hidden" name="csrf_token" value="${csrfToken}">
 
               <div class="actions">
                 <button type="button" class="button button-secondary" onclick="window.history.back()">Cancel</button>
@@ -473,84 +768,113 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
 
 	return new Response(htmlContent, {
 		headers: {
-			"content-type": "text/html; charset=utf-8",
+			"Content-Security-Policy": "frame-ancestors 'none'",
+			"Content-Type": "text/html; charset=utf-8",
+			"Set-Cookie": setCookie,
+			"X-Frame-Options": "DENY",
 		},
 	});
 }
 
-/**
- * Result of parsing the approval form submission.
- */
-export interface ParsedApprovalResult {
-	/** The original state object passed through the form. */
-	state: any;
-	/** Headers to set on the redirect response, including the Set-Cookie header. */
-	headers: Record<string, string>;
-}
+// --- Helper Functions ---
 
-/**
- * Parses the form submission from the approval dialog, extracts the state,
- * and generates Set-Cookie headers to mark the client as approved.
- */
-export async function parseRedirectApproval(
-	request: Request,
-	cookieSecret: string,
-): Promise<ParsedApprovalResult> {
-	if (request.method !== "POST") {
-		throw new Error("Invalid request method. Expected POST.");
-	}
-
-	let state: any;
-	let clientId: string | undefined;
-
-	try {
-		const formData = await request.formData();
-		const encodedState = formData.get("state");
-
-		if (typeof encodedState !== "string" || !encodedState) {
-			throw new Error("Missing or invalid 'state' in form data.");
-		}
-
-		state = JSON.parse(Buffer.from(encodedState, "base64url").toString()) as {
-			oauthReqInfo?: AuthRequest;
-		}; // Decode the state
-		clientId = state?.oauthReqInfo?.clientId; // Extract clientId from within the state
-
-		if (!clientId) {
-			throw new Error("Could not extract clientId from state object.");
-		}
-	} catch (e) {
-		console.error("Error processing form submission:", e);
-		// Rethrow or handle as appropriate, maybe return a specific error response
+function validateClientName(clientName: string): void {
+	if (!/^[a-zA-Z0-9_-]+$/.test(clientName)) {
 		throw new Error(
-			`Failed to parse approval form: ${e instanceof Error ? e.message : String(e)}`,
+			"clientName must contain only alphanumeric characters, hyphens, or underscores",
 		);
 	}
-
-	// Get existing approved clients
-	const cookieHeader = request.headers.get("cookie");
-	const existingApprovedClients =
-		(await getApprovedClientsFromCookie(cookieHeader, cookieSecret)) || [];
-
-	// Add the newly approved client ID (avoid duplicates)
-	const updatedApprovedClients = Array.from(new Set([...existingApprovedClients, clientId]));
-
-	// Sign the updated list
-	const payload = Buffer.from(JSON.stringify(updatedApprovedClients));
-	const key = await importKey(cookieSecret);
-	const signature = Buffer.from(await crypto.subtle.sign("HMAC", key, payload));
-	const newCookieValue = `${signature.toString("hex")}.${payload.toString("base64url")}`;
-
-	// Generate Set-Cookie header
-	const headers: Record<string, string> = {
-		"set-cookie": `${COOKIE_NAME}=${newCookieValue}; HttpOnly; Secure; Path=/; SameSite=Lax; Max-Age=${ONE_YEAR_IN_SECONDS}`,
-	};
-
-	return { headers, state };
 }
 
+async function getApprovedClientsFromCookie(
+	request: Request,
+	config: OAuthUtilsConfig,
+): Promise<string[] | null> {
+	const clientName = config.clientName || "mcp";
+	validateClientName(clientName);
+	const approvedClientsCookieName = `__Host-MCP_APPROVED_CLIENTS-${clientName}`;
+
+	const cookieHeader = request.headers.get("Cookie");
+	if (!cookieHeader) return null;
+
+	const cookies = cookieHeader.split(";").map((c) => c.trim());
+	const targetCookie = cookies.find((c) => c.startsWith(`${approvedClientsCookieName}=`));
+
+	if (!targetCookie) return null;
+
+	const cookieValue = targetCookie.substring(approvedClientsCookieName.length + 1);
+	const parts = cookieValue.split(".");
+
+	if (parts.length !== 2) return null;
+
+	const [signatureHex, base64Payload] = parts;
+	const payload = atob(base64Payload);
+
+	const isValid = await verifySignature(signatureHex, payload, config.cookieSecret);
+
+	if (!isValid) return null;
+
+	try {
+		const approvedClients = JSON.parse(payload);
+		if (
+			!Array.isArray(approvedClients) ||
+			!approvedClients.every((item) => typeof item === "string")
+		) {
+			return null;
+		}
+		return approvedClients as string[];
+	} catch (_e) {
+		return null;
+	}
+}
+
+async function signData(data: string, secret: string): Promise<string> {
+	const key = await importKey(secret);
+	const enc = new TextEncoder();
+	const signatureBuffer = await crypto.subtle.sign("HMAC", key, enc.encode(data));
+	return Array.from(new Uint8Array(signatureBuffer))
+		.map((b) => b.toString(16).padStart(2, "0"))
+		.join("");
+}
+
+async function verifySignature(
+	signatureHex: string,
+	data: string,
+	secret: string,
+): Promise<boolean> {
+	const key = await importKey(secret);
+	const enc = new TextEncoder();
+	try {
+		const signatureBytes = new Uint8Array(
+			signatureHex.match(/.{1,2}/g)!.map((byte) => Number.parseInt(byte, 16)),
+		);
+		return await crypto.subtle.verify("HMAC", key, signatureBytes.buffer, enc.encode(data));
+	} catch (_e) {
+		return false;
+	}
+}
+
+async function importKey(secret: string): Promise<CryptoKey> {
+	if (!secret) {
+		throw new Error("cookieSecret is required for signing cookies");
+	}
+	const enc = new TextEncoder();
+	return crypto.subtle.importKey(
+		"raw",
+		enc.encode(secret),
+		{ hash: "SHA-256", name: "HMAC" },
+		false,
+		["sign", "verify"],
+	);
+}
+
+// --- Cloudflare Access Specific Utilities ---
+
 /**
- * Constructs an authorization URL for an upstream service.
+ * Constructs an authorization URL for an upstream service (CF Access specific).
+ *
+ * @param options - Configuration for the authorization URL
+ * @returns The complete authorization URL
  */
 export function getUpstreamAuthorizeUrl({
 	upstream_url,
@@ -564,7 +888,7 @@ export function getUpstreamAuthorizeUrl({
 	scope: string;
 	redirect_uri: string;
 	state?: string;
-}): string {
+}) {
 	const upstream = new URL(upstream_url);
 	upstream.searchParams.set("client_id", client_id);
 	upstream.searchParams.set("redirect_uri", redirect_uri);
@@ -575,7 +899,11 @@ export function getUpstreamAuthorizeUrl({
 }
 
 /**
- * Fetches an authorization token from an upstream service.
+ * Fetches an authorization token from Cloudflare Access.
+ * Returns both access_token and id_token (CF Access specific).
+ *
+ * @param options - Token exchange parameters
+ * @returns Tuple of [accessToken, idToken, null] or [null, null, errorResponse]
  */
 export async function fetchUpstreamAuthToken({
 	client_id,
@@ -593,56 +921,30 @@ export async function fetchUpstreamAuthToken({
 	if (!code) {
 		return [null, null, new Response("Missing code", { status: 400 })];
 	}
-	const data = {
-		client_id,
-		client_secret,
-		code,
-		grant_type: "authorization_code",
-		redirect_uri,
-	};
+
 	const resp = await fetch(upstream_url, {
-		body: new URLSearchParams(data).toString(),
+		body: new URLSearchParams({ client_id, client_secret, code, redirect_uri }).toString(),
 		headers: {
-			"content-type": "application/x-www-form-urlencoded",
+			"Content-Type": "application/x-www-form-urlencoded",
 		},
 		method: "POST",
 	});
 	if (!resp.ok) {
 		console.log(await resp.text());
-		return [
-			null,
-			null,
-			new Response(`Failed to exchange code ${resp.status}`, { status: 500 }),
-		];
+		return [null, null, new Response("Failed to fetch access token", { status: 500 })];
 	}
-	const body = (await resp.json()) as any;
-
-	const accessToken = body.access_token as string;
-	if (!accessToken) {
-		return [null, null, new Response("Missing access token", { status: 400 })];
-	}
-
-	const idToken = body.id_token as string;
-	if (!idToken) {
-		return [null, null, new Response("Missing id token", { status: 400 })];
+	const body = (await resp.json()) as { access_token?: string; id_token?: string };
+	const accessToken = body.access_token;
+	const idToken = body.id_token;
+	if (!accessToken || !idToken) {
+		return [null, null, new Response("Missing access or id token", { status: 400 })];
 	}
 	return [accessToken, idToken, null];
 }
 
 /**
- * Sanitizes HTML content to prevent XSS attacks
+ * Props type for CF Access authentication context
  */
-function sanitizeHtml(unsafe: string): string {
-	return unsafe
-		.replace(/&/g, "&amp;")
-		.replace(/</g, "&lt;")
-		.replace(/>/g, "&gt;")
-		.replace(/"/g, "&quot;")
-		.replace(/'/g, "&#039;");
-}
-
-// Context from the auth process, encrypted & stored in the auth token
-// and provided to the DurableMCP as this.props
 export type Props = {
 	login: string;
 	name: string;

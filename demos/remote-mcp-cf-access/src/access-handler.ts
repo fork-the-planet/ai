@@ -1,12 +1,18 @@
 import { Buffer } from "node:buffer";
 import type { AuthRequest, OAuthHelpers } from "@cloudflare/workers-oauth-provider";
 import {
-	clientIdAlreadyApproved,
+	addApprovedClient,
+	createOAuthState,
 	fetchUpstreamAuthToken,
+	generateCSRFProtection,
 	getUpstreamAuthorizeUrl,
+	isClientApproved,
+	OAuthError,
+	type OAuthUtilsConfig,
 	type Props,
-	parseRedirectApproval,
 	renderApprovalDialog,
+	validateCSRFToken,
+	validateOAuthState,
 } from "./workers-oauth-utils";
 
 type EnvWithOauth = Env & { OAUTH_PROVIDER: OAuthHelpers };
@@ -25,40 +31,112 @@ export async function handleAccessRequest(
 			return new Response("Invalid request", { status: 400 });
 		}
 
-		if (
-			await clientIdAlreadyApproved(request, oauthReqInfo.clientId, env.COOKIE_ENCRYPTION_KEY)
-		) {
-			return redirectToAccess(request, env, oauthReqInfo);
+		const config: OAuthUtilsConfig = {
+			clientName: "access",
+			cookieSecret: env.COOKIE_ENCRYPTION_KEY,
+			kv: env.OAUTH_KV,
+		};
+
+		// Check if client is already approved
+		if (await isClientApproved(request, clientId, config)) {
+			// Skip approval dialog but still create secure state
+			const { stateToken, setCookie } = await createOAuthState(oauthReqInfo, config);
+			return redirectToAccess(request, env, stateToken, { "Set-Cookie": setCookie });
 		}
+
+		// Generate CSRF protection for the approval form
+		const { token: csrfToken, setCookie } = generateCSRFProtection(config);
 
 		return renderApprovalDialog(request, {
 			client: await env.OAUTH_PROVIDER.lookupClient(clientId),
+			csrfToken,
 			server: {
 				description: "This is a demo MCP Remote Server using Access for authentication.",
 				logo: "https://avatars.githubusercontent.com/u/314135?s=200&v=4",
-				name: "Cloudflare Access MCP Server", // optional
+				name: "Cloudflare Access MCP Server",
 			},
-			state: { oauthReqInfo }, // arbitrary data that flows through the form submission below
+			setCookie,
+			state: { oauthReqInfo },
 		});
 	}
 
 	if (request.method === "POST" && pathname === "/authorize") {
-		// Validates form submission, extracts state, and generates Set-Cookie headers to skip approval dialog next time
-		const { state, headers } = await parseRedirectApproval(request, env.COOKIE_ENCRYPTION_KEY);
-		if (!state.oauthReqInfo) {
+		const config: OAuthUtilsConfig = {
+			clientName: "access",
+			cookieSecret: env.COOKIE_ENCRYPTION_KEY,
+			kv: env.OAUTH_KV,
+		};
+
+		// Validate CSRF token
+		try {
+			await validateCSRFToken(request, config);
+		} catch (error: any) {
+			if (error instanceof OAuthError) {
+				return error.toResponse();
+			}
+			// Unexpected non-OAuth error
+			return new Response("Internal server error", { status: 500 });
+		}
+
+		// Extract state from form data
+		const formData = await request.formData();
+		const encodedState = formData.get("state");
+		if (!encodedState || typeof encodedState !== "string") {
+			return new Response("Missing state in form data", { status: 400 });
+		}
+
+		let state: { oauthReqInfo?: AuthRequest };
+		try {
+			state = JSON.parse(atob(encodedState));
+		} catch (_e) {
+			return new Response("Invalid state data", { status: 400 });
+		}
+
+		if (!state.oauthReqInfo || !state.oauthReqInfo.clientId) {
 			return new Response("Invalid request", { status: 400 });
 		}
 
-		return redirectToAccess(request, env, state.oauthReqInfo, headers);
+		// Add client to approved list
+		const approvedClientCookie = await addApprovedClient(
+			request,
+			state.oauthReqInfo.clientId,
+			config,
+		);
+
+		// Create OAuth state with CSRF protection
+		const { stateToken, setCookie } = await createOAuthState(state.oauthReqInfo, config);
+
+		// Combine cookies
+		const cookies = [approvedClientCookie, setCookie];
+
+		return redirectToAccess(request, env, stateToken, { "Set-Cookie": cookies.join(", ") });
 	}
 
 	if (request.method === "GET" && pathname === "/callback") {
-		// Get the oathReqInfo out of KV
-		const oauthReqInfo = JSON.parse(
-			Buffer.from(searchParams.get("state") ?? "", "base64url").toString(),
-		) as AuthRequest;
+		const config: OAuthUtilsConfig = {
+			clientName: "access",
+			cookieSecret: env.COOKIE_ENCRYPTION_KEY,
+			kv: env.OAUTH_KV,
+		};
+
+		// Validate OAuth state (checks query param matches cookie and retrieves stored data)
+		let oauthReqInfo: AuthRequest;
+		let clearCookie: string;
+
+		try {
+			const result = await validateOAuthState(request, config);
+			oauthReqInfo = result.oauthReqInfo;
+			clearCookie = result.clearCookie;
+		} catch (error: any) {
+			if (error instanceof OAuthError) {
+				return error.toResponse();
+			}
+			// Unexpected non-OAuth error
+			return new Response("Internal server error", { status: 500 });
+		}
+
 		if (!oauthReqInfo.clientId) {
-			return new Response("Invalid state", { status: 400 });
+			return new Response("Invalid OAuth request data", { status: 400 });
 		}
 
 		// Exchange the code for an access token
@@ -96,7 +174,14 @@ export async function handleAccessRequest(
 			scope: oauthReqInfo.scope,
 			userId: user.sub,
 		});
-		return Response.redirect(redirectTo);
+
+		return new Response(null, {
+			headers: {
+				Location: redirectTo,
+				"Set-Cookie": clearCookie,
+			},
+			status: 302,
+		});
 	}
 
 	return new Response("Not Found", { status: 404 });
@@ -105,7 +190,7 @@ export async function handleAccessRequest(
 async function redirectToAccess(
 	request: Request,
 	env: Env,
-	oauthReqInfo: AuthRequest,
+	stateToken: string,
 	headers: Record<string, string> = {},
 ) {
 	return new Response(null, {
@@ -115,7 +200,7 @@ async function redirectToAccess(
 				client_id: env.ACCESS_CLIENT_ID,
 				redirect_uri: new URL("/callback", request.url).href,
 				scope: "openid email profile",
-				state: Buffer.from(JSON.stringify(oauthReqInfo)).toString("base64url"),
+				state: stateToken,
 				upstream_url: env.ACCESS_AUTHORIZATION_URL,
 			}),
 		},
