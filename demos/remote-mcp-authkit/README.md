@@ -15,8 +15,8 @@ Next, add the MCP server's callback URL as a Redirect URI under **_Redirects_**
 `http://localhost:8788/callback`, or if deployed, the domain of your deployed
 worker with the same `/callback` path.
 
-Next, you must set the `WORKOS_CLIENT_ID` and `WORKOS_CLIENT_SECRET` environment
-variables. These can be obtained from the WorkOS Dashboard under **_API Keys_**.
+Next, you must set the `WORKOS_CLIENT_ID`, `WORKOS_CLIENT_SECRET`, and `COOKIE_ENCRYPTION_KEY` environment
+variables. The WorkOS credentials can be obtained from the WorkOS Dashboard under **_API Keys_**.
 
 You can set these in the Cloudflare dashboard or using the `wrangler`
 CLI:
@@ -24,11 +24,30 @@ CLI:
 ```sh
 $ npx wrangler secret put WORKOS_CLIENT_ID <your_workos_client_id>
 $ npx wrangler secret put WORKOS_CLIENT_SECRET <your_workos_client_secret>
+$ npx wrangler secret put COOKIE_ENCRYPTION_KEY # add any random string here e.g. openssl rand -hex 32
 ```
 
 **Note:** The `WORKOS_CLIENT_ID` isn't technically a secret and so you may also choose
-to set it via your `wrangler.jsonc` configuration file. But `WORKOS_CLIENT_SECRET` is not
+to set it via your `wrangler.jsonc` configuration file. But `WORKOS_CLIENT_SECRET` and `COOKIE_ENCRYPTION_KEY` are not
 public and should be securely set elsewhere.
+
+#### Set up a KV namespace
+
+Create a KV namespace for OAuth state storage:
+```sh
+$ npx wrangler kv namespace create OAUTH_KV
+```
+
+Update the KV namespace in the `wrangler.jsonc` file with the ID you receive:
+
+```json
+"kv_namespaces": [
+  {
+    "binding": "OAUTH_KV",
+    "id": "your-kv-namespace-id"
+  }
+]
+```
 
 And that's it! You can now test out your remote MCP server using the example
 playground below.
