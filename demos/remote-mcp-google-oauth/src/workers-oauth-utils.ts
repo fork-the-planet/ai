@@ -1,181 +1,410 @@
 // workers-oauth-utils.ts
+// OAuth utility functions with CSRF and state validation security fixes
 
-import type { AuthRequest, ClientInfo } from "@cloudflare/workers-oauth-provider"; // Adjust path if necessary
+import type { AuthRequest, ClientInfo } from "@cloudflare/workers-oauth-provider";
 
-const COOKIE_NAME = "mcp-approved-clients";
 const ONE_YEAR_IN_SECONDS = 31536000;
 
-// --- Helper Functions ---
-
 /**
- * Encodes arbitrary data to a URL-safe base64 string.
- * @param data - The data to encode (will be stringified).
- * @returns A URL-safe base64 encoded string.
+ * OAuth 2.1 compliant error class.
+ * Represents errors that occur during OAuth operations with standardized error codes and descriptions.
  */
-function _encodeState(data: any): string {
-	try {
-		const jsonString = JSON.stringify(data);
-		// Use btoa for simplicity, assuming Worker environment supports it well enough
-		// For complex binary data, a Buffer/Uint8Array approach might be better
-		return btoa(jsonString);
-	} catch (e) {
-		console.error("Error encoding state:", e);
-		throw new Error("Could not encode state");
+export class OAuthError extends Error {
+	/**
+	 * Creates a new OAuthError
+	 * @param code - The OAuth error code (e.g., "invalid_request", "invalid_grant")
+	 * @param description - Human-readable error description
+	 * @param statusCode - HTTP status code to return (defaults to 400)
+	 */
+	constructor(
+		public code: string,
+		public description: string,
+		public statusCode: number = 400,
+	) {
+		super(description);
+		this.name = "OAuthError";
 	}
-}
 
-/**
- * Decodes a URL-safe base64 string back to its original data.
- * @param encoded - The URL-safe base64 encoded string.
- * @returns The original data.
- */
-function decodeState<T = any>(encoded: string): T {
-	try {
-		const jsonString = atob(encoded);
-		return JSON.parse(jsonString);
-	} catch (e) {
-		console.error("Error decoding state:", e);
-		throw new Error("Could not decode state");
-	}
-}
-
-/**
- * Imports a secret key string for HMAC-SHA256 signing.
- * @param secret - The raw secret key string.
- * @returns A promise resolving to the CryptoKey object.
- */
-async function importKey(secret: string): Promise<CryptoKey> {
-	if (!secret) {
-		throw new Error(
-			"COOKIE_SECRET is not defined. A secret key is required for signing cookies.",
+	/**
+	 * Converts the error to a standardized OAuth error response
+	 * @returns HTTP Response with JSON error body
+	 */
+	toResponse(): Response {
+		return new Response(
+			JSON.stringify({
+				error: this.code,
+				error_description: this.description,
+			}),
+			{
+				status: this.statusCode,
+				headers: { "Content-Type": "application/json" },
+			},
 		);
 	}
-	const enc = new TextEncoder();
-	return crypto.subtle.importKey(
-		"raw",
-		enc.encode(secret),
-		{ hash: "SHA-256", name: "HMAC" },
-		false, // not extractable
-		["sign", "verify"], // key usages
-	);
 }
 
 /**
- * Signs data using HMAC-SHA256.
- * @param key - The CryptoKey for signing.
- * @param data - The string data to sign.
- * @returns A promise resolving to the signature as a hex string.
+ * Configuration options for OAuth utilities
  */
-async function signData(key: CryptoKey, data: string): Promise<string> {
-	const enc = new TextEncoder();
-	const signatureBuffer = await crypto.subtle.sign("HMAC", key, enc.encode(data));
-	// Convert ArrayBuffer to hex string
-	return Array.from(new Uint8Array(signatureBuffer))
-		.map((b) => b.toString(16).padStart(2, "0"))
-		.join("");
+export interface OAuthUtilsConfig {
+	/**
+	 * Cloudflare KV namespace for storing OAuth state data
+	 */
+	kv: KVNamespace;
+
+	/**
+	 * Secret key used for signing and verifying cookie data.
+	 * Should be a long, random string kept secure.
+	 */
+	cookieSecret: string;
+
+	/**
+	 * Optional client identifier to namespace cookies and KV keys.
+	 * Useful when running multiple OAuth providers in the same Worker.
+	 *
+	 * Examples:
+	 * - "github" → cookies: __Host-CSRF_TOKEN-github, KV: oauth:github:state:...
+	 * - "google" → cookies: __Host-CSRF_TOKEN-google, KV: oauth:google:state:...
+	 *
+	 * Must contain only alphanumeric characters, hyphens, or underscores.
+	 * Defaults to "mcp" for Model Context Protocol OAuth flows.
+	 */
+	clientName?: string;
+
+	/**
+	 * Time-to-live for OAuth state in seconds.
+	 * Defaults to 600 (10 minutes)
+	 */
+	stateTTL?: number;
 }
 
 /**
- * Verifies an HMAC-SHA256 signature.
- * @param key - The CryptoKey for verification.
- * @param signatureHex - The signature to verify (hex string).
- * @param data - The original data that was signed.
- * @returns A promise resolving to true if the signature is valid, false otherwise.
+ * Result from createOAuthState containing the state token and cookie header
  */
-async function verifySignature(
-	key: CryptoKey,
-	signatureHex: string,
-	data: string,
-): Promise<boolean> {
-	const enc = new TextEncoder();
-	try {
-		// Convert hex signature back to ArrayBuffer
-		const signatureBytes = new Uint8Array(
-			signatureHex.match(/.{1,2}/g)!.map((byte) => Number.parseInt(byte, 16)),
-		);
-		return await crypto.subtle.verify("HMAC", key, signatureBytes.buffer, enc.encode(data));
-	} catch (e) {
-		// Handle errors during hex parsing or verification
-		console.error("Error verifying signature:", e);
-		return false;
-	}
+export interface OAuthStateResult {
+	/**
+	 * The generated state token to be used in OAuth authorization requests
+	 */
+	stateToken: string;
+
+	/**
+	 * Set-Cookie header value to send to the client
+	 */
+	setCookie: string;
 }
 
 /**
- * Parses the signed cookie and verifies its integrity.
- * @param cookieHeader - The value of the Cookie header from the request.
- * @param secret - The secret key used for signing.
- * @returns A promise resolving to the list of approved client IDs if the cookie is valid, otherwise null.
+ * Result from validateOAuthState containing the original OAuth request info and cookie to clear
  */
-async function getApprovedClientsFromCookie(
-	cookieHeader: string | null,
-	secret: string,
-): Promise<string[] | null> {
-	if (!cookieHeader) return null;
+export interface ValidateStateResult {
+	/**
+	 * The original OAuth request information that was stored with the state token
+	 */
+	oauthReqInfo: AuthRequest;
 
-	const cookies = cookieHeader.split(";").map((c) => c.trim());
-	const targetCookie = cookies.find((c) => c.startsWith(`${COOKIE_NAME}=`));
-
-	if (!targetCookie) return null;
-
-	const cookieValue = targetCookie.substring(COOKIE_NAME.length + 1);
-	const parts = cookieValue.split(".");
-
-	if (parts.length !== 2) {
-		console.warn("Invalid cookie format received.");
-		return null; // Invalid format
-	}
-
-	const [signatureHex, base64Payload] = parts;
-	const payload = atob(base64Payload); // Assuming payload is base64 encoded JSON string
-
-	const key = await importKey(secret);
-	const isValid = await verifySignature(key, signatureHex, payload);
-
-	if (!isValid) {
-		console.warn("Cookie signature verification failed.");
-		return null; // Signature invalid
-	}
-
-	try {
-		const approvedClients = JSON.parse(payload);
-		if (!Array.isArray(approvedClients)) {
-			console.warn("Cookie payload is not an array.");
-			return null; // Payload isn't an array
-		}
-		// Ensure all elements are strings
-		if (!approvedClients.every((item) => typeof item === "string")) {
-			console.warn("Cookie payload contains non-string elements.");
-			return null;
-		}
-		return approvedClients as string[];
-	} catch (e) {
-		console.error("Error parsing cookie payload:", e);
-		return null; // JSON parsing failed
-	}
+	/**
+	 * Set-Cookie header value to clear the state cookie
+	 */
+	clearCookie: string;
 }
 
-// --- Exported Functions ---
+/**
+ * Result from generateCSRFProtection containing the CSRF token and cookie header
+ */
+export interface CSRFProtectionResult {
+	/**
+	 * The generated CSRF token to be embedded in forms
+	 */
+	token: string;
+
+	/**
+	 * Set-Cookie header value to send to the client
+	 */
+	setCookie: string;
+}
 
 /**
- * Checks if a given client ID has already been approved by the user,
- * based on a signed cookie.
+ * Result from validateCSRFToken containing the cookie to clear
+ */
+export interface ValidateCSRFResult {
+	/**
+	 * Set-Cookie header value to clear the CSRF cookie (one-time use per RFC 9700)
+	 */
+	clearCookie: string;
+}
+
+/**
+ * Sanitizes text content for safe display in HTML by escaping special characters.
+ * Use this for client names, descriptions, and other text content.
  *
- * @param request - The incoming Request object to read cookies from.
- * @param clientId - The OAuth client ID to check approval for.
- * @param cookieSecret - The secret key used to sign/verify the approval cookie.
- * @returns A promise resolving to true if the client ID is in the list of approved clients in a valid cookie, false otherwise.
+ * @param text - The unsafe text that might contain HTML special characters
+ * @returns A safe string with HTML special characters escaped
+ *
+ * @example
+ * ```typescript
+ * const safeName = sanitizeText("<script>alert('xss')</script>");
+ * // Returns: "&lt;script&gt;alert(&#039;xss&#039;)&lt;/script&gt;"
+ * ```
  */
-export async function clientIdAlreadyApproved(
+export function sanitizeText(text: string): string {
+	return text
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#039;");
+}
+
+/**
+ * Validates a URL for security.
+ *
+ * Implements RFC compliance:
+ * - RFC 3986: Rejects control characters (not in allowed character set)
+ * - RFC 3986: Validates URI structure using URL parser
+ * - RFC 7591 §2: Client metadata URIs must point to valid web resources
+ * - RFC 7591 §5: Protect users from malicious content (whitelist approach)
+ *
+ * Uses whitelist security: Only allows https: and http: schemes.
+ * All other schemes (javascript:, data:, file:, etc.) are rejected.
+ *
+ * NOTE: This function only validates the URL structure and scheme. It does NOT
+ * perform HTML escaping. If you need to use the URL in HTML context (href, src),
+ * you must also call sanitizeText() on the result.
+ *
+ * @param url - The URL to validate
+ * @returns The validated URL string, or empty string if validation fails
+ *
+ * @example
+ * ```typescript
+ * const validUrl = sanitizeUrl("https://example.com");
+ * // Returns: "https://example.com"
+ *
+ * const blocked = sanitizeUrl("javascript:alert('xss')");
+ * // Returns: "" (rejected - not in whitelist)
+ *
+ * // For use in HTML, also escape:
+ * const htmlSafeUrl = sanitizeText(sanitizeUrl(userInput));
+ * ```
+ */
+export function sanitizeUrl(url: string): string {
+	const normalized = url.trim();
+
+	if (normalized.length === 0) {
+		return "";
+	}
+
+	// RFC 3986: Control characters are not in the allowed character set
+	// Check C0 (0x00-0x1F) and C1 (0x7F-0x9F) control characters
+	for (let i = 0; i < normalized.length; i++) {
+		const code = normalized.charCodeAt(i);
+		if ((code >= 0x00 && code <= 0x1f) || (code >= 0x7f && code <= 0x9f)) {
+			return "";
+		}
+	}
+
+	// RFC 3986: Validate URI structure (scheme and path required)
+	let parsedUrl: URL;
+	try {
+		parsedUrl = new URL(normalized);
+	} catch {
+		return "";
+	}
+
+	// RFC 7591 §2: Client metadata URIs must point to valid web pages/resources
+	// RFC 7591 §5: Protect users from malicious content
+	// Whitelist only http/https schemes for web resources
+	const allowedSchemes = ["https", "http"];
+
+	const scheme = parsedUrl.protocol.slice(0, -1).toLowerCase();
+	if (!allowedSchemes.includes(scheme)) {
+		return "";
+	}
+
+	// Return validated URL without HTML escaping
+	// Caller should use sanitizeText() if HTML escaping is needed
+	return normalized;
+}
+
+/**
+ * Generates a new CSRF token and corresponding cookie for form protection
+ * @param config - OAuth utilities configuration
+ * @returns Object containing the token and Set-Cookie header value
+ */
+export function generateCSRFProtection(config: OAuthUtilsConfig): CSRFProtectionResult {
+	const clientName = config.clientName || "mcp";
+	validateClientName(clientName);
+	const csrfCookieName = `__Host-CSRF_TOKEN-${clientName}`;
+
+	const token = crypto.randomUUID();
+	const setCookie = `${csrfCookieName}=${token}; HttpOnly; Secure; Path=/authorize; SameSite=Lax; Max-Age=600`;
+	return { token, setCookie };
+}
+
+/**
+ * Validates that the CSRF token from the form matches the token in the cookie.
+ * Per RFC 9700 Section 2.1, CSRF tokens must be one-time use.
+ *
+ * @param request - The HTTP request containing form data and cookies
+ * @param config - OAuth utilities configuration
+ * @returns Object containing clearCookie header to invalidate the token
+ * @throws {OAuthError} If CSRF token is missing or mismatched
+ */
+export async function validateCSRFToken(
+	request: Request,
+	config: OAuthUtilsConfig,
+): Promise<ValidateCSRFResult> {
+	const clientName = config.clientName || "mcp";
+	validateClientName(clientName);
+	const csrfCookieName = `__Host-CSRF_TOKEN-${clientName}`;
+
+	const formData = await request.formData();
+	const tokenFromForm = formData.get("csrf_token");
+
+	if (!tokenFromForm || typeof tokenFromForm !== "string") {
+		throw new OAuthError("invalid_request", "Missing CSRF token in form data", 400);
+	}
+
+	const cookieHeader = request.headers.get("Cookie") || "";
+	const cookies = cookieHeader.split(";").map((c) => c.trim());
+	const csrfCookie = cookies.find((c) => c.startsWith(`${csrfCookieName}=`));
+	const tokenFromCookie = csrfCookie ? csrfCookie.substring(csrfCookieName.length + 1) : null;
+
+	if (!tokenFromCookie) {
+		throw new OAuthError("invalid_request", "Missing CSRF token cookie", 400);
+	}
+
+	if (tokenFromForm !== tokenFromCookie) {
+		throw new OAuthError("invalid_request", "CSRF token mismatch", 400);
+	}
+
+	// RFC 9700: CSRF tokens must be one-time use
+	// Clear the cookie to prevent reuse
+	const clearCookie = `${csrfCookieName}=; HttpOnly; Secure; Path=/authorize; SameSite=Lax; Max-Age=0`;
+
+	return { clearCookie };
+}
+
+/**
+ * Creates and stores OAuth state information, returning a state token and cookie
+ * @param oauthReqInfo - OAuth request information to store with the state
+ * @param config - OAuth utilities configuration
+ * @returns Object containing the state token and Set-Cookie header value
+ */
+export async function createOAuthState(
+	oauthReqInfo: AuthRequest,
+	config: OAuthUtilsConfig,
+): Promise<OAuthStateResult> {
+	const clientName = config.clientName || "mcp";
+	validateClientName(clientName);
+	const stateCookieName = `__Host-CONSENTED_STATE-${clientName}`;
+	const stateTTL = config.stateTTL || 600;
+
+	const stateToken = crypto.randomUUID();
+
+	await config.kv.put(`oauth:${clientName}:state:${stateToken}`, JSON.stringify(oauthReqInfo), {
+		expirationTtl: stateTTL,
+	});
+
+	const setCookie = `${stateCookieName}=${stateToken}; HttpOnly; Secure; Path=/callback; SameSite=Lax; Max-Age=${stateTTL}`;
+
+	return { stateToken, setCookie };
+}
+
+/**
+ * Validates OAuth state from the request, ensuring the state parameter matches the cookie
+ * and retrieving the stored OAuth request information
+ * @param request - The HTTP request containing state parameter and cookies
+ * @param config - OAuth utilities configuration
+ * @returns Object containing the original OAuth request info and cookie to clear
+ * @throws {OAuthError} If state is missing, mismatched, or expired
+ */
+export async function validateOAuthState(
+	request: Request,
+	config: OAuthUtilsConfig,
+): Promise<ValidateStateResult> {
+	const clientName = config.clientName || "mcp";
+	validateClientName(clientName);
+	const stateCookieName = `__Host-CONSENTED_STATE-${clientName}`;
+
+	const url = new URL(request.url);
+	const stateFromQuery = url.searchParams.get("state");
+
+	if (!stateFromQuery) {
+		throw new OAuthError("invalid_request", "Missing state parameter", 400);
+	}
+
+	const cookieHeader = request.headers.get("Cookie") || "";
+	const cookies = cookieHeader.split(";").map((c) => c.trim());
+	const stateCookie = cookies.find((c) => c.startsWith(`${stateCookieName}=`));
+	const stateFromCookie = stateCookie ? stateCookie.substring(stateCookieName.length + 1) : null;
+
+	if (!stateFromCookie) {
+		throw new OAuthError("invalid_request", "Missing consent state cookie", 400);
+	}
+
+	if (stateFromQuery !== stateFromCookie) {
+		throw new OAuthError("invalid_request", "State mismatch", 400);
+	}
+
+	const storedDataJson = await config.kv.get(`oauth:${clientName}:state:${stateFromQuery}`);
+	if (!storedDataJson) {
+		throw new OAuthError("invalid_request", "Invalid or expired state", 400);
+	}
+
+	let oauthReqInfo: AuthRequest;
+	try {
+		oauthReqInfo = JSON.parse(storedDataJson) as AuthRequest;
+	} catch (e) {
+		throw new OAuthError("server_error", "Invalid state data", 500);
+	}
+
+	await config.kv.delete(`oauth:${clientName}:state:${stateFromQuery}`);
+
+	const clearCookie = `${stateCookieName}=; HttpOnly; Secure; Path=/callback; SameSite=Lax; Max-Age=0`;
+
+	return { oauthReqInfo, clearCookie };
+}
+
+/**
+ * Checks if a client has been previously approved by the user
+ * @param request - The HTTP request containing cookies
+ * @param clientId - The OAuth client ID to check
+ * @param config - OAuth utilities configuration
+ * @returns True if the client is in the user's approved clients list
+ */
+export async function isClientApproved(
 	request: Request,
 	clientId: string,
-	cookieSecret: string,
+	config: OAuthUtilsConfig,
 ): Promise<boolean> {
-	if (!clientId) return false;
-	const cookieHeader = request.headers.get("Cookie");
-	const approvedClients = await getApprovedClientsFromCookie(cookieHeader, cookieSecret);
-
+	const approvedClients = await getApprovedClientsFromCookie(request, config);
 	return approvedClients?.includes(clientId) ?? false;
+}
+
+/**
+ * Adds a client to the user's list of approved clients
+ * @param request - The HTTP request containing existing cookies
+ * @param clientId - The OAuth client ID to add
+ * @param config - OAuth utilities configuration
+ * @returns Set-Cookie header value with the updated approved clients list
+ */
+export async function addApprovedClient(
+	request: Request,
+	clientId: string,
+	config: OAuthUtilsConfig,
+): Promise<string> {
+	const clientName = config.clientName || "mcp";
+	validateClientName(clientName);
+	const approvedClientsCookieName = `__Host-MCP_APPROVED_CLIENTS-${clientName}`;
+
+	const existingApprovedClients = (await getApprovedClientsFromCookie(request, config)) || [];
+	const updatedApprovedClients = Array.from(new Set([...existingApprovedClients, clientId]));
+
+	const payload = JSON.stringify(updatedApprovedClients);
+	const signature = await signData(payload, config.cookieSecret);
+	const cookieValue = `${signature}.${btoa(payload)}`;
+
+	return `${approvedClientsCookieName}=${cookieValue}; HttpOnly; Secure; Path=/; SameSite=Lax; Max-Age=${ONE_YEAR_IN_SECONDS}`;
 }
 
 /**
@@ -200,72 +429,54 @@ export interface ApprovalDialogOptions {
 	 */
 	state: Record<string, any>;
 	/**
-	 * Name of the cookie to use for storing approvals
-	 * @default "mcp_approved_clients"
+	 * CSRF token to include in the form
 	 */
-	cookieName?: string;
+	csrfToken: string;
 	/**
-	 * Secret used to sign cookies for verification
-	 * Can be a string or Uint8Array
-	 * @default Built-in Uint8Array key
+	 * Set-Cookie header for the CSRF token
 	 */
-	cookieSecret?: string | Uint8Array;
-	/**
-	 * Cookie domain
-	 * @default current domain
-	 */
-	cookieDomain?: string;
-	/**
-	 * Cookie path
-	 * @default "/"
-	 */
-	cookiePath?: string;
-	/**
-	 * Cookie max age in seconds
-	 * @default 30 days
-	 */
-	cookieMaxAge?: number;
+	setCookie: string;
 }
 
 /**
- * Renders an approval dialog for OAuth authorization
+ * Renders an approval dialog for OAuth authorization with CSRF protection
  * The dialog displays information about the client and server
- * and includes a form to submit approval
+ * and includes a form to submit approval with CSRF protection
  *
  * @param request - The HTTP request
  * @param options - Configuration for the approval dialog
  * @returns A Response containing the HTML approval dialog
  */
 export function renderApprovalDialog(request: Request, options: ApprovalDialogOptions): Response {
-	const { client, server, state } = options;
+	const { client, server, state, csrfToken, setCookie } = options;
 
-	// Encode state for form submission
 	const encodedState = btoa(JSON.stringify(state));
 
-	// Sanitize any untrusted content
-	const serverName = sanitizeHtml(server.name);
-	const clientName = client?.clientName ? sanitizeHtml(client.clientName) : "Unknown MCP Client";
-	const serverDescription = server.description ? sanitizeHtml(server.description) : "";
+	const serverName = sanitizeText(server.name);
+	const clientName = client?.clientName ? sanitizeText(client.clientName) : "Unknown MCP Client";
+	const serverDescription = server.description ? sanitizeText(server.description) : "";
 
-	// Safe URLs
-	const logoUrl = server.logo ? sanitizeHtml(server.logo) : "";
-	const clientUri = client?.clientUri ? sanitizeHtml(client.clientUri) : "";
-	const policyUri = client?.policyUri ? sanitizeHtml(client.policyUri) : "";
-	const tosUri = client?.tosUri ? sanitizeHtml(client.tosUri) : "";
+	// Validate URLs then HTML-escape for safe use in attributes
+	const logoUrl = server.logo ? sanitizeText(sanitizeUrl(server.logo)) : "";
+	const clientUri = client?.clientUri ? sanitizeText(sanitizeUrl(client.clientUri)) : "";
+	const policyUri = client?.policyUri ? sanitizeText(sanitizeUrl(client.policyUri)) : "";
+	const tosUri = client?.tosUri ? sanitizeText(sanitizeUrl(client.tosUri)) : "";
 
-	// Client contacts
 	const contacts =
 		client?.contacts && client.contacts.length > 0
-			? sanitizeHtml(client.contacts.join(", "))
+			? sanitizeText(client.contacts.join(", "))
 			: "";
 
-	// Get redirect URIs
 	const redirectUris =
 		client?.redirectUris && client.redirectUris.length > 0
-			? client.redirectUris.map((uri) => sanitizeHtml(uri))
+			? client.redirectUris
+					.map((uri) => {
+						const validated = sanitizeUrl(uri);
+						return validated ? sanitizeText(validated) : "";
+					})
+					.filter((uri) => uri !== "")
 			: [];
 
-	// Generate HTML for the approval dialog
 	const htmlContent = `
     <!DOCTYPE html>
     <html lang="en">
@@ -274,7 +485,6 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>${clientName} | Authorization Request</title>
         <style>
-          /* Modern, responsive styling with system fonts */
           :root {
             --primary-color: #0070f3;
             --error-color: #f44336;
@@ -283,10 +493,10 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
             --background-color: #fff;
             --card-shadow: 0 8px 36px 8px rgba(0, 0, 0, 0.1);
           }
-          
+
           body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, 
-                         Helvetica, Arial, sans-serif, "Apple Color Emoji", 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                         Helvetica, Arial, sans-serif, "Apple Color Emoji",
                          "Segoe UI Emoji", "Segoe UI Symbol";
             line-height: 1.6;
             color: var(--text-color);
@@ -294,32 +504,32 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
             margin: 0;
             padding: 0;
           }
-          
+
           .container {
             max-width: 600px;
             margin: 2rem auto;
             padding: 1rem;
           }
-          
+
           .precard {
             padding: 2rem;
             text-align: center;
           }
-          
+
           .card {
             background-color: var(--background-color);
             border-radius: 8px;
             box-shadow: var(--card-shadow);
             padding: 2rem;
           }
-          
+
           .header {
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 1.5rem;
           }
-          
+
           .logo {
             width: 48px;
             height: 48px;
@@ -327,13 +537,13 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
             border-radius: 8px;
             object-fit: contain;
           }
-          
+
           .title {
             margin: 0;
             font-size: 1.3rem;
             font-weight: 400;
           }
-          
+
           .alert {
             margin: 0;
             font-size: 1.5rem;
@@ -341,62 +551,62 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
             margin: 1rem 0;
             text-align: center;
           }
-          
+
           .description {
             color: #555;
           }
-          
+
           .client-info {
             border: 1px solid var(--border-color);
             border-radius: 6px;
             padding: 1rem 1rem 0.5rem;
             margin-bottom: 1.5rem;
           }
-          
+
           .client-name {
             font-weight: 600;
             font-size: 1.2rem;
             margin: 0 0 0.5rem 0;
           }
-          
+
           .client-detail {
             display: flex;
             margin-bottom: 0.5rem;
             align-items: baseline;
           }
-          
+
           .detail-label {
             font-weight: 500;
             min-width: 120px;
           }
-          
+
           .detail-value {
             font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
             word-break: break-all;
           }
-          
+
           .detail-value a {
             color: inherit;
             text-decoration: underline;
           }
-          
+
           .detail-value.small {
             font-size: 0.8em;
           }
-          
+
           .external-link-icon {
             font-size: 0.75em;
             margin-left: 0.25rem;
             vertical-align: super;
           }
-          
+
           .actions {
             display: flex;
             justify-content: flex-end;
             gap: 1rem;
             margin-top: 2rem;
           }
-          
+
           .button {
             padding: 0.75rem 1.5rem;
             border-radius: 6px;
@@ -405,42 +615,41 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
             border: none;
             font-size: 1rem;
           }
-          
+
           .button-primary {
             background-color: var(--primary-color);
             color: white;
           }
-          
+
           .button-secondary {
             background-color: transparent;
             border: 1px solid var(--border-color);
             color: var(--text-color);
           }
-          
-          /* Responsive adjustments */
+
           @media (max-width: 640px) {
             .container {
               margin: 1rem auto;
               padding: 0.5rem;
             }
-            
+
             .card {
               padding: 1.5rem;
             }
-            
+
             .client-detail {
               flex-direction: column;
             }
-            
+
             .detail-label {
               min-width: unset;
               margin-bottom: 0.25rem;
             }
-            
+
             .actions {
               flex-direction: column;
             }
-            
+
             .button {
               width: 100%;
             }
@@ -454,14 +663,14 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
               ${logoUrl ? `<img src="${logoUrl}" alt="${serverName} Logo" class="logo">` : ""}
             <h1 class="title"><strong>${serverName}</strong></h1>
             </div>
-            
+
             ${serverDescription ? `<p class="description">${serverDescription}</p>` : ""}
           </div>
-            
+
           <div class="card">
-            
+
             <h2 class="alert"><strong>${clientName || "A new MCP Client"}</strong> is requesting access</h1>
-            
+
             <div class="client-info">
               <div class="client-detail">
                 <div class="detail-label">Name:</div>
@@ -469,7 +678,7 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
                   ${clientName}
                 </div>
               </div>
-              
+
               ${
 					clientUri
 						? `
@@ -484,7 +693,7 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
               `
 						: ""
 				}
-              
+
               ${
 					policyUri
 						? `
@@ -499,7 +708,7 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
               `
 						: ""
 				}
-              
+
               ${
 					tosUri
 						? `
@@ -514,7 +723,7 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
               `
 						: ""
 				}
-              
+
               ${
 					redirectUris.length > 0
 						? `
@@ -527,7 +736,7 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
               `
 						: ""
 				}
-              
+
               ${
 					contacts
 						? `
@@ -539,12 +748,13 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
 						: ""
 				}
             </div>
-            
+
             <p>This MCP Client is requesting to be authorized on ${serverName}. If you approve, you will be redirected to complete authentication.</p>
-            
+
             <form method="post" action="${new URL(request.url).pathname}">
               <input type="hidden" name="state" value="${encodedState}">
-              
+              <input type="hidden" name="csrf_token" value="${csrfToken}">
+
               <div class="actions">
                 <button type="button" class="button button-secondary" onclick="window.history.back()">Cancel</button>
                 <button type="submit" class="button button-primary">Approve</button>
@@ -558,95 +768,102 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
 
 	return new Response(htmlContent, {
 		headers: {
+			"Content-Security-Policy": "frame-ancestors 'none'",
 			"Content-Type": "text/html; charset=utf-8",
+			"Set-Cookie": setCookie,
+			"X-Frame-Options": "DENY",
 		},
 	});
 }
 
-/**
- * Result of parsing the approval form submission.
- */
-export interface ParsedApprovalResult {
-	/** The original state object passed through the form. */
-	state: any;
-	/** Headers to set on the redirect response, including the Set-Cookie header. */
-	headers: Record<string, string>;
-}
+// --- Helper Functions ---
 
-/**
- * Parses the form submission from the approval dialog, extracts the state,
- * and generates Set-Cookie headers to mark the client as approved.
- *
- * @param request - The incoming POST Request object containing the form data.
- * @param cookieSecret - The secret key used to sign the approval cookie.
- * @returns A promise resolving to an object containing the parsed state and necessary headers.
- * @throws If the request method is not POST, form data is invalid, or state is missing.
- */
-export async function parseRedirectApproval(
-	request: Request,
-	cookieSecret: string,
-): Promise<ParsedApprovalResult> {
-	if (request.method !== "POST") {
-		throw new Error("Invalid request method. Expected POST.");
-	}
-
-	let state: any;
-	let clientId: string | undefined;
-
-	try {
-		const formData = await request.formData();
-		const encodedState = formData.get("state");
-
-		if (typeof encodedState !== "string" || !encodedState) {
-			throw new Error("Missing or invalid 'state' in form data.");
-		}
-
-		state = decodeState<{ oauthReqInfo?: AuthRequest }>(encodedState); // Decode the state
-		clientId = state?.oauthReqInfo?.clientId; // Extract clientId from within the state
-
-		if (!clientId) {
-			throw new Error("Could not extract clientId from state object.");
-		}
-	} catch (e) {
-		console.error("Error processing form submission:", e);
-		// Rethrow or handle as appropriate, maybe return a specific error response
+function validateClientName(clientName: string): void {
+	if (!/^[a-zA-Z0-9_-]+$/.test(clientName)) {
 		throw new Error(
-			`Failed to parse approval form: ${e instanceof Error ? e.message : String(e)}`,
+			"clientName must contain only alphanumeric characters, hyphens, or underscores",
 		);
 	}
-
-	// Get existing approved clients
-	const cookieHeader = request.headers.get("Cookie");
-	const existingApprovedClients =
-		(await getApprovedClientsFromCookie(cookieHeader, cookieSecret)) || [];
-
-	// Add the newly approved client ID (avoid duplicates)
-	const updatedApprovedClients = Array.from(new Set([...existingApprovedClients, clientId]));
-
-	// Sign the updated list
-	const payload = JSON.stringify(updatedApprovedClients);
-	const key = await importKey(cookieSecret);
-	const signature = await signData(key, payload);
-	const newCookieValue = `${signature}.${btoa(payload)}`; // signature.base64(payload)
-
-	// Generate Set-Cookie header
-	const headers: Record<string, string> = {
-		"Set-Cookie": `${COOKIE_NAME}=${newCookieValue}; HttpOnly; Secure; Path=/; SameSite=Lax; Max-Age=${ONE_YEAR_IN_SECONDS}`,
-	};
-
-	return { headers, state };
 }
 
-/**
- * Sanitizes HTML content to prevent XSS attacks
- * @param unsafe - The unsafe string that might contain HTML
- * @returns A safe string with HTML special characters escaped
- */
-function sanitizeHtml(unsafe: string): string {
-	return unsafe
-		.replace(/&/g, "&amp;")
-		.replace(/</g, "&lt;")
-		.replace(/>/g, "&gt;")
-		.replace(/"/g, "&quot;")
-		.replace(/'/g, "&#039;");
+async function getApprovedClientsFromCookie(
+	request: Request,
+	config: OAuthUtilsConfig,
+): Promise<string[] | null> {
+	const clientName = config.clientName || "mcp";
+	validateClientName(clientName);
+	const approvedClientsCookieName = `__Host-MCP_APPROVED_CLIENTS-${clientName}`;
+
+	const cookieHeader = request.headers.get("Cookie");
+	if (!cookieHeader) return null;
+
+	const cookies = cookieHeader.split(";").map((c) => c.trim());
+	const targetCookie = cookies.find((c) => c.startsWith(`${approvedClientsCookieName}=`));
+
+	if (!targetCookie) return null;
+
+	const cookieValue = targetCookie.substring(approvedClientsCookieName.length + 1);
+	const parts = cookieValue.split(".");
+
+	if (parts.length !== 2) return null;
+
+	const [signatureHex, base64Payload] = parts;
+	const payload = atob(base64Payload);
+
+	const isValid = await verifySignature(signatureHex, payload, config.cookieSecret);
+
+	if (!isValid) return null;
+
+	try {
+		const approvedClients = JSON.parse(payload);
+		if (
+			!Array.isArray(approvedClients) ||
+			!approvedClients.every((item) => typeof item === "string")
+		) {
+			return null;
+		}
+		return approvedClients as string[];
+	} catch (e) {
+		return null;
+	}
+}
+
+async function signData(data: string, secret: string): Promise<string> {
+	const key = await importKey(secret);
+	const enc = new TextEncoder();
+	const signatureBuffer = await crypto.subtle.sign("HMAC", key, enc.encode(data));
+	return Array.from(new Uint8Array(signatureBuffer))
+		.map((b) => b.toString(16).padStart(2, "0"))
+		.join("");
+}
+
+async function verifySignature(
+	signatureHex: string,
+	data: string,
+	secret: string,
+): Promise<boolean> {
+	const key = await importKey(secret);
+	const enc = new TextEncoder();
+	try {
+		const signatureBytes = new Uint8Array(
+			signatureHex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)),
+		);
+		return await crypto.subtle.verify("HMAC", key, signatureBytes.buffer, enc.encode(data));
+	} catch (e) {
+		return false;
+	}
+}
+
+async function importKey(secret: string): Promise<CryptoKey> {
+	if (!secret) {
+		throw new Error("cookieSecret is required for signing cookies");
+	}
+	const enc = new TextEncoder();
+	return crypto.subtle.importKey(
+		"raw",
+		enc.encode(secret),
+		{ hash: "SHA-256", name: "HMAC" },
+		false,
+		["sign", "verify"],
+	);
 }
