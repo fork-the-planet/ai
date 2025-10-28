@@ -6,6 +6,7 @@ declare namespace Cloudflare {
 		OAUTH_KV: KVNamespace;
 		SLACK_CLIENT_ID: "1234567890";
 		SLACK_CLIENT_SECRET: "1234567890";
+        COOKIE_ENCRYPTION_KEY: string;
 		MCP_OBJECT: DurableObjectNamespace<import("./src/index").SlackMCP>;
 	}
 }
