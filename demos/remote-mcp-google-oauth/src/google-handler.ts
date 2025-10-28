@@ -78,7 +78,9 @@ app.post("/authorize", async (c) => {
 		// Create OAuth state with CSRF protection
 		const { stateToken } = await createOAuthState(state.oauthReqInfo, c.env.OAUTH_KV);
 
-		return redirectToGoogle(c.req.raw, c.env, stateToken, { "Set-Cookie": approvedClientCookie });
+		return redirectToGoogle(c.req.raw, c.env, stateToken, {
+			"Set-Cookie": approvedClientCookie,
+		});
 	} catch (error: any) {
 		console.error("POST /authorize error:", error);
 		if (error instanceof OAuthError) {

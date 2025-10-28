@@ -41,7 +41,6 @@ export class OAuthError extends Error {
 	}
 }
 
-
 /**
  * Result from createOAuthState containing the state token
  */
@@ -328,7 +327,8 @@ export async function addApprovedClient(
 	const approvedClientsCookieName = "__Host-APPROVED_CLIENTS";
 	const THIRTY_DAYS_IN_SECONDS = 2592000;
 
-	const existingApprovedClients = (await getApprovedClientsFromCookie(request, cookieSecret)) || [];
+	const existingApprovedClients =
+		(await getApprovedClientsFromCookie(request, cookieSecret)) || [];
 	const updatedApprovedClients = Array.from(new Set([...existingApprovedClients, clientId]));
 
 	const payload = JSON.stringify(updatedApprovedClients);

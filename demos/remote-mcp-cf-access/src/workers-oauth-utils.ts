@@ -41,7 +41,6 @@ export class OAuthError extends Error {
 	}
 }
 
-
 /**
  * Result from createOAuthState containing the state token
  */
@@ -328,7 +327,8 @@ export async function addApprovedClient(
 	const approvedClientsCookieName = "__Host-APPROVED_CLIENTS";
 	const THIRTY_DAYS_IN_SECONDS = 2592000;
 
-	const existingApprovedClients = (await getApprovedClientsFromCookie(request, cookieSecret)) || [];
+	const existingApprovedClients =
+		(await getApprovedClientsFromCookie(request, cookieSecret)) || [];
 	const updatedApprovedClients = Array.from(new Set([...existingApprovedClients, clientId]));
 
 	const payload = JSON.stringify(updatedApprovedClients);
@@ -822,7 +822,7 @@ export async function fetchUpstreamAuthToken(params: {
 		return [null, null, new Response("Missing authorization code", { status: 400 })];
 	}
 
-	const body = new URLSearchParams({
+	const data = new URLSearchParams({
 		client_id: params.client_id,
 		client_secret: params.client_secret,
 		code: params.code,
@@ -834,9 +834,9 @@ export async function fetchUpstreamAuthToken(params: {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/x-www-form-urlencoded",
-			"Accept": "application/json",
+			Accept: "application/json",
 		},
-		body: body.toString(),
+		body: data.toString(),
 	});
 
 	if (!response.ok) {
@@ -850,8 +850,18 @@ export async function fetchUpstreamAuthToken(params: {
 		];
 	}
 
-	const data = await response.json();
-	return [data.access_token, data.id_token, null];
+	const body = (await response.json()) as any;
+
+	const accessToken = body.access_token as string;
+	if (!accessToken) {
+		return [null, null, new Response("Missing access token", { status: 400 })];
+	}
+
+	const idToken = body.id_token as string;
+	if (!idToken) {
+		return [null, null, new Response("Missing id token", { status: 400 })];
+	}
+	return [accessToken, idToken, null];
 }
 
 /**
@@ -862,4 +872,5 @@ export interface Props {
 	email: string;
 	login: string;
 	name: string;
+	[key: string]: unknown;
 }

@@ -88,7 +88,9 @@ export async function handleAccessRequest(
 			// Create OAuth state with CSRF protection
 			const { stateToken } = await createOAuthState(state.oauthReqInfo, env.OAUTH_KV);
 
-			return redirectToAccess(request, env, stateToken, { "Set-Cookie": approvedClientCookie });
+			return redirectToAccess(request, env, stateToken, {
+				"Set-Cookie": approvedClientCookie,
+			});
 		} catch (error: any) {
 			console.error("POST /authorize error:", error);
 			if (error instanceof OAuthError) {
