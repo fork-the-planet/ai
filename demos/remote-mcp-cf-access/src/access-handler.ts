@@ -8,7 +8,6 @@ import {
 	getUpstreamAuthorizeUrl,
 	isClientApproved,
 	OAuthError,
-	type OAuthUtilsConfig,
 	type Props,
 	renderApprovalDialog,
 	validateCSRFToken,
@@ -31,21 +30,15 @@ export async function handleAccessRequest(
 			return new Response("Invalid request", { status: 400 });
 		}
 
-		const config: OAuthUtilsConfig = {
-			clientName: "access",
-			cookieSecret: env.COOKIE_ENCRYPTION_KEY,
-			kv: env.OAUTH_KV,
-		};
-
 		// Check if client is already approved
-		if (await isClientApproved(request, clientId, config)) {
+		if (await isClientApproved(request, clientId, env.COOKIE_ENCRYPTION_KEY)) {
 			// Skip approval dialog but still create secure state
-			const { stateToken, setCookie } = await createOAuthState(oauthReqInfo, config);
+			const { stateToken, setCookie } = await createOAuthState(oauthReqInfo, env.OAUTH_KV);
 			return redirectToAccess(request, env, stateToken, { "Set-Cookie": setCookie });
 		}
 
 		// Generate CSRF protection for the approval form
-		const { token: csrfToken, setCookie } = generateCSRFProtection(config);
+		const { token: csrfToken, setCookie } = generateCSRFProtection();
 
 		return renderApprovalDialog(request, {
 			client: await env.OAUTH_PROVIDER.lookupClient(clientId),
@@ -61,15 +54,9 @@ export async function handleAccessRequest(
 	}
 
 	if (request.method === "POST" && pathname === "/authorize") {
-		const config: OAuthUtilsConfig = {
-			clientName: "access",
-			cookieSecret: env.COOKIE_ENCRYPTION_KEY,
-			kv: env.OAUTH_KV,
-		};
-
 		// Validate CSRF token
 		try {
-			await validateCSRFToken(request, config);
+			await validateCSRFToken(request);
 		} catch (error: any) {
 			if (error instanceof OAuthError) {
 				return error.toResponse();
@@ -100,11 +87,11 @@ export async function handleAccessRequest(
 		const approvedClientCookie = await addApprovedClient(
 			request,
 			state.oauthReqInfo.clientId,
-			config,
+			env.COOKIE_ENCRYPTION_KEY,
 		);
 
 		// Create OAuth state with CSRF protection
-		const { stateToken, setCookie } = await createOAuthState(state.oauthReqInfo, config);
+		const { stateToken, setCookie } = await createOAuthState(state.oauthReqInfo, env.OAUTH_KV);
 
 		// Combine cookies
 		const cookies = [approvedClientCookie, setCookie];
@@ -113,18 +100,12 @@ export async function handleAccessRequest(
 	}
 
 	if (request.method === "GET" && pathname === "/callback") {
-		const config: OAuthUtilsConfig = {
-			clientName: "access",
-			cookieSecret: env.COOKIE_ENCRYPTION_KEY,
-			kv: env.OAUTH_KV,
-		};
-
 		// Validate OAuth state (checks query param matches cookie and retrieves stored data)
 		let oauthReqInfo: AuthRequest;
 		let clearCookie: string;
 
 		try {
-			const result = await validateOAuthState(request, config);
+			const result = await validateOAuthState(request, env.OAUTH_KV);
 			oauthReqInfo = result.oauthReqInfo;
 			clearCookie = result.clearCookie;
 		} catch (error: any) {

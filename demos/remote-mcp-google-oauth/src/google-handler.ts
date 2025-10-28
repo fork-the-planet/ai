@@ -10,7 +10,6 @@ import {
 	renderApprovalDialog,
 	validateCSRFToken,
 	validateOAuthState,
-	type OAuthUtilsConfig,
 } from "./workers-oauth-utils";
 
 const app = new Hono<{ Bindings: Env & { OAUTH_PROVIDER: OAuthHelpers } }>();
@@ -22,21 +21,15 @@ app.get("/authorize", async (c) => {
 		return c.text("Invalid request", 400);
 	}
 
-	const config: OAuthUtilsConfig = {
-		clientName: "google",
-		cookieSecret: c.env.COOKIE_ENCRYPTION_KEY,
-		kv: c.env.OAUTH_KV,
-	};
-
 	// Check if client is already approved
-	if (await isClientApproved(c.req.raw, clientId, config)) {
+	if (await isClientApproved(c.req.raw, clientId, c.env.COOKIE_ENCRYPTION_KEY)) {
 		// Skip approval dialog but still create secure state
-		const { stateToken, setCookie } = await createOAuthState(oauthReqInfo, config);
+		const { stateToken, setCookie } = await createOAuthState(oauthReqInfo, c.env.OAUTH_KV);
 		return redirectToGoogle(c.req.raw, c.env, stateToken, { "Set-Cookie": setCookie });
 	}
 
 	// Generate CSRF protection for the approval form
-	const { token: csrfToken, setCookie } = generateCSRFProtection(config);
+	const { token: csrfToken, setCookie } = generateCSRFProtection();
 
 	return renderApprovalDialog(c.req.raw, {
 		client: await c.env.OAUTH_PROVIDER.lookupClient(clientId),
@@ -51,15 +44,9 @@ app.get("/authorize", async (c) => {
 });
 
 app.post("/authorize", async (c) => {
-	const config: OAuthUtilsConfig = {
-		clientName: "google",
-		cookieSecret: c.env.COOKIE_ENCRYPTION_KEY,
-		kv: c.env.OAUTH_KV,
-	};
-
 	// Validate CSRF token
 	try {
-		await validateCSRFToken(c.req.raw, config);
+		await validateCSRFToken(c.req.raw);
 	} catch (error: any) {
 		if (error instanceof OAuthError) {
 			return error.toResponse();
@@ -90,11 +77,11 @@ app.post("/authorize", async (c) => {
 	const approvedClientCookie = await addApprovedClient(
 		c.req.raw,
 		state.oauthReqInfo.clientId,
-		config,
+		c.env.COOKIE_ENCRYPTION_KEY,
 	);
 
 	// Create OAuth state with CSRF protection
-	const { stateToken, setCookie } = await createOAuthState(state.oauthReqInfo, config);
+	const { stateToken, setCookie } = await createOAuthState(state.oauthReqInfo, c.env.OAUTH_KV);
 
 	// Combine cookies
 	const cookies = [approvedClientCookie, setCookie];
@@ -133,18 +120,12 @@ async function redirectToGoogle(
  * down to the client. It ends by redirecting the client back to _its_ callback URL
  */
 app.get("/callback", async (c) => {
-	const config: OAuthUtilsConfig = {
-		clientName: "google",
-		cookieSecret: c.env.COOKIE_ENCRYPTION_KEY,
-		kv: c.env.OAUTH_KV,
-	};
-
 	// Validate OAuth state (checks query param matches cookie and retrieves stored data)
 	let oauthReqInfo: AuthRequest;
 	let clearCookie: string;
 
 	try {
-		const result = await validateOAuthState(c.req.raw, config);
+		const result = await validateOAuthState(c.req.raw, c.env.OAUTH_KV);
 		oauthReqInfo = result.oauthReqInfo;
 		clearCookie = result.clearCookie;
 	} catch (error: any) {

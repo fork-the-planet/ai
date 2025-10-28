@@ -9,7 +9,6 @@ import {
 	generateCSRFProtection,
 	isClientApproved,
 	OAuthError,
-	type OAuthUtilsConfig,
 	renderApprovalDialog,
 	validateCSRFToken,
 	validateOAuthState,
@@ -24,21 +23,15 @@ app.get("/authorize", async (c) => {
 		return c.text("Invalid request", 400);
 	}
 
-	const config: OAuthUtilsConfig = {
-		clientName: "github",
-		cookieSecret: env.COOKIE_ENCRYPTION_KEY,
-		kv: c.env.OAUTH_KV,
-	};
-
 	// Check if client is already approved
-	if (await isClientApproved(c.req.raw, clientId, config)) {
+	if (await isClientApproved(c.req.raw, clientId, env.COOKIE_ENCRYPTION_KEY)) {
 		// Skip approval dialog but still create secure state
-		const { stateToken, setCookie } = await createOAuthState(oauthReqInfo, config);
+		const { stateToken, setCookie } = await createOAuthState(oauthReqInfo, c.env.OAUTH_KV);
 		return redirectToGithub(c.req.raw, stateToken, { "Set-Cookie": setCookie });
 	}
 
 	// Generate CSRF protection for the approval form
-	const { token: csrfToken, setCookie } = generateCSRFProtection(config);
+	const { token: csrfToken, setCookie } = generateCSRFProtection();
 
 	return renderApprovalDialog(c.req.raw, {
 		client: await c.env.OAUTH_PROVIDER.lookupClient(clientId),
@@ -54,15 +47,9 @@ app.get("/authorize", async (c) => {
 });
 
 app.post("/authorize", async (c) => {
-	const config: OAuthUtilsConfig = {
-		clientName: "github",
-		cookieSecret: env.COOKIE_ENCRYPTION_KEY,
-		kv: c.env.OAUTH_KV,
-	};
-
 	// Validate CSRF token
 	try {
-		await validateCSRFToken(c.req.raw, config);
+		await validateCSRFToken(c.req.raw);
 	} catch (error: any) {
 		if (error instanceof OAuthError) {
 			return error.toResponse();
@@ -93,11 +80,11 @@ app.post("/authorize", async (c) => {
 	const approvedClientCookie = await addApprovedClient(
 		c.req.raw,
 		state.oauthReqInfo.clientId,
-		config,
+		env.COOKIE_ENCRYPTION_KEY,
 	);
 
 	// Create OAuth state with CSRF protection
-	const { stateToken, setCookie } = await createOAuthState(state.oauthReqInfo, config);
+	const { stateToken, setCookie } = await createOAuthState(state.oauthReqInfo, c.env.OAUTH_KV);
 
 	// Combine cookies
 	const cookies = [approvedClientCookie, setCookie];
@@ -134,18 +121,12 @@ async function redirectToGithub(
  * down to the client. It ends by redirecting the client back to _its_ callback URL
  */
 app.get("/callback", async (c) => {
-	const config: OAuthUtilsConfig = {
-		clientName: "github",
-		cookieSecret: env.COOKIE_ENCRYPTION_KEY,
-		kv: c.env.OAUTH_KV,
-	};
-
 	// Validate OAuth state (checks query param matches cookie and retrieves stored data)
 	let oauthReqInfo: AuthRequest;
 	let clearCookie: string;
 
 	try {
-		const result = await validateOAuthState(c.req.raw, config);
+		const result = await validateOAuthState(c.req.raw, c.env.OAUTH_KV);
 		oauthReqInfo = result.oauthReqInfo;
 		clearCookie = result.clearCookie;
 	} catch (error: any) {

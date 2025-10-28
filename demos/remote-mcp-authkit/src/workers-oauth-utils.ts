@@ -3,8 +3,6 @@
 
 import type { AuthRequest, ClientInfo } from "@cloudflare/workers-oauth-provider";
 
-const ONE_YEAR_IN_SECONDS = 31536000;
-
 /**
  * OAuth 2.1 compliant error class.
  * Represents errors that occur during OAuth operations with standardized error codes and descriptions.
@@ -43,40 +41,6 @@ export class OAuthError extends Error {
 	}
 }
 
-/**
- * Configuration options for OAuth utilities
- */
-export interface OAuthUtilsConfig {
-	/**
-	 * Cloudflare KV namespace for storing OAuth state data
-	 */
-	kv: KVNamespace;
-
-	/**
-	 * Secret key used for signing and verifying cookie data.
-	 * Should be a long, random string kept secure.
-	 */
-	cookieSecret: string;
-
-	/**
-	 * Optional client identifier to namespace cookies and KV keys.
-	 * Useful when running multiple OAuth providers in the same Worker.
-	 *
-	 * Examples:
-	 * - "github" → cookies: __Host-CSRF_TOKEN-github, KV: oauth:github:state:...
-	 * - "google" → cookies: __Host-CSRF_TOKEN-google, KV: oauth:google:state:...
-	 *
-	 * Must contain only alphanumeric characters, hyphens, or underscores.
-	 * Defaults to "mcp" for Model Context Protocol OAuth flows.
-	 */
-	clientName?: string;
-
-	/**
-	 * Time-to-live for OAuth state in seconds.
-	 * Defaults to 600 (10 minutes)
-	 */
-	stateTTL?: number;
-}
 
 /**
  * Result from createOAuthState containing the state token and cookie header
@@ -227,13 +191,10 @@ export function sanitizeUrl(url: string): string {
 
 /**
  * Generates a new CSRF token and corresponding cookie for form protection
- * @param config - OAuth utilities configuration
  * @returns Object containing the token and Set-Cookie header value
  */
-export function generateCSRFProtection(config: OAuthUtilsConfig): CSRFProtectionResult {
-	const clientName = config.clientName || "mcp";
-	validateClientName(clientName);
-	const csrfCookieName = `__Host-CSRF_TOKEN-${clientName}`;
+export function generateCSRFProtection(): CSRFProtectionResult {
+	const csrfCookieName = "__Host-CSRF_TOKEN";
 
 	const token = crypto.randomUUID();
 	const setCookie = `${csrfCookieName}=${token}; HttpOnly; Secure; Path=/authorize; SameSite=Lax; Max-Age=600`;
@@ -245,17 +206,11 @@ export function generateCSRFProtection(config: OAuthUtilsConfig): CSRFProtection
  * Per RFC 9700 Section 2.1, CSRF tokens must be one-time use.
  *
  * @param request - The HTTP request containing form data and cookies
- * @param config - OAuth utilities configuration
  * @returns Object containing clearCookie header to invalidate the token
  * @throws {OAuthError} If CSRF token is missing or mismatched
  */
-export async function validateCSRFToken(
-	request: Request,
-	config: OAuthUtilsConfig,
-): Promise<ValidateCSRFResult> {
-	const clientName = config.clientName || "mcp";
-	validateClientName(clientName);
-	const csrfCookieName = `__Host-CSRF_TOKEN-${clientName}`;
+export async function validateCSRFToken(request: Request): Promise<ValidateCSRFResult> {
+	const csrfCookieName = "__Host-CSRF_TOKEN";
 
 	const formData = await request.formData();
 	const tokenFromForm = formData.get("csrf_token");
@@ -287,21 +242,20 @@ export async function validateCSRFToken(
 /**
  * Creates and stores OAuth state information, returning a state token and cookie
  * @param oauthReqInfo - OAuth request information to store with the state
- * @param config - OAuth utilities configuration
+ * @param kv - Cloudflare KV namespace for storing OAuth state data
+ * @param stateTTL - Time-to-live for OAuth state in seconds (defaults to 600)
  * @returns Object containing the state token and Set-Cookie header value
  */
 export async function createOAuthState(
 	oauthReqInfo: AuthRequest,
-	config: OAuthUtilsConfig,
+	kv: KVNamespace,
+	stateTTL = 600,
 ): Promise<OAuthStateResult> {
-	const clientName = config.clientName || "mcp";
-	validateClientName(clientName);
-	const stateCookieName = `__Host-CONSENTED_STATE-${clientName}`;
-	const stateTTL = config.stateTTL || 600;
+	const stateCookieName = "__Host-OAUTH_STATE";
 
 	const stateToken = crypto.randomUUID();
 
-	await config.kv.put(`oauth:${clientName}:state:${stateToken}`, JSON.stringify(oauthReqInfo), {
+	await kv.put(`oauth:state:${stateToken}`, JSON.stringify(oauthReqInfo), {
 		expirationTtl: stateTTL,
 	});
 
@@ -314,17 +268,15 @@ export async function createOAuthState(
  * Validates OAuth state from the request, ensuring the state parameter matches the cookie
  * and retrieving the stored OAuth request information
  * @param request - The HTTP request containing state parameter and cookies
- * @param config - OAuth utilities configuration
+ * @param kv - Cloudflare KV namespace for storing OAuth state data
  * @returns Object containing the original OAuth request info and cookie to clear
  * @throws {OAuthError} If state is missing, mismatched, or expired
  */
 export async function validateOAuthState(
 	request: Request,
-	config: OAuthUtilsConfig,
+	kv: KVNamespace,
 ): Promise<ValidateStateResult> {
-	const clientName = config.clientName || "mcp";
-	validateClientName(clientName);
-	const stateCookieName = `__Host-CONSENTED_STATE-${clientName}`;
+	const stateCookieName = "__Host-OAUTH_STATE";
 
 	const url = new URL(request.url);
 	const stateFromQuery = url.searchParams.get("state");
@@ -346,7 +298,7 @@ export async function validateOAuthState(
 		throw new OAuthError("invalid_request", "State mismatch", 400);
 	}
 
-	const storedDataJson = await config.kv.get(`oauth:${clientName}:state:${stateFromQuery}`);
+	const storedDataJson = await kv.get(`oauth:state:${stateFromQuery}`);
 	if (!storedDataJson) {
 		throw new OAuthError("invalid_request", "Invalid or expired state", 400);
 	}
@@ -358,7 +310,7 @@ export async function validateOAuthState(
 		throw new OAuthError("server_error", "Invalid state data", 500);
 	}
 
-	await config.kv.delete(`oauth:${clientName}:state:${stateFromQuery}`);
+	await kv.delete(`oauth:state:${stateFromQuery}`);
 
 	const clearCookie = `${stateCookieName}=; HttpOnly; Secure; Path=/callback; SameSite=Lax; Max-Age=0`;
 
@@ -369,15 +321,15 @@ export async function validateOAuthState(
  * Checks if a client has been previously approved by the user
  * @param request - The HTTP request containing cookies
  * @param clientId - The OAuth client ID to check
- * @param config - OAuth utilities configuration
+ * @param cookieSecret - Secret key used for signing and verifying cookie data
  * @returns True if the client is in the user's approved clients list
  */
 export async function isClientApproved(
 	request: Request,
 	clientId: string,
-	config: OAuthUtilsConfig,
+	cookieSecret: string,
 ): Promise<boolean> {
-	const approvedClients = await getApprovedClientsFromCookie(request, config);
+	const approvedClients = await getApprovedClientsFromCookie(request, cookieSecret);
 	return approvedClients?.includes(clientId) ?? false;
 }
 
@@ -385,26 +337,25 @@ export async function isClientApproved(
  * Adds a client to the user's list of approved clients
  * @param request - The HTTP request containing existing cookies
  * @param clientId - The OAuth client ID to add
- * @param config - OAuth utilities configuration
+ * @param cookieSecret - Secret key used for signing and verifying cookie data
  * @returns Set-Cookie header value with the updated approved clients list
  */
 export async function addApprovedClient(
 	request: Request,
 	clientId: string,
-	config: OAuthUtilsConfig,
+	cookieSecret: string,
 ): Promise<string> {
-	const clientName = config.clientName || "mcp";
-	validateClientName(clientName);
-	const approvedClientsCookieName = `__Host-MCP_APPROVED_CLIENTS-${clientName}`;
+	const approvedClientsCookieName = "__Host-APPROVED_CLIENTS";
+	const THIRTY_DAYS_IN_SECONDS = 2592000;
 
-	const existingApprovedClients = (await getApprovedClientsFromCookie(request, config)) || [];
+	const existingApprovedClients = (await getApprovedClientsFromCookie(request, cookieSecret)) || [];
 	const updatedApprovedClients = Array.from(new Set([...existingApprovedClients, clientId]));
 
 	const payload = JSON.stringify(updatedApprovedClients);
-	const signature = await signData(payload, config.cookieSecret);
+	const signature = await signData(payload, cookieSecret);
 	const cookieValue = `${signature}.${btoa(payload)}`;
 
-	return `${approvedClientsCookieName}=${cookieValue}; HttpOnly; Secure; Path=/; SameSite=Lax; Max-Age=${ONE_YEAR_IN_SECONDS}`;
+	return `${approvedClientsCookieName}=${cookieValue}; HttpOnly; Secure; Path=/; SameSite=Lax; Max-Age=${THIRTY_DAYS_IN_SECONDS}`;
 }
 
 /**
@@ -780,21 +731,11 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
 
 // --- Helper Functions ---
 
-function validateClientName(clientName: string): void {
-	if (!/^[a-zA-Z0-9_-]+$/.test(clientName)) {
-		throw new Error(
-			"clientName must contain only alphanumeric characters, hyphens, or underscores",
-		);
-	}
-}
-
 async function getApprovedClientsFromCookie(
 	request: Request,
-	config: OAuthUtilsConfig,
+	cookieSecret: string,
 ): Promise<string[] | null> {
-	const clientName = config.clientName || "mcp";
-	validateClientName(clientName);
-	const approvedClientsCookieName = `__Host-MCP_APPROVED_CLIENTS-${clientName}`;
+	const approvedClientsCookieName = "__Host-APPROVED_CLIENTS";
 
 	const cookieHeader = request.headers.get("Cookie");
 	if (!cookieHeader) return null;
@@ -812,7 +753,7 @@ async function getApprovedClientsFromCookie(
 	const [signatureHex, base64Payload] = parts;
 	const payload = atob(base64Payload);
 
-	const isValid = await verifySignature(signatureHex, payload, config.cookieSecret);
+	const isValid = await verifySignature(signatureHex, payload, cookieSecret);
 
 	if (!isValid) return null;
 
