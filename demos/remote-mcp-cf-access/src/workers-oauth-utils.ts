@@ -43,18 +43,13 @@ export class OAuthError extends Error {
 
 
 /**
- * Result from createOAuthState containing the state token and cookie header
+ * Result from createOAuthState containing the state token
  */
 export interface OAuthStateResult {
 	/**
 	 * The generated state token to be used in OAuth authorization requests
 	 */
 	stateToken: string;
-
-	/**
-	 * Set-Cookie header value to send to the client
-	 */
-	setCookie: string;
 }
 
 /**
@@ -197,7 +192,7 @@ export function generateCSRFProtection(): CSRFProtectionResult {
 	const csrfCookieName = "__Host-CSRF_TOKEN";
 
 	const token = crypto.randomUUID();
-	const setCookie = `${csrfCookieName}=${token}; HttpOnly; Secure; Path=/authorize; SameSite=Lax; Max-Age=600`;
+	const setCookie = `${csrfCookieName}=${token}; HttpOnly; Secure; Path=/; SameSite=Lax; Max-Age=600`;
 	return { token, setCookie };
 }
 
@@ -205,14 +200,14 @@ export function generateCSRFProtection(): CSRFProtectionResult {
  * Validates that the CSRF token from the form matches the token in the cookie.
  * Per RFC 9700 Section 2.1, CSRF tokens must be one-time use.
  *
- * @param request - The HTTP request containing form data and cookies
+ * @param formData - The parsed form data containing the CSRF token
+ * @param request - The HTTP request containing cookies
  * @returns Object containing clearCookie header to invalidate the token
  * @throws {OAuthError} If CSRF token is missing or mismatched
  */
-export async function validateCSRFToken(request: Request): Promise<ValidateCSRFResult> {
+export function validateCSRFToken(formData: FormData, request: Request): ValidateCSRFResult {
 	const csrfCookieName = "__Host-CSRF_TOKEN";
 
-	const formData = await request.formData();
 	const tokenFromForm = formData.get("csrf_token");
 
 	if (!tokenFromForm || typeof tokenFromForm !== "string") {
@@ -234,34 +229,31 @@ export async function validateCSRFToken(request: Request): Promise<ValidateCSRFR
 
 	// RFC 9700: CSRF tokens must be one-time use
 	// Clear the cookie to prevent reuse
-	const clearCookie = `${csrfCookieName}=; HttpOnly; Secure; Path=/authorize; SameSite=Lax; Max-Age=0`;
+	const clearCookie = `${csrfCookieName}=; HttpOnly; Secure; Path=/; SameSite=Lax; Max-Age=0`;
 
 	return { clearCookie };
 }
 
 /**
- * Creates and stores OAuth state information, returning a state token and cookie
+ * Creates and stores OAuth state information, returning a state token
  * @param oauthReqInfo - OAuth request information to store with the state
  * @param kv - Cloudflare KV namespace for storing OAuth state data
  * @param stateTTL - Time-to-live for OAuth state in seconds (defaults to 600)
- * @returns Object containing the state token and Set-Cookie header value
+ * @returns Object containing the state token (KV-only validation, no cookie needed)
  */
 export async function createOAuthState(
 	oauthReqInfo: AuthRequest,
 	kv: KVNamespace,
 	stateTTL = 600,
 ): Promise<OAuthStateResult> {
-	const stateCookieName = "__Host-OAUTH_STATE";
-
 	const stateToken = crypto.randomUUID();
 
+	// Store state in KV (secure, one-time use, with TTL)
 	await kv.put(`oauth:state:${stateToken}`, JSON.stringify(oauthReqInfo), {
 		expirationTtl: stateTTL,
 	});
 
-	const setCookie = `${stateCookieName}=${stateToken}; HttpOnly; Secure; Path=/callback; SameSite=Lax; Max-Age=${stateTTL}`;
-
-	return { stateToken, setCookie };
+	return { stateToken };
 }
 
 /**
@@ -276,8 +268,6 @@ export async function validateOAuthState(
 	request: Request,
 	kv: KVNamespace,
 ): Promise<ValidateStateResult> {
-	const stateCookieName = "__Host-OAUTH_STATE";
-
 	const url = new URL(request.url);
 	const stateFromQuery = url.searchParams.get("state");
 
@@ -285,19 +275,7 @@ export async function validateOAuthState(
 		throw new OAuthError("invalid_request", "Missing state parameter", 400);
 	}
 
-	const cookieHeader = request.headers.get("Cookie") || "";
-	const cookies = cookieHeader.split(";").map((c) => c.trim());
-	const stateCookie = cookies.find((c) => c.startsWith(`${stateCookieName}=`));
-	const stateFromCookie = stateCookie ? stateCookie.substring(stateCookieName.length + 1) : null;
-
-	if (!stateFromCookie) {
-		throw new OAuthError("invalid_request", "Missing consent state cookie", 400);
-	}
-
-	if (stateFromQuery !== stateFromCookie) {
-		throw new OAuthError("invalid_request", "State mismatch", 400);
-	}
-
+	// Validate state exists in KV (secure, one-time use, with TTL)
 	const storedDataJson = await kv.get(`oauth:state:${stateFromQuery}`);
 	if (!storedDataJson) {
 		throw new OAuthError("invalid_request", "Invalid or expired state", 400);
@@ -310,9 +288,11 @@ export async function validateOAuthState(
 		throw new OAuthError("server_error", "Invalid state data", 500);
 	}
 
+	// Delete state from KV (one-time use)
 	await kv.delete(`oauth:state:${stateFromQuery}`);
 
-	const clearCookie = `${stateCookieName}=; HttpOnly; Secure; Path=/callback; SameSite=Lax; Max-Age=0`;
+	// No cookie to clear since we're not using state cookies anymore
+	const clearCookie = "";
 
 	return { oauthReqInfo, clearCookie };
 }
@@ -809,86 +789,77 @@ async function importKey(secret: string): Promise<CryptoKey> {
 	);
 }
 
-// --- Cloudflare Access Specific Utilities ---
-
 /**
- * Constructs an authorization URL for an upstream service (CF Access specific).
- *
- * @param options - Configuration for the authorization URL
- * @returns The complete authorization URL
+ * Constructs an upstream OAuth authorization URL with query parameters
  */
-export function getUpstreamAuthorizeUrl({
-	upstream_url,
-	client_id,
-	scope,
-	redirect_uri,
-	state,
-}: {
+export function getUpstreamAuthorizeUrl(params: {
 	upstream_url: string;
 	client_id: string;
-	scope: string;
 	redirect_uri: string;
-	state?: string;
-}) {
-	const upstream = new URL(upstream_url);
-	upstream.searchParams.set("client_id", client_id);
-	upstream.searchParams.set("redirect_uri", redirect_uri);
-	upstream.searchParams.set("scope", scope);
-	if (state) upstream.searchParams.set("state", state);
-	upstream.searchParams.set("response_type", "code");
-	return upstream.href;
+	scope: string;
+	state: string;
+}): string {
+	const url = new URL(params.upstream_url);
+	url.searchParams.set("client_id", params.client_id);
+	url.searchParams.set("redirect_uri", params.redirect_uri);
+	url.searchParams.set("response_type", "code");
+	url.searchParams.set("scope", params.scope);
+	url.searchParams.set("state", params.state);
+	return url.toString();
 }
 
 /**
- * Fetches an authorization token from Cloudflare Access.
- * Returns both access_token and id_token (CF Access specific).
- *
- * @param options - Token exchange parameters
- * @returns Tuple of [accessToken, idToken, null] or [null, null, errorResponse]
+ * Exchanges an authorization code for an access token from the upstream provider
  */
-export async function fetchUpstreamAuthToken({
-	client_id,
-	client_secret,
-	code,
-	redirect_uri,
-	upstream_url,
-}: {
-	code: string | undefined;
+export async function fetchUpstreamAuthToken(params: {
 	upstream_url: string;
-	client_secret: string;
-	redirect_uri: string;
 	client_id: string;
+	client_secret: string;
+	code?: string;
+	redirect_uri: string;
 }): Promise<[string, string, null] | [null, null, Response]> {
-	if (!code) {
-		return [null, null, new Response("Missing code", { status: 400 })];
+	if (!params.code) {
+		return [null, null, new Response("Missing authorization code", { status: 400 })];
 	}
 
-	const resp = await fetch(upstream_url, {
-		body: new URLSearchParams({ client_id, client_secret, code, redirect_uri }).toString(),
+	const body = new URLSearchParams({
+		client_id: params.client_id,
+		client_secret: params.client_secret,
+		code: params.code,
+		grant_type: "authorization_code",
+		redirect_uri: params.redirect_uri,
+	});
+
+	const response = await fetch(params.upstream_url, {
+		method: "POST",
 		headers: {
 			"Content-Type": "application/x-www-form-urlencoded",
+			"Accept": "application/json",
 		},
-		method: "POST",
+		body: body.toString(),
 	});
-	if (!resp.ok) {
-		console.log(await resp.text());
-		return [null, null, new Response("Failed to fetch access token", { status: 500 })];
+
+	if (!response.ok) {
+		const errorText = await response.text();
+		return [
+			null,
+			null,
+			new Response(`Failed to exchange code for token: ${errorText}`, {
+				status: response.status,
+			}),
+		];
 	}
-	const body = (await resp.json()) as { access_token?: string; id_token?: string };
-	const accessToken = body.access_token;
-	const idToken = body.id_token;
-	if (!accessToken || !idToken) {
-		return [null, null, new Response("Missing access or id token", { status: 400 })];
-	}
-	return [accessToken, idToken, null];
+
+	const data = await response.json();
+	return [data.access_token, data.id_token, null];
 }
 
 /**
- * Props type for CF Access authentication context
+ * Props interface for upstream provider user data
  */
-export type Props = {
+export interface Props {
+	accessToken: string;
+	email: string;
 	login: string;
 	name: string;
-	email: string;
-	accessToken: string;
-};
+}

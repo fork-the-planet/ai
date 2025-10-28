@@ -34,8 +34,8 @@ app.get("/authorize", async (c) => {
 	// Check if client is already approved
 	if (await isClientApproved(c.req.raw, clientId, c.env.COOKIE_ENCRYPTION_KEY)) {
 		// Skip approval dialog but still create secure state
-		const { stateToken, setCookie } = await createOAuthState(oauthReqInfo, c.env.OAUTH_KV);
-		return redirectToAuthKit(c, stateToken, { "Set-Cookie": setCookie });
+		const { stateToken } = await createOAuthState(oauthReqInfo, c.env.OAUTH_KV);
+		return redirectToAuthKit(c, stateToken);
 	}
 
 	// Generate CSRF protection for the approval form
@@ -54,49 +54,49 @@ app.get("/authorize", async (c) => {
 });
 
 app.post("/authorize", async (c) => {
-	// Validate CSRF token
 	try {
-		await validateCSRFToken(c.req.raw);
+		// Read form data once
+		const formData = await c.req.raw.formData();
+
+		// Validate CSRF token
+		validateCSRFToken(formData, c.req.raw);
+
+		// Extract state from form data
+		const encodedState = formData.get("state");
+		if (!encodedState || typeof encodedState !== "string") {
+			return c.text("Missing state in form data", 400);
+		}
+
+		let state: { oauthReqInfo?: AuthRequest };
+		try {
+			state = JSON.parse(atob(encodedState));
+		} catch (_e) {
+			return c.text("Invalid state data", 400);
+		}
+
+		if (!state.oauthReqInfo || !state.oauthReqInfo.clientId) {
+			return c.text("Invalid request", 400);
+		}
+
+		// Add client to approved list
+		const approvedClientCookie = await addApprovedClient(
+			c.req.raw,
+			state.oauthReqInfo.clientId,
+			c.env.COOKIE_ENCRYPTION_KEY,
+		);
+
+		// Create OAuth state with CSRF protection
+		const { stateToken } = await createOAuthState(state.oauthReqInfo, c.env.OAUTH_KV);
+
+		return redirectToAuthKit(c, stateToken, { "Set-Cookie": approvedClientCookie });
 	} catch (error: any) {
+		console.error("POST /authorize error:", error);
 		if (error instanceof OAuthError) {
 			return error.toResponse();
 		}
 		// Unexpected non-OAuth error
-		return c.text("Internal server error", 500);
+		return c.text(`Internal server error: ${error.message}`, 500);
 	}
-
-	// Extract state from form data
-	const formData = await c.req.raw.formData();
-	const encodedState = formData.get("state");
-	if (!encodedState || typeof encodedState !== "string") {
-		return c.text("Missing state in form data", 400);
-	}
-
-	let state: { oauthReqInfo?: AuthRequest };
-	try {
-		state = JSON.parse(atob(encodedState));
-	} catch (_e) {
-		return c.text("Invalid state data", 400);
-	}
-
-	if (!state.oauthReqInfo || !state.oauthReqInfo.clientId) {
-		return c.text("Invalid request", 400);
-	}
-
-	// Add client to approved list
-	const approvedClientCookie = await addApprovedClient(
-		c.req.raw,
-		state.oauthReqInfo.clientId,
-		c.env.COOKIE_ENCRYPTION_KEY,
-	);
-
-	// Create OAuth state with CSRF protection
-	const { stateToken, setCookie } = await createOAuthState(state.oauthReqInfo, c.env.OAUTH_KV);
-
-	// Combine cookies
-	const cookies = [approvedClientCookie, setCookie];
-
-	return redirectToAuthKit(c, stateToken, { "Set-Cookie": cookies.join(", ") });
 });
 
 function redirectToAuthKit(c: any, stateToken: string, headers: Record<string, string> = {}) {
@@ -124,14 +124,12 @@ function redirectToAuthKit(c: any, stateToken: string, headers: Record<string, s
  * passed down to the client. It ends by redirecting the client back to _its_ callback URL
  */
 app.get("/callback", async (c) => {
-	// Validate OAuth state (checks query param matches cookie and retrieves stored data)
+	// Validate OAuth state (retrieves stored data from KV)
 	let oauthReqInfo: AuthRequest;
-	let clearCookie: string;
 
 	try {
 		const result = await validateOAuthState(c.req.raw, c.env.OAUTH_KV);
 		oauthReqInfo = result.oauthReqInfo;
-		clearCookie = result.clearCookie;
 	} catch (error: any) {
 		if (error instanceof OAuthError) {
 			return error.toResponse();
@@ -181,13 +179,7 @@ app.get("/callback", async (c) => {
 		} satisfies Props,
 	});
 
-	return new Response(null, {
-		headers: {
-			Location: redirectTo,
-			"Set-Cookie": clearCookie,
-		},
-		status: 302,
-	});
+	return Response.redirect(redirectTo, 302);
 });
 
 export const AuthkitHandler = app;

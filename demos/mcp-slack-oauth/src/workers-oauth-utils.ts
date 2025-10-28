@@ -43,18 +43,13 @@ export class OAuthError extends Error {
 
 
 /**
- * Result from createOAuthState containing the state token and cookie header
+ * Result from createOAuthState containing the state token
  */
 export interface OAuthStateResult {
 	/**
 	 * The generated state token to be used in OAuth authorization requests
 	 */
 	stateToken: string;
-
-	/**
-	 * Set-Cookie header value to send to the client
-	 */
-	setCookie: string;
 }
 
 /**
@@ -197,7 +192,7 @@ export function generateCSRFProtection(): CSRFProtectionResult {
 	const csrfCookieName = "__Host-CSRF_TOKEN";
 
 	const token = crypto.randomUUID();
-	const setCookie = `${csrfCookieName}=${token}; HttpOnly; Secure; Path=/authorize; SameSite=Lax; Max-Age=600`;
+	const setCookie = `${csrfCookieName}=${token}; HttpOnly; Secure; Path=/; SameSite=Lax; Max-Age=600`;
 	return { token, setCookie };
 }
 
@@ -205,14 +200,14 @@ export function generateCSRFProtection(): CSRFProtectionResult {
  * Validates that the CSRF token from the form matches the token in the cookie.
  * Per RFC 9700 Section 2.1, CSRF tokens must be one-time use.
  *
- * @param request - The HTTP request containing form data and cookies
+ * @param formData - The parsed form data containing the CSRF token
+ * @param request - The HTTP request containing cookies
  * @returns Object containing clearCookie header to invalidate the token
  * @throws {OAuthError} If CSRF token is missing or mismatched
  */
-export async function validateCSRFToken(request: Request): Promise<ValidateCSRFResult> {
+export function validateCSRFToken(formData: FormData, request: Request): ValidateCSRFResult {
 	const csrfCookieName = "__Host-CSRF_TOKEN";
 
-	const formData = await request.formData();
 	const tokenFromForm = formData.get("csrf_token");
 
 	if (!tokenFromForm || typeof tokenFromForm !== "string") {
@@ -234,34 +229,31 @@ export async function validateCSRFToken(request: Request): Promise<ValidateCSRFR
 
 	// RFC 9700: CSRF tokens must be one-time use
 	// Clear the cookie to prevent reuse
-	const clearCookie = `${csrfCookieName}=; HttpOnly; Secure; Path=/authorize; SameSite=Lax; Max-Age=0`;
+	const clearCookie = `${csrfCookieName}=; HttpOnly; Secure; Path=/; SameSite=Lax; Max-Age=0`;
 
 	return { clearCookie };
 }
 
 /**
- * Creates and stores OAuth state information, returning a state token and cookie
+ * Creates and stores OAuth state information, returning a state token
  * @param oauthReqInfo - OAuth request information to store with the state
  * @param kv - Cloudflare KV namespace for storing OAuth state data
  * @param stateTTL - Time-to-live for OAuth state in seconds (defaults to 600)
- * @returns Object containing the state token and Set-Cookie header value
+ * @returns Object containing the state token (KV-only validation, no cookie needed)
  */
 export async function createOAuthState(
 	oauthReqInfo: AuthRequest,
 	kv: KVNamespace,
 	stateTTL = 600,
 ): Promise<OAuthStateResult> {
-	const stateCookieName = "__Host-OAUTH_STATE";
-
 	const stateToken = crypto.randomUUID();
 
+	// Store state in KV (secure, one-time use, with TTL)
 	await kv.put(`oauth:state:${stateToken}`, JSON.stringify(oauthReqInfo), {
 		expirationTtl: stateTTL,
 	});
 
-	const setCookie = `${stateCookieName}=${stateToken}; HttpOnly; Secure; Path=/callback; SameSite=Lax; Max-Age=${stateTTL}`;
-
-	return { stateToken, setCookie };
+	return { stateToken };
 }
 
 /**
@@ -276,8 +268,6 @@ export async function validateOAuthState(
 	request: Request,
 	kv: KVNamespace,
 ): Promise<ValidateStateResult> {
-	const stateCookieName = "__Host-OAUTH_STATE";
-
 	const url = new URL(request.url);
 	const stateFromQuery = url.searchParams.get("state");
 
@@ -285,19 +275,7 @@ export async function validateOAuthState(
 		throw new OAuthError("invalid_request", "Missing state parameter", 400);
 	}
 
-	const cookieHeader = request.headers.get("Cookie") || "";
-	const cookies = cookieHeader.split(";").map((c) => c.trim());
-	const stateCookie = cookies.find((c) => c.startsWith(`${stateCookieName}=`));
-	const stateFromCookie = stateCookie ? stateCookie.substring(stateCookieName.length + 1) : null;
-
-	if (!stateFromCookie) {
-		throw new OAuthError("invalid_request", "Missing consent state cookie", 400);
-	}
-
-	if (stateFromQuery !== stateFromCookie) {
-		throw new OAuthError("invalid_request", "State mismatch", 400);
-	}
-
+	// Validate state exists in KV (secure, one-time use, with TTL)
 	const storedDataJson = await kv.get(`oauth:state:${stateFromQuery}`);
 	if (!storedDataJson) {
 		throw new OAuthError("invalid_request", "Invalid or expired state", 400);
@@ -310,9 +288,11 @@ export async function validateOAuthState(
 		throw new OAuthError("server_error", "Invalid state data", 500);
 	}
 
+	// Delete state from KV (one-time use)
 	await kv.delete(`oauth:state:${stateFromQuery}`);
 
-	const clearCookie = `${stateCookieName}=; HttpOnly; Secure; Path=/callback; SameSite=Lax; Max-Age=0`;
+	// No cookie to clear since we're not using state cookies anymore
+	const clearCookie = "";
 
 	return { oauthReqInfo, clearCookie };
 }

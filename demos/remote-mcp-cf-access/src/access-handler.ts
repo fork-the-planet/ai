@@ -33,8 +33,8 @@ export async function handleAccessRequest(
 		// Check if client is already approved
 		if (await isClientApproved(request, clientId, env.COOKIE_ENCRYPTION_KEY)) {
 			// Skip approval dialog but still create secure state
-			const { stateToken, setCookie } = await createOAuthState(oauthReqInfo, env.OAUTH_KV);
-			return redirectToAccess(request, env, stateToken, { "Set-Cookie": setCookie });
+			const { stateToken } = await createOAuthState(oauthReqInfo, env.OAUTH_KV);
+			return redirectToAccess(request, env, stateToken);
 		}
 
 		// Generate CSRF protection for the approval form
@@ -54,60 +54,59 @@ export async function handleAccessRequest(
 	}
 
 	if (request.method === "POST" && pathname === "/authorize") {
-		// Validate CSRF token
 		try {
-			await validateCSRFToken(request);
+			// Read form data once at top
+			const formData = await request.formData();
+
+			// Validate CSRF token - pass parsed FormData
+			validateCSRFToken(formData, request);
+
+			// Extract state from form data
+			const encodedState = formData.get("state");
+			if (!encodedState || typeof encodedState !== "string") {
+				return new Response("Missing state in form data", { status: 400 });
+			}
+
+			let state: { oauthReqInfo?: AuthRequest };
+			try {
+				state = JSON.parse(atob(encodedState));
+			} catch (_e) {
+				return new Response("Invalid state data", { status: 400 });
+			}
+
+			if (!state.oauthReqInfo || !state.oauthReqInfo.clientId) {
+				return new Response("Invalid request", { status: 400 });
+			}
+
+			// Add client to approved list
+			const approvedClientCookie = await addApprovedClient(
+				request,
+				state.oauthReqInfo.clientId,
+				env.COOKIE_ENCRYPTION_KEY,
+			);
+
+			// Create OAuth state with CSRF protection
+			const { stateToken } = await createOAuthState(state.oauthReqInfo, env.OAUTH_KV);
+
+			return redirectToAccess(request, env, stateToken, { "Set-Cookie": approvedClientCookie });
 		} catch (error: any) {
+			console.error("POST /authorize error:", error);
 			if (error instanceof OAuthError) {
 				return error.toResponse();
 			}
 			// Unexpected non-OAuth error
-			return new Response("Internal server error", { status: 500 });
+			return new Response(`Internal server error: ${error.message}`, { status: 500 });
 		}
-
-		// Extract state from form data
-		const formData = await request.formData();
-		const encodedState = formData.get("state");
-		if (!encodedState || typeof encodedState !== "string") {
-			return new Response("Missing state in form data", { status: 400 });
-		}
-
-		let state: { oauthReqInfo?: AuthRequest };
-		try {
-			state = JSON.parse(atob(encodedState));
-		} catch (_e) {
-			return new Response("Invalid state data", { status: 400 });
-		}
-
-		if (!state.oauthReqInfo || !state.oauthReqInfo.clientId) {
-			return new Response("Invalid request", { status: 400 });
-		}
-
-		// Add client to approved list
-		const approvedClientCookie = await addApprovedClient(
-			request,
-			state.oauthReqInfo.clientId,
-			env.COOKIE_ENCRYPTION_KEY,
-		);
-
-		// Create OAuth state with CSRF protection
-		const { stateToken, setCookie } = await createOAuthState(state.oauthReqInfo, env.OAUTH_KV);
-
-		// Combine cookies
-		const cookies = [approvedClientCookie, setCookie];
-
-		return redirectToAccess(request, env, stateToken, { "Set-Cookie": cookies.join(", ") });
 	}
 
 	if (request.method === "GET" && pathname === "/callback") {
-		// Validate OAuth state (checks query param matches cookie and retrieves stored data)
+		// Validate OAuth state (retrieves stored data from KV)
 		let oauthReqInfo: AuthRequest;
-		let clearCookie: string;
 
 		try {
 			const result = await validateOAuthState(request, env.OAUTH_KV);
 			oauthReqInfo = result.oauthReqInfo;
-			clearCookie = result.clearCookie;
+			// No clearCookie variable needed since we're using KV-only state validation
 		} catch (error: any) {
 			if (error instanceof OAuthError) {
 				return error.toResponse();
@@ -156,13 +155,7 @@ export async function handleAccessRequest(
 			userId: user.sub,
 		});
 
-		return new Response(null, {
-			headers: {
-				Location: redirectTo,
-				"Set-Cookie": clearCookie,
-			},
-			status: 302,
-		});
+		return Response.redirect(redirectTo, 302);
 	}
 
 	return new Response("Not Found", { status: 404 });
