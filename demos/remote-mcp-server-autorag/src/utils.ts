@@ -350,13 +350,12 @@ export const renderApproveContent = async (
 			>
 				Return to Home
 			</a>
-			${raw(`
-				<script>
-					setTimeout(() => {
-						window.location.href = "${redirectUrl}";
-					}, 2000);
-				</script>
-			`)}
+			<script data-redirect-url="${redirectUrl}">
+				setTimeout(() => {
+					const script = document.querySelector('script[data-redirect-url]')
+					window.location.href = script.dataset.redirectUrl;
+				}, 2000);
+			</script>
 		</div>
 	`;
 };
