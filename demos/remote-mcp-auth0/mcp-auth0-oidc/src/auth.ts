@@ -22,13 +22,16 @@ import {
 	validateOAuthState,
 } from "./workers-oauth-utils";
 
-type Auth0AuthRequest = {
-	mcpAuthRequest: AuthRequest;
+type Auth0AuthData = {
 	codeVerifier: string;
 	codeChallenge: string;
 	nonce: string;
 	transactionState: string;
 	consentToken: string;
+};
+
+type ExtendedAuthRequest = AuthRequest & {
+	auth0Data: Auth0AuthData;
 };
 
 export async function getOidcConfig({
@@ -82,20 +85,20 @@ export async function authorize(c: Context<{ Bindings: Env & { OAUTH_PROVIDER: O
 		const nonce = oauth.generateRandomNonce();
 		const codeChallenge = await oauth.calculatePKCECodeChallenge(codeVerifier);
 
-		const auth0AuthRequest: Auth0AuthRequest = {
+		const auth0Data: Auth0AuthData = {
 			codeChallenge,
 			codeVerifier,
 			consentToken: "", // Not needed for approved clients
-			mcpAuthRequest: mcpClientAuthRequest,
 			nonce,
 			transactionState: "",
 		};
 
 		// Create OAuth state in KV (secure, one-time use)
-		const { stateToken } = await createOAuthState(
-			{ ...mcpClientAuthRequest, auth0Data: auth0AuthRequest },
-			c.env.OAUTH_KV,
-		);
+		const extendedRequest: ExtendedAuthRequest = {
+			...mcpClientAuthRequest,
+			auth0Data,
+		};
+		const { stateToken } = await createOAuthState(extendedRequest, c.env.OAUTH_KV);
 
 		// Redirect directly to Auth0
 		const { as } = await getOidcConfig({
@@ -126,11 +129,10 @@ export async function authorize(c: Context<{ Bindings: Env & { OAUTH_PROVIDER: O
 	const nonce = oauth.generateRandomNonce();
 	const codeChallenge = await oauth.calculatePKCECodeChallenge(codeVerifier);
 
-	const auth0AuthRequest: Auth0AuthRequest = {
+	const auth0Data: Auth0AuthData = {
 		codeChallenge,
 		codeVerifier,
 		consentToken: "", // Not used anymore, replaced by CSRF token
-		mcpAuthRequest: mcpClientAuthRequest,
 		nonce,
 		transactionState: "",
 	};
@@ -145,7 +147,7 @@ export async function authorize(c: Context<{ Bindings: Env & { OAUTH_PROVIDER: O
 			name: "Auth0 OIDC Proxy Demo",
 		},
 		setCookie: csrfCookie,
-		state: { oauthReqInfo: mcpClientAuthRequest, auth0Data: auth0AuthRequest },
+		state: { oauthReqInfo: mcpClientAuthRequest, auth0Data },
 	});
 }
 
@@ -171,7 +173,7 @@ export async function confirmConsent(
 			return c.text("Missing state in form data", 400);
 		}
 
-		let state: { oauthReqInfo?: AuthRequest; auth0Data?: Auth0AuthRequest };
+		let state: { oauthReqInfo?: AuthRequest; auth0Data?: Auth0AuthData };
 		try {
 			state = JSON.parse(atob(encodedState));
 		} catch (_e) {
@@ -190,10 +192,11 @@ export async function confirmConsent(
 		);
 
 		// Create OAuth state in KV (secure, one-time use)
-		const { stateToken } = await createOAuthState(
-			{ ...state.oauthReqInfo, auth0Data: state.auth0Data },
-			c.env.OAUTH_KV,
-		);
+		const extendedRequest: ExtendedAuthRequest = {
+			...state.oauthReqInfo,
+			auth0Data: state.auth0Data,
+		};
+		const { stateToken } = await createOAuthState(extendedRequest, c.env.OAUTH_KV);
 
 		// Get Auth0 configuration
 		const { as } = await getOidcConfig({
@@ -241,11 +244,11 @@ export async function confirmConsent(
  */
 export async function callback(c: Context<{ Bindings: Env & { OAUTH_PROVIDER: OAuthHelpers } }>) {
 	// Validate OAuth state (retrieves stored data from KV)
-	let storedData: AuthRequest & { auth0Data?: Auth0AuthRequest };
+	let storedData: ExtendedAuthRequest;
 
 	try {
 		const result = await validateOAuthState(c.req.raw, c.env.OAUTH_KV);
-		storedData = result.oauthReqInfo as AuthRequest & { auth0Data?: Auth0AuthRequest };
+		storedData = result.oauthReqInfo as ExtendedAuthRequest;
 	} catch (error: any) {
 		if (error instanceof OAuthError) {
 			return error.toResponse();
@@ -258,7 +261,7 @@ export async function callback(c: Context<{ Bindings: Env & { OAUTH_PROVIDER: OA
 		return c.text("Invalid OAuth request data", 400);
 	}
 
-	const auth0AuthRequest = storedData.auth0Data;
+	const auth0Data = storedData.auth0Data;
 	const stateParam = c.req.query("state") as string;
 
 	const { as, client, clientAuth } = await getOidcConfig({
@@ -275,12 +278,12 @@ export async function callback(c: Context<{ Bindings: Env & { OAUTH_PROVIDER: OA
 		clientAuth,
 		params,
 		new URL("/callback", c.req.url).href,
-		auth0AuthRequest.codeVerifier,
+		auth0Data.codeVerifier,
 	);
 
 	// Process the response
 	const result = await oauth.processAuthorizationCodeResponse(as, client, response, {
-		expectedNonce: auth0AuthRequest.nonce,
+		expectedNonce: auth0Data.nonce,
 		requireIdToken: true,
 	});
 
