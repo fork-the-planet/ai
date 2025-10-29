@@ -2,6 +2,7 @@
 
 interface Env {
 	OAUTH_KV: KVNamespace;
+	COOKIE_ENCRYPTION_KEY: string;
 	WORKOS_CLIENT_ID: string;
 	WORKOS_CLIENT_SECRET: string;
 	MCP_OBJECT: DurableObjectNamespace /* MyMCP */;

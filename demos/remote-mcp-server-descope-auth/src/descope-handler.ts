@@ -1,6 +1,12 @@
+import { env } from "cloudflare:workers";
 import type { AuthRequest, OAuthHelpers } from "@cloudflare/workers-oauth-provider";
 import { Hono } from "hono";
-import { fetchUpstreamAuthToken, getUpstreamAuthorizeUrl, type Props } from "./utils";
+import {
+	fetchDescopeAuthToken,
+	getDescopeAuthorizeUrl,
+	getDescopeUserInfo,
+	type Props,
+} from "./descope-utils";
 import {
 	addApprovedClient,
 	createOAuthState,
@@ -22,10 +28,10 @@ app.get("/authorize", async (c) => {
 	}
 
 	// Check if client is already approved
-	if (await isClientApproved(c.req.raw, clientId, c.env.COOKIE_ENCRYPTION_KEY)) {
+	if (await isClientApproved(c.req.raw, clientId, env.COOKIE_ENCRYPTION_KEY)) {
 		// Skip approval dialog but still create secure state
 		const { stateToken } = await createOAuthState(oauthReqInfo, c.env.OAUTH_KV);
-		return redirectToGoogle(c.req.raw, c.env, stateToken);
+		return redirectToDescope(c.req.raw, stateToken);
 	}
 
 	// Generate CSRF protection for the approval form
@@ -35,8 +41,9 @@ app.get("/authorize", async (c) => {
 		client: await c.env.OAUTH_PROVIDER.lookupClient(clientId),
 		csrfToken,
 		server: {
-			description: "This MCP Server is a demo for Google OAuth.",
-			name: "Google OAuth Demo",
+			description: "This is a demo MCP Remote Server using Descope for authentication.",
+			logo: "https://avatars.githubusercontent.com/u/100786013?s=200&v=4",
+			name: "Cloudflare Descope MCP Server",
 		},
 		setCookie,
 		state: { oauthReqInfo },
@@ -78,9 +85,7 @@ app.post("/authorize", async (c) => {
 		// Create OAuth state with CSRF protection
 		const { stateToken } = await createOAuthState(state.oauthReqInfo, c.env.OAUTH_KV);
 
-		return redirectToGoogle(c.req.raw, c.env, stateToken, {
-			"Set-Cookie": approvedClientCookie,
-		});
+		return redirectToDescope(c.req.raw, stateToken, { "Set-Cookie": approvedClientCookie });
 	} catch (error: any) {
 		console.error("POST /authorize error:", error);
 		if (error instanceof OAuthError) {
@@ -91,22 +96,18 @@ app.post("/authorize", async (c) => {
 	}
 });
 
-async function redirectToGoogle(
+async function redirectToDescope(
 	request: Request,
-	env: Env,
 	stateToken: string,
 	headers: Record<string, string> = {},
 ) {
 	return new Response(null, {
 		headers: {
 			...headers,
-			location: getUpstreamAuthorizeUrl({
-				clientId: env.GOOGLE_CLIENT_ID,
-				hostedDomain: env.HOSTED_DOMAIN,
-				redirectUri: new URL("/callback", request.url).href,
-				scope: "email profile",
+			location: getDescopeAuthorizeUrl({
+				project_id: env.DESCOPE_PROJECT_ID,
+				redirect_uri: new URL("/callback", request.url).href,
 				state: stateToken,
-				upstreamUrl: "https://accounts.google.com/o/oauth2/v2/auth",
 			}),
 		},
 		status: 302,
@@ -116,7 +117,7 @@ async function redirectToGoogle(
 /**
  * OAuth Callback Endpoint
  *
- * This route handles the callback from Google after user authentication.
+ * This route handles the callback from Descope after user authentication.
  * It exchanges the temporary code for an access token, then stores some
  * user metadata & the auth token as part of the 'props' on the token passed
  * down to the client. It ends by redirecting the client back to _its_ callback URL
@@ -141,55 +142,36 @@ app.get("/callback", async (c) => {
 	}
 
 	// Exchange the code for an access token
-	const code = c.req.query("code");
-	if (!code) {
-		return c.text("Missing code", 400);
-	}
-
-	const [accessToken, googleErrResponse] = await fetchUpstreamAuthToken({
-		clientId: c.env.GOOGLE_CLIENT_ID,
-		clientSecret: c.env.GOOGLE_CLIENT_SECRET,
-		code,
-		grantType: "authorization_code",
-		redirectUri: new URL("/callback", c.req.url).href,
-		upstreamUrl: "https://accounts.google.com/o/oauth2/token",
+	const [accessToken, errResponse] = await fetchDescopeAuthToken({
+		code: c.req.query("code"),
+		management_key: c.env.DESCOPE_MANAGEMENT_KEY,
+		project_id: c.env.DESCOPE_PROJECT_ID,
+		redirect_uri: new URL("/callback", c.req.url).href,
 	});
-	if (googleErrResponse) {
-		return googleErrResponse;
-	}
+	if (errResponse) return errResponse;
 
-	// Fetch the user info from Google
-	const userResponse = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
-		headers: {
-			Authorization: `Bearer ${accessToken}`,
-		},
-	});
-	if (!userResponse.ok) {
-		return c.text(`Failed to fetch user info: ${await userResponse.text()}`, 500);
-	}
-
-	const { id, name, email } = (await userResponse.json()) as {
-		id: string;
-		name: string;
-		email: string;
-	};
+	// Fetch the user info from Descope
+	const userInfo = await getDescopeUserInfo(accessToken);
+	const { sub, name, email } = userInfo;
 
 	// Return back to the MCP client a new token
 	const { redirectTo } = await c.env.OAUTH_PROVIDER.completeAuthorization({
 		metadata: {
-			label: name,
+			label: name || sub,
 		},
+		// This will be available on this.props inside MyMCP
 		props: {
 			accessToken,
-			email,
-			name,
+			email: email || "",
+			name: name || "",
+			sub,
 		} as Props,
 		request: oauthReqInfo,
 		scope: oauthReqInfo.scope,
-		userId: id,
+		userId: sub,
 	});
 
 	return Response.redirect(redirectTo, 302);
 });
 
-export { app as GoogleHandler };
+export { app as DescopeHandler };

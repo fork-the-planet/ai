@@ -39,21 +39,22 @@ Acts as OAuth Client to your real OAuth server (in this case, Slack)
 
 ### Deploy to Cloudflare Workers
 
-1. Add you Slack credentials (Slack Client ID and Client Secret) using Wrangler:
+1. Add your Slack credentials (Slack Client ID and Client Secret) and cookie encryption key using Wrangler:
    ```bash
    wrangler secret put SLACK_CLIENT_ID
    wrangler secret put SLACK_CLIENT_SECRET
+   wrangler secret put COOKIE_ENCRYPTION_KEY # add any random string here e.g. openssl rand -hex 32
    ```
 
-2. Create a KV namespace for OAuth token storage:
+2. Create a KV namespace for OAuth state storage:
    ```bash
-   wrangler kv:namespace create OAUTH_KV
+   npx wrangler kv namespace create OAUTH_KV
    ```
 
-   Update the KV namespace in the `wrangler.jsonc` file with the ID you receive. 
+   Update the KV namespace in the `wrangler.jsonc` file with the ID you receive.
 
    ```json
-      "kv_namespaces": [
+   "kv_namespaces": [
      {
        "binding": "OAUTH_KV",
        "id": "your-kv-namespace-id"

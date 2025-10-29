@@ -1,29 +1,41 @@
-import { McpAgent } from "agents/mcp";
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
 import OAuthProvider from "@cloudflare/workers-oauth-provider";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpAgent } from "agents/mcp";
+import { z } from "zod";
 import { LogtoHandler } from "./logto-handler";
-import type { Props } from "./types";
 
-// Define our MCP agent with tools
-export class MyMCP extends McpAgent<Props, Env> {
+// Context from the auth process, encrypted & stored in the auth token
+// and provided to the DurableMCP as this.props
+type Props = {
+	userId: string;
+	email: string;
+	username: string;
+};
+
+export class MyMCP extends McpAgent<Env, Record<string, never>, Props> {
 	server = new McpServer({
-		name: "Logto Proxy Demo",
+		name: "Logto OAuth Proxy Demo",
 		version: "1.0.0",
 	});
 
 	async init() {
-		// Simple addition tool
-		this.server.tool("add", { a: z.number(), b: z.number() }, async ({ a, b }) => ({
-			content: [{ type: "text", text: String(a + b) }],
-		}));
+		// Hello, world!
+		this.server.tool(
+			"add",
+			"Add two numbers the way only MCP can",
+			{ a: z.number(), b: z.number() },
+			async ({ a, b }) => ({
+				content: [{ text: String(a + b), type: "text" }],
+			}),
+		);
 
-		this.server.tool("getCurrentUserInfo", "Get user info from Logto", {}, async () => {
+		// Use the props to provide user information
+		this.server.tool("getCurrentUserInfo", "Get current user info from Logto", {}, async () => {
 			return {
 				content: [
 					{
-						type: "text",
 						text: JSON.stringify(this.props),
+						type: "text",
 					},
 				],
 			};
@@ -32,11 +44,14 @@ export class MyMCP extends McpAgent<Props, Env> {
 }
 
 export default new OAuthProvider({
-	apiRoute: "/sse",
-	apiHandler: MyMCP.mount("/sse"),
-	// @ts-expect-error
-	defaultHandler: LogtoHandler,
+	// NOTE - during the summer 2025, the SSE protocol was deprecated and replaced by the Streamable-HTTP protocol
+	// https://developers.cloudflare.com/agents/model-context-protocol/transport/#mcp-server-with-authentication
+	apiHandlers: {
+		"/sse": MyMCP.serveSSE("/sse"), // deprecated SSE protocol - use /mcp instead
+		"/mcp": MyMCP.serve("/mcp"), // Streamable-HTTP protocol
+	},
 	authorizeEndpoint: "/authorize",
-	tokenEndpoint: "/token",
 	clientRegistrationEndpoint: "/register",
+	defaultHandler: LogtoHandler as any,
+	tokenEndpoint: "/token",
 });
