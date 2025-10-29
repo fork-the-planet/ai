@@ -7,9 +7,17 @@
 	"name": "remote-mcp-logto",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-03-10",
-	"compatibility_flags": [
-		"nodejs_compat"
-	],
+	"compatibility_flags": ["nodejs_compat"],
+	/**
+	 * Note: Use secrets to store sensitive data.
+	 * https://developers.cloudflare.com/workers/configuration/secrets/
+	 *
+	 * Commands to set secrets:
+	 * npx wrangler secret put LOGTO_ENDPOINT
+	 * npx wrangler secret put LOGTO_APP_ID
+	 * npx wrangler secret put LOGTO_APP_SECRET
+	 * npx wrangler secret put COOKIE_ENCRYPTION_KEY
+	 */
 	"migrations": [
 		{
 			"new_sqlite_classes": [
@@ -18,10 +26,10 @@
 			"tag": "v1"
 		}
 	],
-  "kv_namespaces": [
+	"kv_namespaces": [
 		{
 			"binding": "OAUTH_KV",
-			"id": "<your-kv-id>"
+			"id": "<Add-KV-ID>"
 		}
 	],
 	"durable_objects": {

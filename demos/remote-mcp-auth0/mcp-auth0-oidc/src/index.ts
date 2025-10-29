@@ -68,7 +68,7 @@ export class AuthenticatedMCP extends McpAgent<Env, Record<string, never>, UserP
 // Initialize the Hono app with the routes for the OAuth Provider.
 const app = new Hono<{ Bindings: Env & { OAUTH_PROVIDER: OAuthHelpers } }>();
 app.get("/authorize", authorize);
-app.post("/authorize/consent", confirmConsent);
+app.post("/authorize", confirmConsent);
 app.get("/callback", callback);
 
 export default new OAuthProvider({

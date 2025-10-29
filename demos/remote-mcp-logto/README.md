@@ -23,7 +23,7 @@ Before getting started, you need to create an account on [Logto Cloud](https://c
 
 1. Create the KV namespace:
 ```
-wrangler kv:namespace create "OAUTH_KV"
+npx wrangler kv namespace create "OAUTH_KV"
 ```
 2. Update the Wrangler file with the KV ID:
 ```
@@ -40,7 +40,7 @@ wrangler kv:namespace create "OAUTH_KV"
 - `LOGTO_ENDPOINT`: The Logto Endpoint (e.g. `https://your-tenant-id.logto.app`)
 - `LOGTO_APP_ID`: The Logto App ID
 - `LOGTO_APP_SECRET`: The Logto App Secret
-
+- `COOKIE_ENCRYPTION_KEY`: A secret key for cookie encryption (generate with `openssl rand -hex 32`)
 
 ## Development
 
@@ -50,6 +50,7 @@ Create a `.dev.vars` file in the root of the project with the following structur
 LOGTO_ENDPOINT=https://your-tenant-id.logto.app
 LOGTO_APP_ID=<your-logto-app-id>
 LOGTO_APP_SECRET=<your-logto-app-secret>
+COOKIE_ENCRYPTION_KEY=<your-cookie-encryption-key>
 ```
 
 ## Test the MCP server locally
@@ -70,13 +71,17 @@ A login page will appear. After completing the login process, you can interact w
 
 ## Deploying the MCP Server to Cloudflare
 
-Before deploying to Cloudflare, you'll need to configure the following Logto-related secrets:
+Before deploying to Cloudflare, you'll need to configure the following secrets:
 
 ```bash
-wrangler secret put LOGTO_ENDPOINT
-wrangler secret put LOGTO_APP_ID
-wrangler secret put LOGTO_APP_SECRET
+npx wrangler secret put LOGTO_ENDPOINT
+npx wrangler secret put LOGTO_APP_ID
+npx wrangler secret put LOGTO_APP_SECRET
+npx wrangler secret put COOKIE_ENCRYPTION_KEY  # add any random string here e.g. openssl rand -hex 32
 ```
+
+> [!IMPORTANT]
+> When you create the first secret, Wrangler will ask if you want to create a new Worker. Submit "Y" to create a new Worker and save the secret.
 
 After setting up the secrets, deploy your API by running:
 

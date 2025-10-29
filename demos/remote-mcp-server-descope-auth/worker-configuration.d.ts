@@ -2,11 +2,12 @@
 // Runtime types generated with workerd@1.20250409.0 2025-03-10 
 declare namespace Cloudflare {
 	interface Env {
+		OAUTH_KV: KVNamespace;
 		DESCOPE_PROJECT_ID: string;
 		DESCOPE_MANAGEMENT_KEY: string;
-		SERVER_URL: string;
+		COOKIE_ENCRYPTION_KEY: string;
 		MCP_OBJECT: DurableObjectNamespace<import("./src/index").MyMCP>;
-		ASSETS: Fetcher;
+		OAUTH_PROVIDER: import("@cloudflare/workers-oauth-provider").OAuthHelpers;
 	}
 }
 interface Env extends Cloudflare.Env {}

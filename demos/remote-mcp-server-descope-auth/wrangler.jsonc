@@ -7,6 +7,15 @@
 	"name": "remote-mcp-server-bearer-auth",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-03-10",
+	/**
+	 * Note: Use secrets to store sensitive data.
+	 * https://developers.cloudflare.com/workers/configuration/secrets/
+	 *
+	 * Commands to set secrets:
+	 * npx wrangler secret put DESCOPE_PROJECT_ID
+	 * npx wrangler secret put DESCOPE_MANAGEMENT_KEY
+	 * npx wrangler secret put COOKIE_ENCRYPTION_KEY
+	 */
 	"migrations": [
 		{
 			"new_sqlite_classes": [
@@ -23,15 +32,17 @@
 			}
 		]
 	},
+	"kv_namespaces": [
+		{
+			"binding": "OAUTH_KV",
+			"id": "<Add-KV-ID>"
+		}
+	],
 	"observability": {
 		"enabled": true
 	},
 	"assets": {
 		"directory": "./static/",
 		"binding": "ASSETS"
-	},
-	"vars": {
-		"DESCOPE_PROJECT_ID": "your_project_id",
-		"SERVER_URL": "https://your_worker_slug.your_account_name.workers.dev"
 	}
 }

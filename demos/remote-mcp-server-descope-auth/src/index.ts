@@ -1,88 +1,77 @@
-import { McpAgent } from "agents/mcp";
+import OAuthProvider from "@cloudflare/workers-oauth-provider";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpAgent } from "agents/mcp";
 import { z } from "zod";
-import { type Context, Hono } from "hono";
-import { layout, homeContent } from "./utils";
-import { DescopeMcpProvider } from "./descope-hono/provider";
-import { descopeMcpAuthRouter } from "./descope-hono/router";
-import { descopeMcpBearerAuth } from "./descope-hono/middleware/bearerAuth";
-import { cors } from "hono/cors";
+import { DescopeHandler } from "./descope-handler";
 
-type Bindings = {
-	DESCOPE_PROJECT_ID: string;
-	DESCOPE_MANAGEMENT_KEY: string;
-	DESCOPE_BASE_URL?: string;
-	SERVER_URL: string;
-};
-
+// Context from the auth process, encrypted & stored in the auth token
+// and provided to the DurableMCP as this.props
 type Props = {
-	bearerToken: string;
+	sub: string;
+	name: string;
+	email: string;
+	accessToken: string;
 };
 
-type State = null;
-export class MyMCP extends McpAgent<Bindings, State, Props> {
+export class MyMCP extends McpAgent<Env, Record<string, never>, Props> {
 	server = new McpServer({
-		name: "Demo",
+		name: "Descope OAuth Proxy Demo",
 		version: "1.0.0",
 	});
 
 	async init() {
-		this.server.tool("add", { a: z.number(), b: z.number() }, async ({ a, b }) => ({
-			content: [{ type: "text", text: String(a + b) }],
-		}));
+		// Hello, world!
+		this.server.tool(
+			"add",
+			"Add two numbers the way only MCP can",
+			{ a: z.number(), b: z.number() },
+			async ({ a, b }) => ({
+				content: [{ text: String(a + b), type: "text" }],
+			}),
+		);
 
-		this.server.tool("getToken", {}, async () => ({
+		// Use the upstream access token to access user info
+		this.server.tool(
+			"getUserInfo",
+			"Get authenticated user info from Descope",
+			{},
+			async () => {
+				return {
+					content: [
+						{
+							text: JSON.stringify({
+								email: this.props!.email,
+								name: this.props!.name,
+								sub: this.props!.sub,
+							}),
+							type: "text",
+						},
+					],
+				};
+			},
+		);
+
+		// Return the access token
+		this.server.tool("getToken", "Get the Descope access token", {}, async () => ({
 			content: [
 				{
+					text: String(`User's token: ${this.props!.accessToken}`),
 					type: "text",
-					text: String(`User's token: ${this.props!.bearerToken}`),
 				},
 			],
 		}));
 	}
 }
 
-// Create the main Hono app
-const app = new Hono<{ Bindings: Bindings }>();
-
-// Apply CORS middleware
-app.use(
-	cors({
-		origin: "*",
-		allowHeaders: ["Content-Type", "Authorization", "mcp-protocol-version"],
-		maxAge: 86400,
-	}),
-);
-
-// Homepage route
-app.get("/", async (c) => {
-	const content = await homeContent(c.req.raw);
-	return c.html(layout(content, "MCP Remote Auth Demo - Home"));
+export default new OAuthProvider({
+	// NOTE - during the summer 2025, the SSE protocol was deprecated and replaced by the Streamable-HTTP protocol
+	// https://developers.cloudflare.com/agents/model-context-protocol/transport/#mcp-server-with-authentication
+	apiHandlers: {
+		"/sse": MyMCP.serveSSE("/sse"), // deprecated SSE protocol - use /mcp instead
+		"/mcp": MyMCP.serve("/mcp"), // Streamable-HTTP protocol
+	},
+	authorizeEndpoint: "/authorize",
+	clientRegistrationEndpoint: "/register",
+	defaultHandler: DescopeHandler as any,
+	tokenEndpoint: "/token",
 });
-
-// OAuth routes handler
-const handleOAuthRoute = async (c: Context) => {
-	const provider = new DescopeMcpProvider({}, { env: c.env });
-	const router = descopeMcpAuthRouter(provider);
-	return router.fetch(c.req.raw, c.env, c.executionCtx);
-};
-
-// OAuth routes
-app.use("/.well-known/oauth-authorization-server", handleOAuthRoute);
-app.all("/authorize", handleOAuthRoute);
-app.use("/register", handleOAuthRoute);
-
-// Protected MCP routes
-app.use("/sse/*", descopeMcpBearerAuth());
-app.route(
-	"/sse",
-	new Hono().mount("/", (req, env, ctx) => {
-		const authHeader = req.headers.get("authorization");
-		ctx.props = {
-			bearerToken: authHeader,
-		};
-		return MyMCP.mount("/sse").fetch(req, env, ctx);
-	}),
-);
-
-export default app;

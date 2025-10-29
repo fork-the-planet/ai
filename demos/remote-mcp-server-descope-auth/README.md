@@ -16,17 +16,28 @@ Before you begin, ensure you have:
    - [Project ID](https://app.descope.com/settings/project)
    - [Management Key](https://app.descope.com/settings/company/managementkeys)
 
-2. Create a `.dev.vars` file in your project root (this file is gitignored):
+2. Create a KV namespace for OAuth state storage:
+
+```bash
+npx wrangler kv namespace create OAUTH_KV
+# Copy the ID and update wrangler.jsonc
+```
+
+3. Copy the `.dev.vars.example` file to `.dev.vars` and fill in your credentials:
 
 ```bash
 # .dev.vars
 DESCOPE_PROJECT_ID="your_project_id"
 DESCOPE_MANAGEMENT_KEY="your_management_key"
-# For local development
-SERVER_URL="http://localhost:8787"
+COOKIE_ENCRYPTION_KEY="your_cookie_encryption_key"
 ```
 
-3. Clone and set up the repository:
+Generate the cookie encryption key:
+```bash
+openssl rand -hex 32
+```
+
+4. Clone and set up the repository:
 
 ```bash
 # clone the repository
@@ -58,21 +69,20 @@ To explore your new MCP api, you can use the [MCP Inspector](https://modelcontex
 
 ## Deploy to Cloudflare
 
-1. Set up your secrets in Cloudflare:
+1. Create a KV namespace for production:
+
+```bash
+npx wrangler kv:namespace create OAUTH_KV --env production
+# Update the KV namespace ID in wrangler.jsonc
+```
+
+2. Set up your secrets in Cloudflare:
 
 ```bash
 # Set Descope credentials as secrets
-wrangler secret put DESCOPE_MANAGEMENT_KEY
-```
-
-2. Set your Descope `project_id` and your hosted worker's `server_url` to the `wrangler.jsonc` file:
-
-```bash
-# wrangler.jsonc
-"vars": {
- "DESCOPE_PROJECT_ID": "your_project_id",
- "SERVER_URL": "https://your_worker_slug.your_account_name.workers.dev"
-}
+npx wrangler secret put DESCOPE_PROJECT_ID
+npx wrangler secret put DESCOPE_MANAGEMENT_KEY
+npx wrangler secret put COOKIE_ENCRYPTION_KEY
 ```
 
 3. Deploy the worker:
