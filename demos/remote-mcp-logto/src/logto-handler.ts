@@ -14,7 +14,13 @@ import {
 	validateOAuthState,
 } from "./workers-oauth-utils";
 
-const app = new Hono<{ Bindings: Env & { OAUTH_PROVIDER: OAuthHelpers, OAUTH_KV: KVNamespace, COOKIE_ENCRYPTION_KEY: string } }>();
+const app = new Hono<{
+	Bindings: Env & {
+		OAUTH_PROVIDER: OAuthHelpers;
+		OAUTH_KV: KVNamespace;
+		COOKIE_ENCRYPTION_KEY: string;
+	};
+}>();
 
 const logtoConfig: LogtoConfig = {
 	endpoint: env.LOGTO_ENDPOINT,

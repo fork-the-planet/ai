@@ -58,7 +58,7 @@ export async function fetchDescopeAuthToken({
 			redirect_uri,
 		}),
 		headers: {
-			"Authorization": `Bearer ${project_id}:${management_key}`,
+			Authorization: `Bearer ${project_id}:${management_key}`,
 			"Content-Type": "application/json",
 		},
 		method: "POST",
@@ -85,9 +85,7 @@ export async function fetchDescopeAuthToken({
  *
  * @returns {Promise<DescopeUserInfo>} A promise that resolves to the user info.
  */
-export async function getDescopeUserInfo(
-	accessToken: string,
-): Promise<DescopeUserInfo> {
+export async function getDescopeUserInfo(accessToken: string): Promise<DescopeUserInfo> {
 	const resp = await fetch("https://api.descope.com/oauth2/v1/apps/userinfo", {
 		headers: {
 			Authorization: `Bearer ${accessToken}`,

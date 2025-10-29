@@ -69,7 +69,13 @@ export async function authorize(c: Context<{ Bindings: Env & { OAUTH_PROVIDER: O
 	}
 
 	// Check if client is already approved
-	if (await isClientApproved(c.req.raw, mcpClientAuthRequest.clientId, c.env.COOKIE_ENCRYPTION_KEY)) {
+	if (
+		await isClientApproved(
+			c.req.raw,
+			mcpClientAuthRequest.clientId,
+			c.env.COOKIE_ENCRYPTION_KEY,
+		)
+	) {
 		// Skip approval dialog but still use secure state management
 		// Generate all that is needed for the Auth0 auth request
 		const codeVerifier = oauth.generateRandomCodeVerifier();
@@ -368,4 +374,3 @@ export async function tokenExchangeCallback(
 		};
 	}
 }
-

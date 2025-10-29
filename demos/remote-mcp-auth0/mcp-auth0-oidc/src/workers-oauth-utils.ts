@@ -611,8 +611,8 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
               </div>
 
               ${
-								clientUri
-									? `
+					clientUri
+						? `
                 <div class="client-detail">
                   <div class="detail-label">Website:</div>
                   <div class="detail-value small">
@@ -622,12 +622,12 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
                   </div>
                 </div>
               `
-									: ""
-							}
+						: ""
+				}
 
               ${
-								policyUri
-									? `
+					policyUri
+						? `
                 <div class="client-detail">
                   <div class="detail-label">Privacy Policy:</div>
                   <div class="detail-value">
@@ -637,12 +637,12 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
                   </div>
                 </div>
               `
-									: ""
-							}
+						: ""
+				}
 
               ${
-								tosUri
-									? `
+					tosUri
+						? `
                 <div class="client-detail">
                   <div class="detail-label">Terms of Service:</div>
                   <div class="detail-value">
@@ -652,12 +652,12 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
                   </div>
                 </div>
               `
-									: ""
-							}
+						: ""
+				}
 
               ${
-								redirectUris.length > 0
-									? `
+					redirectUris.length > 0
+						? `
                 <div class="client-detail">
                   <div class="detail-label">Redirect URIs:</div>
                   <div class="detail-value small">
@@ -665,19 +665,19 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
                   </div>
                 </div>
               `
-									: ""
-							}
+						: ""
+				}
 
               ${
-								contacts
-									? `
+					contacts
+						? `
                 <div class="client-detail">
                   <div class="detail-label">Contact:</div>
                   <div class="detail-value">${contacts}</div>
                 </div>
               `
-									: ""
-							}
+						: ""
+				}
             </div>
 
             <p>This MCP Client is requesting to be authorized on ${serverName}. If you approve, you will be redirected to complete authentication.</p>

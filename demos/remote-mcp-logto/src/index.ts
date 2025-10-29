@@ -30,21 +30,16 @@ export class MyMCP extends McpAgent<Env, Record<string, never>, Props> {
 		);
 
 		// Use the props to provide user information
-		this.server.tool(
-			"getCurrentUserInfo",
-			"Get current user info from Logto",
-			{},
-			async () => {
-				return {
-					content: [
-						{
-							text: JSON.stringify(this.props),
-							type: "text",
-						},
-					],
-				};
-			},
-		);
+		this.server.tool("getCurrentUserInfo", "Get current user info from Logto", {}, async () => {
+			return {
+				content: [
+					{
+						text: JSON.stringify(this.props),
+						type: "text",
+					},
+				],
+			};
+		});
 	}
 }
 
