@@ -6,6 +6,9 @@ AuthKit supports user management features including an organization-centric
 authentication model allowing you to control tool access based on user and
 organization permissions.
 
+> [!WARNING]
+> This is a demo template designed to help you get started quickly. While we have implemented several security controls, **you must implement all preventive and defense-in-depth security measures before deploying to production**. Please review our comprehensive security guide: [Securing MCP Servers](https://github.com/cloudflare/agents/blob/main/docs/securing-mcp-servers.md)
+
 ## Getting Started
 
 First to create a WorkOS account by signing into the [WorkOS Dashboard](https://dashboard.workos.com).

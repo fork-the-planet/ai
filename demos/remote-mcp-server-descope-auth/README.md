@@ -2,6 +2,9 @@
 
 Let's get a Remote MCP server up-and-running on Cloudflare Workers with Descope OAuth login!
 
+> [!WARNING]
+> This is a demo template designed to help you get started quickly. While we have implemented several security controls, **you must implement all preventive and defense-in-depth security measures before deploying to production**. Please review our comprehensive security guide: [Securing MCP Servers](https://github.com/cloudflare/agents/blob/main/docs/securing-mcp-servers.md)
+
 ## Prerequisites
 
 Before you begin, ensure you have:

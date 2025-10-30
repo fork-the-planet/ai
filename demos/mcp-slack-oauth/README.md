@@ -1,6 +1,6 @@
 # Remote Slack MCP Server with OAuth
 
-This is an implementation of a remote Slack [MCP server](https://modelcontextprotocol.io/introduction) that requires users to login to their Slack account in order to use the tools to read and post messages from their channels. 
+This is an implementation of a remote Slack [MCP server](https://modelcontextprotocol.io/introduction) that requires users to login to their Slack account in order to use the tools to read and post messages from their channels.
 
 You can deploy it to your own Cloudflare account, once you create a [Slack OAuth](https://api.slack.com/authentication/oauth-v2) app.
 
@@ -10,6 +10,9 @@ The MCP server (powered by Cloudflare Workers):
 
 Acts as OAuth Server to your MCP clients
 Acts as OAuth Client to your real OAuth server (in this case, Slack)
+
+> [!WARNING]
+> This is a demo template designed to help you get started quickly. While we have implemented several security controls, **you must implement all preventive and defense-in-depth security measures before deploying to production**. Please review our comprehensive security guide: [Securing MCP Servers](https://github.com/cloudflare/agents/blob/main/docs/securing-mcp-servers.md)
 
 ## Available Tools
 

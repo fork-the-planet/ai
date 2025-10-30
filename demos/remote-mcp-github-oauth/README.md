@@ -6,10 +6,13 @@ You can deploy it to your own Cloudflare account, and after you create your own 
 
 You can use this as a reference example for how to integrate other OAuth providers with an MCP server deployed to Cloudflare, using the [`workers-oauth-provider` library](https://github.com/cloudflare/workers-oauth-provider).
 
-The MCP server (powered by [Cloudflare Workers](https://developers.cloudflare.com/workers/)): 
+The MCP server (powered by [Cloudflare Workers](https://developers.cloudflare.com/workers/)):
 
 * Acts as OAuth _Server_ to your MCP clients
 * Acts as OAuth _Client_ to your _real_ OAuth server (in this case, GitHub)
+
+> [!WARNING]
+> This is a demo template designed to help you get started quickly. While we have implemented several security controls, **you must implement all preventive and defense-in-depth security measures before deploying to production**. Please review our comprehensive security guide: [Securing MCP Servers](https://github.com/cloudflare/agents/blob/main/docs/securing-mcp-servers.md)
 
 ## Getting Started
 

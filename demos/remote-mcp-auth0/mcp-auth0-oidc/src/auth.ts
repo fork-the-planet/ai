@@ -12,10 +12,11 @@ import * as oauth from "oauth4webapi";
 
 import type { UserProps } from "./types";
 import {
+	addApprovedClient,
+	bindStateToSession,
 	createOAuthState,
 	generateCSRFProtection,
 	isClientApproved,
-	addApprovedClient,
 	OAuthError,
 	renderApprovalDialog,
 	validateCSRFToken,
@@ -79,7 +80,7 @@ export async function authorize(c: Context<{ Bindings: Env & { OAUTH_PROVIDER: O
 			c.env.COOKIE_ENCRYPTION_KEY,
 		)
 	) {
-		// Skip approval dialog but still use secure state management
+		// Skip approval dialog but still create secure state and bind to session
 		// Generate all that is needed for the Auth0 auth request
 		const codeVerifier = oauth.generateRandomCodeVerifier();
 		const nonce = oauth.generateRandomNonce();
@@ -99,6 +100,7 @@ export async function authorize(c: Context<{ Bindings: Env & { OAUTH_PROVIDER: O
 			auth0Data,
 		};
 		const { stateToken } = await createOAuthState(extendedRequest, c.env.OAUTH_KV);
+		const { setCookie: sessionBindingCookie } = await bindStateToSession(stateToken);
 
 		// Redirect directly to Auth0
 		const { as } = await getOidcConfig({
@@ -118,7 +120,13 @@ export async function authorize(c: Context<{ Bindings: Env & { OAUTH_PROVIDER: O
 		authorizationUrl.searchParams.set("nonce", nonce);
 		authorizationUrl.searchParams.set("state", stateToken);
 
-		return c.redirect(authorizationUrl.href);
+		return new Response(null, {
+			status: 302,
+			headers: {
+				"Location": authorizationUrl.href,
+				"Set-Cookie": sessionBindingCookie,
+			},
+		});
 	}
 
 	// Generate CSRF protection for the approval form
@@ -191,12 +199,13 @@ export async function confirmConsent(
 			c.env.COOKIE_ENCRYPTION_KEY,
 		);
 
-		// Create OAuth state in KV (secure, one-time use)
+		// Create OAuth state and bind it to this user's session
 		const extendedRequest: ExtendedAuthRequest = {
 			...state.oauthReqInfo,
 			auth0Data: state.auth0Data,
 		};
 		const { stateToken } = await createOAuthState(extendedRequest, c.env.OAUTH_KV);
+		const { setCookie: sessionBindingCookie } = await bindStateToSession(stateToken);
 
 		// Get Auth0 configuration
 		const { as } = await getOidcConfig({
@@ -217,13 +226,15 @@ export async function confirmConsent(
 		authorizationUrl.searchParams.set("nonce", state.auth0Data.nonce);
 		authorizationUrl.searchParams.set("state", stateToken);
 
-		// Return redirect with cleared CSRF cookie and new approved client cookie
+		// Set both cookies: approved client list + session binding
+		const headers = new Headers();
+		headers.append("Set-Cookie", approvedClientCookie);
+		headers.append("Set-Cookie", sessionBindingCookie);
+		headers.set("Location", authorizationUrl.href);
+
 		return new Response(null, {
 			status: 302,
-			headers: {
-				Location: authorizationUrl.href,
-				"Set-Cookie": approvedClientCookie,
-			},
+			headers,
 		});
 	} catch (error: any) {
 		console.error("POST /authorize error:", error);
@@ -241,14 +252,25 @@ export async function confirmConsent(
  * This route handles the callback from Auth0 after user authentication.
  * It validates the OAuth state, exchanges the authorization code for tokens,
  * and completes the authorization process.
+ *
+ * SECURITY: This endpoint validates that the state parameter from Auth0
+ * matches both:
+ * 1. A valid state token in KV (proves it was created by our server)
+ * 2. The __Host-CONSENTED_STATE cookie (proves THIS browser consented to it)
+ *
+ * This prevents CSRF attacks where an attacker's state token is injected
+ * into a victim's OAuth flow.
  */
 export async function callback(c: Context<{ Bindings: Env & { OAUTH_PROVIDER: OAuthHelpers } }>) {
-	// Validate OAuth state (retrieves stored data from KV)
+	// Validate OAuth state with session binding
+	// This checks both KV storage AND the session cookie
 	let storedData: ExtendedAuthRequest;
+	let clearSessionCookie: string;
 
 	try {
 		const result = await validateOAuthState(c.req.raw, c.env.OAUTH_KV);
 		storedData = result.oauthReqInfo as ExtendedAuthRequest;
+		clearSessionCookie = result.clearCookie;
 	} catch (error: any) {
 		if (error instanceof OAuthError) {
 			return error.toResponse();
@@ -312,7 +334,16 @@ export async function callback(c: Context<{ Bindings: Env & { OAUTH_PROVIDER: OA
 		userId: claims.sub!,
 	});
 
-	return Response.redirect(redirectTo);
+	// Clear the session binding cookie (one-time use) by creating response with headers
+	const headers = new Headers({ Location: redirectTo });
+	if (clearSessionCookie) {
+		headers.set("Set-Cookie", clearSessionCookie);
+	}
+
+	return new Response(null, {
+		status: 302,
+		headers,
+	});
 }
 
 /**
