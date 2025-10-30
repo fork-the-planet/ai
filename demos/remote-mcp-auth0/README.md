@@ -7,6 +7,9 @@ The MCP server (powered by [Cloudflare Workers](https://developers.cloudflare.co
 - Acts as OAuth _Server_ to your MCP clients
 - Acts as OIDC _Client_ to your Auth0 Tenant
 
+> [!WARNING]
+> This is a demo template designed to help you get started quickly. While we have implemented several security controls, **you must implement all preventive and defense-in-depth security measures before deploying to production**. Please review our comprehensive security guide: [Securing MCP Servers](https://github.com/cloudflare/agents/blob/main/docs/securing-mcp-servers.md)
+
 ## Getting Started
 
 This demo allows an MCP Server to call a protected API on behalf of the authenticated user. To get started you will need the following:
