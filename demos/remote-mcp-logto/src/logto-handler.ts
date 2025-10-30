@@ -5,6 +5,7 @@ import type { LogtoConfig } from "@logto/node";
 import { LogtoHonoClient, type LogtoUserProps } from "./logto-utils";
 import {
 	addApprovedClient,
+	bindStateToSession,
 	createOAuthState,
 	generateCSRFProtection,
 	isClientApproved,
@@ -38,9 +39,12 @@ app.get("/authorize", async (c) => {
 
 	// Check if client is already approved
 	if (await isClientApproved(c.req.raw, clientId, c.env.COOKIE_ENCRYPTION_KEY)) {
-		// Skip approval dialog but still create secure state
+		// Skip approval dialog but still create secure state and bind to session
 		const { stateToken } = await createOAuthState(oauthReqInfo, c.env.OAUTH_KV);
-		return redirectToLogto(c.req.raw, stateToken, c.env.OAUTH_KV);
+		const { setCookie: sessionBindingCookie } = await bindStateToSession(stateToken);
+		return redirectToLogto(c.req.raw, stateToken, c.env.OAUTH_KV, {
+			"Set-Cookie": sessionBindingCookie,
+		});
 	}
 
 	// Generate CSRF protection for the approval form
@@ -91,12 +95,16 @@ app.post("/authorize", async (c) => {
 			c.env.COOKIE_ENCRYPTION_KEY,
 		);
 
-		// Create OAuth state with CSRF protection
+		// Create OAuth state and bind it to this user's session
 		const { stateToken } = await createOAuthState(state.oauthReqInfo, c.env.OAUTH_KV);
+		const { setCookie: sessionBindingCookie } = await bindStateToSession(stateToken);
 
-		return redirectToLogto(c.req.raw, stateToken, c.env.OAUTH_KV, {
-			"Set-Cookie": approvedClientCookie,
-		});
+		// Set both cookies: approved client list + session binding
+		const headers = new Headers();
+		headers.append("Set-Cookie", approvedClientCookie);
+		headers.append("Set-Cookie", sessionBindingCookie);
+
+		return redirectToLogto(c.req.raw, stateToken, c.env.OAUTH_KV, Object.fromEntries(headers));
 	} catch (error: any) {
 		console.error("POST /authorize error:", error);
 		if (error instanceof OAuthError) {
@@ -117,11 +125,22 @@ async function redirectToLogto(
 	const logtoClient = new LogtoHonoClient(logtoConfig, stateToken, kv);
 	const response = await logtoClient.handleSignIn(new URL("/callback", request.url).href);
 
-	// Add any additional headers (like approved client cookie)
+	// If additional headers provided (like session binding cookie), create new response with merged headers
 	if (Object.keys(headers).length > 0) {
+		const newHeaders = new Headers(response.headers);
 		for (const [key, value] of Object.entries(headers)) {
-			response.headers.set(key, value);
+			if (key.toLowerCase() === "set-cookie") {
+				// Append Set-Cookie headers instead of replacing them
+				newHeaders.append(key, value);
+			} else {
+				newHeaders.set(key, value);
+			}
 		}
+		return new Response(response.body, {
+			status: response.status,
+			statusText: response.statusText,
+			headers: newHeaders,
+		});
 	}
 
 	return response;
@@ -134,6 +153,14 @@ async function redirectToLogto(
  * It validates the OAuth state, exchanges the authorization code with Logto,
  * then stores user metadata in the 'props' on the token passed down to the client.
  * It ends by redirecting the client back to _its_ callback URL
+ *
+ * SECURITY: This endpoint validates that the state parameter from Logto
+ * matches both:
+ * 1. A valid state token in KV (proves it was created by our server)
+ * 2. The __Host-CONSENTED_STATE cookie (proves THIS browser consented to it)
+ *
+ * This prevents CSRF attacks where an attacker's state token is injected
+ * into a victim's OAuth flow.
  */
 app.get("/callback", async (c) => {
 	// Extract state from Logto callback (stored in sessionId)
@@ -144,8 +171,10 @@ app.get("/callback", async (c) => {
 		return c.text("Missing state parameter", 400);
 	}
 
-	// Validate OAuth state (retrieves stored data from KV)
+	// Validate OAuth state with session binding
+	// This checks both KV storage AND the session cookie
 	let oauthReqInfo: AuthRequest;
+	let clearSessionCookie: string;
 
 	try {
 		// Create a modified request with the state in the query string
@@ -155,6 +184,7 @@ app.get("/callback", async (c) => {
 
 		const result = await validateOAuthState(modifiedRequest, c.env.OAUTH_KV);
 		oauthReqInfo = result.oauthReqInfo;
+		clearSessionCookie = result.clearCookie;
 	} catch (error: any) {
 		if (error instanceof OAuthError) {
 			return error.toResponse();
@@ -190,7 +220,16 @@ app.get("/callback", async (c) => {
 		userId: sub,
 	});
 
-	return Response.redirect(redirectTo, 302);
+	// Clear the session binding cookie (one-time use) by creating response with headers
+	const headers = new Headers({ Location: redirectTo });
+	if (clearSessionCookie) {
+		headers.set("Set-Cookie", clearSessionCookie);
+	}
+
+	return new Response(null, {
+		status: 302,
+		headers,
+	});
 });
 
 export { app as LogtoHandler };
