@@ -40,10 +40,10 @@
 	],
 	"dependencies": {
 		"@ai-sdk/provider": "^2.0.0",
-		"@ai-sdk/provider-utils": "^3.0.10"
+		"@ai-sdk/provider-utils": "^3.0.14"
 	},
 	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20251003.0",
+		"@cloudflare/workers-types": "^4.20251014.0",
 		"zod": "^3.25.76"
 	}
 }
