@@ -1,3 +1,18 @@
+[project]
+name = "python-workers-mcp"
+version = "0.1.0"
+requires-python = "==3.12.*"
+dependencies = ["mcp", "structlog"]
+
+[dependency-groups]
+dev = [
+    "workers-py",
+    "pytest",
+    "requests",
+    "pytest-asyncio",
+    "ruff",
+]
+
 [tool.ruff]
 target-version = "py312"
 line-length = 100
