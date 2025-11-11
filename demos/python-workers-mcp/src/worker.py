@@ -1,9 +1,4 @@
-import sys
-
 from workers import DurableObject
-
-sys.path.insert(0, "/session/metadata/vendor")
-sys.path.insert(0, "/session/metadata")
 
 
 def setup_server():

@@ -43,6 +43,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --child-concurrency=10
 
+      - name: Install uv for Python
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.9.3"
+          enable-cache: false
+
       - name: "Ensure package-lock.json files are updated"
         run: "pnpm lint-npm-lockfiles"
 
