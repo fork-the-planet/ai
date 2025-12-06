@@ -38,11 +38,9 @@
 		"chat",
 		"serverless"
 	],
-	"dependencies": {
-		"@ai-sdk/provider": "^3.0.0",
-		"@ai-sdk/provider-utils": "^4.0.0"
-	},
 	"peerDependencies": {
+		"@ai-sdk/provider": "^3.0.0",
+		"@ai-sdk/provider-utils": "^4.0.0",
 		"ai": "^6.0.0"
 	},
 	"devDependencies": {
