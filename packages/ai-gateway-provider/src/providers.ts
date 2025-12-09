@@ -49,6 +49,13 @@ export const providers = [
 			url.replace(/^https:\/\/api\.groq\.com\/openai\/v1\//, ""),
 	},
 	{
+		name: "google-vertex-ai",
+		regex: /^https:\/\/(?:[a-z0-9]+-)*aiplatform\.googleapis\.com\//,
+		transformEndpoint: (url: string) =>
+			url.replace(/^https:\/\/(?:[a-z0-9]+-)*aiplatform\.googleapis\.com\//, ""),
+		headerKey: "authorization",
+	},
+	{
 		name: "azure-openai",
 		regex: /^https:\/\/(?<resource>[^.]+)\.openai\.azure\.com\/openai\/deployments\/(?<deployment>[^/]+)\/(?<rest>.*)$/,
 		transformEndpoint: (url: string) => {
