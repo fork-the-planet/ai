@@ -1,5 +1,11 @@
 # ai-gateway-provider
 
+## 2.0.4
+
+### Patch Changes
+
+- [`a4b85d1`](https://github.com/cloudflare/ai/commit/a4b85d1366c9cefc8da1d08f610bef0915cb0702) Thanks [@threepointone](https://github.com/threepointone)! - trigger a release
+
 ## 2.0.3
 
 ### Patch Changes
