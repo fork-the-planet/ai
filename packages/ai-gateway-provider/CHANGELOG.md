@@ -1,5 +1,11 @@
 # ai-gateway-provider
 
+## 2.1.0
+
+### Minor Changes
+
+- [#323](https://github.com/cloudflare/ai/pull/323) [`7c15672`](https://github.com/cloudflare/ai/commit/7c15672f62b77785c85a1d8700b7724dafd57ab8) Thanks [@palashgo](https://github.com/palashgo)! - Fix Google Vertex support
+
 ## 2.0.5
 
 ### Patch Changes
