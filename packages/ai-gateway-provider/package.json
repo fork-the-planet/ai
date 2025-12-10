@@ -28,11 +28,6 @@
 			"import": "./dist/providers/amazon-bedrock.mjs",
 			"require": "./dist/providers/amazon-bedrock.js"
 		},
-		"./providers/google-vertex": {
-			"types": "./dist/providers/google-vertex.d.ts",
-			"import": "./dist/providers/google-vertex.mjs",
-			"require": "./dist/providers/google-vertex.js"
-		},
 		"./providers/openai": {
 			"types": "./dist/providers/openai.d.ts",
 			"import": "./dist/providers/openai.mjs",
@@ -117,7 +112,7 @@
 	],
 	"author": "Gabriel Massadas <https://github.com/g4brym>",
 	"license": "MIT",
-	"homepage": "https://github.com/cloudflare/ai",
+	"homepage": "https://developers.cloudflare.com/ai-gateway/integrations/vercel-ai-sdk/",
 	"repository": {
 		"type": "git",
 		"url": "git+ssh://git@github.com/cloudflare/ai.git"
@@ -141,7 +136,6 @@
 		"@ai-sdk/elevenlabs": "^1.0.20",
 		"@ai-sdk/fireworks": "^1.0.29",
 		"@ai-sdk/google": "^2.0.44",
-		"@ai-sdk/google-vertex": "^3.0.86",
 		"@ai-sdk/groq": "^2.0.32",
 		"@ai-sdk/mistral": "^2.0.25",
 		"@ai-sdk/openai": "^2.0.77",
