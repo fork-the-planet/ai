@@ -23,6 +23,12 @@ export const providers = [
 			url.replace(/^https:\/\/generativelanguage\.googleapis\.com\//, ""),
 	},
 	{
+		name: "google-vertex-ai",
+		regex: /aiplatform\.googleapis\.com/,
+		transformEndpoint: (url: string) =>
+			url.replace(/https:\/\/(.*)[-]?aiplatform\.googleapis\.com\//, ""),
+	},
+	{
 		name: "grok",
 		regex: /^https:\/\/api\.x\.ai\//,
 		transformEndpoint: (url: string) => url.replace(/^https:\/\/api\.x\.ai\//, ""),
