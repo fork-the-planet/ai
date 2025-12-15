@@ -1,5 +1,11 @@
 # ai-gateway-provider
 
+## 2.2.0
+
+### Minor Changes
+
+- [#326](https://github.com/cloudflare/ai/pull/326) [`5e76b59`](https://github.com/cloudflare/ai/commit/5e76b595039a1d12e7c87f7e9e381c6b078d929d) Thanks [@palashgo](https://github.com/palashgo)! - Add Google Vertex wrapper factory for BYOK/Unified Billing support
+
 ## 2.1.0
 
 ### Minor Changes
