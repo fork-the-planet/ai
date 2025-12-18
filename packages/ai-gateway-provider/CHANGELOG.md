@@ -1,5 +1,11 @@
 # ai-gateway-provider
 
+## 2.3.0
+
+### Minor Changes
+
+- [#334](https://github.com/cloudflare/ai/pull/334) [`094d9db`](https://github.com/cloudflare/ai/commit/094d9dbf60584f7f28aff0c4c5ea385ba2770eb8) Thanks [@palashgo](https://github.com/palashgo)! - Add Unified API, Openrouter providers
+
 ## 2.2.0
 
 ### Minor Changes
