@@ -77,4 +77,14 @@ export const providers = [
 		},
 		headerKey: "api-key",
 	},
+	{
+		name: "openrouter",
+		regex: /^https:\/\/openrouter\.ai\/api\//,
+		transformEndpoint: (url: string) => url.replace(/^https:\/\/openrouter\.ai\/api\//, ""),
+	},
+	{
+		name: "compat",
+		regex: /^https:\/\/gateway\.ai\.cloudflare\.com\/v1\/compat\//,
+		transformEndpoint: (url: string) => url.replace(/^https:\/\/gateway\.ai\.cloudflare\.com\/v1\/compat\//, ""),
+	}
 ];
