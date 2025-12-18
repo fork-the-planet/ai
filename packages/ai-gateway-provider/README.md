@@ -59,6 +59,25 @@ const { text } = await generateText({
 });
 ```
 
+### Unified API / Dynamic Routes
+
+```typescript
+import { createAiGateway } from 'ai-gateway-provider';
+import { unified, createUnified } from 'ai-gateway-provider/providers/unified';
+import { generateText } from "ai";
+
+const aigateway = createAiGateway({
+  accountId: "{{CLOUDFLARE_ACCOUNT_ID}}",
+  gateway: '{{GATEWAY_NAME}}',
+  apiKey: '{{CF_AIG_TOKEN}}',
+});
+
+const { text } = await generateText({
+  model: aigateway(unified("dynamic/customer-support")),
+  prompt: 'Write a vegetarian lasagna recipe for 4 people.',
+});
+```
+
 ## Automatic Fallback Example
 
 ```typescript

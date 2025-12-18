@@ -102,6 +102,16 @@
 			"types": "./dist/providers/google-vertex.d.ts",
 			"import": "./dist/providers/google-vertex.mjs",
 			"require": "./dist/providers/google-vertex.js"
+		},
+		"./providers/openrouter": {
+			"types": "./dist/providers/openrouter.d.ts",
+			"import": "./dist/providers/openrouter.mjs",
+			"require": "./dist/providers/openrouter.js"
+		},
+		"./providers/unified": {
+			"types": "./dist/providers/unified.d.ts",
+			"import": "./dist/providers/unified.mjs",
+			"require": "./dist/providers/unified.js"
 		}
 	},
 	"publishConfig": {
@@ -130,6 +140,9 @@
 		"@ai-sdk/provider-utils": "^3.0.18",
 		"ai": "^5.0.106"
 	},
+	"peerDependencies": {
+		"@ai-sdk/openai-compatible": "^1.0.29"
+	},
 	"optionalDependencies": {
 		"@ai-sdk/amazon-bedrock": "^3.0.67",
 		"@ai-sdk/anthropic": "^2.0.53",
@@ -146,7 +159,8 @@
 		"@ai-sdk/openai": "^2.0.77",
 		"@ai-sdk/perplexity": "^2.0.21",
 		"@ai-sdk/xai": "^2.0.39",
-		"@ai-sdk/google-vertex": "3.0.90"
+		"@ai-sdk/google-vertex": "3.0.90",
+		"@openrouter/ai-sdk-provider": "^1.5.3"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.8",
