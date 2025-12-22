@@ -85,6 +85,7 @@ export const providers = [
 	{
 		name: "compat",
 		regex: /^https:\/\/gateway\.ai\.cloudflare\.com\/v1\/compat\//,
-		transformEndpoint: (url: string) => url.replace(/^https:\/\/gateway\.ai\.cloudflare\.com\/v1\/compat\//, ""),
-	}
+		transformEndpoint: (url: string) =>
+			url.replace(/^https:\/\/gateway\.ai\.cloudflare\.com\/v1\/compat\//, ""),
+	},
 ];

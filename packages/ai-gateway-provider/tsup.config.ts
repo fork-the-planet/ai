@@ -8,6 +8,8 @@ export default defineConfig({
 	clean: true,
 	dts: true,
 	format: ["cjs", "esm"],
-	external: Object.keys(pkg.optionalDependencies ?? {}).filter((dep) => dep !== "@ai-sdk/google-vertex"),
+	external: Object.keys(pkg.optionalDependencies ?? {}).filter(
+		(dep) => dep !== "@ai-sdk/google-vertex",
+	),
 	target: "es2020",
 });
