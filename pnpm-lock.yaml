@@ -51,10 +51,10 @@ importers:
         version: 5.3.4
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
         specifier: ^6.0.0
-        version: 6.0.0(zod@3.25.76)
+        version: 6.0.1(zod@3.25.76)
       chalk:
         specifier: ^5.6.2
         version: 5.6.2
@@ -129,10 +129,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
         specifier: ^6.0.0
-        version: 6.0.0(zod@3.25.76)
+        version: 6.0.1(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -169,10 +169,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
         specifier: ^6.0.0
-        version: 6.0.0(zod@3.25.76)
+        version: 6.0.1(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -209,10 +209,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
         specifier: ^6.0.0
-        version: 6.0.0(zod@3.25.76)
+        version: 6.0.1(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -249,10 +249,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
         specifier: ^6.0.0
-        version: 6.0.0(zod@3.25.76)
+        version: 6.0.1(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -289,7 +289,7 @@ importers:
     dependencies:
       ai:
         specifier: ^6.0.0
-        version: 6.0.0(zod@3.25.76)
+        version: 6.0.1(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -323,7 +323,7 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       nanoid:
         specifier: ^5.1.6
         version: 5.1.6
@@ -360,7 +360,7 @@ importers:
         version: 0.2.2
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -422,7 +422,7 @@ importers:
         version: 5.44.0
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       commander:
         specifier: ^14.0.2
         version: 14.0.2
@@ -498,7 +498,7 @@ importers:
         version: 5.44.0
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -565,10 +565,10 @@ importers:
         version: 3.0.0(zod@3.25.76)
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
         specifier: ^6.0.0
-        version: 6.0.0(zod@3.25.76)
+        version: 6.0.1(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -605,10 +605,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
         specifier: ^6.0.0
-        version: 6.0.0(zod@3.25.76)
+        version: 6.0.1(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -645,10 +645,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
         specifier: ^6.0.0
-        version: 6.0.0(zod@3.25.76)
+        version: 6.0.1(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -685,10 +685,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
         specifier: ^6.0.0
-        version: 6.0.0(zod@3.25.76)
+        version: 6.0.1(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -734,7 +734,7 @@ importers:
         version: 0.2.2
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -799,7 +799,7 @@ importers:
         version: 7.77.0(express@5.1.0)
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -827,7 +827,7 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -849,7 +849,7 @@ importers:
         version: 0.2.2
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       just-pick:
         specifier: ^4.2.0
         version: 4.2.0
@@ -880,7 +880,7 @@ importers:
         version: 0.2.2
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -914,7 +914,7 @@ importers:
         version: 0.2.2
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -948,7 +948,7 @@ importers:
         version: 3.1.6
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -970,7 +970,7 @@ importers:
         version: 0.2.2
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -995,7 +995,7 @@ importers:
         version: 0.2.2
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -1020,7 +1020,7 @@ importers:
         version: 0.2.2
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -1042,10 +1042,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
         specifier: ^6.0.0
-        version: 6.0.0(zod@3.25.76)
+        version: 6.0.1(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -1082,10 +1082,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
         specifier: ^6.0.0
-        version: 6.0.0(zod@3.25.76)
+        version: 6.0.1(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -1122,7 +1122,7 @@ importers:
     dependencies:
       ai:
         specifier: ^6.0.0
-        version: 6.0.0(zod@3.25.76)
+        version: 6.0.1(zod@3.25.76)
       workers-ai-provider:
         specifier: workspace:*
         version: link:../../packages/workers-ai-provider
@@ -1147,10 +1147,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
         specifier: ^6.0.0
-        version: 6.0.0(zod@3.25.76)
+        version: 6.0.1(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -1184,10 +1184,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
         specifier: ^6.0.0
-        version: 6.0.0(zod@3.25.76)
+        version: 6.0.1(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -1224,10 +1224,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
         specifier: ^6.0.0
-        version: 6.0.0(zod@3.25.76)
+        version: 6.0.1(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -1264,10 +1264,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
         specifier: ^6.0.0
-        version: 6.0.0(zod@3.25.76)
+        version: 6.0.1(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -1304,10 +1304,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
         specifier: ^6.0.0
-        version: 6.0.0(zod@3.25.76)
+        version: 6.0.1(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -1344,7 +1344,7 @@ importers:
         version: 3.0.0(zod@3.25.76)
       '@ai-sdk/react':
         specifier: ^3.0.0
-        version: 3.0.0(react@19.2.3)(zod@3.25.76)
+        version: 3.0.1(react@19.2.3)(zod@3.25.76)
       '@mantine/charts':
         specifier: ^8.3.10
         version: 8.3.10(@mantine/core@8.3.10(@mantine/hooks@8.3.10(react@19.2.3))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@mantine/hooks@8.3.10(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(recharts@3.6.0(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react-is@18.3.1)(react@19.2.3)(redux@5.0.1))
@@ -1371,7 +1371,7 @@ importers:
         version: 8.3.10(@mantine/core@8.3.10(@mantine/hooks@8.3.10(react@19.2.3))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@mantine/hooks@8.3.10(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       ai:
         specifier: ^6.0.0
-        version: 6.0.0(zod@3.25.76)
+        version: 6.0.1(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -1432,7 +1432,7 @@ importers:
     dependencies:
       ai:
         specifier: ^6.0.0
-        version: 6.0.0(zod@3.25.76)
+        version: 6.0.1(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -1492,7 +1492,7 @@ importers:
         version: 4.0.0(zod@3.25.76)
       ai:
         specifier: ^6.0.0
-        version: 6.0.0(zod@3.25.76)
+        version: 6.0.1(zod@3.25.76)
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
@@ -1554,7 +1554,7 @@ importers:
         version: 3.0.0(zod@3.25.76)
       '@openrouter/ai-sdk-provider':
         specifier: ^1.5.4
-        version: 1.5.4(ai@6.0.0(zod@3.25.76))(zod@3.25.76)
+        version: 1.5.4(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
 
   packages/workers-ai-provider:
     dependencies:
@@ -1566,7 +1566,7 @@ importers:
         version: 4.0.0(zod@3.25.76)
       ai:
         specifier: ^6.0.0
-        version: 6.0.0(zod@3.25.76)
+        version: 6.0.1(zod@3.25.76)
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20251221.0
@@ -1659,8 +1659,8 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/gateway@2.0.0':
-    resolution: {integrity: sha512-Gj0PuawK7NkZuyYgO/h5kDK/l6hFOjhLdTq3/Lli1FTl47iGmwhH1IZQpAL3Z09BeFYWakcwUmn02ovIm2wy9g==}
+  '@ai-sdk/gateway@3.0.0':
+    resolution: {integrity: sha512-JcjePYVpbezv+XOxkxPemwnorjWpgDiiKWMYy6FXTCG2rFABIK2Co1bFxIUSDT4vYO6f1448x9rKbn38vbhDiA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -1707,28 +1707,18 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/provider-utils@3.0.12':
-    resolution: {integrity: sha512-ZtbdvYxdMoria+2SlNarEk6Hlgyf+zzcznlD55EAl+7VZvJaSg2sqPvwArY7L6TfDEDJsnCq0fdhBSkYo0Xqdg==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
-
   '@ai-sdk/provider-utils@4.0.0':
     resolution: {integrity: sha512-HyCyOls9I3a3e38+gtvOJOEjuw9KRcvbBnCL5GBuSmJvS9Jh9v3fz7pRC6ha1EUo/ZH1zwvLWYXBMtic8MTguA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/provider@2.0.0':
-    resolution: {integrity: sha512-6o7Y2SeO9vFKB8lArHXehNuusnpddKPk7xqL7T2/b+OvXMRIXUO1rR4wcv1hAFUAT9avGZshty3Wlua/XA7TvA==}
-    engines: {node: '>=18'}
-
   '@ai-sdk/provider@3.0.0':
     resolution: {integrity: sha512-m9ka3ptkPQbaHHZHqDXDF9C9B5/Mav0KTdky1k2HZ3/nrW2t1AgObxIVPyGDWQNS9FXT/FS6PIoSjpcP/No8rQ==}
     engines: {node: '>=18'}
 
-  '@ai-sdk/react@3.0.0':
-    resolution: {integrity: sha512-QI09Ci7jbG7szkuIyyuPDqK3Vt2Jq8thbn2JvXzdpTouuR6z4BrM95TGviXgRwVdQG264d/nViPdr5JKQJ5mew==}
+  '@ai-sdk/react@3.0.1':
+    resolution: {integrity: sha512-XUPDMFgalNtqBQg+Q3UiiEmWE3PC5pAoc+Drs5Z1Mxqe57za+hKCEwViYADuqeZrc0q6PXTzbcFlQb3pjyGjcQ==}
     engines: {node: '>=18'}
     peerDependencies:
       react: ^18 || ~19.0.1 || ~19.1.2 || ^19.2.1
@@ -3507,8 +3497,8 @@ packages:
     resolution: {integrity: sha512-IrDKrw7pCRUR94zeuCSUWQ+w8JEf5ZX5jl/e6AHGSLi1/zIr0lgutfn/7JpfCey+urpgQEdrZVYzCaVVKiTwhQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@vercel/oidc@3.0.3':
-    resolution: {integrity: sha512-yNEQvPcVrK9sIe637+I0jD6leluPxzwJKx/Haw6F4H77CdDsszUn5V3o96LPziXkSNE2B83+Z3mjqGKBK/R6Gg==}
+  '@vercel/oidc@3.0.5':
+    resolution: {integrity: sha512-fnYhv671l+eTTp48gB4zEsTW/YtRgRPnkI2nT7x6qw5rkI1Lq2hTmQIpHPgyThI0znLK+vX2n9XxKdXZ7BUbbw==}
     engines: {node: '>= 20'}
 
   '@vitejs/plugin-react@5.1.2':
@@ -3619,7 +3609,7 @@ packages:
     engines: {node: '>= 8.0.0'}
 
   agents@https://pkg.pr.new/cloudflare/agents@733:
-    resolution: {integrity: sha512-QR53LErSYlc0Fonv2gxghzfE1h385UUPnHKK+slwlDpHkx9lm+msbEmcYH4tBhNzBykRFnXpSfY4BZ3yyNzMlQ==, tarball: https://pkg.pr.new/cloudflare/agents@733}
+    resolution: {tarball: https://pkg.pr.new/cloudflare/agents@733}
     version: 0.2.35
     hasBin: true
     peerDependencies:
@@ -3642,8 +3632,8 @@ packages:
       x402:
         optional: true
 
-  ai@6.0.0:
-    resolution: {integrity: sha512-ZxPmmOW3stVPNtg4nq6THDQ6aD9Epo/vA/YcTe4q1SD5Q6ZXWg1+aTwjV1mDWWTY2azs3/mw05a3rF5DEiHoEA==}
+  ai@6.0.1:
+    resolution: {integrity: sha512-g/jPakC6h4vUJKDww0d6+VaJmfMC38UqH3kKsngiP+coT0uvCUdQ7lpFDJ0mNmamaOyRMaY2zwEB2RnTAaJU/w==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -6477,11 +6467,11 @@ snapshots:
       zod: 3.25.76
     optional: true
 
-  '@ai-sdk/gateway@2.0.0(zod@3.25.76)':
+  '@ai-sdk/gateway@3.0.0(zod@3.25.76)':
     dependencies:
-      '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.12(zod@3.25.76)
-      '@vercel/oidc': 3.0.3
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
+      '@vercel/oidc': 3.0.5
       zod: 3.25.76
 
   '@ai-sdk/google-vertex@4.0.0(patch_hash=271963aef1bb8d69c1fbba83342f6bdf1b39f53c660e9b34659e6ce279c0a100)(zod@3.25.76)':
@@ -6536,13 +6526,6 @@ snapshots:
       zod: 3.25.76
     optional: true
 
-  '@ai-sdk/provider-utils@3.0.12(zod@3.25.76)':
-    dependencies:
-      '@ai-sdk/provider': 2.0.0
-      '@standard-schema/spec': 1.1.0
-      eventsource-parser: 3.0.6
-      zod: 3.25.76
-
   '@ai-sdk/provider-utils@4.0.0(zod@3.25.76)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
@@ -6550,18 +6533,14 @@ snapshots:
       eventsource-parser: 3.0.6
       zod: 3.25.76
 
-  '@ai-sdk/provider@2.0.0':
-    dependencies:
-      json-schema: 0.4.0
-
   '@ai-sdk/provider@3.0.0':
     dependencies:
       json-schema: 0.4.0
 
-  '@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76)':
+  '@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76)':
     dependencies:
       '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
-      ai: 6.0.0(zod@3.25.76)
+      ai: 6.0.1(zod@3.25.76)
       react: 19.2.3
       swr: 2.3.3(react@19.2.3)
       throttleit: 2.1.0
@@ -7938,10 +7917,10 @@ snapshots:
 
   '@open-draft/until@2.1.0': {}
 
-  '@openrouter/ai-sdk-provider@1.5.4(ai@6.0.0(zod@3.25.76))(zod@3.25.76)':
+  '@openrouter/ai-sdk-provider@1.5.4(ai@6.0.1(zod@3.25.76))(zod@3.25.76)':
     dependencies:
       '@openrouter/sdk': 0.1.27
-      ai: 6.0.0(zod@3.25.76)
+      ai: 6.0.1(zod@3.25.76)
       zod: 3.25.76
     optional: true
 
@@ -8465,7 +8444,7 @@ snapshots:
       '@typescript-eslint/types': 8.50.1
       eslint-visitor-keys: 4.2.1
 
-  '@vercel/oidc@3.0.3': {}
+  '@vercel/oidc@3.0.5': {}
 
   '@vitejs/plugin-react@5.1.2(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))':
     dependencies:
@@ -8584,7 +8563,7 @@ snapshots:
       humanize-ms: 1.2.1
     optional: true
 
-  agents@https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76):
+  agents@https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76):
     dependencies:
       '@cfworker/json-schema': 4.1.1
       '@modelcontextprotocol/sdk': 1.23.0(@cfworker/json-schema@4.1.1)(zod@3.25.76)
@@ -8601,17 +8580,17 @@ snapshots:
       zod-to-ts: 2.0.0(typescript@5.9.3)(zod@3.25.76)
     optionalDependencies:
       '@ai-sdk/openai': 3.0.0(zod@3.25.76)
-      '@ai-sdk/react': 3.0.0(react@19.2.3)(zod@3.25.76)
-      ai: 6.0.0(zod@3.25.76)
+      '@ai-sdk/react': 3.0.1(react@19.2.3)(zod@3.25.76)
+      ai: 6.0.1(zod@3.25.76)
       viem: 2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)
     transitivePeerDependencies:
       - '@cloudflare/workers-types'
       - supports-color
       - typescript
 
-  ai@6.0.0(zod@3.25.76):
+  ai@6.0.1(zod@3.25.76):
     dependencies:
-      '@ai-sdk/gateway': 2.0.0(zod@3.25.76)
+      '@ai-sdk/gateway': 3.0.0(zod@3.25.76)
       '@ai-sdk/provider': 3.0.0
       '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
       '@opentelemetry/api': 1.9.0
