@@ -17,7 +17,7 @@
 	},
 	"dependencies": {
 		"agents": "https://pkg.pr.new/cloudflare/agents@733",
-		"ai": "6.0.0-beta.168",
+		"ai": "^6.0.0",
 		"hono": "^4.11.1",
 		"zod": "^3.25.76"
 	},

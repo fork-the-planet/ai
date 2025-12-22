@@ -14,8 +14,8 @@ importers:
   .:
     devDependencies:
       '@ai-sdk/openai':
-        specifier: 3.0.0-beta.112
-        version: 3.0.0-beta.112(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(zod@3.25.76)
       '@biomejs/biome':
         specifier: ^2.3.10
         version: 2.3.10
@@ -51,10 +51,10 @@ importers:
         version: 5.3.4
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
-        specifier: 6.0.0-beta.168
-        version: 6.0.0-beta.168(zod@3.25.76)
+        specifier: ^6.0.0
+        version: 6.0.0(zod@3.25.76)
       chalk:
         specifier: ^5.6.2
         version: 5.6.2
@@ -129,10 +129,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
-        specifier: 6.0.0-beta.168
-        version: 6.0.0-beta.168(zod@3.25.76)
+        specifier: ^6.0.0
+        version: 6.0.0(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -169,10 +169,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
-        specifier: 6.0.0-beta.168
-        version: 6.0.0-beta.168(zod@3.25.76)
+        specifier: ^6.0.0
+        version: 6.0.0(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -209,10 +209,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
-        specifier: 6.0.0-beta.168
-        version: 6.0.0-beta.168(zod@3.25.76)
+        specifier: ^6.0.0
+        version: 6.0.0(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -249,10 +249,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
-        specifier: 6.0.0-beta.168
-        version: 6.0.0-beta.168(zod@3.25.76)
+        specifier: ^6.0.0
+        version: 6.0.0(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -288,8 +288,8 @@ importers:
   demos/image-generation:
     dependencies:
       ai:
-        specifier: 6.0.0-beta.168
-        version: 6.0.0-beta.168(zod@3.25.76)
+        specifier: ^6.0.0
+        version: 6.0.0(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -323,7 +323,7 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       nanoid:
         specifier: ^5.1.6
         version: 5.1.6
@@ -360,7 +360,7 @@ importers:
         version: 0.2.2
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -422,7 +422,7 @@ importers:
         version: 5.44.0
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       commander:
         specifier: ^14.0.2
         version: 14.0.2
@@ -479,8 +479,8 @@ importers:
         specifier: 5.9.3
         version: 5.9.3
       typescript-eslint:
-        specifier: ^8.50.0
-        version: 8.50.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+        specifier: ^8.50.1
+        version: 8.50.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
       vite:
         specifier: ^7.3.0
         version: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
@@ -498,7 +498,7 @@ importers:
         version: 5.44.0
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -549,8 +549,8 @@ importers:
         specifier: 5.9.3
         version: 5.9.3
       typescript-eslint:
-        specifier: ^8.50.0
-        version: 8.50.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+        specifier: ^8.50.1
+        version: 8.50.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
       vite:
         specifier: ^7.3.0
         version: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
@@ -561,14 +561,14 @@ importers:
   demos/model-scraper:
     dependencies:
       '@ai-sdk/openai':
-        specifier: 3.0.0-beta.112
-        version: 3.0.0-beta.112(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(zod@3.25.76)
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
-        specifier: 6.0.0-beta.168
-        version: 6.0.0-beta.168(zod@3.25.76)
+        specifier: ^6.0.0
+        version: 6.0.0(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -605,10 +605,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
-        specifier: 6.0.0-beta.168
-        version: 6.0.0-beta.168(zod@3.25.76)
+        specifier: ^6.0.0
+        version: 6.0.0(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -645,10 +645,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
-        specifier: 6.0.0-beta.168
-        version: 6.0.0-beta.168(zod@3.25.76)
+        specifier: ^6.0.0
+        version: 6.0.0(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -685,10 +685,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
-        specifier: 6.0.0-beta.168
-        version: 6.0.0-beta.168(zod@3.25.76)
+        specifier: ^6.0.0
+        version: 6.0.0(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -734,7 +734,7 @@ importers:
         version: 0.2.2
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -799,7 +799,7 @@ importers:
         version: 7.77.0(express@5.1.0)
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -827,7 +827,7 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -849,7 +849,7 @@ importers:
         version: 0.2.2
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       just-pick:
         specifier: ^4.2.0
         version: 4.2.0
@@ -880,7 +880,7 @@ importers:
         version: 0.2.2
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -914,7 +914,7 @@ importers:
         version: 0.2.2
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -948,7 +948,7 @@ importers:
         version: 3.1.6
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -970,7 +970,7 @@ importers:
         version: 0.2.2
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -995,7 +995,7 @@ importers:
         version: 0.2.2
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -1020,7 +1020,7 @@ importers:
         version: 0.2.2
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -1042,10 +1042,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
-        specifier: 6.0.0-beta.168
-        version: 6.0.0-beta.168(zod@3.25.76)
+        specifier: ^6.0.0
+        version: 6.0.0(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -1082,10 +1082,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
-        specifier: 6.0.0-beta.168
-        version: 6.0.0-beta.168(zod@3.25.76)
+        specifier: ^6.0.0
+        version: 6.0.0(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -1121,8 +1121,8 @@ importers:
   demos/structured-output-node:
     dependencies:
       ai:
-        specifier: 6.0.0-beta.168
-        version: 6.0.0-beta.168(zod@3.25.76)
+        specifier: ^6.0.0
+        version: 6.0.0(zod@3.25.76)
       workers-ai-provider:
         specifier: workspace:*
         version: link:../../packages/workers-ai-provider
@@ -1147,10 +1147,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
-        specifier: 6.0.0-beta.168
-        version: 6.0.0-beta.168(zod@3.25.76)
+        specifier: ^6.0.0
+        version: 6.0.0(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -1184,10 +1184,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
-        specifier: 6.0.0-beta.168
-        version: 6.0.0-beta.168(zod@3.25.76)
+        specifier: ^6.0.0
+        version: 6.0.0(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -1224,10 +1224,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
-        specifier: 6.0.0-beta.168
-        version: 6.0.0-beta.168(zod@3.25.76)
+        specifier: ^6.0.0
+        version: 6.0.0(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -1264,10 +1264,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
-        specifier: 6.0.0-beta.168
-        version: 6.0.0-beta.168(zod@3.25.76)
+        specifier: ^6.0.0
+        version: 6.0.0(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -1304,10 +1304,10 @@ importers:
     dependencies:
       agents:
         specifier: https://pkg.pr.new/cloudflare/agents@733
-        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       ai:
-        specifier: 6.0.0-beta.168
-        version: 6.0.0-beta.168(zod@3.25.76)
+        specifier: ^6.0.0
+        version: 6.0.0(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -1340,11 +1340,11 @@ importers:
   demos/ui-worker:
     dependencies:
       '@ai-sdk/openai':
-        specifier: 3.0.0-beta.112
-        version: 3.0.0-beta.112(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(zod@3.25.76)
       '@ai-sdk/react':
-        specifier: 3.0.0-beta.171
-        version: 3.0.0-beta.171(react@19.2.3)(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(react@19.2.3)(zod@3.25.76)
       '@mantine/charts':
         specifier: ^8.3.10
         version: 8.3.10(@mantine/core@8.3.10(@mantine/hooks@8.3.10(react@19.2.3))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@mantine/hooks@8.3.10(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(recharts@3.6.0(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react-is@18.3.1)(react@19.2.3)(redux@5.0.1))
@@ -1370,8 +1370,8 @@ importers:
         specifier: ^8.3.10
         version: 8.3.10(@mantine/core@8.3.10(@mantine/hooks@8.3.10(react@19.2.3))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@mantine/hooks@8.3.10(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       ai:
-        specifier: 6.0.0-beta.168
-        version: 6.0.0-beta.168(zod@3.25.76)
+        specifier: ^6.0.0
+        version: 6.0.0(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -1431,8 +1431,8 @@ importers:
   demos/vision:
     dependencies:
       ai:
-        specifier: 6.0.0-beta.168
-        version: 6.0.0-beta.168(zod@3.25.76)
+        specifier: ^6.0.0
+        version: 6.0.0(zod@3.25.76)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -1482,17 +1482,17 @@ importers:
   packages/ai-gateway-provider:
     dependencies:
       '@ai-sdk/openai-compatible':
-        specifier: 2.0.0-beta.60
-        version: 2.0.0-beta.60(zod@3.25.76)
+        specifier: ^2.0.0
+        version: 2.0.0(zod@3.25.76)
       '@ai-sdk/provider':
-        specifier: 3.0.0-beta.32
-        version: 3.0.0-beta.32
+        specifier: ^3.0.0
+        version: 3.0.0
       '@ai-sdk/provider-utils':
-        specifier: 4.0.0-beta.59
-        version: 4.0.0-beta.59(zod@3.25.76)
+        specifier: ^4.0.0
+        version: 4.0.0(zod@3.25.76)
       ai:
-        specifier: 6.0.0-beta.168
-        version: 6.0.0-beta.168(zod@3.25.76)
+        specifier: ^6.0.0
+        version: 6.0.0(zod@3.25.76)
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
@@ -1505,68 +1505,68 @@ importers:
         version: 5.9.3
     optionalDependencies:
       '@ai-sdk/amazon-bedrock':
-        specifier: 4.0.0-beta.109
-        version: 4.0.0-beta.109(zod@3.25.76)
+        specifier: ^4.0.0
+        version: 4.0.0(zod@3.25.76)
       '@ai-sdk/anthropic':
-        specifier: 3.0.0-beta.98
-        version: 3.0.0-beta.98(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(zod@3.25.76)
       '@ai-sdk/azure':
-        specifier: 3.0.0-beta.114
-        version: 3.0.0-beta.114(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(zod@3.25.76)
       '@ai-sdk/cerebras':
-        specifier: 2.0.0-beta.64
-        version: 2.0.0-beta.64(zod@3.25.76)
+        specifier: ^2.0.0
+        version: 2.0.0(zod@3.25.76)
       '@ai-sdk/cohere':
-        specifier: 3.0.0-beta.60
-        version: 3.0.0-beta.60(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(zod@3.25.76)
       '@ai-sdk/deepgram':
-        specifier: 2.0.0-beta.60
-        version: 2.0.0-beta.60(zod@3.25.76)
+        specifier: ^2.0.0
+        version: 2.0.0(zod@3.25.76)
       '@ai-sdk/deepseek':
-        specifier: 2.0.0-beta.62
-        version: 2.0.0-beta.62(zod@3.25.76)
+        specifier: ^2.0.0
+        version: 2.0.0(zod@3.25.76)
       '@ai-sdk/elevenlabs':
-        specifier: 2.0.0-beta.59
-        version: 2.0.0-beta.59(zod@3.25.76)
+        specifier: ^2.0.0
+        version: 2.0.0(zod@3.25.76)
       '@ai-sdk/fireworks':
-        specifier: 2.0.0-beta.60
-        version: 2.0.0-beta.60(zod@3.25.76)
+        specifier: ^2.0.0
+        version: 2.0.0(zod@3.25.76)
       '@ai-sdk/google':
-        specifier: 3.0.0-beta.89
-        version: 3.0.0-beta.89(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(zod@3.25.76)
       '@ai-sdk/google-vertex':
-        specifier: 4.0.0-beta.134
-        version: 4.0.0-beta.134(patch_hash=271963aef1bb8d69c1fbba83342f6bdf1b39f53c660e9b34659e6ce279c0a100)(zod@3.25.76)
+        specifier: ^4.0.0
+        version: 4.0.0(patch_hash=271963aef1bb8d69c1fbba83342f6bdf1b39f53c660e9b34659e6ce279c0a100)(zod@3.25.76)
       '@ai-sdk/groq':
-        specifier: 3.0.0-beta.62
-        version: 3.0.0-beta.62(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(zod@3.25.76)
       '@ai-sdk/mistral':
-        specifier: 3.0.0-beta.61
-        version: 3.0.0-beta.61(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(zod@3.25.76)
       '@ai-sdk/openai':
-        specifier: 3.0.0-beta.112
-        version: 3.0.0-beta.112(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(zod@3.25.76)
       '@ai-sdk/perplexity':
-        specifier: 3.0.0-beta.61
-        version: 3.0.0-beta.61(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(zod@3.25.76)
       '@ai-sdk/xai':
-        specifier: 3.0.0-beta.69
-        version: 3.0.0-beta.69(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(zod@3.25.76)
       '@openrouter/ai-sdk-provider':
-        specifier: ^1.5.3
-        version: 1.5.3(ai@6.0.0-beta.168(zod@3.25.76))(zod@3.25.76)
+        specifier: ^1.5.4
+        version: 1.5.4(ai@6.0.0(zod@3.25.76))(zod@3.25.76)
 
   packages/workers-ai-provider:
     dependencies:
       '@ai-sdk/provider':
-        specifier: 3.0.0-beta.32
-        version: 3.0.0-beta.32
+        specifier: ^3.0.0
+        version: 3.0.0
       '@ai-sdk/provider-utils':
-        specifier: 4.0.0-beta.59
-        version: 4.0.0-beta.59(zod@3.25.76)
+        specifier: ^4.0.0
+        version: 4.0.0(zod@3.25.76)
       ai:
-        specifier: 6.0.0-beta.168
-        version: 6.0.0-beta.168(zod@3.25.76)
+        specifier: ^6.0.0
+        version: 6.0.0(zod@3.25.76)
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20251221.0
@@ -1605,126 +1605,136 @@ packages:
   '@adraffy/ens-normalize@1.11.1':
     resolution: {integrity: sha512-nhCBV3quEgesuf7c7KYfperqSS14T8bYuvJ8PcLJp6znkZpFc0AuW4qBtr8eKVyPPe/8RSr7sglCWPU5eaxwKQ==}
 
-  '@ai-sdk/amazon-bedrock@4.0.0-beta.109':
-    resolution: {integrity: sha512-dlpYuH1mn6a1DE2D7TxEOm/e3T+T8uWl2k0Kr5aB9HhR+TEtTxnxOaPb3wCbFS4WQmufz9Od/yz3SPaUp5nSig==}
+  '@ai-sdk/amazon-bedrock@4.0.0':
+    resolution: {integrity: sha512-/6ZxbE9qxBLAAUlJaeAkELeAvLwi0PCcRz0LrNTiM+DONm+WkFggA+60r8uV0kdTTVtBpch32BQ/hAQG+UBmMQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/anthropic@3.0.0-beta.98':
-    resolution: {integrity: sha512-XMWhml/fplgixqitIvOYFO+A9EsXiU2Kh6+b+F5AH7ILhVuJiQ3yPzaZ9ca4WcY/7NPnlLYmoUd2XcaF2qOopQ==}
+  '@ai-sdk/anthropic@3.0.0':
+    resolution: {integrity: sha512-4BnxkXwRkvh+OB1ze0mHbskT90HL4MNrg6JUsRDkIsU9w5vitvGzxwc/XwlByUGMap/5I8/LZ3XZDzv6KViCuQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/azure@3.0.0-beta.114':
-    resolution: {integrity: sha512-pVF7luCYOQC6+SVg/2P6X/f8RkAIEuvnq80+6FboZHyhLrYWdVzweNPcmDFCNIVuzYwM9mQadV0TlF4NMNOpCg==}
+  '@ai-sdk/azure@3.0.0':
+    resolution: {integrity: sha512-bY1EfX4aisnpOYcuZkmkuBIUc0noNT/25ZoWispSiMZMS53yF55xkT1SFM+cxDjJ4M3HVJwVuU6r1szA8f9IPA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/cerebras@2.0.0-beta.64':
-    resolution: {integrity: sha512-P5D3Pp96MxWc/UZhkIn+IiZsXLfOGcpVYUXn1vPWLWti7XW1WFYR4eh4ga2CVRxg/ePj2IXPgwS/FQkQ5zmnqA==}
+  '@ai-sdk/cerebras@2.0.0':
+    resolution: {integrity: sha512-VdLxIpzumo7TTd78KqE7MKl48YdoEp+60FV8IF3U/I6srzsJqk64fcQPWcNihE10VE5heMiD0xC869M0luC99w==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/cohere@3.0.0-beta.60':
-    resolution: {integrity: sha512-K9aAjE214i68VunhRCRjP0hRiSaSI+ukUAJv7KJi5At9kpYCzruhd74R4HrKLzpbFMyp2YzXt/70w/VGq6UypQ==}
+  '@ai-sdk/cohere@3.0.0':
+    resolution: {integrity: sha512-ZeoVheAF866ADyC2xdjg8Z1e/K4Zv6dt6UnPmk17ZT1karOocNLiMwWpfpi5Z3b2UU+KD/LyxyLt5gFMVWFG4w==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/deepgram@2.0.0-beta.60':
-    resolution: {integrity: sha512-kUJrfkDIUe66la8hyboJEv3iVO5ZYNGv17Sx7+V8HywWL8exT4cZcc1m0NGyChwpbjstw7z6IOXMvjj5poxpcA==}
+  '@ai-sdk/deepgram@2.0.0':
+    resolution: {integrity: sha512-jfo0vKaJbTGd14N5VtJl7Sb1QtZyviiLyfL19HzsLdKqiOuWPG8fnR/I8o72c3jTO+GEEyZqu8rnWIfi5HtW1A==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/deepseek@2.0.0-beta.62':
-    resolution: {integrity: sha512-FtlROd5rYbDUQQEu1t34t8pm5SK++dll8yLOEwZnF5Ct3NwbWq26on4VI3gRqL/5xW2oF4Vzjwvxxd6AVtXQpA==}
+  '@ai-sdk/deepseek@2.0.0':
+    resolution: {integrity: sha512-qRX06mouHaF4OePE4S8W8+fLX7Iq4dWk7Ul4+SSPBzx6zBJKUqwHYW2XyPShNWhT4Rcogpl5yHJUrBaOExkiyg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/elevenlabs@2.0.0-beta.59':
-    resolution: {integrity: sha512-7LgvLLuqokHXAFQYdeN8kUkkSrHnQwgJaKo/lUpu7rItLuzWUU6syYLm87kFHYqCP8FxeRS7rqq8Ve0r/Vxf/Q==}
+  '@ai-sdk/elevenlabs@2.0.0':
+    resolution: {integrity: sha512-gE4aqYM2YHe8a75mWJ96CWVWCuCMPmM/766oW0sghYCccwKGM2G8JiqyfX5wEq0gDiLG73+I/M7aKS+9PjyA3Q==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/fireworks@2.0.0-beta.60':
-    resolution: {integrity: sha512-RG/YeIunNUuhd7/9CmiL51LJ0GwGumYJ9SeDoRlUaXTXksTgUtRxV0gECd6WHWuWHyhB4GsfMHVyHQbSTkKB8w==}
+  '@ai-sdk/fireworks@2.0.0':
+    resolution: {integrity: sha512-2cHY0LxaL4t/DfGJ9AFC4Ch/D6MImxnM5qvnb+UFOyR2ZT4Apb1Gv6NL0VTlmjqaKLgYW9z39U/yt6ppiG+ZSQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/gateway@2.0.0-beta.93':
-    resolution: {integrity: sha512-yN0QzF4esw2XePXk/wCpGm+9SU45kYAGCiYLheDlS3iL6D+91rtb8RXL/5+iFENYFwqWyxEIj4Qiktm9djPFAg==}
+  '@ai-sdk/gateway@2.0.0':
+    resolution: {integrity: sha512-Gj0PuawK7NkZuyYgO/h5kDK/l6hFOjhLdTq3/Lli1FTl47iGmwhH1IZQpAL3Z09BeFYWakcwUmn02ovIm2wy9g==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/google-vertex@4.0.0-beta.134':
-    resolution: {integrity: sha512-6Pmzwb0kLL2SJy5X+9h+d9WAFjWzKoQKwNggXx09tlQM5rCR84I92hn5jkCWY/lYbHPtsPtjfghnxNyGtxv5qw==}
+  '@ai-sdk/google-vertex@4.0.0':
+    resolution: {integrity: sha512-wbRgf8uRyKc4hZ+/zY9NUZ+hNIz41k1Zu8NfDt0raqDDBIQiB6spJ3RG9fmmACob4ITbWQQxakqwuRpAACVyZA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/google@3.0.0-beta.89':
-    resolution: {integrity: sha512-pZHtv1CCIYyWWgge6kuKkE64IxbSW3GGfOFkxzI9zjQWL0jMa3UvigQ4YPF26eGcm/sMo7AyAiEk67DINhobOA==}
+  '@ai-sdk/google@3.0.0':
+    resolution: {integrity: sha512-KFS9pR7KGDyt7p1OQibglS3amoLjCXxwF7DVg+gL2RLcwFRQV0s6Tp7Q+PvGNFSqPdrPYW8mHyvn8ODK4WTImA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/groq@3.0.0-beta.62':
-    resolution: {integrity: sha512-f1wDHCefqhctbPAWlQv4wSoaKH2qa3/GS27Ge6hCXDxDLxETrScRSPeTRzXgI6Y+/FEwL5qdvbUqjXC9EJusuA==}
+  '@ai-sdk/groq@3.0.0':
+    resolution: {integrity: sha512-uWfvdzNwjXy7HiMOvKdIHnTItRViSWaqiGA4P3+Y1RB+seXHK9hJrKWXHH3hiyLFeAN9lcQp67gtipnGh68ZLg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/mistral@3.0.0-beta.61':
-    resolution: {integrity: sha512-uB4mf6QpX02tqEfhWAeMAhutCiXRpMNXjv09LlirZlAB9tQpn3ToimGXb/9OPeOCd/Zt/N5gQ+oO8SH3F/gf4Q==}
+  '@ai-sdk/mistral@3.0.0':
+    resolution: {integrity: sha512-c7k/hLqXUdsbwco63kbM9mB7JA6c76kwPTtn9ulpsO8jvL+3n3+MKn0zWF7wjIZXc3kWAOBBK1zZB492hm+f3w==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/openai-compatible@2.0.0-beta.60':
-    resolution: {integrity: sha512-WCs4dzulFbK2qlWGb6em98DVdrAUSlOfBkTfLWnp4hMdJRYwAwzAc6uzQvSjtrZ8FCqiQqiHb2wrueFt9U/RPQ==}
+  '@ai-sdk/openai-compatible@2.0.0':
+    resolution: {integrity: sha512-dQITHbDWLtIVB0Kpb9AXRMAZC2n4azS2T/uaVq8HOgw2Uy9x19usS0DIoXlTbj3R4rJuJXpAUhYowQ+YcK16WQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/openai@3.0.0-beta.112':
-    resolution: {integrity: sha512-09Kv9Y6e7ORKa2ha3ZN0il9qgrZOnVcQwTxgRZZo0IOjd51Q4HBpYXsqrv2Nl5RHqv6naaV/gKQVG5UFkbrluw==}
+  '@ai-sdk/openai@3.0.0':
+    resolution: {integrity: sha512-/o2xCQlRA+O0cAXIIBOfMeT35H6Fonzilz9r/IJojPOMQnmIL+0jPQVKOUPr5bouRqCjnwKpwuKEBRqm8jUZkQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/perplexity@3.0.0-beta.61':
-    resolution: {integrity: sha512-GkCJgZIDWaiFpioNK5jUe5eIP8yh6eD/ngrFKx52LHZKdlVyxiYf201ZhdP6MbdiG/4fZR68GoJMxhYvMlczlQ==}
+  '@ai-sdk/perplexity@3.0.0':
+    resolution: {integrity: sha512-7uMTi+8fVQBM4y6qzjplXTmfOa+p87ZYSEhzTbrteV3gm5DdFQwb4JCIPuZVl3nx2Ug7TajtG8UX95rIrmhLqg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/provider-utils@4.0.0-beta.59':
-    resolution: {integrity: sha512-Ide+xB/kMT54cEC0o8vKwtdL+YVzdpOtwYIDo11y7BOU4PYZUtT0F+IpfwxuLx+P1uMCPtz6pNZvCRIgCdVoig==}
+  '@ai-sdk/provider-utils@3.0.12':
+    resolution: {integrity: sha512-ZtbdvYxdMoria+2SlNarEk6Hlgyf+zzcznlD55EAl+7VZvJaSg2sqPvwArY7L6TfDEDJsnCq0fdhBSkYo0Xqdg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/provider@3.0.0-beta.32':
-    resolution: {integrity: sha512-JWYyFAWiGRkB8lkKykPPmV+s2fwjApvOQ7vuf2lNWuPJGOWIBXQy3SBrNxhgPZwkm8QquKuPtB+LILT2PisE4w==}
+  '@ai-sdk/provider-utils@4.0.0':
+    resolution: {integrity: sha512-HyCyOls9I3a3e38+gtvOJOEjuw9KRcvbBnCL5GBuSmJvS9Jh9v3fz7pRC6ha1EUo/ZH1zwvLWYXBMtic8MTguA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/provider@2.0.0':
+    resolution: {integrity: sha512-6o7Y2SeO9vFKB8lArHXehNuusnpddKPk7xqL7T2/b+OvXMRIXUO1rR4wcv1hAFUAT9avGZshty3Wlua/XA7TvA==}
     engines: {node: '>=18'}
 
-  '@ai-sdk/react@3.0.0-beta.171':
-    resolution: {integrity: sha512-9iTfbiVUXf+R54AlCSPLVJbNylVbtF2EOkUDA84yzo49tHSbDkEjvXcFd0L2zVNiN10aaHvYpGTsAx/NVm7Q6g==}
+  '@ai-sdk/provider@3.0.0':
+    resolution: {integrity: sha512-m9ka3ptkPQbaHHZHqDXDF9C9B5/Mav0KTdky1k2HZ3/nrW2t1AgObxIVPyGDWQNS9FXT/FS6PIoSjpcP/No8rQ==}
+    engines: {node: '>=18'}
+
+  '@ai-sdk/react@3.0.0':
+    resolution: {integrity: sha512-QI09Ci7jbG7szkuIyyuPDqK3Vt2Jq8thbn2JvXzdpTouuR6z4BrM95TGviXgRwVdQG264d/nViPdr5JKQJ5mew==}
     engines: {node: '>=18'}
     peerDependencies:
       react: ^18 || ~19.0.1 || ~19.1.2 || ^19.2.1
 
-  '@ai-sdk/xai@3.0.0-beta.69':
-    resolution: {integrity: sha512-I6rkd5VEIvN9mbKQz/wiqoqMH701M4aJ+K6PBe+GZw4LubNkr2qw1xqueuY8aTzZlB0UWtH9Aix6HXWEMiu9WA==}
+  '@ai-sdk/xai@3.0.0':
+    resolution: {integrity: sha512-LTEfmNo0ESXnfWwOnEWcyYuJi/0xKGdjiEwRhCe7IjVxqLk2jF0Cpqk1U+S414JZdB5s9cqjcxFNdkLZ5AfbUA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -3023,16 +3033,12 @@ packages:
   '@open-draft/until@2.1.0':
     resolution: {integrity: sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==}
 
-  '@openrouter/ai-sdk-provider@1.5.3':
-    resolution: {integrity: sha512-7SZmmLdp0x1wwuwZARn5R19ZSySHmTiUEM8IvN7O5r3ZH4drI1//BsLpfw56YFsBXu34VRtQzyvko1FLIcgtRg==}
+  '@openrouter/ai-sdk-provider@1.5.4':
+    resolution: {integrity: sha512-xrSQPUIH8n9zuyYZR0XK7Ba0h2KsjJcMkxnwaYfmv13pKs3sDkjPzVPPhlhzqBGddHb5cFEwJ9VFuFeDcxCDSw==}
     engines: {node: '>=18'}
     peerDependencies:
-      '@toon-format/toon': ^2.0.0
       ai: ^5.0.0
       zod: ^3.24.1 || ^v4
-    peerDependenciesMeta:
-      '@toon-format/toon':
-        optional: true
 
   '@openrouter/sdk@0.1.27':
     resolution: {integrity: sha512-RH//L10bSmc81q25zAZudiI4kNkLgxF2E+WU42vghp3N6TEvZ6F0jK7uT3tOxkEn91gzmMw9YVmDENy7SJsajQ==}
@@ -3442,67 +3448,67 @@ packages:
   '@types/wait-on@5.3.4':
     resolution: {integrity: sha512-EBsPjFMrFlMbbUFf9D1Fp+PAB2TwmUn7a3YtHyD9RLuTIk1jDd8SxXVAoez2Ciy+8Jsceo2MYEYZzJ/DvorOKw==}
 
-  '@typescript-eslint/eslint-plugin@8.50.0':
-    resolution: {integrity: sha512-O7QnmOXYKVtPrfYzMolrCTfkezCJS9+ljLdKW/+DCvRsc3UAz+sbH6Xcsv7p30+0OwUbeWfUDAQE0vpabZ3QLg==}
+  '@typescript-eslint/eslint-plugin@8.50.1':
+    resolution: {integrity: sha512-PKhLGDq3JAg0Jk/aK890knnqduuI/Qj+udH7wCf0217IGi4gt+acgCyPVe79qoT+qKUvHMDQkwJeKW9fwl8Cyw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
-      '@typescript-eslint/parser': ^8.50.0
+      '@typescript-eslint/parser': ^8.50.1
       eslint: ^8.57.0 || ^9.0.0
       typescript: '>=4.8.4 <6.0.0'
 
-  '@typescript-eslint/parser@8.50.0':
-    resolution: {integrity: sha512-6/cmF2piao+f6wSxUsJLZjck7OQsYyRtcOZS02k7XINSNlz93v6emM8WutDQSXnroG2xwYlEVHJI+cPA7CPM3Q==}
-    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-    peerDependencies:
-      eslint: ^8.57.0 || ^9.0.0
-      typescript: '>=4.8.4 <6.0.0'
-
-  '@typescript-eslint/project-service@8.50.0':
-    resolution: {integrity: sha512-Cg/nQcL1BcoTijEWyx4mkVC56r8dj44bFDvBdygifuS20f3OZCHmFbjF34DPSi07kwlFvqfv/xOLnJ5DquxSGQ==}
-    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-    peerDependencies:
-      typescript: '>=4.8.4 <6.0.0'
-
-  '@typescript-eslint/scope-manager@8.50.0':
-    resolution: {integrity: sha512-xCwfuCZjhIqy7+HKxBLrDVT5q/iq7XBVBXLn57RTIIpelLtEIZHXAF/Upa3+gaCpeV1NNS5Z9A+ID6jn50VD4A==}
-    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-
-  '@typescript-eslint/tsconfig-utils@8.50.0':
-    resolution: {integrity: sha512-vxd3G/ybKTSlm31MOA96gqvrRGv9RJ7LGtZCn2Vrc5htA0zCDvcMqUkifcjrWNNKXHUU3WCkYOzzVSFBd0wa2w==}
-    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-    peerDependencies:
-      typescript: '>=4.8.4 <6.0.0'
-
-  '@typescript-eslint/type-utils@8.50.0':
-    resolution: {integrity: sha512-7OciHT2lKCewR0mFoBrvZJ4AXTMe/sYOe87289WAViOocEmDjjv8MvIOT2XESuKj9jp8u3SZYUSh89QA4S1kQw==}
+  '@typescript-eslint/parser@8.50.1':
+    resolution: {integrity: sha512-hM5faZwg7aVNa819m/5r7D0h0c9yC4DUlWAOvHAtISdFTc8xB86VmX5Xqabrama3wIPJ/q9RbGS1worb6JfnMg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
       typescript: '>=4.8.4 <6.0.0'
 
-  '@typescript-eslint/types@8.50.0':
-    resolution: {integrity: sha512-iX1mgmGrXdANhhITbpp2QQM2fGehBse9LbTf0sidWK6yg/NE+uhV5dfU1g6EYPlcReYmkE9QLPq/2irKAmtS9w==}
-    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-
-  '@typescript-eslint/typescript-estree@8.50.0':
-    resolution: {integrity: sha512-W7SVAGBR/IX7zm1t70Yujpbk+zdPq/u4soeFSknWFdXIFuWsBGBOUu/Tn/I6KHSKvSh91OiMuaSnYp3mtPt5IQ==}
+  '@typescript-eslint/project-service@8.50.1':
+    resolution: {integrity: sha512-E1ur1MCVf+YiP89+o4Les/oBAVzmSbeRB0MQLfSlYtbWU17HPxZ6Bhs5iYmKZRALvEuBoXIZMOIRRc/P++Ortg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       typescript: '>=4.8.4 <6.0.0'
 
-  '@typescript-eslint/utils@8.50.0':
-    resolution: {integrity: sha512-87KgUXET09CRjGCi2Ejxy3PULXna63/bMYv72tCAlDJC3Yqwln0HiFJ3VJMst2+mEtNtZu5oFvX4qJGjKsnAgg==}
+  '@typescript-eslint/scope-manager@8.50.1':
+    resolution: {integrity: sha512-mfRx06Myt3T4vuoHaKi8ZWNTPdzKPNBhiblze5N50//TSHOAQQevl/aolqA/BcqqbJ88GUnLqjjcBc8EWdBcVw==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@typescript-eslint/tsconfig-utils@8.50.1':
+    resolution: {integrity: sha512-ooHmotT/lCWLXi55G4mvaUF60aJa012QzvLK0Y+Mp4WdSt17QhMhWOaBWeGTFVkb2gDgBe19Cxy1elPXylslDw==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    peerDependencies:
+      typescript: '>=4.8.4 <6.0.0'
+
+  '@typescript-eslint/type-utils@8.50.1':
+    resolution: {integrity: sha512-7J3bf022QZE42tYMO6SL+6lTPKFk/WphhRPe9Tw/el+cEwzLz1Jjz2PX3GtGQVxooLDKeMVmMt7fWpYRdG5Etg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
       typescript: '>=4.8.4 <6.0.0'
 
-  '@typescript-eslint/visitor-keys@8.50.0':
-    resolution: {integrity: sha512-Xzmnb58+Db78gT/CCj/PVCvK+zxbnsw6F+O1oheYszJbBSdEjVhQi3C/Xttzxgi/GLmpvOggRs1RFpiJ8+c34Q==}
+  '@typescript-eslint/types@8.50.1':
+    resolution: {integrity: sha512-v5lFIS2feTkNyMhd7AucE/9j/4V9v5iIbpVRncjk/K0sQ6Sb+Np9fgYS/63n6nwqahHQvbmujeBL7mp07Q9mlA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@vercel/oidc@3.0.5':
-    resolution: {integrity: sha512-fnYhv671l+eTTp48gB4zEsTW/YtRgRPnkI2nT7x6qw5rkI1Lq2hTmQIpHPgyThI0znLK+vX2n9XxKdXZ7BUbbw==}
+  '@typescript-eslint/typescript-estree@8.50.1':
+    resolution: {integrity: sha512-woHPdW+0gj53aM+cxchymJCrh0cyS7BTIdcDxWUNsclr9VDkOSbqC13juHzxOmQ22dDkMZEpZB+3X1WpUvzgVQ==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    peerDependencies:
+      typescript: '>=4.8.4 <6.0.0'
+
+  '@typescript-eslint/utils@8.50.1':
+    resolution: {integrity: sha512-lCLp8H1T9T7gPbEuJSnHwnSuO9mDf8mfK/Nion5mZmiEaQD9sWf9W4dfeFqRyqRjF06/kBuTmAqcs9sewM2NbQ==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    peerDependencies:
+      eslint: ^8.57.0 || ^9.0.0
+      typescript: '>=4.8.4 <6.0.0'
+
+  '@typescript-eslint/visitor-keys@8.50.1':
+    resolution: {integrity: sha512-IrDKrw7pCRUR94zeuCSUWQ+w8JEf5ZX5jl/e6AHGSLi1/zIr0lgutfn/7JpfCey+urpgQEdrZVYzCaVVKiTwhQ==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@vercel/oidc@3.0.3':
+    resolution: {integrity: sha512-yNEQvPcVrK9sIe637+I0jD6leluPxzwJKx/Haw6F4H77CdDsszUn5V3o96LPziXkSNE2B83+Z3mjqGKBK/R6Gg==}
     engines: {node: '>= 20'}
 
   '@vitejs/plugin-react@5.1.2':
@@ -3636,8 +3642,8 @@ packages:
       x402:
         optional: true
 
-  ai@6.0.0-beta.168:
-    resolution: {integrity: sha512-z0O616kF89nzSUg+xU0xpm7A8KTiKm5YK8++ErwAWFAaphWpDO3ZvogltDxCidVgcTx0v3uiyh1LCEjwfEc16g==}
+  ai@6.0.0:
+    resolution: {integrity: sha512-ZxPmmOW3stVPNtg4nq6THDQ6aD9Epo/vA/YcTe4q1SD5Q6ZXWg1+aTwjV1mDWWTY2azs3/mw05a3rF5DEiHoEA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -6004,8 +6010,8 @@ packages:
     resolution: {integrity: sha512-OZs6gsjF4vMp32qrCbiVSkrFmXtG/AZhY3t0iAMrMBiAZyV9oALtXO8hsrHbMXF9x6L3grlFuwW2oAz7cav+Gw==}
     engines: {node: '>= 0.6'}
 
-  typescript-eslint@8.50.0:
-    resolution: {integrity: sha512-Q1/6yNUmCpH94fbgMUMg2/BSAr/6U7GBk61kZTv1/asghQOWOjTlp9K8mixS5NcJmm2creY+UFfGeW/+OcA64A==}
+  typescript-eslint@8.50.1:
+    resolution: {integrity: sha512-ytTHO+SoYSbhAH9CrYnMhiLx8To6PSSvqnvXyPUgPETCvB6eBKmTI9w6XMPS3HsBRGkwTVBX+urA8dYQx6bHfQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
@@ -6401,161 +6407,172 @@ snapshots:
   '@adraffy/ens-normalize@1.11.1':
     optional: true
 
-  '@ai-sdk/amazon-bedrock@4.0.0-beta.109(zod@3.25.76)':
+  '@ai-sdk/amazon-bedrock@4.0.0(zod@3.25.76)':
     dependencies:
-      '@ai-sdk/anthropic': 3.0.0-beta.98(zod@3.25.76)
-      '@ai-sdk/provider': 3.0.0-beta.32
-      '@ai-sdk/provider-utils': 4.0.0-beta.59(zod@3.25.76)
+      '@ai-sdk/anthropic': 3.0.0(zod@3.25.76)
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
       '@smithy/eventstream-codec': 4.2.0
       '@smithy/util-utf8': 4.2.0
       aws4fetch: 1.0.20
       zod: 3.25.76
     optional: true
 
-  '@ai-sdk/anthropic@3.0.0-beta.98(zod@3.25.76)':
+  '@ai-sdk/anthropic@3.0.0(zod@3.25.76)':
     dependencies:
-      '@ai-sdk/provider': 3.0.0-beta.32
-      '@ai-sdk/provider-utils': 4.0.0-beta.59(zod@3.25.76)
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
       zod: 3.25.76
     optional: true
 
-  '@ai-sdk/azure@3.0.0-beta.114(zod@3.25.76)':
+  '@ai-sdk/azure@3.0.0(zod@3.25.76)':
     dependencies:
-      '@ai-sdk/openai': 3.0.0-beta.112(zod@3.25.76)
-      '@ai-sdk/provider': 3.0.0-beta.32
-      '@ai-sdk/provider-utils': 4.0.0-beta.59(zod@3.25.76)
+      '@ai-sdk/openai': 3.0.0(zod@3.25.76)
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
       zod: 3.25.76
     optional: true
 
-  '@ai-sdk/cerebras@2.0.0-beta.64(zod@3.25.76)':
+  '@ai-sdk/cerebras@2.0.0(zod@3.25.76)':
     dependencies:
-      '@ai-sdk/openai-compatible': 2.0.0-beta.60(zod@3.25.76)
-      '@ai-sdk/provider': 3.0.0-beta.32
-      '@ai-sdk/provider-utils': 4.0.0-beta.59(zod@3.25.76)
+      '@ai-sdk/openai-compatible': 2.0.0(zod@3.25.76)
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
       zod: 3.25.76
     optional: true
 
-  '@ai-sdk/cohere@3.0.0-beta.60(zod@3.25.76)':
+  '@ai-sdk/cohere@3.0.0(zod@3.25.76)':
     dependencies:
-      '@ai-sdk/provider': 3.0.0-beta.32
-      '@ai-sdk/provider-utils': 4.0.0-beta.59(zod@3.25.76)
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
       zod: 3.25.76
     optional: true
 
-  '@ai-sdk/deepgram@2.0.0-beta.60(zod@3.25.76)':
+  '@ai-sdk/deepgram@2.0.0(zod@3.25.76)':
     dependencies:
-      '@ai-sdk/provider': 3.0.0-beta.32
-      '@ai-sdk/provider-utils': 4.0.0-beta.59(zod@3.25.76)
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
       zod: 3.25.76
     optional: true
 
-  '@ai-sdk/deepseek@2.0.0-beta.62(zod@3.25.76)':
+  '@ai-sdk/deepseek@2.0.0(zod@3.25.76)':
     dependencies:
-      '@ai-sdk/provider': 3.0.0-beta.32
-      '@ai-sdk/provider-utils': 4.0.0-beta.59(zod@3.25.76)
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
       zod: 3.25.76
     optional: true
 
-  '@ai-sdk/elevenlabs@2.0.0-beta.59(zod@3.25.76)':
+  '@ai-sdk/elevenlabs@2.0.0(zod@3.25.76)':
     dependencies:
-      '@ai-sdk/provider': 3.0.0-beta.32
-      '@ai-sdk/provider-utils': 4.0.0-beta.59(zod@3.25.76)
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
       zod: 3.25.76
     optional: true
 
-  '@ai-sdk/fireworks@2.0.0-beta.60(zod@3.25.76)':
+  '@ai-sdk/fireworks@2.0.0(zod@3.25.76)':
     dependencies:
-      '@ai-sdk/openai-compatible': 2.0.0-beta.60(zod@3.25.76)
-      '@ai-sdk/provider': 3.0.0-beta.32
-      '@ai-sdk/provider-utils': 4.0.0-beta.59(zod@3.25.76)
+      '@ai-sdk/openai-compatible': 2.0.0(zod@3.25.76)
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
       zod: 3.25.76
     optional: true
 
-  '@ai-sdk/gateway@2.0.0-beta.93(zod@3.25.76)':
+  '@ai-sdk/gateway@2.0.0(zod@3.25.76)':
     dependencies:
-      '@ai-sdk/provider': 3.0.0-beta.32
-      '@ai-sdk/provider-utils': 4.0.0-beta.59(zod@3.25.76)
-      '@vercel/oidc': 3.0.5
+      '@ai-sdk/provider': 2.0.0
+      '@ai-sdk/provider-utils': 3.0.12(zod@3.25.76)
+      '@vercel/oidc': 3.0.3
       zod: 3.25.76
 
-  '@ai-sdk/google-vertex@4.0.0-beta.134(patch_hash=271963aef1bb8d69c1fbba83342f6bdf1b39f53c660e9b34659e6ce279c0a100)(zod@3.25.76)':
+  '@ai-sdk/google-vertex@4.0.0(patch_hash=271963aef1bb8d69c1fbba83342f6bdf1b39f53c660e9b34659e6ce279c0a100)(zod@3.25.76)':
     dependencies:
-      '@ai-sdk/anthropic': 3.0.0-beta.98(zod@3.25.76)
-      '@ai-sdk/google': 3.0.0-beta.89(zod@3.25.76)
-      '@ai-sdk/provider': 3.0.0-beta.32
-      '@ai-sdk/provider-utils': 4.0.0-beta.59(zod@3.25.76)
+      '@ai-sdk/anthropic': 3.0.0(zod@3.25.76)
+      '@ai-sdk/google': 3.0.0(zod@3.25.76)
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
       google-auth-library: 10.5.0
       zod: 3.25.76
     transitivePeerDependencies:
       - supports-color
     optional: true
 
-  '@ai-sdk/google@3.0.0-beta.89(zod@3.25.76)':
+  '@ai-sdk/google@3.0.0(zod@3.25.76)':
     dependencies:
-      '@ai-sdk/provider': 3.0.0-beta.32
-      '@ai-sdk/provider-utils': 4.0.0-beta.59(zod@3.25.76)
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
       zod: 3.25.76
     optional: true
 
-  '@ai-sdk/groq@3.0.0-beta.62(zod@3.25.76)':
+  '@ai-sdk/groq@3.0.0(zod@3.25.76)':
     dependencies:
-      '@ai-sdk/provider': 3.0.0-beta.32
-      '@ai-sdk/provider-utils': 4.0.0-beta.59(zod@3.25.76)
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
       zod: 3.25.76
     optional: true
 
-  '@ai-sdk/mistral@3.0.0-beta.61(zod@3.25.76)':
+  '@ai-sdk/mistral@3.0.0(zod@3.25.76)':
     dependencies:
-      '@ai-sdk/provider': 3.0.0-beta.32
-      '@ai-sdk/provider-utils': 4.0.0-beta.59(zod@3.25.76)
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
       zod: 3.25.76
     optional: true
 
-  '@ai-sdk/openai-compatible@2.0.0-beta.60(zod@3.25.76)':
+  '@ai-sdk/openai-compatible@2.0.0(zod@3.25.76)':
     dependencies:
-      '@ai-sdk/provider': 3.0.0-beta.32
-      '@ai-sdk/provider-utils': 4.0.0-beta.59(zod@3.25.76)
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
       zod: 3.25.76
 
-  '@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76)':
+  '@ai-sdk/openai@3.0.0(zod@3.25.76)':
     dependencies:
-      '@ai-sdk/provider': 3.0.0-beta.32
-      '@ai-sdk/provider-utils': 4.0.0-beta.59(zod@3.25.76)
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
       zod: 3.25.76
 
-  '@ai-sdk/perplexity@3.0.0-beta.61(zod@3.25.76)':
+  '@ai-sdk/perplexity@3.0.0(zod@3.25.76)':
     dependencies:
-      '@ai-sdk/provider': 3.0.0-beta.32
-      '@ai-sdk/provider-utils': 4.0.0-beta.59(zod@3.25.76)
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
       zod: 3.25.76
     optional: true
 
-  '@ai-sdk/provider-utils@4.0.0-beta.59(zod@3.25.76)':
+  '@ai-sdk/provider-utils@3.0.12(zod@3.25.76)':
     dependencies:
-      '@ai-sdk/provider': 3.0.0-beta.32
+      '@ai-sdk/provider': 2.0.0
       '@standard-schema/spec': 1.1.0
       eventsource-parser: 3.0.6
       zod: 3.25.76
 
-  '@ai-sdk/provider@3.0.0-beta.32':
+  '@ai-sdk/provider-utils@4.0.0(zod@3.25.76)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.0
+      '@standard-schema/spec': 1.1.0
+      eventsource-parser: 3.0.6
+      zod: 3.25.76
+
+  '@ai-sdk/provider@2.0.0':
     dependencies:
       json-schema: 0.4.0
 
-  '@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76)':
+  '@ai-sdk/provider@3.0.0':
     dependencies:
-      '@ai-sdk/provider-utils': 4.0.0-beta.59(zod@3.25.76)
-      ai: 6.0.0-beta.168(zod@3.25.76)
+      json-schema: 0.4.0
+
+  '@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76)':
+    dependencies:
+      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
+      ai: 6.0.0(zod@3.25.76)
       react: 19.2.3
       swr: 2.3.3(react@19.2.3)
       throttleit: 2.1.0
     transitivePeerDependencies:
       - zod
 
-  '@ai-sdk/xai@3.0.0-beta.69(zod@3.25.76)':
+  '@ai-sdk/xai@3.0.0(zod@3.25.76)':
     dependencies:
-      '@ai-sdk/openai-compatible': 2.0.0-beta.60(zod@3.25.76)
-      '@ai-sdk/provider': 3.0.0-beta.32
-      '@ai-sdk/provider-utils': 4.0.0-beta.59(zod@3.25.76)
+      '@ai-sdk/openai-compatible': 2.0.0(zod@3.25.76)
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
       zod: 3.25.76
     optional: true
 
@@ -7921,10 +7938,10 @@ snapshots:
 
   '@open-draft/until@2.1.0': {}
 
-  '@openrouter/ai-sdk-provider@1.5.3(ai@6.0.0-beta.168(zod@3.25.76))(zod@3.25.76)':
+  '@openrouter/ai-sdk-provider@1.5.4(ai@6.0.0(zod@3.25.76))(zod@3.25.76)':
     dependencies:
       '@openrouter/sdk': 0.1.27
-      ai: 6.0.0-beta.168(zod@3.25.76)
+      ai: 6.0.0(zod@3.25.76)
       zod: 3.25.76
     optional: true
 
@@ -8357,14 +8374,14 @@ snapshots:
     dependencies:
       '@types/node': 25.0.3
 
-  '@typescript-eslint/eslint-plugin@8.50.0(@typescript-eslint/parser@8.50.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)':
+  '@typescript-eslint/eslint-plugin@8.50.1(@typescript-eslint/parser@8.50.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)':
     dependencies:
       '@eslint-community/regexpp': 4.12.1
-      '@typescript-eslint/parser': 8.50.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
-      '@typescript-eslint/scope-manager': 8.50.0
-      '@typescript-eslint/type-utils': 8.50.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
-      '@typescript-eslint/utils': 8.50.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
-      '@typescript-eslint/visitor-keys': 8.50.0
+      '@typescript-eslint/parser': 8.50.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      '@typescript-eslint/scope-manager': 8.50.1
+      '@typescript-eslint/type-utils': 8.50.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      '@typescript-eslint/utils': 8.50.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      '@typescript-eslint/visitor-keys': 8.50.1
       eslint: 9.39.2(jiti@2.6.1)
       ignore: 7.0.5
       natural-compare: 1.4.0
@@ -8373,41 +8390,41 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/parser@8.50.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)':
+  '@typescript-eslint/parser@8.50.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)':
     dependencies:
-      '@typescript-eslint/scope-manager': 8.50.0
-      '@typescript-eslint/types': 8.50.0
-      '@typescript-eslint/typescript-estree': 8.50.0(typescript@5.9.3)
-      '@typescript-eslint/visitor-keys': 8.50.0
+      '@typescript-eslint/scope-manager': 8.50.1
+      '@typescript-eslint/types': 8.50.1
+      '@typescript-eslint/typescript-estree': 8.50.1(typescript@5.9.3)
+      '@typescript-eslint/visitor-keys': 8.50.1
       debug: 4.4.1
       eslint: 9.39.2(jiti@2.6.1)
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/project-service@8.50.0(typescript@5.9.3)':
+  '@typescript-eslint/project-service@8.50.1(typescript@5.9.3)':
     dependencies:
-      '@typescript-eslint/tsconfig-utils': 8.50.0(typescript@5.9.3)
-      '@typescript-eslint/types': 8.50.0
+      '@typescript-eslint/tsconfig-utils': 8.50.1(typescript@5.9.3)
+      '@typescript-eslint/types': 8.50.1
       debug: 4.4.1
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/scope-manager@8.50.0':
+  '@typescript-eslint/scope-manager@8.50.1':
     dependencies:
-      '@typescript-eslint/types': 8.50.0
-      '@typescript-eslint/visitor-keys': 8.50.0
+      '@typescript-eslint/types': 8.50.1
+      '@typescript-eslint/visitor-keys': 8.50.1
 
-  '@typescript-eslint/tsconfig-utils@8.50.0(typescript@5.9.3)':
+  '@typescript-eslint/tsconfig-utils@8.50.1(typescript@5.9.3)':
     dependencies:
       typescript: 5.9.3
 
-  '@typescript-eslint/type-utils@8.50.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)':
+  '@typescript-eslint/type-utils@8.50.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)':
     dependencies:
-      '@typescript-eslint/types': 8.50.0
-      '@typescript-eslint/typescript-estree': 8.50.0(typescript@5.9.3)
-      '@typescript-eslint/utils': 8.50.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      '@typescript-eslint/types': 8.50.1
+      '@typescript-eslint/typescript-estree': 8.50.1(typescript@5.9.3)
+      '@typescript-eslint/utils': 8.50.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
       debug: 4.4.1
       eslint: 9.39.2(jiti@2.6.1)
       ts-api-utils: 2.1.0(typescript@5.9.3)
@@ -8415,14 +8432,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/types@8.50.0': {}
+  '@typescript-eslint/types@8.50.1': {}
 
-  '@typescript-eslint/typescript-estree@8.50.0(typescript@5.9.3)':
+  '@typescript-eslint/typescript-estree@8.50.1(typescript@5.9.3)':
     dependencies:
-      '@typescript-eslint/project-service': 8.50.0(typescript@5.9.3)
-      '@typescript-eslint/tsconfig-utils': 8.50.0(typescript@5.9.3)
-      '@typescript-eslint/types': 8.50.0
-      '@typescript-eslint/visitor-keys': 8.50.0
+      '@typescript-eslint/project-service': 8.50.1(typescript@5.9.3)
+      '@typescript-eslint/tsconfig-utils': 8.50.1(typescript@5.9.3)
+      '@typescript-eslint/types': 8.50.1
+      '@typescript-eslint/visitor-keys': 8.50.1
       debug: 4.4.1
       minimatch: 9.0.5
       semver: 7.7.1
@@ -8432,23 +8449,23 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/utils@8.50.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)':
+  '@typescript-eslint/utils@8.50.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)':
     dependencies:
       '@eslint-community/eslint-utils': 4.9.0(eslint@9.39.2(jiti@2.6.1))
-      '@typescript-eslint/scope-manager': 8.50.0
-      '@typescript-eslint/types': 8.50.0
-      '@typescript-eslint/typescript-estree': 8.50.0(typescript@5.9.3)
+      '@typescript-eslint/scope-manager': 8.50.1
+      '@typescript-eslint/types': 8.50.1
+      '@typescript-eslint/typescript-estree': 8.50.1(typescript@5.9.3)
       eslint: 9.39.2(jiti@2.6.1)
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/visitor-keys@8.50.0':
+  '@typescript-eslint/visitor-keys@8.50.1':
     dependencies:
-      '@typescript-eslint/types': 8.50.0
+      '@typescript-eslint/types': 8.50.1
       eslint-visitor-keys: 4.2.1
 
-  '@vercel/oidc@3.0.5': {}
+  '@vercel/oidc@3.0.3': {}
 
   '@vitejs/plugin-react@5.1.2(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))':
     dependencies:
@@ -8567,7 +8584,7 @@ snapshots:
       humanize-ms: 1.2.1
     optional: true
 
-  agents@https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0-beta.112(zod@3.25.76))(@ai-sdk/react@3.0.0-beta.171(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0-beta.168(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76):
+  agents@https://pkg.pr.new/cloudflare/agents@733(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.0(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.0(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76):
     dependencies:
       '@cfworker/json-schema': 4.1.1
       '@modelcontextprotocol/sdk': 1.23.0(@cfworker/json-schema@4.1.1)(zod@3.25.76)
@@ -8583,20 +8600,20 @@ snapshots:
       zod: 3.25.76
       zod-to-ts: 2.0.0(typescript@5.9.3)(zod@3.25.76)
     optionalDependencies:
-      '@ai-sdk/openai': 3.0.0-beta.112(zod@3.25.76)
-      '@ai-sdk/react': 3.0.0-beta.171(react@19.2.3)(zod@3.25.76)
-      ai: 6.0.0-beta.168(zod@3.25.76)
+      '@ai-sdk/openai': 3.0.0(zod@3.25.76)
+      '@ai-sdk/react': 3.0.0(react@19.2.3)(zod@3.25.76)
+      ai: 6.0.0(zod@3.25.76)
       viem: 2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)
     transitivePeerDependencies:
       - '@cloudflare/workers-types'
       - supports-color
       - typescript
 
-  ai@6.0.0-beta.168(zod@3.25.76):
+  ai@6.0.0(zod@3.25.76):
     dependencies:
-      '@ai-sdk/gateway': 2.0.0-beta.93(zod@3.25.76)
-      '@ai-sdk/provider': 3.0.0-beta.32
-      '@ai-sdk/provider-utils': 4.0.0-beta.59(zod@3.25.76)
+      '@ai-sdk/gateway': 2.0.0(zod@3.25.76)
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
       '@opentelemetry/api': 1.9.0
       zod: 3.25.76
 
@@ -10999,12 +11016,12 @@ snapshots:
       media-typer: 1.1.0
       mime-types: 3.0.1
 
-  typescript-eslint@8.50.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3):
+  typescript-eslint@8.50.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3):
     dependencies:
-      '@typescript-eslint/eslint-plugin': 8.50.0(@typescript-eslint/parser@8.50.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
-      '@typescript-eslint/parser': 8.50.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
-      '@typescript-eslint/typescript-estree': 8.50.0(typescript@5.9.3)
-      '@typescript-eslint/utils': 8.50.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      '@typescript-eslint/eslint-plugin': 8.50.1(@typescript-eslint/parser@8.50.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      '@typescript-eslint/parser': 8.50.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      '@typescript-eslint/typescript-estree': 8.50.1(typescript@5.9.3)
+      '@typescript-eslint/utils': 8.50.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
       eslint: 9.39.2(jiti@2.6.1)
       typescript: 5.9.3
     transitivePeerDependencies:
