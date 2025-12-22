@@ -39,8 +39,11 @@
 		"serverless"
 	],
 	"dependencies": {
-		"@ai-sdk/provider": "^2.0.0",
-		"@ai-sdk/provider-utils": "^3.0.19"
+		"@ai-sdk/provider": "^3.0.0",
+		"@ai-sdk/provider-utils": "^4.0.0"
+	},
+	"peerDependencies": {
+		"ai": "^6.0.0"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20251221.0",

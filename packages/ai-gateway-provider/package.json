@@ -136,31 +136,31 @@
 		"url": "https://github.com/cloudflare/ai/issues"
 	},
 	"dependencies": {
-		"@ai-sdk/provider": "^2.0.0",
-		"@ai-sdk/provider-utils": "^3.0.19",
-		"ai": "^5.0.116"
+		"@ai-sdk/provider": "^3.0.0",
+		"@ai-sdk/provider-utils": "^4.0.0",
+		"ai": "^6.0.0"
 	},
 	"peerDependencies": {
-		"@ai-sdk/openai-compatible": "^1.0.29"
+		"@ai-sdk/openai-compatible": "^2.0.0"
 	},
 	"optionalDependencies": {
-		"@ai-sdk/amazon-bedrock": "^3.0.71",
-		"@ai-sdk/anthropic": "^2.0.56",
-		"@ai-sdk/azure": "^2.0.90",
-		"@ai-sdk/cerebras": "^1.0.33",
-		"@ai-sdk/cohere": "^2.0.21",
-		"@ai-sdk/deepgram": "^1.0.21",
-		"@ai-sdk/deepseek": "^1.0.32",
-		"@ai-sdk/elevenlabs": "^1.0.21",
-		"@ai-sdk/fireworks": "^1.0.30",
-		"@ai-sdk/google": "^2.0.51",
-		"@ai-sdk/google-vertex": "3.0.90",
-		"@ai-sdk/groq": "^2.0.33",
-		"@ai-sdk/mistral": "^2.0.26",
-		"@ai-sdk/openai": "^2.0.88",
-		"@ai-sdk/perplexity": "^2.0.22",
-		"@ai-sdk/xai": "^2.0.42",
-		"@openrouter/ai-sdk-provider": "^1.5.3"
+		"@ai-sdk/amazon-bedrock": "^4.0.0",
+		"@ai-sdk/anthropic": "^3.0.0",
+		"@ai-sdk/azure": "^3.0.0",
+		"@ai-sdk/cerebras": "^2.0.0",
+		"@ai-sdk/cohere": "^3.0.0",
+		"@ai-sdk/deepgram": "^2.0.0",
+		"@ai-sdk/deepseek": "^2.0.0",
+		"@ai-sdk/elevenlabs": "^2.0.0",
+		"@ai-sdk/fireworks": "^2.0.0",
+		"@ai-sdk/google": "^3.0.0",
+		"@ai-sdk/google-vertex": "^4.0.0",
+		"@ai-sdk/groq": "^3.0.0",
+		"@ai-sdk/mistral": "^3.0.0",
+		"@ai-sdk/openai": "^3.0.0",
+		"@ai-sdk/perplexity": "^3.0.0",
+		"@ai-sdk/xai": "^3.0.0",
+		"@openrouter/ai-sdk-provider": "^1.5.4"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.10",
