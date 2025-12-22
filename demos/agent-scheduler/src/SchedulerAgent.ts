@@ -53,7 +53,7 @@ interface SchedulerAgentState {
 /**
  * Agent class specialised in managing scheduling operations.
  */
-export class SchedulerAgent extends Agent<{ AI: any }, SchedulerAgentState> {
+export class SchedulerAgent extends Agent<Env, SchedulerAgentState> {
 	/**
 	 * Initialises the agent's state with an empty confirmation list.
 	 */

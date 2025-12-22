@@ -10,16 +10,16 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@cloudflare/workers-oauth-provider": "^0.1.0",
-    "agents": "^0.2.29",
+    "@cloudflare/workers-oauth-provider": "^0.2.2",
+    "agents": "^0.2.35",
     "just-pick": "^4.2.0",
     "octokit": "^5.0.5",
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@types/node": "^24.10.1",
+    "@types/node": "^25.0.3",
     "prettier": "^3.7.4",
     "typescript": "5.9.3",
-    "wrangler": "^4.52.1"
+    "wrangler": "^4.56.0"
   }
 }

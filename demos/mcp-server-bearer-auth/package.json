@@ -12,14 +12,14 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@cloudflare/workers-oauth-provider": "^0.1.0",
-		"agents": "^0.2.29",
-		"hono": "^4.10.7",
+		"@cloudflare/workers-oauth-provider": "^0.2.2",
+		"agents": "^0.2.35",
+		"hono": "^4.11.1",
 		"zod": "^3.25.76"
 	},
 	"devDependencies": {
 		"marked": "^17.0.1",
 		"typescript": "5.9.3",
-		"wrangler": "^4.52.1"
+		"wrangler": "^4.56.0"
 	}
 }
