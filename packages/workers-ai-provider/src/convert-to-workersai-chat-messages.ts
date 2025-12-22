@@ -1,19 +1,19 @@
-import type { LanguageModelV2Prompt, SharedV2ProviderMetadata } from "@ai-sdk/provider";
+import type { LanguageModelV3Prompt, SharedV3ProviderOptions } from "@ai-sdk/provider";
 import type { WorkersAIChatPrompt } from "./workersai-chat-prompt";
 
-export function convertToWorkersAIChatMessages(prompt: LanguageModelV2Prompt): {
+export function convertToWorkersAIChatMessages(prompt: LanguageModelV3Prompt): {
 	messages: WorkersAIChatPrompt;
 	images: {
-		mimeType: string | undefined;
+		mediaType: string | undefined;
 		image: Uint8Array;
-		providerOptions: SharedV2ProviderMetadata | undefined;
+		providerOptions: SharedV3ProviderOptions | undefined;
 	}[];
 } {
 	const messages: WorkersAIChatPrompt = [];
 	const images: {
-		mimeType: string | undefined;
+		mediaType: string | undefined;
 		image: Uint8Array;
-		providerOptions: SharedV2ProviderMetadata | undefined;
+		providerOptions: SharedV3ProviderOptions | undefined;
 	}[] = [];
 
 	for (const { role, content } of prompt) {
@@ -38,7 +38,7 @@ export function convertToWorkersAIChatMessages(prompt: LanguageModelV2Prompt): {
 										// For Llama 3.2 Vision model, which needs array of integers
 										images.push({
 											image: part.data,
-											mimeType: part.mediaType,
+											mediaType: part.mediaType,
 											providerOptions: part.providerOptions,
 										});
 									}
@@ -74,6 +74,11 @@ export function convertToWorkersAIChatMessages(prompt: LanguageModelV2Prompt): {
 							break;
 						}
 
+						case "file": {
+							// Handle file parts in assistant messages (V3)
+							break;
+						}
+
 						case "tool-call": {
 							text = JSON.stringify({
 								name: part.toolName,
@@ -90,9 +95,17 @@ export function convertToWorkersAIChatMessages(prompt: LanguageModelV2Prompt): {
 							});
 							break;
 						}
+
+						case "tool-result": {
+							// Handle tool results in assistant messages (V3)
+							break;
+						}
+
 						default: {
-							const exhaustiveCheck = part;
-							throw new Error(`Unsupported part type: ${exhaustiveCheck.type}`);
+							const exhaustiveCheck = part satisfies never;
+							throw new Error(
+								`Unsupported part type: ${(exhaustiveCheck as { type: string }).type}`,
+							);
 						}
 					}
 				}
@@ -115,12 +128,15 @@ export function convertToWorkersAIChatMessages(prompt: LanguageModelV2Prompt): {
 
 			case "tool": {
 				for (const [index, toolResponse] of content.entries()) {
-					messages.push({
-						content: JSON.stringify(toolResponse.output),
-						name: toolResponse.toolName,
-						tool_call_id: `functions.${toolResponse.toolName}:${index}`,
-						role: "tool",
-					});
+					if (toolResponse.type === "tool-result") {
+						messages.push({
+							content: JSON.stringify(toolResponse.output),
+							name: toolResponse.toolName,
+							tool_call_id: `functions.${toolResponse.toolName}:${index}`,
+							role: "tool",
+						});
+					}
+					// Skip tool-approval-response parts as they're not supported by Workers AI
 				}
 				break;
 			}

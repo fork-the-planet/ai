@@ -1,8 +1,4 @@
-import type {
-	LanguageModelV2,
-	LanguageModelV2CallWarning,
-	LanguageModelV2StreamPart,
-} from "@ai-sdk/provider";
+import type { LanguageModelV3, SharedV3Warning, LanguageModelV3StreamPart } from "@ai-sdk/provider";
 
 import type { AutoRAGChatSettings } from "./autorag-chat-settings";
 import { convertToWorkersAIChatMessages } from "./convert-to-workersai-chat-messages";
@@ -17,8 +13,8 @@ type AutoRAGChatConfig = {
 	gateway?: GatewayOptions;
 };
 
-export class AutoRAGChatLanguageModel implements LanguageModelV2 {
-	readonly specificationVersion = "v2";
+export class AutoRAGChatLanguageModel implements LanguageModelV3 {
+	readonly specificationVersion = "v3";
 	readonly defaultObjectGenerationMode = "json";
 
 	readonly supportedUrls: Record<string, RegExp[]> | PromiseLike<Record<string, RegExp[]>> = {
@@ -51,20 +47,20 @@ export class AutoRAGChatLanguageModel implements LanguageModelV2 {
 		toolChoice,
 		frequencyPenalty,
 		presencePenalty,
-	}: Parameters<LanguageModelV2["doGenerate"]>[0]) {
-		const warnings: LanguageModelV2CallWarning[] = [];
+	}: Parameters<LanguageModelV3["doGenerate"]>[0]) {
+		const warnings: SharedV3Warning[] = [];
 
 		if (frequencyPenalty != null) {
 			warnings.push({
-				setting: "frequencyPenalty",
-				type: "unsupported-setting",
+				feature: "frequencyPenalty",
+				type: "unsupported",
 			});
 		}
 
 		if (presencePenalty != null) {
 			warnings.push({
-				setting: "presencePenalty",
-				type: "unsupported-setting",
+				feature: "presencePenalty",
+				type: "unsupported",
 			});
 		}
 
@@ -79,7 +75,10 @@ export class AutoRAGChatLanguageModel implements LanguageModelV2 {
 		switch (type) {
 			case "text": {
 				return {
-					args: { ...baseArgs, ...prepareToolsAndToolChoice(tools, toolChoice) },
+					args: {
+						...baseArgs,
+						...prepareToolsAndToolChoice(tools, toolChoice),
+					},
 					warnings,
 				};
 			}
@@ -106,8 +105,8 @@ export class AutoRAGChatLanguageModel implements LanguageModelV2 {
 	}
 
 	async doGenerate(
-		options: Parameters<LanguageModelV2["doGenerate"]>[0],
-	): Promise<Awaited<ReturnType<LanguageModelV2["doGenerate"]>>> {
+		options: Parameters<LanguageModelV3["doGenerate"]>[0],
+	): Promise<Awaited<ReturnType<LanguageModelV3["doGenerate"]>>> {
 		const { warnings } = this.getArgs(options);
 		const { messages } = convertToWorkersAIChatMessages(options.prompt);
 
@@ -116,7 +115,7 @@ export class AutoRAGChatLanguageModel implements LanguageModelV2 {
 		});
 
 		return {
-			finishReason: "stop",
+			finishReason: { unified: "stop", raw: "stop" },
 
 			content: [
 				...output.data.map(({ file_id, filename, score }) => ({
@@ -140,14 +139,14 @@ export class AutoRAGChatLanguageModel implements LanguageModelV2 {
 	}
 
 	async doStream(
-		options: Parameters<LanguageModelV2["doStream"]>[0],
-	): Promise<Awaited<ReturnType<LanguageModelV2["doStream"]>>> {
+		options: Parameters<LanguageModelV3["doStream"]>[0],
+	): Promise<Awaited<ReturnType<LanguageModelV3["doStream"]>>> {
 		const { args, warnings } = this.getArgs(options);
 		const { messages } = convertToWorkersAIChatMessages(options.prompt);
 
 		const query = messages.map(({ content, role }) => `${role}: ${content}`).join("\n\n");
 
-		// Get the underlying streaming response (assume this returns a ReadableStream<LanguageModelV2StreamPart>)
+		// Get the underlying streaming response (assume this returns a ReadableStream<LanguageModelV3StreamPart>)
 		const response = await this.config.binding.aiSearch({
 			query,
 			stream: true,
@@ -155,12 +154,12 @@ export class AutoRAGChatLanguageModel implements LanguageModelV2 {
 
 		// Create a new stream that first emits the stream-start part with warnings,
 		// then pipes through the rest of the response stream
-		const stream = new ReadableStream<LanguageModelV2StreamPart>({
+		const stream = new ReadableStream<LanguageModelV3StreamPart>({
 			start(controller) {
 				// Emit the stream-start part with warnings
 				controller.enqueue({
 					type: "stream-start",
-					warnings: warnings as LanguageModelV2CallWarning[],
+					warnings: warnings as SharedV3Warning[],
 				});
 
 				// Pipe the rest of the response stream

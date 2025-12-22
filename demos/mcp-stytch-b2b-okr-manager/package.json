@@ -16,7 +16,7 @@
 	"dependencies": {
 		"@stytch/react": "^19.18.0",
 		"@stytch/vanilla-js": "^5.44.0",
-		"agents": "^0.2.35",
+		"agents": "https://pkg.pr.new/cloudflare/agents@733",
 		"commander": "^14.0.2",
 		"hono": "^4.11.1",
 		"lucide-react": "^0.562.0",

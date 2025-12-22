@@ -15,10 +15,10 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
-		"agents": "^0.2.35",
-		"ai": "^5.0.116",
+		"agents": "https://pkg.pr.new/cloudflare/agents@733",
+		"ai": "6.0.0-beta.168",
 		"hono": "^4.11.1",
-		"workers-ai-provider": "^2.0.2",
+		"workers-ai-provider": "workspace:*",
 		"zod": "^3.25.76"
 	},
 	"devDependencies": {

@@ -14,7 +14,7 @@
 	"dependencies": {
 		"@cloudflare/workers-oauth-provider": "^0.2.2",
 		"@logto/node": "^3.1.6",
-		"agents": "^0.2.35",
+		"agents": "https://pkg.pr.new/cloudflare/agents@733",
 		"hono": "^4.11.1",
 		"zod": "^3.25.76"
 	},

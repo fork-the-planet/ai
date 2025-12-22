@@ -14,11 +14,11 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
-		"ai": "^5.0.116",
+		"ai": "6.0.0-beta.168",
 		"hono": "^4.11.1",
 		"react": "^19.2.3",
 		"react-dom": "^19.2.3",
-		"workers-ai-provider": "^2.0.2",
+		"workers-ai-provider": "workspace:*",
 		"zod": "^3.25.76"
 	},
 	"devDependencies": {

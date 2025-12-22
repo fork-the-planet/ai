@@ -1,8 +1,4 @@
-import type {
-	LanguageModelV2,
-	LanguageModelV2CallWarning,
-	LanguageModelV2StreamPart,
-} from "@ai-sdk/provider";
+import type { LanguageModelV3, SharedV3Warning, LanguageModelV3StreamPart } from "@ai-sdk/provider";
 import { generateId } from "ai";
 import { convertToWorkersAIChatMessages } from "./convert-to-workersai-chat-messages";
 import { mapWorkersAIFinishReason } from "./map-workersai-finish-reason";
@@ -23,8 +19,8 @@ type WorkersAIChatConfig = {
 	gateway?: GatewayOptions;
 };
 
-export class WorkersAIChatLanguageModel implements LanguageModelV2 {
-	readonly specificationVersion = "v2";
+export class WorkersAIChatLanguageModel implements LanguageModelV3 {
+	readonly specificationVersion = "v3";
 	readonly defaultObjectGenerationMode = "json";
 
 	readonly supportedUrls: Record<string, RegExp[]> | PromiseLike<Record<string, RegExp[]>> = {
@@ -60,22 +56,22 @@ export class WorkersAIChatLanguageModel implements LanguageModelV2 {
 		frequencyPenalty,
 		presencePenalty,
 		seed,
-	}: Parameters<LanguageModelV2["doGenerate"]>[0]) {
+	}: Parameters<LanguageModelV3["doGenerate"]>[0]) {
 		const type = responseFormat?.type ?? "text";
 
-		const warnings: LanguageModelV2CallWarning[] = [];
+		const warnings: SharedV3Warning[] = [];
 
 		if (frequencyPenalty != null) {
 			warnings.push({
-				setting: "frequencyPenalty",
-				type: "unsupported-setting",
+				feature: "frequencyPenalty",
+				type: "unsupported",
 			});
 		}
 
 		if (presencePenalty != null) {
 			warnings.push({
-				setting: "presencePenalty",
-				type: "unsupported-setting",
+				feature: "presencePenalty",
+				type: "unsupported",
 			});
 		}
 
@@ -125,8 +121,8 @@ export class WorkersAIChatLanguageModel implements LanguageModelV2 {
 	}
 
 	async doGenerate(
-		options: Parameters<LanguageModelV2["doGenerate"]>[0],
-	): Promise<Awaited<ReturnType<LanguageModelV2["doGenerate"]>>> {
+		options: Parameters<LanguageModelV3["doGenerate"]>[0],
+	): Promise<Awaited<ReturnType<LanguageModelV3["doGenerate"]>>> {
 		const { args, warnings } = this.getArgs(options);
 
 		// biome-ignore lint/correctness/noUnusedVariables: this needs to be destructured
@@ -198,8 +194,8 @@ export class WorkersAIChatLanguageModel implements LanguageModelV2 {
 	}
 
 	async doStream(
-		options: Parameters<LanguageModelV2["doStream"]>[0],
-	): Promise<Awaited<ReturnType<LanguageModelV2["doStream"]>>> {
+		options: Parameters<LanguageModelV3["doStream"]>[0],
+	): Promise<Awaited<ReturnType<LanguageModelV3["doStream"]>>> {
 		const { args, warnings } = this.getArgs(options);
 
 		// Extract image from messages if present
@@ -221,12 +217,12 @@ export class WorkersAIChatLanguageModel implements LanguageModelV2 {
 
 			return {
 				// rawCall: { rawPrompt: messages, rawSettings: args },
-				stream: new ReadableStream<LanguageModelV2StreamPart>({
+				stream: new ReadableStream<LanguageModelV3StreamPart>({
 					async start(controller) {
 						// Emit the stream-start part with warnings
 						controller.enqueue({
 							type: "stream-start",
-							warnings: warnings as LanguageModelV2CallWarning[],
+							warnings: warnings as SharedV3Warning[],
 						});
 
 						for (const contentPart of response.content) {
@@ -315,12 +311,12 @@ export class WorkersAIChatLanguageModel implements LanguageModelV2 {
 
 		// Create a new stream that first emits the stream-start part with warnings,
 		// then pipes through the rest of the response stream
-		const stream = new ReadableStream<LanguageModelV2StreamPart>({
+		const stream = new ReadableStream<LanguageModelV3StreamPart>({
 			start(controller) {
 				// Emit the stream-start part with warnings
 				controller.enqueue({
 					type: "stream-start",
-					warnings: warnings as LanguageModelV2CallWarning[],
+					warnings: warnings as SharedV3Warning[],
 				});
 
 				// Pipe the rest of the response stream

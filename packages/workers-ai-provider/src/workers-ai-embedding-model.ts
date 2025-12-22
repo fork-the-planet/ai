@@ -1,4 +1,9 @@
-import { type EmbeddingModelV2, TooManyEmbeddingValuesForCallError } from "@ai-sdk/provider";
+import type {
+	EmbeddingModelV3,
+	EmbeddingModelV3CallOptions,
+	EmbeddingModelV3Result,
+} from "@ai-sdk/provider";
+import { TooManyEmbeddingValuesForCallError } from "@ai-sdk/provider";
 import type { StringLike } from "./utils";
 import type { EmbeddingModels } from "./workersai-models";
 
@@ -19,12 +24,12 @@ export type WorkersAIEmbeddingSettings = {
 	[key: string]: StringLike;
 };
 
-export class WorkersAIEmbeddingModel implements EmbeddingModelV2<string> {
+export class WorkersAIEmbeddingModel implements EmbeddingModelV3 {
 	/**
-	 * Semantic version of the {@link EmbeddingModelV1} specification implemented
+	 * Semantic version of the {@link EmbeddingModelV3} specification implemented
 	 * by this class. It never changes.
 	 */
-	readonly specificationVersion = "v2";
+	readonly specificationVersion = "v3";
 	readonly modelId: EmbeddingModels;
 	private readonly config: WorkersAIEmbeddingConfig;
 	private readonly settings: WorkersAIEmbeddingSettings;
@@ -56,11 +61,7 @@ export class WorkersAIEmbeddingModel implements EmbeddingModelV2<string> {
 		this.config = config;
 	}
 
-	async doEmbed({
-		values,
-	}: Parameters<EmbeddingModelV2<string>["doEmbed"]>[0]): Promise<
-		Awaited<ReturnType<EmbeddingModelV2<string>["doEmbed"]>>
-	> {
+	async doEmbed({ values }: EmbeddingModelV3CallOptions): Promise<EmbeddingModelV3Result> {
 		if (values.length > this.maxEmbeddingsPerCall) {
 			throw new TooManyEmbeddingValuesForCallError({
 				maxEmbeddingsPerCall: this.maxEmbeddingsPerCall,
@@ -85,6 +86,7 @@ export class WorkersAIEmbeddingModel implements EmbeddingModelV2<string> {
 
 		return {
 			embeddings: response.data,
+			warnings: [],
 		};
 	}
 }
