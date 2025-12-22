@@ -1,5 +1,11 @@
 # ai-gateway-provider
 
+## 3.0.0
+
+### Major Changes
+
+- [#338](https://github.com/cloudflare/ai/pull/338) [`cd9e93c`](https://github.com/cloudflare/ai/commit/cd9e93cc7f124dfc1f4c89dfb58e8b69fc94f197) Thanks [@threepointone](https://github.com/threepointone)! - migrate to ai sdk v6
+
 ## 2.3.1
 
 ### Patch Changes
