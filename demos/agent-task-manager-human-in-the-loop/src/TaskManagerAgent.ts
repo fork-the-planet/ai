@@ -36,7 +36,7 @@ interface TaskManagerState {
 	confirmations: Confirmation[];
 }
 
-export class TaskManagerAgent extends Agent<{ AI: Ai }, TaskManagerState> {
+export class TaskManagerAgent extends Agent<Env, TaskManagerState> {
 	/**
 	 * The initial state of the TaskManagerAgent. By default, there are no tasks and no confirmations.
 	 */

@@ -15,7 +15,7 @@ interface TaskManagerState {
 	tasks: Task[];
 }
 
-export class TaskManagerAgent extends Agent<{ AI: Ai }, TaskManagerState> {
+export class TaskManagerAgent extends Agent<Env, TaskManagerState> {
 	initialState: TaskManagerState = {
 		tasks: [],
 	};
