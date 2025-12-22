@@ -137,8 +137,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.1
-        version: 2.0.1(zod@3.25.76)
+        specifier: ^2.0.2
+        version: 2.0.2(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -177,8 +177,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.1
-        version: 2.0.1(zod@3.25.76)
+        specifier: ^2.0.2
+        version: 2.0.2(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -217,8 +217,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.1
-        version: 2.0.1(zod@3.25.76)
+        specifier: ^2.0.2
+        version: 2.0.2(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -257,8 +257,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.1
-        version: 2.0.1(zod@3.25.76)
+        specifier: ^2.0.2
+        version: 2.0.2(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -294,8 +294,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.1
-        version: 2.0.1(zod@3.25.76)
+        specifier: ^2.0.2
+        version: 2.0.2(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -573,8 +573,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.1
-        version: 2.0.1(zod@3.25.76)
+        specifier: ^2.0.2
+        version: 2.0.2(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -613,8 +613,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.1
-        version: 2.0.1(zod@3.25.76)
+        specifier: ^2.0.2
+        version: 2.0.2(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -653,8 +653,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.1
-        version: 2.0.1(zod@3.25.76)
+        specifier: ^2.0.2
+        version: 2.0.2(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -693,8 +693,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.1
-        version: 2.0.1(zod@3.25.76)
+        specifier: ^2.0.2
+        version: 2.0.2(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -1050,8 +1050,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.1
-        version: 2.0.1(zod@3.25.76)
+        specifier: ^2.0.2
+        version: 2.0.2(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -1090,8 +1090,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.1
-        version: 2.0.1(zod@3.25.76)
+        specifier: ^2.0.2
+        version: 2.0.2(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -1124,8 +1124,8 @@ importers:
         specifier: ^5.0.116
         version: 5.0.116(zod@3.25.76)
       workers-ai-provider:
-        specifier: ^2.0.1
-        version: 2.0.1(zod@3.25.76)
+        specifier: ^2.0.2
+        version: 2.0.2(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -1155,8 +1155,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.1
-        version: 2.0.1(zod@3.25.76)
+        specifier: ^2.0.2
+        version: 2.0.2(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -1192,8 +1192,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.1
-        version: 2.0.1(zod@3.25.76)
+        specifier: ^2.0.2
+        version: 2.0.2(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -1232,8 +1232,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.1
-        version: 2.0.1(zod@3.25.76)
+        specifier: ^2.0.2
+        version: 2.0.2(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -1272,8 +1272,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.1
-        version: 2.0.1(zod@3.25.76)
+        specifier: ^2.0.2
+        version: 2.0.2(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -1443,8 +1443,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.3(react@19.2.3)
       workers-ai-provider:
-        specifier: ^2.0.1
-        version: 2.0.1(zod@3.25.76)
+        specifier: ^2.0.2
+        version: 2.0.2(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -6276,8 +6276,8 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
 
-  workers-ai-provider@2.0.1:
-    resolution: {integrity: sha512-n9COW8PLJLtuchGo/cbsFkn87dJvzzUfEQciuX53taQ5eaSJyss3kFhzhATkMjQDqO1UmaITpM96TwC9aI7ZhQ==}
+  workers-ai-provider@2.0.2:
+    resolution: {integrity: sha512-8PB5O8GuRMxO37RD81TTuRp2ogrqE8Z7CfUBvys8dHoXBJhAkLbJyweukQQ7AXcjDSd52HEEXx9MG4L4SQqKNA==}
 
   wrangler@4.56.0:
     resolution: {integrity: sha512-Nqi8duQeRbA+31QrD6QlWHW3IZVnuuRxMy7DEg46deUzywivmaRV/euBN5KKXDPtA24VyhYsK7I0tkb7P5DM2w==}
@@ -11285,7 +11285,7 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20251217.0
       '@cloudflare/workerd-windows-64': 1.20251217.0
 
-  workers-ai-provider@2.0.1(zod@3.25.76):
+  workers-ai-provider@2.0.2(zod@3.25.76):
     dependencies:
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.19(zod@3.25.76)
