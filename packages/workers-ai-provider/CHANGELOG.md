@@ -1,5 +1,11 @@
 # workers-ai-provider
 
+## 2.0.2
+
+### Patch Changes
+
+- [#339](https://github.com/cloudflare/ai/pull/339) [`ea16584`](https://github.com/cloudflare/ai/commit/ea16584319bacb906629109eeb0c3eeee8976f75) Thanks [@threepointone](https://github.com/threepointone)! - remove blank tags array
+
 ## 2.0.1
 
 ### Patch Changes
