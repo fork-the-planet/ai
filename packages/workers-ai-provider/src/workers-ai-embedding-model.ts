@@ -80,7 +80,6 @@ export class WorkersAIEmbeddingModel implements EmbeddingModelV2<string> {
 			{
 				gateway: this.config.gateway ?? gateway,
 				...passthroughOptions,
-				tags: [],
 			},
 		);
 
