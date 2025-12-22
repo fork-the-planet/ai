@@ -159,7 +159,6 @@ export class WorkersAIChatLanguageModel implements LanguageModelV2 {
 			{
 				gateway: this.config.gateway ?? gateway,
 				...passthroughOptions,
-				tags: [],
 			},
 		);
 
@@ -307,7 +306,6 @@ export class WorkersAIChatLanguageModel implements LanguageModelV2 {
 			{
 				gateway: this.config.gateway ?? gateway,
 				...passthroughOptions,
-				tags: [],
 			},
 		);
 
