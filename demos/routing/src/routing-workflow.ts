@@ -1,5 +1,9 @@
-import { WorkflowEntrypoint, type WorkflowEvent, type WorkflowStep } from "cloudflare:workers";
-import { generateObject } from "ai";
+import {
+	WorkflowEntrypoint,
+	type WorkflowEvent,
+	type WorkflowStep,
+} from "cloudflare:workers";
+import { generateObject, type LanguageModel } from "ai";
 import { createWorkersAI } from "workers-ai-provider";
 import z from "zod";
 
@@ -15,7 +19,10 @@ const finalOutputSchema = z.object({
 	result: z.string(),
 });
 
-export class RoutingWorkflow extends WorkflowEntrypoint<Env, RoutingWorkflowParams> {
+export class RoutingWorkflow extends WorkflowEntrypoint<
+	Env,
+	RoutingWorkflowParams
+> {
 	async run(event: WorkflowEvent<{ prompt: string }>, step: WorkflowStep) {
 		const { prompt } = event.payload;
 
@@ -27,7 +34,7 @@ export class RoutingWorkflow extends WorkflowEntrypoint<Env, RoutingWorkflowPara
 		const gradeObj = await step.do("grade prompt", async () => {
 			const gradePrompt = `Please evaluate the following prompt and assign a grade between 0 and 100 based on its complexity and difficulty. A higher number = more complex and difficult:\n\n${prompt}\n\nReturn a JSON object like { "grade": 75 } where the number represents the grade.`;
 			const { object } = await generateObject({
-				model: smallModel,
+				model: smallModel as LanguageModel,
 				schema: gradeSchema,
 				prompt: gradePrompt,
 			});
@@ -40,7 +47,7 @@ export class RoutingWorkflow extends WorkflowEntrypoint<Env, RoutingWorkflowPara
 		const finalObj = await step.do("generate final output", async () => {
 			const finalPrompt = `Using the prompt provided below, please produce a detailed and well-formulated response:\n\n${prompt}\n\nPlease return your result as a JSON object like { "result": "Your detailed response here." }`;
 			const { object } = await generateObject({
-				model: selectedModel,
+				model: selectedModel as LanguageModel,
 				schema: finalOutputSchema,
 				prompt: finalPrompt,
 			});

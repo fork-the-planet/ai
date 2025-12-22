@@ -1,4 +1,4 @@
-import { stepCountIs, streamText, tool } from "ai";
+import { type LanguageModel, stepCountIs, streamText, tool } from "ai";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { createWorkersAI } from "workers-ai-provider";
@@ -18,7 +18,7 @@ app.post("/", async (c) => {
 	const model = workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast");
 
 	const result = streamText({
-		model,
+		model: model as LanguageModel,
 		messages: [
 			{ role: "system", content: "You are a helpful AI assistant" },
 			{ role: "user", content: prompt },

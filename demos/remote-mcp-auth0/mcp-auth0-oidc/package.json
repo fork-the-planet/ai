@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@cloudflare/workers-oauth-provider": "^0.2.2",
-    "agents": "https://pkg.pr.new/cloudflare/agents@733",
+    "agents": "^0.3.0",
     "hono": "^4.11.1",
     "jose": "^6.1.3",
     "just-pick": "^4.2.0",

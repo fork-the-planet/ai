@@ -1,4 +1,4 @@
-import { generateText } from "ai";
+import { generateText, type LanguageModel } from "ai";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { createWorkersAI } from "workers-ai-provider";
@@ -12,7 +12,9 @@ app.post("/", async (c) => {
 	const workersai = createWorkersAI({ binding: c.env.AI });
 
 	const result = await generateText({
-		model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
+		model: workersai(
+			"@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+		) as LanguageModel,
 		prompt,
 	});
 

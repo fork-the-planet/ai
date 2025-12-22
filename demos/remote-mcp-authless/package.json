@@ -12,7 +12,7 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
-		"agents": "https://pkg.pr.new/cloudflare/agents@733",
+		"agents": "^0.3.0",
 		"zod": "^3.25.76"
 	},
 	"devDependencies": {

@@ -6,6 +6,7 @@ import { extractAlarmType } from "./llm/extract-alarm-type";
 import { extractCronSchedule } from "./llm/extract-cron-schedule";
 import { extractScheduleId } from "./llm/extract-schedule-id";
 import { extractScheduledDate } from "./llm/extract-scheduled-date";
+import type { LanguageModel } from "ai";
 
 /**
  * Union type representing the different scheduling configurations.
@@ -79,7 +80,11 @@ export class SchedulerAgent extends Agent<Env, SchedulerAgentState> {
 		const workersai = createWorkersAI({ binding: this.env.AI });
 		const aiModel = workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast");
 
-		const { action, message } = await extractActionType(aiModel, query, this.getSchedules());
+		const { action, message } = await extractActionType(
+			aiModel as LanguageModel,
+			query,
+			this.getSchedules(),
+		);
 
 		if (action === "list") {
 			return this.getSchedules();
@@ -92,14 +97,14 @@ export class SchedulerAgent extends Agent<Env, SchedulerAgentState> {
 
 		if (action === "add") {
 			const [payload, scheduleType] = await Promise.all([
-				extractAlarmMessage(aiModel, query),
-				extractAlarmType(aiModel, query),
+				extractAlarmMessage(aiModel as LanguageModel, query),
+				extractAlarmType(aiModel as LanguageModel, query),
 			]);
 
 			// We can use the same logic for delayed and schedule as they both refer to a
 			// specific time in the future.
 			if (scheduleType === "scheduled" || scheduleType === "delayed") {
-				const date = await extractScheduledDate(aiModel, query);
+				const date = await extractScheduledDate(aiModel as LanguageModel, query);
 
 				const newConfirmation: Confirmation = {
 					id: crypto.randomUUID(),
@@ -120,7 +125,7 @@ export class SchedulerAgent extends Agent<Env, SchedulerAgentState> {
 			}
 
 			if (scheduleType === "cron") {
-				const cron = await extractCronSchedule(aiModel, query);
+				const cron = await extractCronSchedule(aiModel as LanguageModel, query);
 
 				const newConfirmation: Confirmation = {
 					id: crypto.randomUUID(),
@@ -142,7 +147,11 @@ export class SchedulerAgent extends Agent<Env, SchedulerAgentState> {
 		}
 
 		if (action === "cancel") {
-			const scheduleId = await extractScheduleId(aiModel, query, this.getSchedules());
+			const scheduleId = await extractScheduleId(
+				aiModel as LanguageModel,
+				query,
+				this.getSchedules(),
+			);
 
 			const schedule = scheduleId && (await this.getSchedule(scheduleId));
 

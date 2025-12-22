@@ -1,5 +1,5 @@
 import { Agent } from "agents";
-import { generateObject } from "ai";
+import { generateObject, type LanguageModel } from "ai";
 import { createWorkersAI } from "workers-ai-provider";
 import z from "zod";
 
@@ -27,7 +27,7 @@ export class TaskManagerAgent extends Agent<Env, TaskManagerState> {
 		const aiModel = workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast");
 
 		const { object } = await generateObject({
-			model: aiModel,
+			model: aiModel as LanguageModel,
 			schema: z.object({
 				action: z.string(),
 				message: z.string().optional(),
@@ -61,7 +61,7 @@ export class TaskManagerAgent extends Agent<Env, TaskManagerState> {
 
 		if (object.action === "add") {
 			const { object } = await generateObject({
-				model: aiModel,
+				model: aiModel as LanguageModel,
 				schema: z.object({
 					title: z.string().optional(),
 				}),
@@ -91,7 +91,7 @@ export class TaskManagerAgent extends Agent<Env, TaskManagerState> {
 
 		if (object.action === "delete") {
 			const { object } = await generateObject({
-				model: aiModel,
+				model: aiModel as LanguageModel,
 				schema: z.object({
 					taskId: z.string().optional(),
 				}),
