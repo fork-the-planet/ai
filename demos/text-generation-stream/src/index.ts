@@ -1,4 +1,4 @@
-import { streamText, type LanguageModel } from "ai";
+import { streamText } from "ai";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { createWorkersAI } from "workers-ai-provider";
@@ -13,7 +13,7 @@ app.post("/", async (c) => {
 	const model = workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast");
 
 	const result = streamText({
-		model: model as LanguageModel,
+		model: model,
 		prompt,
 	});
 

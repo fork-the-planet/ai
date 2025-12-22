@@ -1,5 +1,5 @@
 import { Agent } from "agents";
-import { generateObject, type LanguageModel } from "ai";
+import { generateObject } from "ai";
 import { createWorkersAI } from "workers-ai-provider";
 import z from "zod";
 
@@ -50,19 +50,14 @@ export class TaskManagerAgent extends Agent<Env, TaskManagerState> {
 	 * or do nothing. Instead of immediately performing add/delete, it creates a Confirmation.
 	 */
 	async query(
-		query: string
-	): Promise<
-		| { confirmation?: Confirmation; message?: string }
-		| Task[]
-		| string
-		| undefined
-	> {
+		query: string,
+	): Promise<{ confirmation?: Confirmation; message?: string } | Task[] | string | undefined> {
 		const workersai = createWorkersAI({ binding: this.env.AI });
 		const aiModel = workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast");
 
 		// First, determine the desired action: add, delete, list, or none.
 		const { object: actionObject } = await generateObject({
-			model: aiModel as LanguageModel,
+			model: aiModel,
 			schema: z.object({
 				action: z.string(),
 				message: z.string().optional(),
@@ -107,7 +102,7 @@ export class TaskManagerAgent extends Agent<Env, TaskManagerState> {
 		// If user wants to add a task, figure out what the task title should be.
 		if (actionObject.action === "add") {
 			const { object: addObject } = await generateObject({
-				model: aiModel as LanguageModel,
+				model: aiModel,
 				schema: z.object({
 					title: z.string().optional(),
 				}),
@@ -150,7 +145,7 @@ export class TaskManagerAgent extends Agent<Env, TaskManagerState> {
 		// If user wants to delete a task, figure out which task ID to delete.
 		if (actionObject.action === "delete") {
 			const { object: deleteObject } = await generateObject({
-				model: aiModel as LanguageModel,
+				model: aiModel,
 				schema: z.object({
 					taskId: z.string().optional(),
 				}),
@@ -200,14 +195,9 @@ export class TaskManagerAgent extends Agent<Env, TaskManagerState> {
 	 * @param userConfirmed - Whether to proceed with the action (`true`) or reject it (`false`).
 	 * @returns The result of the action that was confirmed, or a message if rejected/not found.
 	 */
-	confirm(
-		confirmationId: string,
-		userConfirmed: boolean
-	): Task | string | false | undefined {
+	confirm(confirmationId: string, userConfirmed: boolean): Task | string | false | undefined {
 		// Find the confirmation in the state.
-		const confirmation = this.state.confirmations.find(
-			(c) => c.id === confirmationId
-		);
+		const confirmation = this.state.confirmations.find((c) => c.id === confirmationId);
 
 		if (!confirmation) {
 			return "No matching confirmation found.";
@@ -231,7 +221,7 @@ export class TaskManagerAgent extends Agent<Env, TaskManagerState> {
 
 		// Remove the used (or rejected) confirmation from the array.
 		const remainingConfirmations = this.state.confirmations.filter(
-			(c) => c.id !== confirmationId
+			(c) => c.id !== confirmationId,
 		);
 
 		this.setState({

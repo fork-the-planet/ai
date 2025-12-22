@@ -1,9 +1,5 @@
-import {
-	WorkflowEntrypoint,
-	type WorkflowEvent,
-	type WorkflowStep,
-} from "cloudflare:workers";
-import { generateObject, type LanguageModel } from "ai";
+import { WorkflowEntrypoint, type WorkflowEvent, type WorkflowStep } from "cloudflare:workers";
+import { generateObject } from "ai";
 import { createWorkersAI } from "workers-ai-provider";
 import z from "zod";
 
@@ -27,10 +23,7 @@ export class OrchestratorWorkersWorkflow extends WorkflowEntrypoint<
 	Env,
 	OrchestratorWorkersWorkflowParams
 > {
-	async run(
-		event: WorkflowEvent<OrchestratorWorkersWorkflowParams>,
-		step: WorkflowStep
-	) {
+	async run(event: WorkflowEvent<OrchestratorWorkersWorkflowParams>, step: WorkflowStep) {
 		const { prompt } = event.payload;
 
 		const workersai = createWorkersAI({ binding: this.env.AI });
@@ -41,7 +34,7 @@ export class OrchestratorWorkersWorkflow extends WorkflowEntrypoint<
 		const orchestratorResult = await step.do("generate subtasks", async () => {
 			const orchestratorPrompt = `Given the following complex coding task:\n\n${prompt}\n\nPlease break it down into a list of subtasks needed to complete the task. Return your answer as a JSON object in the format { "tasks": ["Task 1", "Task 2", ...] }`;
 			const { object } = await generateObject({
-				model: bigModel as LanguageModel,
+				model: bigModel,
 				schema: orchestratorSchema,
 				prompt: orchestratorPrompt,
 			});
@@ -49,24 +42,19 @@ export class OrchestratorWorkersWorkflow extends WorkflowEntrypoint<
 		});
 
 		// --- Step 2: Workers Execute Each Subtask in Parallel ---
-		const workerResponses = await step.do(
-			"execute subtasks in parallel",
-			async () => {
-				const workerPromises = orchestratorResult.tasks.map(
-					async (taskPrompt) => {
-						const workerLLMPrompt = `You are a specialised coding assistant. Please complete the following subtask:\n\n${taskPrompt}\n\nReturn your result as a JSON object in the format { "response": "Your detailed response here." }`;
-						const { object } = await generateObject({
-							model: smallModel as LanguageModel,
-							schema: workerOutputSchema,
-							prompt: workerLLMPrompt,
-						});
+		const workerResponses = await step.do("execute subtasks in parallel", async () => {
+			const workerPromises = orchestratorResult.tasks.map(async (taskPrompt) => {
+				const workerLLMPrompt = `You are a specialised coding assistant. Please complete the following subtask:\n\n${taskPrompt}\n\nReturn your result as a JSON object in the format { "response": "Your detailed response here." }`;
+				const { object } = await generateObject({
+					model: smallModel,
+					schema: workerOutputSchema,
+					prompt: workerLLMPrompt,
+				});
 
-						return object.response;
-					}
-				);
-				return Promise.all(workerPromises);
-			}
-		);
+				return object.response;
+			});
+			return Promise.all(workerPromises);
+		});
 
 		// --- Step 3: Aggregator Synthesises the Worker Responses ---
 		const aggregatorResult = await step.do("synthesise responses", async () => {
@@ -77,7 +65,7 @@ export class OrchestratorWorkersWorkflow extends WorkflowEntrypoint<
 				\n\nPlease synthesise these responses into a single, comprehensive final result.
 				Return your answer as a JSON object in the format { "finalResult": "Your comprehensive result here." }`;
 			const { object } = await generateObject({
-				model: bigModel as LanguageModel,
+				model: bigModel,
 				schema: aggregatorSchema,
 				prompt: aggregatorPrompt,
 			});

@@ -1,9 +1,5 @@
-import {
-	WorkflowEntrypoint,
-	type WorkflowEvent,
-	type WorkflowStep,
-} from "cloudflare:workers";
-import { generateObject, type LanguageModel } from "ai";
+import { WorkflowEntrypoint, type WorkflowEvent, type WorkflowStep } from "cloudflare:workers";
+import { generateObject } from "ai";
 import { createWorkersAI } from "workers-ai-provider";
 import z from "zod";
 
@@ -23,10 +19,7 @@ export class ParallelisationWorkflow extends WorkflowEntrypoint<
 	Env,
 	ParallelisationWorkflowParams
 > {
-	async run(
-		event: WorkflowEvent<ParallelisationWorkflowParams>,
-		step: WorkflowStep
-	) {
+	async run(event: WorkflowEvent<ParallelisationWorkflowParams>, step: WorkflowStep) {
 		const { prompt } = event.payload;
 
 		// Initialise Workers AI using the AI binding from the environment.
@@ -45,7 +38,7 @@ export class ParallelisationWorkflow extends WorkflowEntrypoint<
 		const angleOutputs = await step.do("parallel angle calls", async () => {
 			const calls = anglePrompts.map(async (anglePrompt) => {
 				const { object } = await generateObject({
-					model: smallModel as LanguageModel,
+					model: smallModel,
 					schema: angleSchema,
 					prompt: anglePrompt,
 				});
@@ -66,7 +59,7 @@ export class ParallelisationWorkflow extends WorkflowEntrypoint<
 				Return your answer as a JSON object in the format { "finalResult": "Your comprehensive result here." }`;
 
 			const { object } = await generateObject({
-				model: bigModel as LanguageModel,
+				model: bigModel,
 				schema: finalOutputSchema,
 				prompt: aggregatorPrompt,
 			});

@@ -1,9 +1,5 @@
-import {
-	WorkflowEntrypoint,
-	type WorkflowEvent,
-	type WorkflowStep,
-} from "cloudflare:workers";
-import { generateObject, type LanguageModel } from "ai";
+import { WorkflowEntrypoint, type WorkflowEvent, type WorkflowStep } from "cloudflare:workers";
+import { generateObject } from "ai";
 import { createWorkersAI } from "workers-ai-provider";
 import z from "zod";
 
@@ -31,10 +27,7 @@ export class EvaluatorOptimiserWorkflow extends WorkflowEntrypoint<
 	Env,
 	EvaluatorOptimiserWorkflowParams
 > {
-	async run(
-		event: WorkflowEvent<EvaluatorOptimiserWorkflowParams>,
-		step: WorkflowStep
-	) {
+	async run(event: WorkflowEvent<EvaluatorOptimiserWorkflowParams>, step: WorkflowStep) {
 		const { prompt } = event.payload;
 
 		const workersai = createWorkersAI({ binding: this.env.AI });
@@ -47,7 +40,7 @@ export class EvaluatorOptimiserWorkflow extends WorkflowEntrypoint<
 
 		const draftObj = await step.do("generate draft", async () => {
 			const { object } = await generateObject({
-				model: smallModel as LanguageModel,
+				model: smallModel,
 				schema: draftSchema,
 				prompt: draftPrompt,
 			});
@@ -61,7 +54,7 @@ export class EvaluatorOptimiserWorkflow extends WorkflowEntrypoint<
 
 		const evaluationObj = await step.do("evaluate draft", async () => {
 			const { object } = await generateObject({
-				model: smallModel as LanguageModel,
+				model: smallModel,
 				schema: evaluationSchema,
 				prompt: evaluationPrompt,
 			});
@@ -78,7 +71,7 @@ export class EvaluatorOptimiserWorkflow extends WorkflowEntrypoint<
 
 			const optimizedDraft = await step.do("optimize draft", async () => {
 				const { object } = await generateObject({
-					model: bigModel as LanguageModel,
+					model: bigModel,
 					schema: optimizedSchema,
 					prompt: optimizerPrompt,
 				});

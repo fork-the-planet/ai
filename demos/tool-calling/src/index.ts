@@ -1,4 +1,4 @@
-import { generateText, stepCountIs, tool, type LanguageModel } from "ai";
+import { generateText, stepCountIs, tool } from "ai";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { createWorkersAI } from "workers-ai-provider";
@@ -14,7 +14,7 @@ app.post("/", async (c) => {
 	const workersai = createWorkersAI({ binding: c.env.AI });
 
 	const result = await generateText({
-		model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast") as LanguageModel,
+		model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
 		messages: [
 			{ role: "system", content: "You are a helpful AI assistant" },
 			{ role: "user", content: prompt },

@@ -137,8 +137,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.2
-        version: 2.0.2(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -177,8 +177,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.2
-        version: 2.0.2(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -217,8 +217,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.2
-        version: 2.0.2(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -257,8 +257,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.2
-        version: 2.0.2(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -294,8 +294,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.2
-        version: 2.0.2(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -573,8 +573,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.2
-        version: 2.0.2(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -613,8 +613,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.2
-        version: 2.0.2(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -653,8 +653,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.2
-        version: 2.0.2(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -693,8 +693,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.2
-        version: 2.0.2(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -1050,8 +1050,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.2
-        version: 2.0.2(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -1090,8 +1090,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.2
-        version: 2.0.2(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -1124,8 +1124,8 @@ importers:
         specifier: ^6.0.0
         version: 6.0.1(zod@3.25.76)
       workers-ai-provider:
-        specifier: ^2.0.2
-        version: 2.0.2(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -1155,8 +1155,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.2
-        version: 2.0.2(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -1192,8 +1192,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.2
-        version: 2.0.2(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -1232,8 +1232,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.2
-        version: 2.0.2(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -1272,8 +1272,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^2.0.2
-        version: 2.0.2(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -1443,8 +1443,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.3(react@19.2.3)
       workers-ai-provider:
-        specifier: ^2.0.2
-        version: 2.0.2(zod@3.25.76)
+        specifier: ^3.0.0
+        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -1707,21 +1707,11 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/provider-utils@3.0.19':
-    resolution: {integrity: sha512-W41Wc9/jbUVXVwCN/7bWa4IKe8MtxO3EyA0Hfhx6grnmiYlCvpI8neSYWFE0zScXJkgA/YK3BRybzgyiXuu6JA==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
-
   '@ai-sdk/provider-utils@4.0.0':
     resolution: {integrity: sha512-HyCyOls9I3a3e38+gtvOJOEjuw9KRcvbBnCL5GBuSmJvS9Jh9v3fz7pRC6ha1EUo/ZH1zwvLWYXBMtic8MTguA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
-
-  '@ai-sdk/provider@2.0.0':
-    resolution: {integrity: sha512-6o7Y2SeO9vFKB8lArHXehNuusnpddKPk7xqL7T2/b+OvXMRIXUO1rR4wcv1hAFUAT9avGZshty3Wlua/XA7TvA==}
-    engines: {node: '>=18'}
 
   '@ai-sdk/provider@3.0.0':
     resolution: {integrity: sha512-m9ka3ptkPQbaHHZHqDXDF9C9B5/Mav0KTdky1k2HZ3/nrW2t1AgObxIVPyGDWQNS9FXT/FS6PIoSjpcP/No8rQ==}
@@ -6278,8 +6268,10 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
 
-  workers-ai-provider@2.0.2:
-    resolution: {integrity: sha512-8PB5O8GuRMxO37RD81TTuRp2ogrqE8Z7CfUBvys8dHoXBJhAkLbJyweukQQ7AXcjDSd52HEEXx9MG4L4SQqKNA==}
+  workers-ai-provider@3.0.0:
+    resolution: {integrity: sha512-Pg0cihFGXAhERHsd176z+wbF+z3+Ceyi/HpuJnIkBLJQTSDGF5Fxs4oT6K7bzNcvX1oa6dcZw6J6RcdR6Wz3kA==}
+    peerDependencies:
+      ai: ^6.0.0
 
   wrangler@4.56.0:
     resolution: {integrity: sha512-Nqi8duQeRbA+31QrD6QlWHW3IZVnuuRxMy7DEg46deUzywivmaRV/euBN5KKXDPtA24VyhYsK7I0tkb7P5DM2w==}
@@ -6538,23 +6530,12 @@ snapshots:
       zod: 3.25.76
     optional: true
 
-  '@ai-sdk/provider-utils@3.0.19(zod@3.25.76)':
-    dependencies:
-      '@ai-sdk/provider': 2.0.0
-      '@standard-schema/spec': 1.1.0
-      eventsource-parser: 3.0.6
-      zod: 3.25.76
-
   '@ai-sdk/provider-utils@4.0.0(zod@3.25.76)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
       '@standard-schema/spec': 1.1.0
       eventsource-parser: 3.0.6
       zod: 3.25.76
-
-  '@ai-sdk/provider@2.0.0':
-    dependencies:
-      json-schema: 0.4.0
 
   '@ai-sdk/provider@3.0.0':
     dependencies:
@@ -11293,10 +11274,11 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20251217.0
       '@cloudflare/workerd-windows-64': 1.20251217.0
 
-  workers-ai-provider@2.0.2(zod@3.25.76):
+  workers-ai-provider@3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76):
     dependencies:
-      '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.19(zod@3.25.76)
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
+      ai: 6.0.1(zod@3.25.76)
     transitivePeerDependencies:
       - zod
 
