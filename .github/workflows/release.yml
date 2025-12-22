@@ -10,6 +10,7 @@ jobs:
     permissions:
       id-token: write # Required for OIDC
       contents: write
+      pull-requests: write
 
     if: ${{ github.repository_owner == 'cloudflare' }}
     timeout-minutes: 5
