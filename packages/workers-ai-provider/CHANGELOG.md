@@ -1,5 +1,11 @@
 # workers-ai-provider
 
+## 3.0.1
+
+### Patch Changes
+
+- [#315](https://github.com/cloudflare/ai/pull/315) [`5ee3b4d`](https://github.com/cloudflare/ai/commit/5ee3b4dbec94ed2493c872b4ab93b392c23a04a2) Thanks [@agcty](https://github.com/agcty)! - move deps to peer deps
+
 ## 3.0.0
 
 ### Major Changes
