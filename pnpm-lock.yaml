@@ -137,8 +137,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
         specifier: ^4.1.8
         version: 4.2.1
@@ -177,8 +177,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
         specifier: ^4.1.8
         version: 4.2.1
@@ -217,8 +217,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
         specifier: ^4.1.8
         version: 4.2.1
@@ -257,8 +257,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
         specifier: ^4.1.8
         version: 4.2.1
@@ -294,8 +294,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
         specifier: ^4.1.8
         version: 4.2.1
@@ -573,8 +573,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
         specifier: ^4.1.8
         version: 4.2.1
@@ -613,8 +613,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
         specifier: ^4.1.8
         version: 4.2.1
@@ -653,8 +653,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
         specifier: ^4.1.8
         version: 4.2.1
@@ -693,8 +693,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
         specifier: ^4.1.8
         version: 4.2.1
@@ -1050,8 +1050,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
         specifier: ^4.1.8
         version: 4.2.1
@@ -1090,8 +1090,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
         specifier: ^4.1.8
         version: 4.2.1
@@ -1124,8 +1124,8 @@ importers:
         specifier: ^6.0.0
         version: 6.0.1(zod@4.2.1)
       workers-ai-provider:
-        specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
         specifier: ^4.1.8
         version: 4.2.1
@@ -1155,8 +1155,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
         specifier: ^4.1.8
         version: 4.2.1
@@ -1192,8 +1192,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
         specifier: ^4.1.8
         version: 4.2.1
@@ -1232,8 +1232,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
         specifier: ^4.1.8
         version: 4.2.1
@@ -1272,8 +1272,8 @@ importers:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
-        specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
         specifier: ^4.1.8
         version: 4.2.1
@@ -1443,8 +1443,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.3(react@19.2.3)
       workers-ai-provider:
-        specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
         specifier: ^4.1.8
         version: 4.2.1
@@ -6267,10 +6267,13 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
 
-  workers-ai-provider@3.0.0:
-    resolution: {integrity: sha512-Pg0cihFGXAhERHsd176z+wbF+z3+Ceyi/HpuJnIkBLJQTSDGF5Fxs4oT6K7bzNcvX1oa6dcZw6J6RcdR6Wz3kA==}
+  workers-ai-provider@3.0.1:
+    resolution: {integrity: sha512-vvDesUxmDdKk1rYCVVyCUIAzuh+3uYUyrl3i1m3WYVVYj2TO2m3inl1O9uH2Bh2kmyOLO26a0GlRcGELUjX1lw==}
     peerDependencies:
+      '@ai-sdk/provider': ^3.0.0
+      '@ai-sdk/provider-utils': ^4.0.0
       ai: ^6.0.0
+      zod: ^3.25.0 || ^4.0.0
 
   wrangler@4.56.0:
     resolution: {integrity: sha512-Nqi8duQeRbA+31QrD6QlWHW3IZVnuuRxMy7DEg46deUzywivmaRV/euBN5KKXDPtA24VyhYsK7I0tkb7P5DM2w==}
@@ -11276,13 +11279,12 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20251217.0
       '@cloudflare/workerd-windows-64': 1.20251217.0
 
-  workers-ai-provider@3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1):
+  workers-ai-provider@3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1):
     dependencies:
       '@ai-sdk/provider': 3.0.0
       '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
       ai: 6.0.1(zod@4.2.1)
-    transitivePeerDependencies:
-      - zod
+      zod: 4.2.1
 
   wrangler@4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10):
     dependencies:
