@@ -15,7 +15,7 @@
     "hono": "^4.11.1",
     "just-pick": "^4.2.0",
     "octokit": "^5.0.5",
-    "zod": "^3.25.76"
+    "zod": "^4.1.8"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20251221.0",
