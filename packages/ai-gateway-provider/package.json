@@ -125,7 +125,7 @@
 		"agents",
 		"autorag"
 	],
-	"author": "Gabriel Massadas <https://github.com/g4brym>",
+	"author": "Cloudflare Inc.",
 	"license": "MIT",
 	"homepage": "https://developers.cloudflare.com/ai-gateway/integrations/vercel-ai-sdk/",
 	"repository": {
@@ -135,13 +135,11 @@
 	"bugs": {
 		"url": "https://github.com/cloudflare/ai/issues"
 	},
-	"dependencies": {
+	"peerDependencies": {
+		"@ai-sdk/openai-compatible": "^2.0.0",
 		"@ai-sdk/provider": "^3.0.0",
 		"@ai-sdk/provider-utils": "^4.0.0",
 		"ai": "^6.0.0"
-	},
-	"peerDependencies": {
-		"@ai-sdk/openai-compatible": "^2.0.0"
 	},
 	"optionalDependencies": {
 		"@ai-sdk/amazon-bedrock": "^4.0.0",

@@ -1,6 +1,6 @@
 {
 	"name": "@cloudflare/ai-mono",
-	"author": "Andy Jessop",
+	"author": "Cloudflare Inc.",
 	"scripts": {
 		"create-demo": "tsx ./tools/create-demo/index.ts",
 		"format": "biome format --write",
@@ -48,7 +48,7 @@
 		"vitest": "~3.2.4",
 		"wait-on": "^9.0.3",
 		"wrangler": "^4.56.0",
-		"zod": "^3.25.76"
+		"zod": "^4.1.8"
 	},
 	"packageManager": "pnpm@10.26.1",
 	"pnpm": {

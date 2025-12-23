@@ -15,7 +15,7 @@ importers:
     devDependencies:
       '@ai-sdk/openai':
         specifier: ^3.0.0
-        version: 3.0.0(zod@3.25.76)
+        version: 3.0.0(zod@4.2.1)
       '@biomejs/biome':
         specifier: ^2.3.10
         version: 2.3.10
@@ -33,10 +33,10 @@ importers:
         version: 0.2.2
       '@langchain/core':
         specifier: ^1.1.7
-        version: 1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76))
+        version: 1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))
       '@modelcontextprotocol/sdk':
         specifier: 1.23.0
-        version: 1.23.0(@cfworker/json-schema@4.1.1)(zod@3.25.76)
+        version: 1.23.0(@cfworker/json-schema@4.1.1)(zod@4.2.1)
       '@repo/aicli':
         specifier: workspace:*
         version: link:tools/aicli
@@ -51,10 +51,10 @@ importers:
         version: 5.3.4
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
         specifier: ^6.0.0
-        version: 6.0.1(zod@3.25.76)
+        version: 6.0.1(zod@4.2.1)
       chalk:
         specifier: ^5.6.2
         version: 5.6.2
@@ -90,7 +90,7 @@ importers:
         version: 9.1.7
       langchain:
         specifier: ^1.2.2
-        version: 1.2.2(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76)))(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod-to-json-schema@3.25.0(zod@3.25.76))
+        version: 1.2.2(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod-to-json-schema@3.25.0(zod@4.2.1))
       marked:
         specifier: ^17.0.1
         version: 17.0.1
@@ -122,26 +122,26 @@ importers:
         specifier: ^4.56.0
         version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
 
   demos/agent-scheduler:
     dependencies:
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
         specifier: ^6.0.0
-        version: 6.0.1(zod@3.25.76)
+        version: 6.0.1(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
         specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
+        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
@@ -169,19 +169,19 @@ importers:
     dependencies:
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
         specifier: ^6.0.0
-        version: 6.0.1(zod@3.25.76)
+        version: 6.0.1(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
         specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
+        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
@@ -209,19 +209,19 @@ importers:
     dependencies:
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
         specifier: ^6.0.0
-        version: 6.0.1(zod@3.25.76)
+        version: 6.0.1(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
         specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
+        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
@@ -249,19 +249,19 @@ importers:
     dependencies:
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
         specifier: ^6.0.0
-        version: 6.0.1(zod@3.25.76)
+        version: 6.0.1(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
         specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
+        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
@@ -289,16 +289,16 @@ importers:
     dependencies:
       ai:
         specifier: ^6.0.0
-        version: 6.0.1(zod@3.25.76)
+        version: 6.0.1(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
         specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
+        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
@@ -323,7 +323,7 @@ importers:
     dependencies:
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       nanoid:
         specifier: ^5.1.6
         version: 5.1.6
@@ -360,13 +360,13 @@ importers:
         version: 0.2.2
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       marked:
         specifier: ^17.0.1
@@ -409,8 +409,8 @@ importers:
         specifier: ^4.56.0
         version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
 
   demos/mcp-stytch-b2b-okr-manager:
     dependencies:
@@ -422,7 +422,7 @@ importers:
         version: 5.44.0
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       commander:
         specifier: ^14.0.2
         version: 14.0.2
@@ -445,8 +445,8 @@ importers:
         specifier: ^12.43.1
         version: 12.43.1
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
@@ -498,7 +498,7 @@ importers:
         version: 5.44.0
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -515,8 +515,8 @@ importers:
         specifier: ^7.11.0
         version: 7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
@@ -562,22 +562,22 @@ importers:
     dependencies:
       '@ai-sdk/openai':
         specifier: ^3.0.0
-        version: 3.0.0(zod@3.25.76)
+        version: 3.0.0(zod@4.2.1)
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
         specifier: ^6.0.0
-        version: 6.0.1(zod@3.25.76)
+        version: 6.0.1(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
         specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
+        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
@@ -605,19 +605,19 @@ importers:
     dependencies:
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
         specifier: ^6.0.0
-        version: 6.0.1(zod@3.25.76)
+        version: 6.0.1(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
         specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
+        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
@@ -645,19 +645,19 @@ importers:
     dependencies:
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
         specifier: ^6.0.0
-        version: 6.0.1(zod@3.25.76)
+        version: 6.0.1(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
         specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
+        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
@@ -685,19 +685,19 @@ importers:
     dependencies:
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
         specifier: ^6.0.0
-        version: 6.0.1(zod@3.25.76)
+        version: 6.0.1(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
         specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
+        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
@@ -734,7 +734,7 @@ importers:
         version: 0.2.2
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -748,8 +748,8 @@ importers:
         specifier: ^3.8.3
         version: 3.8.3
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20251221.0
@@ -799,7 +799,7 @@ importers:
         version: 7.77.0(express@5.1.0)
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -807,8 +807,8 @@ importers:
         specifier: ^6.1.3
         version: 6.1.3
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
@@ -827,10 +827,10 @@ importers:
     dependencies:
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
@@ -849,7 +849,7 @@ importers:
         version: 0.2.2
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       just-pick:
         specifier: ^4.2.0
         version: 4.2.0
@@ -857,8 +857,8 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@types/node':
         specifier: ^25.0.3
@@ -880,7 +880,7 @@ importers:
         version: 0.2.2
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -891,8 +891,8 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20251221.0
@@ -914,7 +914,7 @@ importers:
         version: 0.2.2
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -922,8 +922,8 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20251221.0
@@ -948,13 +948,13 @@ importers:
         version: 3.1.6
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       typescript:
         specifier: 5.9.3
@@ -970,13 +970,13 @@ importers:
         version: 0.2.2
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       marked:
         specifier: ^17.0.1
@@ -995,13 +995,13 @@ importers:
         version: 0.2.2
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       marked:
         specifier: ^17.0.1
@@ -1020,13 +1020,13 @@ importers:
         version: 0.2.2
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       marked:
         specifier: ^17.0.1
@@ -1042,19 +1042,19 @@ importers:
     dependencies:
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
         specifier: ^6.0.0
-        version: 6.0.1(zod@3.25.76)
+        version: 6.0.1(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
         specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
+        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
@@ -1082,19 +1082,19 @@ importers:
     dependencies:
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
         specifier: ^6.0.0
-        version: 6.0.1(zod@3.25.76)
+        version: 6.0.1(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
         specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
+        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
@@ -1122,13 +1122,13 @@ importers:
     dependencies:
       ai:
         specifier: ^6.0.0
-        version: 6.0.1(zod@3.25.76)
+        version: 6.0.1(zod@4.2.1)
       workers-ai-provider:
         specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
+        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
@@ -1147,19 +1147,19 @@ importers:
     dependencies:
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
         specifier: ^6.0.0
-        version: 6.0.1(zod@3.25.76)
+        version: 6.0.1(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
         specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
+        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
@@ -1184,19 +1184,19 @@ importers:
     dependencies:
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
         specifier: ^6.0.0
-        version: 6.0.1(zod@3.25.76)
+        version: 6.0.1(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
         specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
+        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
@@ -1224,19 +1224,19 @@ importers:
     dependencies:
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
         specifier: ^6.0.0
-        version: 6.0.1(zod@3.25.76)
+        version: 6.0.1(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
         specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
+        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
@@ -1264,19 +1264,19 @@ importers:
     dependencies:
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
         specifier: ^6.0.0
-        version: 6.0.1(zod@3.25.76)
+        version: 6.0.1(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
       workers-ai-provider:
         specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
+        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
@@ -1304,16 +1304,16 @@ importers:
     dependencies:
       agents:
         specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
         specifier: ^6.0.0
-        version: 6.0.1(zod@3.25.76)
+        version: 6.0.1(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
@@ -1341,10 +1341,10 @@ importers:
     dependencies:
       '@ai-sdk/openai':
         specifier: ^3.0.0
-        version: 3.0.0(zod@3.25.76)
+        version: 3.0.0(zod@4.2.1)
       '@ai-sdk/react':
         specifier: ^3.0.0
-        version: 3.0.1(react@19.2.3)(zod@3.25.76)
+        version: 3.0.1(react@19.2.3)(zod@4.2.1)
       '@mantine/charts':
         specifier: ^8.3.10
         version: 8.3.10(@mantine/core@8.3.10(@mantine/hooks@8.3.10(react@19.2.3))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@mantine/hooks@8.3.10(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(recharts@3.6.0(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react-is@18.3.1)(react@19.2.3)(redux@5.0.1))
@@ -1371,7 +1371,7 @@ importers:
         version: 8.3.10(@mantine/core@8.3.10(@mantine/hooks@8.3.10(react@19.2.3))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@mantine/hooks@8.3.10(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       ai:
         specifier: ^6.0.0
-        version: 6.0.1(zod@3.25.76)
+        version: 6.0.1(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -1385,8 +1385,8 @@ importers:
         specifier: ^3.6.0
         version: 3.6.0(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react-is@18.3.1)(react@19.2.3)(redux@5.0.1)
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
@@ -1432,7 +1432,7 @@ importers:
     dependencies:
       ai:
         specifier: ^6.0.0
-        version: 6.0.1(zod@3.25.76)
+        version: 6.0.1(zod@4.2.1)
       hono:
         specifier: ^4.11.1
         version: 4.11.1
@@ -1444,10 +1444,10 @@ importers:
         version: 19.2.3(react@19.2.3)
       workers-ai-provider:
         specifier: ^3.0.0
-        version: 3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
+        version: 3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
@@ -1483,16 +1483,16 @@ importers:
     dependencies:
       '@ai-sdk/openai-compatible':
         specifier: ^2.0.0
-        version: 2.0.0(zod@3.25.76)
+        version: 2.0.0(zod@4.2.1)
       '@ai-sdk/provider':
         specifier: ^3.0.0
         version: 3.0.0
       '@ai-sdk/provider-utils':
         specifier: ^4.0.0
-        version: 4.0.0(zod@3.25.76)
+        version: 4.0.0(zod@4.2.1)
       ai:
         specifier: ^6.0.0
-        version: 6.0.1(zod@3.25.76)
+        version: 6.0.1(zod@4.2.1)
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
@@ -1506,74 +1506,73 @@ importers:
     optionalDependencies:
       '@ai-sdk/amazon-bedrock':
         specifier: ^4.0.0
-        version: 4.0.0(zod@3.25.76)
+        version: 4.0.0(zod@4.2.1)
       '@ai-sdk/anthropic':
         specifier: ^3.0.0
-        version: 3.0.0(zod@3.25.76)
+        version: 3.0.0(zod@4.2.1)
       '@ai-sdk/azure':
         specifier: ^3.0.0
-        version: 3.0.0(zod@3.25.76)
+        version: 3.0.0(zod@4.2.1)
       '@ai-sdk/cerebras':
         specifier: ^2.0.0
-        version: 2.0.0(zod@3.25.76)
+        version: 2.0.0(zod@4.2.1)
       '@ai-sdk/cohere':
         specifier: ^3.0.0
-        version: 3.0.0(zod@3.25.76)
+        version: 3.0.0(zod@4.2.1)
       '@ai-sdk/deepgram':
         specifier: ^2.0.0
-        version: 2.0.0(zod@3.25.76)
+        version: 2.0.0(zod@4.2.1)
       '@ai-sdk/deepseek':
         specifier: ^2.0.0
-        version: 2.0.0(zod@3.25.76)
+        version: 2.0.0(zod@4.2.1)
       '@ai-sdk/elevenlabs':
         specifier: ^2.0.0
-        version: 2.0.0(zod@3.25.76)
+        version: 2.0.0(zod@4.2.1)
       '@ai-sdk/fireworks':
         specifier: ^2.0.0
-        version: 2.0.0(zod@3.25.76)
+        version: 2.0.0(zod@4.2.1)
       '@ai-sdk/google':
         specifier: ^3.0.0
-        version: 3.0.0(zod@3.25.76)
+        version: 3.0.0(zod@4.2.1)
       '@ai-sdk/google-vertex':
         specifier: ^4.0.0
-        version: 4.0.0(patch_hash=271963aef1bb8d69c1fbba83342f6bdf1b39f53c660e9b34659e6ce279c0a100)(zod@3.25.76)
+        version: 4.0.0(patch_hash=271963aef1bb8d69c1fbba83342f6bdf1b39f53c660e9b34659e6ce279c0a100)(zod@4.2.1)
       '@ai-sdk/groq':
         specifier: ^3.0.0
-        version: 3.0.0(zod@3.25.76)
+        version: 3.0.0(zod@4.2.1)
       '@ai-sdk/mistral':
         specifier: ^3.0.0
-        version: 3.0.0(zod@3.25.76)
+        version: 3.0.0(zod@4.2.1)
       '@ai-sdk/openai':
         specifier: ^3.0.0
-        version: 3.0.0(zod@3.25.76)
+        version: 3.0.0(zod@4.2.1)
       '@ai-sdk/perplexity':
         specifier: ^3.0.0
-        version: 3.0.0(zod@3.25.76)
+        version: 3.0.0(zod@4.2.1)
       '@ai-sdk/xai':
         specifier: ^3.0.0
-        version: 3.0.0(zod@3.25.76)
+        version: 3.0.0(zod@4.2.1)
       '@openrouter/ai-sdk-provider':
         specifier: ^1.5.4
-        version: 1.5.4(ai@6.0.1(zod@3.25.76))(zod@3.25.76)
+        version: 1.5.4(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
 
   packages/workers-ai-provider:
-    dependencies:
+    devDependencies:
       '@ai-sdk/provider':
         specifier: ^3.0.0
         version: 3.0.0
       '@ai-sdk/provider-utils':
         specifier: ^4.0.0
-        version: 4.0.0(zod@3.25.76)
-      ai:
-        specifier: ^6.0.0
-        version: 6.0.1(zod@3.25.76)
-    devDependencies:
+        version: 4.0.0(zod@4.2.1)
       '@cloudflare/workers-types':
         specifier: ^4.20251221.0
         version: 4.20251221.0
+      ai:
+        specifier: ^6.0.0
+        version: 6.0.1(zod@4.2.1)
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
 
   tools/aicli:
     dependencies:
@@ -1587,8 +1586,8 @@ importers:
         specifier: ^4.21.0
         version: 4.21.0
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.1.8
+        version: 4.2.1
       zx:
         specifier: 8.8.5
         version: 8.8.5
@@ -6391,6 +6390,9 @@ packages:
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
+  zod@4.2.1:
+    resolution: {integrity: sha512-0wZ1IRqGGhMP76gLqz8EyfBXKk0J2qo2+H3fi4mcUP/KtTocoX08nmIAHl1Z2kJIZbZee8KOpBCSNPRgauucjw==}
+
   zx@8.8.5:
     resolution: {integrity: sha512-SNgDF5L0gfN7FwVOdEFguY3orU5AkfFZm9B5YSHog/UDHv+lvmd82ZAsOenOkQixigwH2+yyH198AwNdKhj+RA==}
     engines: {node: '>= 12.17.0'}
@@ -6401,162 +6403,162 @@ snapshots:
   '@adraffy/ens-normalize@1.11.1':
     optional: true
 
-  '@ai-sdk/amazon-bedrock@4.0.0(zod@3.25.76)':
+  '@ai-sdk/amazon-bedrock@4.0.0(zod@4.2.1)':
     dependencies:
-      '@ai-sdk/anthropic': 3.0.0(zod@3.25.76)
+      '@ai-sdk/anthropic': 3.0.0(zod@4.2.1)
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
+      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
       '@smithy/eventstream-codec': 4.2.0
       '@smithy/util-utf8': 4.2.0
       aws4fetch: 1.0.20
-      zod: 3.25.76
+      zod: 4.2.1
     optional: true
 
-  '@ai-sdk/anthropic@3.0.0(zod@3.25.76)':
+  '@ai-sdk/anthropic@3.0.0(zod@4.2.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
-      zod: 3.25.76
+      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      zod: 4.2.1
     optional: true
 
-  '@ai-sdk/azure@3.0.0(zod@3.25.76)':
+  '@ai-sdk/azure@3.0.0(zod@4.2.1)':
     dependencies:
-      '@ai-sdk/openai': 3.0.0(zod@3.25.76)
+      '@ai-sdk/openai': 3.0.0(zod@4.2.1)
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
-      zod: 3.25.76
+      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      zod: 4.2.1
     optional: true
 
-  '@ai-sdk/cerebras@2.0.0(zod@3.25.76)':
+  '@ai-sdk/cerebras@2.0.0(zod@4.2.1)':
     dependencies:
-      '@ai-sdk/openai-compatible': 2.0.0(zod@3.25.76)
+      '@ai-sdk/openai-compatible': 2.0.0(zod@4.2.1)
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
-      zod: 3.25.76
+      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      zod: 4.2.1
     optional: true
 
-  '@ai-sdk/cohere@3.0.0(zod@3.25.76)':
+  '@ai-sdk/cohere@3.0.0(zod@4.2.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
-      zod: 3.25.76
+      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      zod: 4.2.1
     optional: true
 
-  '@ai-sdk/deepgram@2.0.0(zod@3.25.76)':
+  '@ai-sdk/deepgram@2.0.0(zod@4.2.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
-      zod: 3.25.76
+      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      zod: 4.2.1
     optional: true
 
-  '@ai-sdk/deepseek@2.0.0(zod@3.25.76)':
+  '@ai-sdk/deepseek@2.0.0(zod@4.2.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
-      zod: 3.25.76
+      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      zod: 4.2.1
     optional: true
 
-  '@ai-sdk/elevenlabs@2.0.0(zod@3.25.76)':
+  '@ai-sdk/elevenlabs@2.0.0(zod@4.2.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
-      zod: 3.25.76
+      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      zod: 4.2.1
     optional: true
 
-  '@ai-sdk/fireworks@2.0.0(zod@3.25.76)':
+  '@ai-sdk/fireworks@2.0.0(zod@4.2.1)':
     dependencies:
-      '@ai-sdk/openai-compatible': 2.0.0(zod@3.25.76)
+      '@ai-sdk/openai-compatible': 2.0.0(zod@4.2.1)
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
-      zod: 3.25.76
+      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      zod: 4.2.1
     optional: true
 
-  '@ai-sdk/gateway@3.0.0(zod@3.25.76)':
+  '@ai-sdk/gateway@3.0.0(zod@4.2.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
+      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
       '@vercel/oidc': 3.0.5
-      zod: 3.25.76
+      zod: 4.2.1
 
-  '@ai-sdk/google-vertex@4.0.0(patch_hash=271963aef1bb8d69c1fbba83342f6bdf1b39f53c660e9b34659e6ce279c0a100)(zod@3.25.76)':
+  '@ai-sdk/google-vertex@4.0.0(patch_hash=271963aef1bb8d69c1fbba83342f6bdf1b39f53c660e9b34659e6ce279c0a100)(zod@4.2.1)':
     dependencies:
-      '@ai-sdk/anthropic': 3.0.0(zod@3.25.76)
-      '@ai-sdk/google': 3.0.0(zod@3.25.76)
+      '@ai-sdk/anthropic': 3.0.0(zod@4.2.1)
+      '@ai-sdk/google': 3.0.0(zod@4.2.1)
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
+      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
       google-auth-library: 10.5.0
-      zod: 3.25.76
+      zod: 4.2.1
     transitivePeerDependencies:
       - supports-color
     optional: true
 
-  '@ai-sdk/google@3.0.0(zod@3.25.76)':
+  '@ai-sdk/google@3.0.0(zod@4.2.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
-      zod: 3.25.76
+      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      zod: 4.2.1
     optional: true
 
-  '@ai-sdk/groq@3.0.0(zod@3.25.76)':
+  '@ai-sdk/groq@3.0.0(zod@4.2.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
-      zod: 3.25.76
+      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      zod: 4.2.1
     optional: true
 
-  '@ai-sdk/mistral@3.0.0(zod@3.25.76)':
+  '@ai-sdk/mistral@3.0.0(zod@4.2.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
-      zod: 3.25.76
+      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      zod: 4.2.1
     optional: true
 
-  '@ai-sdk/openai-compatible@2.0.0(zod@3.25.76)':
+  '@ai-sdk/openai-compatible@2.0.0(zod@4.2.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
-      zod: 3.25.76
+      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      zod: 4.2.1
 
-  '@ai-sdk/openai@3.0.0(zod@3.25.76)':
+  '@ai-sdk/openai@3.0.0(zod@4.2.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
-      zod: 3.25.76
+      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      zod: 4.2.1
 
-  '@ai-sdk/perplexity@3.0.0(zod@3.25.76)':
+  '@ai-sdk/perplexity@3.0.0(zod@4.2.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
-      zod: 3.25.76
+      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      zod: 4.2.1
     optional: true
 
-  '@ai-sdk/provider-utils@4.0.0(zod@3.25.76)':
+  '@ai-sdk/provider-utils@4.0.0(zod@4.2.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
       '@standard-schema/spec': 1.1.0
       eventsource-parser: 3.0.6
-      zod: 3.25.76
+      zod: 4.2.1
 
   '@ai-sdk/provider@3.0.0':
     dependencies:
       json-schema: 0.4.0
 
-  '@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76)':
+  '@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1)':
     dependencies:
-      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
-      ai: 6.0.1(zod@3.25.76)
+      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      ai: 6.0.1(zod@4.2.1)
       react: 19.2.3
       swr: 2.3.3(react@19.2.3)
       throttleit: 2.1.0
     transitivePeerDependencies:
       - zod
 
-  '@ai-sdk/xai@3.0.0(zod@3.25.76)':
+  '@ai-sdk/xai@3.0.0(zod@4.2.1)':
     dependencies:
-      '@ai-sdk/openai-compatible': 2.0.0(zod@3.25.76)
+      '@ai-sdk/openai-compatible': 2.0.0(zod@4.2.1)
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
-      zod: 3.25.76
+      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      zod: 4.2.1
     optional: true
 
   '@apidevtools/json-schema-ref-parser@11.9.3':
@@ -7469,48 +7471,48 @@ snapshots:
 
   '@jsdevtools/ono@7.1.3': {}
 
-  '@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76))':
+  '@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))':
     dependencies:
       '@cfworker/json-schema': 4.1.1
       ansi-styles: 5.2.0
       camelcase: 6.3.0
       decamelize: 1.2.0
       js-tiktoken: 1.0.19
-      langsmith: 0.4.0(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76))
+      langsmith: 0.4.0(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))
       mustache: 4.2.0
       p-queue: 6.6.2
       uuid: 10.0.0
-      zod: 3.25.76
+      zod: 4.2.1
     transitivePeerDependencies:
       - '@opentelemetry/api'
       - '@opentelemetry/exporter-trace-otlp-proto'
       - '@opentelemetry/sdk-trace-base'
       - openai
 
-  '@langchain/langgraph-checkpoint@1.0.0(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76)))':
+  '@langchain/langgraph-checkpoint@1.0.0(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))':
     dependencies:
-      '@langchain/core': 1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76))
+      '@langchain/core': 1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))
       uuid: 10.0.0
 
-  '@langchain/langgraph-sdk@1.0.0(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+  '@langchain/langgraph-sdk@1.0.0(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
     dependencies:
       p-queue: 6.6.2
       p-retry: 4.6.2
       uuid: 9.0.1
     optionalDependencies:
-      '@langchain/core': 1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76))
+      '@langchain/core': 1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
 
-  '@langchain/langgraph@1.0.1(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod-to-json-schema@3.25.0(zod@3.25.76))(zod@3.25.76)':
+  '@langchain/langgraph@1.0.1(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod-to-json-schema@3.25.0(zod@4.2.1))(zod@4.2.1)':
     dependencies:
-      '@langchain/core': 1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76))
-      '@langchain/langgraph-checkpoint': 1.0.0(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76)))
-      '@langchain/langgraph-sdk': 1.0.0(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@langchain/core': 1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))
+      '@langchain/langgraph-checkpoint': 1.0.0(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))
+      '@langchain/langgraph-sdk': 1.0.0(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       uuid: 10.0.0
-      zod: 3.25.76
+      zod: 4.2.1
     optionalDependencies:
-      zod-to-json-schema: 3.25.0(zod@3.25.76)
+      zod-to-json-schema: 3.25.0(zod@4.2.1)
     transitivePeerDependencies:
       - react
       - react-dom
@@ -7618,7 +7620,7 @@ snapshots:
       globby: 11.1.0
       read-yaml-file: 1.1.0
 
-  '@modelcontextprotocol/sdk@1.23.0(@cfworker/json-schema@4.1.1)(zod@3.25.76)':
+  '@modelcontextprotocol/sdk@1.23.0(@cfworker/json-schema@4.1.1)(zod@4.2.1)':
     dependencies:
       ajv: 8.17.1
       ajv-formats: 3.0.1(ajv@8.17.1)
@@ -7631,8 +7633,8 @@ snapshots:
       express-rate-limit: 7.5.0(express@5.1.0)
       pkce-challenge: 5.0.0
       raw-body: 3.0.0
-      zod: 3.25.76
-      zod-to-json-schema: 3.25.0(zod@3.25.76)
+      zod: 4.2.1
+      zod-to-json-schema: 3.25.0(zod@4.2.1)
     optionalDependencies:
       '@cfworker/json-schema': 4.1.1
     transitivePeerDependencies:
@@ -7921,16 +7923,16 @@ snapshots:
 
   '@open-draft/until@2.1.0': {}
 
-  '@openrouter/ai-sdk-provider@1.5.4(ai@6.0.1(zod@3.25.76))(zod@3.25.76)':
+  '@openrouter/ai-sdk-provider@1.5.4(ai@6.0.1(zod@4.2.1))(zod@4.2.1)':
     dependencies:
       '@openrouter/sdk': 0.1.27
-      ai: 6.0.1(zod@3.25.76)
-      zod: 3.25.76
+      ai: 6.0.1(zod@4.2.1)
+      zod: 4.2.1
     optional: true
 
   '@openrouter/sdk@0.1.27':
     dependencies:
-      zod: 3.25.76
+      zod: 4.2.1
     optional: true
 
   '@opentelemetry/api@1.9.0': {}
@@ -8527,16 +8529,16 @@ snapshots:
     dependencies:
       argparse: 2.0.1
 
-  abitype@1.1.0(typescript@5.9.3)(zod@3.25.76):
+  abitype@1.1.0(typescript@5.9.3)(zod@4.2.1):
     optionalDependencies:
       typescript: 5.9.3
-      zod: 3.25.76
+      zod: 4.2.1
     optional: true
 
-  abitype@1.1.1(typescript@5.9.3)(zod@3.25.76):
+  abitype@1.1.1(typescript@5.9.3)(zod@4.2.1):
     optionalDependencies:
       typescript: 5.9.3
-      zod: 3.25.76
+      zod: 4.2.1
     optional: true
 
   abort-controller@3.0.0:
@@ -8567,10 +8569,10 @@ snapshots:
       humanize-ms: 1.2.1
     optional: true
 
-  agents@0.3.0(@ai-sdk/openai@3.0.0(zod@3.25.76))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@3.25.76))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@3.25.76))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76):
+  agents@0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1):
     dependencies:
       '@cfworker/json-schema': 4.1.1
-      '@modelcontextprotocol/sdk': 1.23.0(@cfworker/json-schema@4.1.1)(zod@3.25.76)
+      '@modelcontextprotocol/sdk': 1.23.0(@cfworker/json-schema@4.1.1)(zod@4.2.1)
       cron-schedule: 6.0.0
       json-schema: 0.4.0
       json-schema-to-typescript: 15.0.4
@@ -8580,25 +8582,25 @@ snapshots:
       partysocket: 1.1.10
       react: 19.2.3
       yargs: 18.0.0
-      zod: 3.25.76
-      zod-to-ts: 2.0.0(typescript@5.9.3)(zod@3.25.76)
+      zod: 4.2.1
+      zod-to-ts: 2.0.0(typescript@5.9.3)(zod@4.2.1)
     optionalDependencies:
-      '@ai-sdk/openai': 3.0.0(zod@3.25.76)
-      '@ai-sdk/react': 3.0.1(react@19.2.3)(zod@3.25.76)
-      ai: 6.0.1(zod@3.25.76)
-      viem: 2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@ai-sdk/openai': 3.0.0(zod@4.2.1)
+      '@ai-sdk/react': 3.0.1(react@19.2.3)(zod@4.2.1)
+      ai: 6.0.1(zod@4.2.1)
+      viem: 2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1)
     transitivePeerDependencies:
       - '@cloudflare/workers-types'
       - supports-color
       - typescript
 
-  ai@6.0.1(zod@3.25.76):
+  ai@6.0.1(zod@4.2.1):
     dependencies:
-      '@ai-sdk/gateway': 3.0.0(zod@3.25.76)
+      '@ai-sdk/gateway': 3.0.0(zod@4.2.1)
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
+      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
       '@opentelemetry/api': 1.9.0
-      zod: 3.25.76
+      zod: 4.2.1
 
   ajv-formats@3.0.1(ajv@8.17.1):
     optionalDependencies:
@@ -9145,8 +9147,8 @@ snapshots:
       '@babel/parser': 7.28.4
       eslint: 9.39.2(jiti@2.6.1)
       hermes-parser: 0.25.1
-      zod: 3.25.76
-      zod-validation-error: 3.5.3(zod@3.25.76)
+      zod: 4.2.1
+      zod-validation-error: 3.5.3(zod@4.2.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -9813,14 +9815,14 @@ snapshots:
 
   klona@2.0.6: {}
 
-  langchain@1.2.2(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76)))(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod-to-json-schema@3.25.0(zod@3.25.76)):
+  langchain@1.2.2(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod-to-json-schema@3.25.0(zod@4.2.1)):
     dependencies:
-      '@langchain/core': 1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76))
-      '@langchain/langgraph': 1.0.1(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod-to-json-schema@3.25.0(zod@3.25.76))(zod@3.25.76)
-      '@langchain/langgraph-checkpoint': 1.0.0(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76)))
-      langsmith: 0.4.0(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76))
+      '@langchain/core': 1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))
+      '@langchain/langgraph': 1.0.1(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod-to-json-schema@3.25.0(zod@4.2.1))(zod@4.2.1)
+      '@langchain/langgraph-checkpoint': 1.0.0(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))
+      langsmith: 0.4.0(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))
       uuid: 10.0.0
-      zod: 3.25.76
+      zod: 4.2.1
     transitivePeerDependencies:
       - '@opentelemetry/api'
       - '@opentelemetry/exporter-trace-otlp-proto'
@@ -9830,7 +9832,7 @@ snapshots:
       - react-dom
       - zod-to-json-schema
 
-  langsmith@0.4.0(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76)):
+  langsmith@0.4.0(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)):
     dependencies:
       '@types/uuid': 10.0.0
       chalk: 4.1.2
@@ -9840,7 +9842,7 @@ snapshots:
       uuid: 10.0.0
     optionalDependencies:
       '@opentelemetry/api': 1.9.0
-      openai: 4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76)
+      openai: 4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)
 
   leb@1.0.0: {}
 
@@ -10192,7 +10194,7 @@ snapshots:
       is-docker: 2.2.1
       is-wsl: 2.2.0
 
-  openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76):
+  openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1):
     dependencies:
       '@types/node': 18.19.86
       '@types/node-fetch': 2.6.12
@@ -10203,7 +10205,7 @@ snapshots:
       node-fetch: 2.7.0
     optionalDependencies:
       ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      zod: 3.25.76
+      zod: 4.2.1
     transitivePeerDependencies:
       - encoding
     optional: true
@@ -10232,7 +10234,7 @@ snapshots:
 
   outvariant@1.4.3: {}
 
-  ox@0.9.6(typescript@5.9.3)(zod@3.25.76):
+  ox@0.9.6(typescript@5.9.3)(zod@4.2.1):
     dependencies:
       '@adraffy/ens-normalize': 1.11.1
       '@noble/ciphers': 1.3.0
@@ -10240,7 +10242,7 @@ snapshots:
       '@noble/hashes': 1.8.0
       '@scure/bip32': 1.7.0
       '@scure/bip39': 1.6.0
-      abitype: 1.1.1(typescript@5.9.3)(zod@3.25.76)
+      abitype: 1.1.1(typescript@5.9.3)(zod@4.2.1)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 5.9.3
@@ -11120,15 +11122,15 @@ snapshots:
       d3-time: 3.1.0
       d3-timer: 3.0.1
 
-  viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76):
+  viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1):
     dependencies:
       '@noble/curves': 1.9.1
       '@noble/hashes': 1.8.0
       '@scure/bip32': 1.7.0
       '@scure/bip39': 1.6.0
-      abitype: 1.1.0(typescript@5.9.3)(zod@3.25.76)
+      abitype: 1.1.0(typescript@5.9.3)(zod@4.2.1)
       isows: 1.0.7(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      ox: 0.9.6(typescript@5.9.3)(zod@3.25.76)
+      ox: 0.9.6(typescript@5.9.3)(zod@4.2.1)
       ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
     optionalDependencies:
       typescript: 5.9.3
@@ -11274,11 +11276,11 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20251217.0
       '@cloudflare/workerd-windows-64': 1.20251217.0
 
-  workers-ai-provider@3.0.0(ai@6.0.1(zod@3.25.76))(zod@3.25.76):
+  workers-ai-provider@3.0.0(ai@6.0.1(zod@4.2.1))(zod@4.2.1):
     dependencies:
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@3.25.76)
-      ai: 6.0.1(zod@3.25.76)
+      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      ai: 6.0.1(zod@4.2.1)
     transitivePeerDependencies:
       - zod
 
@@ -11382,21 +11384,23 @@ snapshots:
       cookie: 1.0.2
       youch-core: 0.3.3
 
-  zod-to-json-schema@3.25.0(zod@3.25.76):
+  zod-to-json-schema@3.25.0(zod@4.2.1):
     dependencies:
-      zod: 3.25.76
+      zod: 4.2.1
 
-  zod-to-ts@2.0.0(typescript@5.9.3)(zod@3.25.76):
+  zod-to-ts@2.0.0(typescript@5.9.3)(zod@4.2.1):
     dependencies:
       typescript: 5.9.3
-      zod: 3.25.76
+      zod: 4.2.1
 
-  zod-validation-error@3.5.3(zod@3.25.76):
+  zod-validation-error@3.5.3(zod@4.2.1):
     dependencies:
-      zod: 3.25.76
+      zod: 4.2.1
 
   zod@3.22.3: {}
 
   zod@3.25.76: {}
+
+  zod@4.2.1: {}
 
   zx@8.8.5: {}

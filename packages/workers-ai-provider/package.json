@@ -12,7 +12,7 @@
 	"bugs": {
 		"url": "https://github.com/cloudflare/ai/issues"
 	},
-	"authors": "Sunil Pai <spai@cloudflare.com>",
+	"authors": "Cloudflare Inc.",
 	"license": "MIT",
 	"scripts": {
 		"build": "rm -rf dist && tsup src/index.ts --dts --sourcemap --format esm --target es2020",
@@ -38,15 +38,17 @@
 		"chat",
 		"serverless"
 	],
-	"dependencies": {
-		"@ai-sdk/provider": "^3.0.0",
-		"@ai-sdk/provider-utils": "^4.0.0"
-	},
 	"peerDependencies": {
-		"ai": "^6.0.0"
+		"@ai-sdk/provider": "^3.0.0",
+		"@ai-sdk/provider-utils": "^4.0.0",
+		"ai": "^6.0.0",
+		"zod": "^3.25.0 || ^4.0.0"
 	},
 	"devDependencies": {
+		"@ai-sdk/provider": "^3.0.0",
+		"@ai-sdk/provider-utils": "^4.0.0",
 		"@cloudflare/workers-types": "^4.20251221.0",
-		"zod": "^3.25.76"
+		"ai": "^6.0.0",
+		"zod": "^4.1.8"
 	}
 }
