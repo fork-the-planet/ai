@@ -14,8 +14,8 @@ importers:
   .:
     devDependencies:
       '@ai-sdk/openai':
-        specifier: ^3.0.0
-        version: 3.0.0(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(zod@4.2.1)
       '@biomejs/biome':
         specifier: ^2.3.10
         version: 2.3.10
@@ -32,8 +32,8 @@ importers:
         specifier: ^0.2.2
         version: 0.2.2
       '@langchain/core':
-        specifier: ^1.1.7
-        version: 1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))
+        specifier: ^1.1.8
+        version: 1.1.8(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))
       '@modelcontextprotocol/sdk':
         specifier: 1.23.0
         version: 1.23.0(@cfworker/json-schema@4.1.1)(zod@4.2.1)
@@ -50,11 +50,11 @@ importers:
         specifier: ^5.3.4
         version: 5.3.4
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
-        specifier: ^6.0.0
-        version: 6.0.1(zod@4.2.1)
+        specifier: ^6.0.3
+        version: 6.0.3(zod@4.2.1)
       chalk:
         specifier: ^5.6.2
         version: 5.6.2
@@ -83,20 +83,20 @@ importers:
         specifier: ^4.7.8
         version: 4.7.8
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       husky:
         specifier: ^9.1.7
         version: 9.1.7
       langchain:
-        specifier: ^1.2.2
-        version: 1.2.2(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod-to-json-schema@3.25.0(zod@4.2.1))
+        specifier: ^1.2.3
+        version: 1.2.3(@langchain/core@1.1.8(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod-to-json-schema@3.25.0(zod@4.2.1))
       marked:
         specifier: ^17.0.1
         version: 17.0.1
       msw:
-        specifier: ^2.12.4
-        version: 2.12.4(@types/node@25.0.3)(typescript@5.9.3)
+        specifier: ^2.12.7
+        version: 2.12.7(@types/node@25.0.3)(typescript@5.9.3)
       nx:
         specifier: 22.3.3
         version: 22.3.3
@@ -114,33 +114,33 @@ importers:
         version: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       vitest:
         specifier: ~3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       wait-on:
         specifier: ^9.0.3
         version: 9.0.3
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
 
   demos/agent-scheduler:
     dependencies:
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
-        specifier: ^6.0.0
-        version: 6.0.1(zod@4.2.1)
+        specifier: ^6.0.3
+        version: 6.0.3(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       workers-ai-provider:
         specifier: ^3.0.1
-        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.1(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.3(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@biomejs/biome':
@@ -148,10 +148,10 @@ importers:
         version: 2.3.10
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
-        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.11.1
-        version: 0.11.1(@cloudflare/workers-types@4.20251221.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
+        version: 0.11.1(@cloudflare/workers-types@4.20251229.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -160,27 +160,27 @@ importers:
         version: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       vitest:
         specifier: ~3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/agent-task-manager:
     dependencies:
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
-        specifier: ^6.0.0
-        version: 6.0.1(zod@4.2.1)
+        specifier: ^6.0.3
+        version: 6.0.3(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       workers-ai-provider:
         specifier: ^3.0.1
-        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.1(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.3(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@biomejs/biome':
@@ -188,10 +188,10 @@ importers:
         version: 2.3.10
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
-        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.11.1
-        version: 0.11.1(@cloudflare/workers-types@4.20251221.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
+        version: 0.11.1(@cloudflare/workers-types@4.20251229.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -200,27 +200,27 @@ importers:
         version: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       vitest:
         specifier: ~3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/agent-task-manager-human-in-the-loop:
     dependencies:
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
-        specifier: ^6.0.0
-        version: 6.0.1(zod@4.2.1)
+        specifier: ^6.0.3
+        version: 6.0.3(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       workers-ai-provider:
         specifier: ^3.0.1
-        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.1(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.3(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@biomejs/biome':
@@ -228,10 +228,10 @@ importers:
         version: 2.3.10
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
-        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.11.1
-        version: 0.11.1(@cloudflare/workers-types@4.20251221.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
+        version: 0.11.1(@cloudflare/workers-types@4.20251229.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -240,27 +240,27 @@ importers:
         version: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       vitest:
         specifier: ~3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/evaluator-optimiser:
     dependencies:
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
-        specifier: ^6.0.0
-        version: 6.0.1(zod@4.2.1)
+        specifier: ^6.0.3
+        version: 6.0.3(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       workers-ai-provider:
         specifier: ^3.0.1
-        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.1(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.3(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@biomejs/biome':
@@ -268,10 +268,10 @@ importers:
         version: 2.3.10
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
-        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.11.1
-        version: 0.11.1(@cloudflare/workers-types@4.20251221.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
+        version: 0.11.1(@cloudflare/workers-types@4.20251229.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -280,32 +280,32 @@ importers:
         version: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       vitest:
         specifier: ~3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/image-generation:
     dependencies:
       ai:
-        specifier: ^6.0.0
-        version: 6.0.1(zod@4.2.1)
+        specifier: ^6.0.3
+        version: 6.0.3(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       workers-ai-provider:
         specifier: ^3.0.1
-        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.1(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.3(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
-        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.11.1
-        version: 0.11.1(@cloudflare/workers-types@4.20251221.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
+        version: 0.11.1(@cloudflare/workers-types@4.20251229.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -314,16 +314,16 @@ importers:
         version: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       vitest:
         specifier: ~3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/mcp-client:
     dependencies:
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       nanoid:
         specifier: ^5.1.6
         version: 5.1.6
@@ -336,10 +336,10 @@ importers:
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
-        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@cloudflare/workers-types':
-        specifier: ^4.20251221.0
-        version: 4.20251221.0
+        specifier: ^4.20251229.0
+        version: 4.20251229.0
       '@types/react':
         specifier: ^19.2.7
         version: 19.2.7
@@ -359,13 +359,13 @@ importers:
         specifier: ^0.2.2
         version: 0.2.2
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       marked:
@@ -376,7 +376,7 @@ importers:
         version: 5.9.3
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/mcp-slack-oauth:
     dependencies:
@@ -387,8 +387,8 @@ importers:
         specifier: ^7.13.0
         version: 7.13.0
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       just-pick:
         specifier: ^4.2.0
         version: 4.2.0
@@ -397,8 +397,8 @@ importers:
         version: 5.0.5
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: ^4.20251221.0
-        version: 4.20251221.0
+        specifier: ^4.20251229.0
+        version: 4.20251229.0
       prettier:
         specifier: ^3.7.4
         version: 3.7.4
@@ -407,9 +407,9 @@ importers:
         version: 5.9.3
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
 
   demos/mcp-stytch-b2b-okr-manager:
@@ -421,14 +421,14 @@ importers:
         specifier: ^5.44.0
         version: 5.44.0
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       commander:
         specifier: ^14.0.2
         version: 14.0.2
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       lucide-react:
         specifier: ^0.562.0
         version: 0.562.0(react@19.2.3)
@@ -445,12 +445,12 @@ importers:
         specifier: ^12.43.1
         version: 12.43.1
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
-        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@eslint/js':
         specifier: ^9.39.2
         version: 9.39.2
@@ -486,7 +486,7 @@ importers:
         version: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/mcp-stytch-consumer-todo-list:
     dependencies:
@@ -497,11 +497,11 @@ importers:
         specifier: ^5.44.0
         version: 5.44.0
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       jose:
         specifier: ^6.1.3
         version: 6.1.3
@@ -515,12 +515,12 @@ importers:
         specifier: ^7.11.0
         version: 7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
-        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@eslint/js':
         specifier: ^9.39.2
         version: 9.39.2
@@ -556,27 +556,27 @@ importers:
         version: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/model-scraper:
     dependencies:
       '@ai-sdk/openai':
-        specifier: ^3.0.0
-        version: 3.0.0(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(zod@4.2.1)
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
-        specifier: ^6.0.0
-        version: 6.0.1(zod@4.2.1)
+        specifier: ^6.0.3
+        version: 6.0.3(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       workers-ai-provider:
         specifier: ^3.0.1
-        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.1(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.3(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@biomejs/biome':
@@ -584,10 +584,10 @@ importers:
         version: 2.3.10
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
-        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.11.1
-        version: 0.11.1(@cloudflare/workers-types@4.20251221.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
+        version: 0.11.1(@cloudflare/workers-types@4.20251229.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -596,27 +596,27 @@ importers:
         version: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       vitest:
         specifier: ~3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/orchestrator-workers:
     dependencies:
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
-        specifier: ^6.0.0
-        version: 6.0.1(zod@4.2.1)
+        specifier: ^6.0.3
+        version: 6.0.3(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       workers-ai-provider:
         specifier: ^3.0.1
-        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.1(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.3(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@biomejs/biome':
@@ -624,10 +624,10 @@ importers:
         version: 2.3.10
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
-        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.11.1
-        version: 0.11.1(@cloudflare/workers-types@4.20251221.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
+        version: 0.11.1(@cloudflare/workers-types@4.20251229.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -636,27 +636,27 @@ importers:
         version: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       vitest:
         specifier: ~3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/parallelisation:
     dependencies:
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
-        specifier: ^6.0.0
-        version: 6.0.1(zod@4.2.1)
+        specifier: ^6.0.3
+        version: 6.0.3(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       workers-ai-provider:
         specifier: ^3.0.1
-        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.1(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.3(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@biomejs/biome':
@@ -664,10 +664,10 @@ importers:
         version: 2.3.10
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
-        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.11.1
-        version: 0.11.1(@cloudflare/workers-types@4.20251221.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
+        version: 0.11.1(@cloudflare/workers-types@4.20251229.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -676,27 +676,27 @@ importers:
         version: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       vitest:
         specifier: ~3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/prompt-chaining:
     dependencies:
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
-        specifier: ^6.0.0
-        version: 6.0.1(zod@4.2.1)
+        specifier: ^6.0.3
+        version: 6.0.3(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       workers-ai-provider:
         specifier: ^3.0.1
-        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.1(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.3(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@biomejs/biome':
@@ -704,10 +704,10 @@ importers:
         version: 2.3.10
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
-        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.11.1
-        version: 0.11.1(@cloudflare/workers-types@4.20251221.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
+        version: 0.11.1(@cloudflare/workers-types@4.20251229.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -716,16 +716,16 @@ importers:
         version: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       vitest:
         specifier: ~3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/python-workers-mcp:
     devDependencies:
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/remote-mcp-auth0/mcp-auth0-oidc:
     dependencies:
@@ -733,11 +733,11 @@ importers:
         specifier: ^0.2.2
         version: 0.2.2
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       jose:
         specifier: ^6.1.3
         version: 6.1.3
@@ -748,12 +748,12 @@ importers:
         specifier: ^3.8.3
         version: 3.8.3
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: ^4.20251221.0
-        version: 4.20251221.0
+        specifier: ^4.20251229.0
+        version: 4.20251229.0
       prettier:
         specifier: ^3.7.4
         version: 3.7.4
@@ -762,7 +762,7 @@ importers:
         version: 5.9.3
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/remote-mcp-auth0/todos-api:
     dependencies:
@@ -770,15 +770,15 @@ importers:
         specifier: ^10.1.0
         version: 10.1.0
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       jose:
         specifier: ^6.1.3
         version: 6.1.3
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: ^4.20251221.0
-        version: 4.20251221.0
+        specifier: ^4.20251229.0
+        version: 4.20251229.0
       prettier:
         specifier: ^3.7.4
         version: 3.7.4
@@ -787,7 +787,7 @@ importers:
         version: 5.9.3
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/remote-mcp-authkit:
     dependencies:
@@ -798,38 +798,38 @@ importers:
         specifier: ^7.77.0
         version: 7.77.0(express@5.1.0)
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       jose:
         specifier: ^6.1.3
         version: 6.1.3
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
         version: 2.3.10
       '@cloudflare/workers-types':
-        specifier: ^4.20251221.0
-        version: 4.20251221.0
+        specifier: ^4.20251229.0
+        version: 4.20251229.0
       typescript:
         specifier: 5.9.3
         version: 5.9.3
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/remote-mcp-authless:
     dependencies:
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@biomejs/biome':
@@ -840,7 +840,7 @@ importers:
         version: 5.9.3
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/remote-mcp-cf-access:
     dependencies:
@@ -848,8 +848,8 @@ importers:
         specifier: ^0.2.2
         version: 0.2.2
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       just-pick:
         specifier: ^4.2.0
         version: 4.2.0
@@ -857,7 +857,7 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@types/node':
@@ -871,7 +871,7 @@ importers:
         version: 5.9.3
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/remote-mcp-github-oauth:
     dependencies:
@@ -879,11 +879,11 @@ importers:
         specifier: ^0.2.2
         version: 0.2.2
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       just-pick:
         specifier: ^4.2.0
         version: 4.2.0
@@ -891,12 +891,12 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: ^4.20251221.0
-        version: 4.20251221.0
+        specifier: ^4.20251229.0
+        version: 4.20251229.0
       prettier:
         specifier: ^3.7.4
         version: 3.7.4
@@ -905,7 +905,7 @@ importers:
         version: 5.9.3
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/remote-mcp-google-oauth:
     dependencies:
@@ -913,21 +913,21 @@ importers:
         specifier: ^0.2.2
         version: 0.2.2
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       just-pick:
         specifier: ^4.2.0
         version: 4.2.0
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: ^4.20251221.0
-        version: 4.20251221.0
+        specifier: ^4.20251229.0
+        version: 4.20251229.0
       prettier:
         specifier: ^3.7.4
         version: 3.7.4
@@ -936,7 +936,7 @@ importers:
         version: 5.9.3
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/remote-mcp-logto:
     dependencies:
@@ -944,16 +944,16 @@ importers:
         specifier: ^0.2.2
         version: 0.2.2
       '@logto/node':
-        specifier: ^3.1.6
-        version: 3.1.6
+        specifier: ^3.1.7
+        version: 3.1.7
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       typescript:
@@ -961,7 +961,7 @@ importers:
         version: 5.9.3
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/remote-mcp-server:
     dependencies:
@@ -969,13 +969,13 @@ importers:
         specifier: ^0.2.2
         version: 0.2.2
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       marked:
@@ -986,7 +986,7 @@ importers:
         version: 5.9.3
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/remote-mcp-server-autorag:
     dependencies:
@@ -994,13 +994,13 @@ importers:
         specifier: ^0.2.2
         version: 0.2.2
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       marked:
@@ -1011,7 +1011,7 @@ importers:
         version: 5.9.3
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/remote-mcp-server-descope-auth:
     dependencies:
@@ -1019,13 +1019,13 @@ importers:
         specifier: ^0.2.2
         version: 0.2.2
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       marked:
@@ -1036,24 +1036,24 @@ importers:
         version: 5.9.3
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/routing:
     dependencies:
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
-        specifier: ^6.0.0
-        version: 6.0.1(zod@4.2.1)
+        specifier: ^6.0.3
+        version: 6.0.3(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       workers-ai-provider:
         specifier: ^3.0.1
-        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.1(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.3(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@biomejs/biome':
@@ -1061,10 +1061,10 @@ importers:
         version: 2.3.10
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
-        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.11.1
-        version: 0.11.1(@cloudflare/workers-types@4.20251221.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
+        version: 0.11.1(@cloudflare/workers-types@4.20251229.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -1073,27 +1073,27 @@ importers:
         version: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       vitest:
         specifier: ~3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/structured-output:
     dependencies:
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
-        specifier: ^6.0.0
-        version: 6.0.1(zod@4.2.1)
+        specifier: ^6.0.3
+        version: 6.0.3(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       workers-ai-provider:
         specifier: ^3.0.1
-        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.1(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.3(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@biomejs/biome':
@@ -1101,10 +1101,10 @@ importers:
         version: 2.3.10
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
-        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.11.1
-        version: 0.11.1(@cloudflare/workers-types@4.20251221.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
+        version: 0.11.1(@cloudflare/workers-types@4.20251229.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -1113,52 +1113,52 @@ importers:
         version: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       vitest:
         specifier: ~3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/structured-output-node:
     dependencies:
       ai:
-        specifier: ^6.0.0
-        version: 6.0.1(zod@4.2.1)
+        specifier: ^6.0.3
+        version: 6.0.3(zod@4.2.1)
       workers-ai-provider:
         specifier: ^3.0.1
-        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.1(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.3(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
         version: 2.3.10
       '@cloudflare/workers-types':
-        specifier: ^4.20251221.0
-        version: 4.20251221.0
+        specifier: ^4.20251229.0
+        version: 4.20251229.0
       typescript:
         specifier: 5.9.3
         version: 5.9.3
       vitest:
         specifier: ~3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
 
   demos/text-generation:
     dependencies:
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
-        specifier: ^6.0.0
-        version: 6.0.1(zod@4.2.1)
+        specifier: ^6.0.3
+        version: 6.0.3(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       workers-ai-provider:
         specifier: ^3.0.1
-        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.1(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.3(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@biomejs/biome':
@@ -1166,36 +1166,36 @@ importers:
         version: 2.3.10
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
-        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.11.1
-        version: 0.11.1(@cloudflare/workers-types@4.20251221.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
+        version: 0.11.1(@cloudflare/workers-types@4.20251229.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
       vite:
         specifier: ^7.3.0
         version: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       vitest:
         specifier: ~3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/text-generation-stream:
     dependencies:
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
-        specifier: ^6.0.0
-        version: 6.0.1(zod@4.2.1)
+        specifier: ^6.0.3
+        version: 6.0.3(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       workers-ai-provider:
         specifier: ^3.0.1
-        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.1(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.3(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@biomejs/biome':
@@ -1203,10 +1203,10 @@ importers:
         version: 2.3.10
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
-        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.11.1
-        version: 0.11.1(@cloudflare/workers-types@4.20251221.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
+        version: 0.11.1(@cloudflare/workers-types@4.20251229.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -1215,27 +1215,27 @@ importers:
         version: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       vitest:
         specifier: ~3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/tool-calling:
     dependencies:
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
-        specifier: ^6.0.0
-        version: 6.0.1(zod@4.2.1)
+        specifier: ^6.0.3
+        version: 6.0.3(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       workers-ai-provider:
         specifier: ^3.0.1
-        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.1(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.3(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@biomejs/biome':
@@ -1243,10 +1243,10 @@ importers:
         version: 2.3.10
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
-        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.11.1
-        version: 0.11.1(@cloudflare/workers-types@4.20251221.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
+        version: 0.11.1(@cloudflare/workers-types@4.20251229.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -1255,27 +1255,27 @@ importers:
         version: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       vitest:
         specifier: ~3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/tool-calling-stream:
     dependencies:
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
-        specifier: ^6.0.0
-        version: 6.0.1(zod@4.2.1)
+        specifier: ^6.0.3
+        version: 6.0.3(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       workers-ai-provider:
         specifier: ^3.0.1
-        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.1(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.3(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@biomejs/biome':
@@ -1283,10 +1283,10 @@ importers:
         version: 2.3.10
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
-        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.11.1
-        version: 0.11.1(@cloudflare/workers-types@4.20251221.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
+        version: 0.11.1(@cloudflare/workers-types@4.20251229.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -1295,24 +1295,24 @@ importers:
         version: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       vitest:
         specifier: ~3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/tool-calling-stream-traditional:
     dependencies:
       agents:
-        specifier: ^0.3.0
-        version: 0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
       ai:
-        specifier: ^6.0.0
-        version: 6.0.1(zod@4.2.1)
+        specifier: ^6.0.3
+        version: 6.0.3(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@biomejs/biome':
@@ -1320,10 +1320,10 @@ importers:
         version: 2.3.10
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
-        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.11.1
-        version: 0.11.1(@cloudflare/workers-types@4.20251221.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
+        version: 0.11.1(@cloudflare/workers-types@4.20251229.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -1332,19 +1332,19 @@ importers:
         version: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       vitest:
         specifier: ~3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/ui-worker:
     dependencies:
       '@ai-sdk/openai':
-        specifier: ^3.0.0
-        version: 3.0.0(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(zod@4.2.1)
       '@ai-sdk/react':
-        specifier: ^3.0.0
-        version: 3.0.1(react@19.2.3)(zod@4.2.1)
+        specifier: ^3.0.3
+        version: 3.0.3(react@19.2.3)(zod@4.2.1)
       '@mantine/charts':
         specifier: ^8.3.10
         version: 8.3.10(@mantine/core@8.3.10(@mantine/hooks@8.3.10(react@19.2.3))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@mantine/hooks@8.3.10(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(recharts@3.6.0(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react-is@18.3.1)(react@19.2.3)(redux@5.0.1))
@@ -1370,11 +1370,11 @@ importers:
         specifier: ^8.3.10
         version: 8.3.10(@mantine/core@8.3.10(@mantine/hooks@8.3.10(react@19.2.3))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@mantine/hooks@8.3.10(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       ai:
-        specifier: ^6.0.0
-        version: 6.0.1(zod@4.2.1)
+        specifier: ^6.0.3
+        version: 6.0.3(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       react:
         specifier: ^19.2.3
         version: 19.2.3
@@ -1385,7 +1385,7 @@ importers:
         specifier: ^3.6.0
         version: 3.6.0(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react-is@18.3.1)(react@19.2.3)(redux@5.0.1)
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@biomejs/biome':
@@ -1393,10 +1393,10 @@ importers:
         version: 2.3.10
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
-        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.11.1
-        version: 0.11.1(@cloudflare/workers-types@4.20251221.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
+        version: 0.11.1(@cloudflare/workers-types@4.20251229.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
       '@types/react':
         specifier: ^19.2.7
         version: 19.2.7
@@ -1423,19 +1423,19 @@ importers:
         version: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       vitest:
         specifier: ~3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   demos/vision:
     dependencies:
       ai:
-        specifier: ^6.0.0
-        version: 6.0.1(zod@4.2.1)
+        specifier: ^6.0.3
+        version: 6.0.3(zod@4.2.1)
       hono:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.3
+        version: 4.11.3
       react:
         specifier: ^19.2.3
         version: 19.2.3
@@ -1444,14 +1444,14 @@ importers:
         version: 19.2.3(react@19.2.3)
       workers-ai-provider:
         specifier: ^3.0.1
-        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.1(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.3(zod@4.2.1))(zod@4.2.1)
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: ^1.19.0
-        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@types/react':
         specifier: ^19.2.7
         version: 19.2.7
@@ -1469,7 +1469,7 @@ importers:
         version: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
       wrangler:
         specifier: ^4.56.0
-        version: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   libs/logger: {}
 
@@ -1508,50 +1508,50 @@ importers:
         specifier: ^4.0.0
         version: 4.0.0(zod@4.2.1)
       '@ai-sdk/anthropic':
-        specifier: ^3.0.0
-        version: 3.0.0(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(zod@4.2.1)
       '@ai-sdk/azure':
-        specifier: ^3.0.0
-        version: 3.0.0(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(zod@4.2.1)
       '@ai-sdk/cerebras':
-        specifier: ^2.0.0
-        version: 2.0.0(zod@4.2.1)
+        specifier: ^2.0.2
+        version: 2.0.2(zod@4.2.1)
       '@ai-sdk/cohere':
-        specifier: ^3.0.0
-        version: 3.0.0(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(zod@4.2.1)
       '@ai-sdk/deepgram':
-        specifier: ^2.0.0
-        version: 2.0.0(zod@4.2.1)
+        specifier: ^2.0.1
+        version: 2.0.1(zod@4.2.1)
       '@ai-sdk/deepseek':
-        specifier: ^2.0.0
-        version: 2.0.0(zod@4.2.1)
+        specifier: ^2.0.1
+        version: 2.0.1(zod@4.2.1)
       '@ai-sdk/elevenlabs':
-        specifier: ^2.0.0
-        version: 2.0.0(zod@4.2.1)
+        specifier: ^2.0.1
+        version: 2.0.1(zod@4.2.1)
       '@ai-sdk/fireworks':
-        specifier: ^2.0.0
-        version: 2.0.0(zod@4.2.1)
+        specifier: ^2.0.1
+        version: 2.0.1(zod@4.2.1)
       '@ai-sdk/google':
-        specifier: ^3.0.0
-        version: 3.0.0(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(zod@4.2.1)
       '@ai-sdk/google-vertex':
-        specifier: ^4.0.0
-        version: 4.0.0(patch_hash=271963aef1bb8d69c1fbba83342f6bdf1b39f53c660e9b34659e6ce279c0a100)(zod@4.2.1)
+        specifier: ^4.0.1
+        version: 4.0.1(patch_hash=271963aef1bb8d69c1fbba83342f6bdf1b39f53c660e9b34659e6ce279c0a100)(zod@4.2.1)
       '@ai-sdk/groq':
-        specifier: ^3.0.0
-        version: 3.0.0(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(zod@4.2.1)
       '@ai-sdk/mistral':
-        specifier: ^3.0.0
-        version: 3.0.0(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(zod@4.2.1)
       '@ai-sdk/openai':
-        specifier: ^3.0.0
-        version: 3.0.0(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(zod@4.2.1)
       '@ai-sdk/perplexity':
-        specifier: ^3.0.0
-        version: 3.0.0(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(zod@4.2.1)
       '@ai-sdk/xai':
-        specifier: ^3.0.0
-        version: 3.0.0(zod@4.2.1)
+        specifier: ^3.0.1
+        version: 3.0.1(zod@4.2.1)
       '@openrouter/ai-sdk-provider':
         specifier: ^1.5.4
         version: 1.5.4(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
@@ -1562,16 +1562,16 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0
       '@ai-sdk/provider-utils':
-        specifier: ^4.0.0
-        version: 4.0.0(zod@4.2.1)
+        specifier: ^4.0.1
+        version: 4.0.1(zod@4.2.1)
       '@cloudflare/workers-types':
-        specifier: ^4.20251221.0
-        version: 4.20251221.0
+        specifier: ^4.20251229.0
+        version: 4.20251229.0
       ai:
-        specifier: ^6.0.0
-        version: 6.0.1(zod@4.2.1)
+        specifier: ^6.0.3
+        version: 6.0.3(zod@4.2.1)
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
 
   tools/aicli:
@@ -1586,7 +1586,7 @@ importers:
         specifier: ^4.21.0
         version: 4.21.0
       zod:
-        specifier: ^4.1.8
+        specifier: ^4.2.1
         version: 4.2.1
       zx:
         specifier: 8.8.5
@@ -1616,44 +1616,50 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/azure@3.0.0':
-    resolution: {integrity: sha512-bY1EfX4aisnpOYcuZkmkuBIUc0noNT/25ZoWispSiMZMS53yF55xkT1SFM+cxDjJ4M3HVJwVuU6r1szA8f9IPA==}
+  '@ai-sdk/anthropic@3.0.1':
+    resolution: {integrity: sha512-MOiwKs76ilEmau/WRMnGWlheTUoB+cbvXCse+SAtpW5ATLreInsuYlspLABn12Dxu3w1Xzke1dT+tmEnxhy9SA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/cerebras@2.0.0':
-    resolution: {integrity: sha512-VdLxIpzumo7TTd78KqE7MKl48YdoEp+60FV8IF3U/I6srzsJqk64fcQPWcNihE10VE5heMiD0xC869M0luC99w==}
+  '@ai-sdk/azure@3.0.1':
+    resolution: {integrity: sha512-WaGi03PKrZe6l5eg07UXGat+ljEN6uG0KKbWyMhve0VpMrfmlU8R7XE2JtAVWZuK4t+pPKO0zhXganqJmhTSgA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/cohere@3.0.0':
-    resolution: {integrity: sha512-ZeoVheAF866ADyC2xdjg8Z1e/K4Zv6dt6UnPmk17ZT1karOocNLiMwWpfpi5Z3b2UU+KD/LyxyLt5gFMVWFG4w==}
+  '@ai-sdk/cerebras@2.0.2':
+    resolution: {integrity: sha512-PimfPWYpoQ0XOahLjby3HdI31fAl3aLt1UadFNMaFapA0OcHhgA1P3lcah8qpBTEoHbMDuJei6lZ27cSmZRCRg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/deepgram@2.0.0':
-    resolution: {integrity: sha512-jfo0vKaJbTGd14N5VtJl7Sb1QtZyviiLyfL19HzsLdKqiOuWPG8fnR/I8o72c3jTO+GEEyZqu8rnWIfi5HtW1A==}
+  '@ai-sdk/cohere@3.0.1':
+    resolution: {integrity: sha512-U2Ej7PeWBvl7qDungEDGMlfhm6FuRqRhxrWTzZ2/GidSx8QN3ralFar3LpmxhsLGwphagf0SFt8TpZmOOaWT3Q==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/deepseek@2.0.0':
-    resolution: {integrity: sha512-qRX06mouHaF4OePE4S8W8+fLX7Iq4dWk7Ul4+SSPBzx6zBJKUqwHYW2XyPShNWhT4Rcogpl5yHJUrBaOExkiyg==}
+  '@ai-sdk/deepgram@2.0.1':
+    resolution: {integrity: sha512-AKfhbgKfbvY895l5A3BFYJUGR8sO6iwmVO4A5WXpGK2jE0hz/nsJn4LooUrFveobX6/CKi0Ad5RxO6CrseQblA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/elevenlabs@2.0.0':
-    resolution: {integrity: sha512-gE4aqYM2YHe8a75mWJ96CWVWCuCMPmM/766oW0sghYCccwKGM2G8JiqyfX5wEq0gDiLG73+I/M7aKS+9PjyA3Q==}
+  '@ai-sdk/deepseek@2.0.1':
+    resolution: {integrity: sha512-CFEP9QjOUwLvK9zCuXS/LUWoLZouAVgJ0+ITscyIS2KtmJYlUPGmpleCthyrl1CqpPEEQiMcF3DKKVootrdveQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/fireworks@2.0.0':
-    resolution: {integrity: sha512-2cHY0LxaL4t/DfGJ9AFC4Ch/D6MImxnM5qvnb+UFOyR2ZT4Apb1Gv6NL0VTlmjqaKLgYW9z39U/yt6ppiG+ZSQ==}
+  '@ai-sdk/elevenlabs@2.0.1':
+    resolution: {integrity: sha512-SDaE752rBibUX90JaQxWW8GgfHaOCNYpdoZb9grVawOBpGQOLUCJ49LOcENHywYKf7utfmKE7qJVBNYDIQHdLg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/fireworks@2.0.1':
+    resolution: {integrity: sha512-zcgtn4RaNuxk0JwZ5RxMlpQsU6Q3Cs3gyOAPxnVXg/57CN9WD7ygiZACc07x3a3MmQ4m4xYH1E7UsT15JhGcqQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -1664,26 +1670,32 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/google-vertex@4.0.0':
-    resolution: {integrity: sha512-wbRgf8uRyKc4hZ+/zY9NUZ+hNIz41k1Zu8NfDt0raqDDBIQiB6spJ3RG9fmmACob4ITbWQQxakqwuRpAACVyZA==}
+  '@ai-sdk/gateway@3.0.2':
+    resolution: {integrity: sha512-giJEg9ob45htbu3iautK+2kvplY2JnTj7ir4wZzYSQWvqGatWfBBfDuNCU5wSJt9BCGjymM5ZS9ziD42JGCZBw==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/google@3.0.0':
-    resolution: {integrity: sha512-KFS9pR7KGDyt7p1OQibglS3amoLjCXxwF7DVg+gL2RLcwFRQV0s6Tp7Q+PvGNFSqPdrPYW8mHyvn8ODK4WTImA==}
+  '@ai-sdk/google-vertex@4.0.1':
+    resolution: {integrity: sha512-WVyHy8cLlFHng3nmC3d1a/eRWZJ2zQjQkKss1kMZnU5x7M5FtAS97xKjf5UtKWvswaI9+AfcM632Dc1Hmu3M0w==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/groq@3.0.0':
-    resolution: {integrity: sha512-uWfvdzNwjXy7HiMOvKdIHnTItRViSWaqiGA4P3+Y1RB+seXHK9hJrKWXHH3hiyLFeAN9lcQp67gtipnGh68ZLg==}
+  '@ai-sdk/google@3.0.1':
+    resolution: {integrity: sha512-gh7i4lEvd1CElmefkq7+RoUhNkhP2OTshzVxSt7/Vh2AV5wTPLhduKJMg1c7SFwErytqffO3el/M/LlfCsqzEw==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/mistral@3.0.0':
-    resolution: {integrity: sha512-c7k/hLqXUdsbwco63kbM9mB7JA6c76kwPTtn9ulpsO8jvL+3n3+MKn0zWF7wjIZXc3kWAOBBK1zZB492hm+f3w==}
+  '@ai-sdk/groq@3.0.1':
+    resolution: {integrity: sha512-scG4Esc0AuFXxKDrcoXuO0ufPg/kFtavnGgll/LCqN7UqQ46mcNIBBaF9TT5LrkgAS8tEOUGLNrbU635HvscIA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/mistral@3.0.1':
+    resolution: {integrity: sha512-Uc2FW8OLOY9is5tuLxCOOfDd11s38agtLUcs10oaIDGDwMeae/kAZufmkrPQq8aaGWtjPs1Sp06fJVcIMz7V7g==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -1694,14 +1706,20 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/openai@3.0.0':
-    resolution: {integrity: sha512-/o2xCQlRA+O0cAXIIBOfMeT35H6Fonzilz9r/IJojPOMQnmIL+0jPQVKOUPr5bouRqCjnwKpwuKEBRqm8jUZkQ==}
+  '@ai-sdk/openai-compatible@2.0.1':
+    resolution: {integrity: sha512-6tfF6YAREdECPHqQ4ydZFQyY6AiwRc+MHZPbwx2HGsLBTPQXtImLO+iew/pB9XjD2G8s4un6PSNYK//Y+jWDcQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/perplexity@3.0.0':
-    resolution: {integrity: sha512-7uMTi+8fVQBM4y6qzjplXTmfOa+p87ZYSEhzTbrteV3gm5DdFQwb4JCIPuZVl3nx2Ug7TajtG8UX95rIrmhLqg==}
+  '@ai-sdk/openai@3.0.1':
+    resolution: {integrity: sha512-P+qxz2diOrh8OrpqLRg+E+XIFVIKM3z2kFjABcCJGHjGbXBK88AJqmuKAi87qLTvTe/xn1fhZBjklZg9bTyigw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/perplexity@3.0.1':
+    resolution: {integrity: sha512-UjdmAJWkls7EnElg2QEQrHwzKwIF5Zj1yRBoHN6x25qPHND0Kup1BpUiYwk4XCRO6nxuRiPklTi+9ajV5iXmyw==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -1712,18 +1730,24 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
+  '@ai-sdk/provider-utils@4.0.1':
+    resolution: {integrity: sha512-de2v8gH9zj47tRI38oSxhQIewmNc+OZjYIOOaMoVWKL65ERSav2PYYZHPSPCrfOeLMkv+Dyh8Y0QGwkO29wMWQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
   '@ai-sdk/provider@3.0.0':
     resolution: {integrity: sha512-m9ka3ptkPQbaHHZHqDXDF9C9B5/Mav0KTdky1k2HZ3/nrW2t1AgObxIVPyGDWQNS9FXT/FS6PIoSjpcP/No8rQ==}
     engines: {node: '>=18'}
 
-  '@ai-sdk/react@3.0.1':
-    resolution: {integrity: sha512-XUPDMFgalNtqBQg+Q3UiiEmWE3PC5pAoc+Drs5Z1Mxqe57za+hKCEwViYADuqeZrc0q6PXTzbcFlQb3pjyGjcQ==}
+  '@ai-sdk/react@3.0.3':
+    resolution: {integrity: sha512-mLIgQuBdIX9gxCYQN3Pv/J8ARoFreIKYr/TVQtI+FwEzejuGFimTyhDln7UIBfrnm3Mpn1xENIWZfDfCRF7wkw==}
     engines: {node: '>=18'}
     peerDependencies:
       react: ^18 || ~19.0.1 || ~19.1.2 || ^19.2.1
 
-  '@ai-sdk/xai@3.0.0':
-    resolution: {integrity: sha512-LTEfmNo0ESXnfWwOnEWcyYuJi/0xKGdjiEwRhCe7IjVxqLk2jF0Cpqk1U+S414JZdB5s9cqjcxFNdkLZ5AfbUA==}
+  '@ai-sdk/xai@3.0.1':
+    resolution: {integrity: sha512-LAURdpfcsxoroVdSgst3gW5woST0LKi0vTjsiz057gU2wZSKB+/4U/yo/EL2GMvqLMRiosJJ/XHt6mQpIYdfJQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -1983,11 +2007,11 @@ packages:
     resolution: {integrity: sha512-pMN5FcrEw9hUkZA4f+zLlzivQSeQf5dRGJjSUbvVYDLvpKCdQx5OaknvKzgbtXOizhP+SJJJjqEbOe55uKKfAw==}
 
   '@cloudflare/kv-asset-handler@0.4.1':
-    resolution: {integrity: sha512-Nu8ahitGFFJztxUml9oD/DLb7Z28C8cd8F46IVQ7y5Btz575pvMY8AqZsXkX7Gds29eCKdMgIHjIvzskHgPSFg==, tarball: https://registry.npmjs.org/@cloudflare/kv-asset-handler/-/kv-asset-handler-0.4.1.tgz}
+    resolution: {integrity: sha512-Nu8ahitGFFJztxUml9oD/DLb7Z28C8cd8F46IVQ7y5Btz575pvMY8AqZsXkX7Gds29eCKdMgIHjIvzskHgPSFg==}
     engines: {node: '>=18.0.0'}
 
   '@cloudflare/unenv-preset@2.7.13':
-    resolution: {integrity: sha512-NulO1H8R/DzsJguLC0ndMuk4Ufv0KSlN+E54ay9rn9ZCQo0kpAPwwh3LhgpZ96a3Dr6L9LqW57M4CqC34iLOvw==, tarball: https://registry.npmjs.org/@cloudflare/unenv-preset/-/unenv-preset-2.7.13.tgz}
+    resolution: {integrity: sha512-NulO1H8R/DzsJguLC0ndMuk4Ufv0KSlN+E54ay9rn9ZCQo0kpAPwwh3LhgpZ96a3Dr6L9LqW57M4CqC34iLOvw==}
     peerDependencies:
       unenv: 2.0.0-rc.24
       workerd: ^1.20251202.0
@@ -1996,53 +2020,53 @@ packages:
         optional: true
 
   '@cloudflare/vite-plugin@1.19.0':
-    resolution: {integrity: sha512-5WpXYB7vwLnqlMyGSrPOO0nKynbn/nA33VXRPQg3II7q3T/3GOACYq/pnv9WBfcq4OnTdehJFm72Zn+psfhBXQ==, tarball: https://registry.npmjs.org/@cloudflare/vite-plugin/-/vite-plugin-1.19.0.tgz}
+    resolution: {integrity: sha512-5WpXYB7vwLnqlMyGSrPOO0nKynbn/nA33VXRPQg3II7q3T/3GOACYq/pnv9WBfcq4OnTdehJFm72Zn+psfhBXQ==}
     peerDependencies:
       vite: ^6.1.0 || ^7.0.0
       wrangler: ^4.56.0
 
   '@cloudflare/vitest-pool-workers@0.11.1':
-    resolution: {integrity: sha512-2ATtR5pb5Q6R19ByHN/Dbe1JY5JWuqGMz3yI2MusDqPcDvL1o5OPlPKJAXphOMEIilXLeATPYrNamdqLBJu3sg==, tarball: https://registry.npmjs.org/@cloudflare/vitest-pool-workers/-/vitest-pool-workers-0.11.1.tgz}
+    resolution: {integrity: sha512-2ATtR5pb5Q6R19ByHN/Dbe1JY5JWuqGMz3yI2MusDqPcDvL1o5OPlPKJAXphOMEIilXLeATPYrNamdqLBJu3sg==}
     peerDependencies:
       '@vitest/runner': 2.0.x - 3.2.x
       '@vitest/snapshot': 2.0.x - 3.2.x
       vitest: 2.0.x - 3.2.x
 
   '@cloudflare/workerd-darwin-64@1.20251217.0':
-    resolution: {integrity: sha512-DN6vT+9ho61d/1/YuILW4VS+N1JBLaixWRL1vqNmhgbf8J8VHwWWotrRruEUYigJKx2yZyw6YsasE+yLXgx/Fw==, tarball: https://registry.npmjs.org/@cloudflare/workerd-darwin-64/-/workerd-darwin-64-1.20251217.0.tgz}
+    resolution: {integrity: sha512-DN6vT+9ho61d/1/YuILW4VS+N1JBLaixWRL1vqNmhgbf8J8VHwWWotrRruEUYigJKx2yZyw6YsasE+yLXgx/Fw==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [darwin]
 
   '@cloudflare/workerd-darwin-arm64@1.20251217.0':
-    resolution: {integrity: sha512-5nZOpRTkHmtcTc4Wbr1mj/O3dLb6aHZSiJuVBgtdbVcVmOXueSay3hnw1PXEyR+vpTKGUPkM+omUIslKHWnXDw==, tarball: https://registry.npmjs.org/@cloudflare/workerd-darwin-arm64/-/workerd-darwin-arm64-1.20251217.0.tgz}
+    resolution: {integrity: sha512-5nZOpRTkHmtcTc4Wbr1mj/O3dLb6aHZSiJuVBgtdbVcVmOXueSay3hnw1PXEyR+vpTKGUPkM+omUIslKHWnXDw==}
     engines: {node: '>=16'}
     cpu: [arm64]
     os: [darwin]
 
   '@cloudflare/workerd-linux-64@1.20251217.0':
-    resolution: {integrity: sha512-uoPGhMaZVXPpCsU0oG3HQzyVpXCGi5rU+jcHRjUI7DXM4EwctBGvZ380Knkja36qtl+ZvSKVR1pUFSGdK+45Pg==, tarball: https://registry.npmjs.org/@cloudflare/workerd-linux-64/-/workerd-linux-64-1.20251217.0.tgz}
+    resolution: {integrity: sha512-uoPGhMaZVXPpCsU0oG3HQzyVpXCGi5rU+jcHRjUI7DXM4EwctBGvZ380Knkja36qtl+ZvSKVR1pUFSGdK+45Pg==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [linux]
 
   '@cloudflare/workerd-linux-arm64@1.20251217.0':
-    resolution: {integrity: sha512-ixHnHKsiz1Xko+eDgCJOZ7EEUZKtmnYq3AjW3nkVcLFypSLks4C29E45zVewdaN4wq8sCLeyQCl6r1kS17+DQQ==, tarball: https://registry.npmjs.org/@cloudflare/workerd-linux-arm64/-/workerd-linux-arm64-1.20251217.0.tgz}
+    resolution: {integrity: sha512-ixHnHKsiz1Xko+eDgCJOZ7EEUZKtmnYq3AjW3nkVcLFypSLks4C29E45zVewdaN4wq8sCLeyQCl6r1kS17+DQQ==}
     engines: {node: '>=16'}
     cpu: [arm64]
     os: [linux]
 
   '@cloudflare/workerd-windows-64@1.20251217.0':
-    resolution: {integrity: sha512-rP6USX+7ctynz3AtmKi+EvlLP3Xdr1ETrSdcnv693/I5QdUwBxq4yE1Lj6CV7GJizX6opXKYg8QMq0Q4eB9zRQ==, tarball: https://registry.npmjs.org/@cloudflare/workerd-windows-64/-/workerd-windows-64-1.20251217.0.tgz}
+    resolution: {integrity: sha512-rP6USX+7ctynz3AtmKi+EvlLP3Xdr1ETrSdcnv693/I5QdUwBxq4yE1Lj6CV7GJizX6opXKYg8QMq0Q4eB9zRQ==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [win32]
 
   '@cloudflare/workers-oauth-provider@0.2.2':
-    resolution: {integrity: sha512-hvg9NFLZwpb/+dNilv8cFrUPjWO1Kqi5UwZymOub92djS3YwdHQczgreVG+GU2C0YHOypNkr/P3Jo6pfkXXQFQ==, tarball: https://registry.npmjs.org/@cloudflare/workers-oauth-provider/-/workers-oauth-provider-0.2.2.tgz}
+    resolution: {integrity: sha512-hvg9NFLZwpb/+dNilv8cFrUPjWO1Kqi5UwZymOub92djS3YwdHQczgreVG+GU2C0YHOypNkr/P3Jo6pfkXXQFQ==}
 
-  '@cloudflare/workers-types@4.20251221.0':
-    resolution: {integrity: sha512-VVTEhY29TtwIwjBjpRrdT51Oqu0JlXijc5TiEKFCjwouUSn+5VhzoTSaz7UBjVOu4vfvcQmjqt/dzwBUR7c95w==, tarball: https://registry.npmjs.org/@cloudflare/workers-types/-/workers-types-4.20251221.0.tgz}
+  '@cloudflare/workers-types@4.20251229.0':
+    resolution: {integrity: sha512-LgzxDZaT9bQhycQInf7S/fcZCQRTvWWQPE9xnEyedI+CXxWsXAD7hg84kvVyr+KUz+W9Oblzo75g6XZ3HdI5Yg==}
 
   '@commander-js/extra-typings@14.0.0':
     resolution: {integrity: sha512-hIn0ncNaJRLkZrxBIp5AsW/eXEHNKYQBh0aPdoUqNgD+Io3NIykQqpKFyKcuasZhicGaEZJX/JBSIkZ4e5x8Dg==}
@@ -2663,8 +2687,8 @@ packages:
   '@jsdevtools/ono@7.1.3':
     resolution: {integrity: sha512-4JQNk+3mVzK3xh2rqd6RB4J46qUR19azEHBneZyTZM+c456qOrbbM/5xcR8huNCCcbVt7+UmizG6GuUvPvKUYg==}
 
-  '@langchain/core@1.1.7':
-    resolution: {integrity: sha512-NSZSi33+V/8RVv1szsUiX7u+jXVCDImr2VO74SiKgJrhyxXKdJcxa3HMPKwdU+tkgQ6T+R7wxVYQ1Cnd4Z48tA==}
+  '@langchain/core@1.1.8':
+    resolution: {integrity: sha512-kIUidOgc0ZdyXo4Ahn9Zas+OayqOfk4ZoKPi7XaDipNSWSApc2+QK5BVcjvwtzxstsNOrmXJiJWEN6WPF/MvAw==}
     engines: {node: '>=20'}
 
   '@langchain/langgraph-checkpoint@1.0.0':
@@ -2698,14 +2722,14 @@ packages:
       zod-to-json-schema:
         optional: true
 
-  '@logto/client@3.1.4':
-    resolution: {integrity: sha512-aaz1XrLLTBii5lz3c7oHr/kqcR2iTbTehxlCn3YMnSyGUBVjoUYH4eU37wqf08nEYjtsLaSndYu63WVN8/Fpqw==}
+  '@logto/client@3.1.5':
+    resolution: {integrity: sha512-xitL6NT09HU41ebNlRfQhjeOL5Ct0nZOwQFqPaIWIvOD8QZ454xN+eSRodBP/xVGuh4znOX8Jrlz0fFQFhKqgQ==}
 
   '@logto/js@6.1.0':
     resolution: {integrity: sha512-FGFDtqZqVP0mUR7ze7Uz488TsMSWQkMiU00PefJg/MMQJeI93WejPcpPkGd4JvoKAVj99wfsY/0AR1gMADCLyQ==}
 
-  '@logto/node@3.1.6':
-    resolution: {integrity: sha512-X/y49goHwbsVRqZmeD0fmw2XepOGFKvJpE6ZXBg995y+zBz+W/QcrZVsg9wUH2L80Z3xLbxoTCOf02IBKGk2qg==}
+  '@logto/node@3.1.7':
+    resolution: {integrity: sha512-P75Q6lrIrHQu2M+stEA2Cykm+WIrDlKMKyLDOddPdoNBp5VeDGpP+H6b3GhY2UE8e0BpEsMqHGDp00NME3mb+g==}
 
   '@mantine/charts@8.3.10':
     resolution: {integrity: sha512-/JbuxY7qzrxrZR7ZjKj9dD8OXq03nAIClqJ+fD5ezF8J1cVYH9nx0IaIu8RPpaT4UwRdxz+TH/EutQ0LdeOz8w==}
@@ -3607,8 +3631,8 @@ packages:
     resolution: {integrity: sha512-kja8j7PjmncONqaTsB8fQ+wE2mSU2DJ9D4XKoJ5PFWIdRMa6SLSN1ff4mOr4jCbfRSsxR4keIiySJU0N9T5hIQ==}
     engines: {node: '>= 8.0.0'}
 
-  agents@0.3.0:
-    resolution: {integrity: sha512-UwhTWs6YPrhHTfV6vvEkYlJnC643nwpCSOvoUmyabWbZvUiHuIvhhAMclmsSh9J0GYQSpg7rKb1tCId2xumvbQ==}
+  agents@0.3.1:
+    resolution: {integrity: sha512-kOxEG7pJbq0nXgEiBz/qweWEy8PIH0d9M/H9vsPkFE13EtmlzYuOnZtJHwp3E0gUQKTezUOJzXziylNMjgC3/g==}
     hasBin: true
     peerDependencies:
       '@ai-sdk/openai': ^3.0.0
@@ -3623,8 +3647,6 @@ packages:
         optional: true
       '@ai-sdk/react':
         optional: true
-      ai:
-        optional: true
       viem:
         optional: true
       x402:
@@ -3632,6 +3654,12 @@ packages:
 
   ai@6.0.1:
     resolution: {integrity: sha512-g/jPakC6h4vUJKDww0d6+VaJmfMC38UqH3kKsngiP+coT0uvCUdQ7lpFDJ0mNmamaOyRMaY2zwEB2RnTAaJU/w==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  ai@6.0.3:
+    resolution: {integrity: sha512-OOo+/C+sEyscoLnbY3w42vjQDICioVNyS+F+ogwq6O5RJL/vgWGuiLzFwuP7oHTeni/MkmX8tIge48GTdaV7QQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -4575,8 +4603,8 @@ packages:
   hermes-parser@0.25.1:
     resolution: {integrity: sha512-6pEjquH3rqaI6cYAXYPcz9MS4rY6R4ngRgrgfDshRptUZIc3lw0MCIJIGDj9++mfySOuPTHB4nrSW99BCvOPIA==}
 
-  hono@4.11.1:
-    resolution: {integrity: sha512-KsFcH0xxHes0J4zaQgWbYwmz3UPOOskdqZmItstUG93+Wk1ePBLkLGwbP9zlmh1BFUiL8Qp+Xfu9P7feJWpGNg==}
+  hono@4.11.3:
+    resolution: {integrity: sha512-PmQi306+M/ct/m5s66Hrg+adPnkD5jiO6IjA7WhWw0gSBSo1EcRegwuI1deZ+wd5pzCGynCcn2DprnE4/yEV4w==}
     engines: {node: '>=16.9.0'}
 
   http-errors@2.0.0:
@@ -4835,11 +4863,11 @@ packages:
     resolution: {integrity: sha512-dhG34DXATL5hSxJbIexCft8FChFXtmskoZYnoPWjXQuebWYCNkVeV3KkGegCK9CP1oswI/vQibS2GY7Em/sJJA==}
     engines: {node: '>= 8'}
 
-  langchain@1.2.2:
-    resolution: {integrity: sha512-oa49AJGTE0MM5IlSvw70fQr2Ot/1LPRvHdSYWj0oGeeTVUalIwWYOpp9KbSW7eYUu7kgIviy4oUMo+KzXCj7Iw==}
+  langchain@1.2.3:
+    resolution: {integrity: sha512-3k986xJuqg4az53JxV5LnGlOzIXF1d9Kq6Y9s7XjitvzhpsbFuTDV5/kiF4cx3pkNGyw0mUXC4tLz9RxucO0hw==}
     engines: {node: '>=20'}
     peerDependencies:
-      '@langchain/core': 1.1.7
+      '@langchain/core': 1.1.8
 
   langsmith@0.4.0:
     resolution: {integrity: sha512-/X99fHBuBFFup778dNmgAVJMdFULz0S8yZUT1cD1RRSviMjxq1GZo8PulRR1ALDxpgYsJs8ueF9godUzF13LSw==}
@@ -5083,8 +5111,8 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
-  msw@2.12.4:
-    resolution: {integrity: sha512-rHNiVfTyKhzc0EjoXUBVGteNKBevdjOlVC6GlIRXpy+/3LHEIGRovnB5WPjcvmNODVQ1TNFnoa7wsGbd0V3epg==}
+  msw@2.12.7:
+    resolution: {integrity: sha512-retd5i3xCZDVWMYjHEVuKTmhqY8lSsxujjVrZiGbbdoxxIBg5S7rCuYy/YQpfrTYIxpd/o0Kyb/3H+1udBMoYg==}
     engines: {node: '>=18'}
     hasBin: true
     peerDependencies:
@@ -6424,55 +6452,62 @@ snapshots:
       zod: 4.2.1
     optional: true
 
-  '@ai-sdk/azure@3.0.0(zod@4.2.1)':
+  '@ai-sdk/anthropic@3.0.1(zod@4.2.1)':
     dependencies:
-      '@ai-sdk/openai': 3.0.0(zod@4.2.1)
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      '@ai-sdk/provider-utils': 4.0.1(zod@4.2.1)
       zod: 4.2.1
     optional: true
 
-  '@ai-sdk/cerebras@2.0.0(zod@4.2.1)':
+  '@ai-sdk/azure@3.0.1(zod@4.2.1)':
     dependencies:
-      '@ai-sdk/openai-compatible': 2.0.0(zod@4.2.1)
+      '@ai-sdk/openai': 3.0.1(zod@4.2.1)
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      '@ai-sdk/provider-utils': 4.0.1(zod@4.2.1)
       zod: 4.2.1
     optional: true
 
-  '@ai-sdk/cohere@3.0.0(zod@4.2.1)':
+  '@ai-sdk/cerebras@2.0.2(zod@4.2.1)':
     dependencies:
+      '@ai-sdk/openai-compatible': 2.0.1(zod@4.2.1)
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      '@ai-sdk/provider-utils': 4.0.1(zod@4.2.1)
       zod: 4.2.1
     optional: true
 
-  '@ai-sdk/deepgram@2.0.0(zod@4.2.1)':
+  '@ai-sdk/cohere@3.0.1(zod@4.2.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      '@ai-sdk/provider-utils': 4.0.1(zod@4.2.1)
       zod: 4.2.1
     optional: true
 
-  '@ai-sdk/deepseek@2.0.0(zod@4.2.1)':
+  '@ai-sdk/deepgram@2.0.1(zod@4.2.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      '@ai-sdk/provider-utils': 4.0.1(zod@4.2.1)
       zod: 4.2.1
     optional: true
 
-  '@ai-sdk/elevenlabs@2.0.0(zod@4.2.1)':
+  '@ai-sdk/deepseek@2.0.1(zod@4.2.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      '@ai-sdk/provider-utils': 4.0.1(zod@4.2.1)
       zod: 4.2.1
     optional: true
 
-  '@ai-sdk/fireworks@2.0.0(zod@4.2.1)':
+  '@ai-sdk/elevenlabs@2.0.1(zod@4.2.1)':
     dependencies:
-      '@ai-sdk/openai-compatible': 2.0.0(zod@4.2.1)
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      '@ai-sdk/provider-utils': 4.0.1(zod@4.2.1)
+      zod: 4.2.1
+    optional: true
+
+  '@ai-sdk/fireworks@2.0.1(zod@4.2.1)':
+    dependencies:
+      '@ai-sdk/openai-compatible': 2.0.1(zod@4.2.1)
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.1(zod@4.2.1)
       zod: 4.2.1
     optional: true
 
@@ -6483,36 +6518,43 @@ snapshots:
       '@vercel/oidc': 3.0.5
       zod: 4.2.1
 
-  '@ai-sdk/google-vertex@4.0.0(patch_hash=271963aef1bb8d69c1fbba83342f6bdf1b39f53c660e9b34659e6ce279c0a100)(zod@4.2.1)':
+  '@ai-sdk/gateway@3.0.2(zod@4.2.1)':
     dependencies:
-      '@ai-sdk/anthropic': 3.0.0(zod@4.2.1)
-      '@ai-sdk/google': 3.0.0(zod@4.2.1)
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      '@ai-sdk/provider-utils': 4.0.1(zod@4.2.1)
+      '@vercel/oidc': 3.0.5
+      zod: 4.2.1
+
+  '@ai-sdk/google-vertex@4.0.1(patch_hash=271963aef1bb8d69c1fbba83342f6bdf1b39f53c660e9b34659e6ce279c0a100)(zod@4.2.1)':
+    dependencies:
+      '@ai-sdk/anthropic': 3.0.1(zod@4.2.1)
+      '@ai-sdk/google': 3.0.1(zod@4.2.1)
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.1(zod@4.2.1)
       google-auth-library: 10.5.0
       zod: 4.2.1
     transitivePeerDependencies:
       - supports-color
     optional: true
 
-  '@ai-sdk/google@3.0.0(zod@4.2.1)':
+  '@ai-sdk/google@3.0.1(zod@4.2.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      '@ai-sdk/provider-utils': 4.0.1(zod@4.2.1)
       zod: 4.2.1
     optional: true
 
-  '@ai-sdk/groq@3.0.0(zod@4.2.1)':
+  '@ai-sdk/groq@3.0.1(zod@4.2.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      '@ai-sdk/provider-utils': 4.0.1(zod@4.2.1)
       zod: 4.2.1
     optional: true
 
-  '@ai-sdk/mistral@3.0.0(zod@4.2.1)':
+  '@ai-sdk/mistral@3.0.1(zod@4.2.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      '@ai-sdk/provider-utils': 4.0.1(zod@4.2.1)
       zod: 4.2.1
     optional: true
 
@@ -6522,16 +6564,23 @@ snapshots:
       '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
       zod: 4.2.1
 
-  '@ai-sdk/openai@3.0.0(zod@4.2.1)':
+  '@ai-sdk/openai-compatible@2.0.1(zod@4.2.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      '@ai-sdk/provider-utils': 4.0.1(zod@4.2.1)
+      zod: 4.2.1
+    optional: true
+
+  '@ai-sdk/openai@3.0.1(zod@4.2.1)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.1(zod@4.2.1)
       zod: 4.2.1
 
-  '@ai-sdk/perplexity@3.0.0(zod@4.2.1)':
+  '@ai-sdk/perplexity@3.0.1(zod@4.2.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      '@ai-sdk/provider-utils': 4.0.1(zod@4.2.1)
       zod: 4.2.1
     optional: true
 
@@ -6542,25 +6591,32 @@ snapshots:
       eventsource-parser: 3.0.6
       zod: 4.2.1
 
+  '@ai-sdk/provider-utils@4.0.1(zod@4.2.1)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.0
+      '@standard-schema/spec': 1.1.0
+      eventsource-parser: 3.0.6
+      zod: 4.2.1
+
   '@ai-sdk/provider@3.0.0':
     dependencies:
       json-schema: 0.4.0
 
-  '@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1)':
+  '@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1)':
     dependencies:
-      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
-      ai: 6.0.1(zod@4.2.1)
+      '@ai-sdk/provider-utils': 4.0.1(zod@4.2.1)
+      ai: 6.0.3(zod@4.2.1)
       react: 19.2.3
       swr: 2.3.3(react@19.2.3)
       throttleit: 2.1.0
     transitivePeerDependencies:
       - zod
 
-  '@ai-sdk/xai@3.0.0(zod@4.2.1)':
+  '@ai-sdk/xai@3.0.1(zod@4.2.1)':
     dependencies:
-      '@ai-sdk/openai-compatible': 2.0.0(zod@4.2.1)
+      '@ai-sdk/openai-compatible': 2.0.1(zod@4.2.1)
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      '@ai-sdk/provider-utils': 4.0.1(zod@4.2.1)
       zod: 4.2.1
     optional: true
 
@@ -6987,7 +7043,7 @@ snapshots:
     optionalDependencies:
       workerd: 1.20251217.0
 
-  '@cloudflare/vite-plugin@1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
+  '@cloudflare/vite-plugin@1.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))(workerd@1.20251217.0)(wrangler@4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
     dependencies:
       '@cloudflare/unenv-preset': 2.7.13(unenv@2.0.0-rc.24)(workerd@1.20251217.0)
       '@remix-run/node-fetch-server': 0.8.0
@@ -6998,14 +7054,14 @@ snapshots:
       tinyglobby: 0.2.15
       unenv: 2.0.0-rc.24
       vite: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
-      wrangler: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      wrangler: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       ws: 8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
       - workerd
 
-  '@cloudflare/vitest-pool-workers@0.11.1(@cloudflare/workers-types@4.20251221.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))':
+  '@cloudflare/vitest-pool-workers@0.11.1(@cloudflare/workers-types@4.20251229.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))':
     dependencies:
       '@vitest/runner': 3.2.4
       '@vitest/snapshot': 3.2.4
@@ -7015,8 +7071,8 @@ snapshots:
       esbuild: 0.27.0
       miniflare: 4.20251217.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       semver: 7.7.1
-      vitest: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
-      wrangler: 4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      vitest: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
+      wrangler: 4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       zod: 3.25.76
     transitivePeerDependencies:
       - '@cloudflare/workers-types'
@@ -7040,7 +7096,7 @@ snapshots:
 
   '@cloudflare/workers-oauth-provider@0.2.2': {}
 
-  '@cloudflare/workers-types@4.20251221.0': {}
+  '@cloudflare/workers-types@4.20251229.0': {}
 
   '@commander-js/extra-typings@14.0.0(commander@14.0.2)':
     dependencies:
@@ -7474,7 +7530,7 @@ snapshots:
 
   '@jsdevtools/ono@7.1.3': {}
 
-  '@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))':
+  '@langchain/core@1.1.8(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))':
     dependencies:
       '@cfworker/json-schema': 4.1.1
       ansi-styles: 5.2.0
@@ -7492,26 +7548,26 @@ snapshots:
       - '@opentelemetry/sdk-trace-base'
       - openai
 
-  '@langchain/langgraph-checkpoint@1.0.0(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))':
+  '@langchain/langgraph-checkpoint@1.0.0(@langchain/core@1.1.8(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))':
     dependencies:
-      '@langchain/core': 1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))
+      '@langchain/core': 1.1.8(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))
       uuid: 10.0.0
 
-  '@langchain/langgraph-sdk@1.0.0(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+  '@langchain/langgraph-sdk@1.0.0(@langchain/core@1.1.8(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
     dependencies:
       p-queue: 6.6.2
       p-retry: 4.6.2
       uuid: 9.0.1
     optionalDependencies:
-      '@langchain/core': 1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))
+      '@langchain/core': 1.1.8(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
 
-  '@langchain/langgraph@1.0.1(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod-to-json-schema@3.25.0(zod@4.2.1))(zod@4.2.1)':
+  '@langchain/langgraph@1.0.1(@langchain/core@1.1.8(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod-to-json-schema@3.25.0(zod@4.2.1))(zod@4.2.1)':
     dependencies:
-      '@langchain/core': 1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))
-      '@langchain/langgraph-checkpoint': 1.0.0(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))
-      '@langchain/langgraph-sdk': 1.0.0(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@langchain/core': 1.1.8(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))
+      '@langchain/langgraph-checkpoint': 1.0.0(@langchain/core@1.1.8(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))
+      '@langchain/langgraph-sdk': 1.0.0(@langchain/core@1.1.8(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       uuid: 10.0.0
       zod: 4.2.1
     optionalDependencies:
@@ -7520,7 +7576,7 @@ snapshots:
       - react
       - react-dom
 
-  '@logto/client@3.1.4':
+  '@logto/client@3.1.5':
     dependencies:
       '@logto/js': 6.1.0
       '@silverhand/essentials': 2.9.2
@@ -7532,9 +7588,9 @@ snapshots:
       '@silverhand/essentials': 2.9.2
       camelcase-keys: 9.1.3
 
-  '@logto/node@3.1.6':
+  '@logto/node@3.1.7':
     dependencies:
-      '@logto/client': 3.1.4
+      '@logto/client': 3.1.5
       '@silverhand/essentials': 2.9.2
       js-base64: 3.7.7
 
@@ -8475,13 +8531,13 @@ snapshots:
       chai: 5.2.0
       tinyrainbow: 2.0.0
 
-  '@vitest/mocker@3.2.4(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))':
+  '@vitest/mocker@3.2.4(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))':
     dependencies:
       '@vitest/spy': 3.2.4
       estree-walker: 3.0.3
       magic-string: 0.30.17
     optionalDependencies:
-      msw: 2.12.4(@types/node@25.0.3)(typescript@5.9.3)
+      msw: 2.12.7(@types/node@25.0.3)(typescript@5.9.3)
       vite: 7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1)
 
   '@vitest/pretty-format@3.2.4':
@@ -8572,25 +8628,25 @@ snapshots:
       humanize-ms: 1.2.1
     optional: true
 
-  agents@0.3.0(@ai-sdk/openai@3.0.0(zod@4.2.1))(@ai-sdk/react@3.0.1(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251221.0)(ai@6.0.1(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1):
+  agents@0.3.1(@ai-sdk/openai@3.0.1(zod@4.2.1))(@ai-sdk/react@3.0.3(react@19.2.3)(zod@4.2.1))(@cloudflare/workers-types@4.20251229.0)(ai@6.0.3(zod@4.2.1))(react@19.2.3)(typescript@5.9.3)(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1):
     dependencies:
       '@cfworker/json-schema': 4.1.1
       '@modelcontextprotocol/sdk': 1.23.0(@cfworker/json-schema@4.1.1)(zod@4.2.1)
+      ai: 6.0.3(zod@4.2.1)
       cron-schedule: 6.0.0
       json-schema: 0.4.0
       json-schema-to-typescript: 15.0.4
       mimetext: 3.0.27
       nanoid: 5.1.6
-      partyserver: 0.1.0(@cloudflare/workers-types@4.20251221.0)
+      partyserver: 0.1.0(@cloudflare/workers-types@4.20251229.0)
       partysocket: 1.1.10
       react: 19.2.3
       yargs: 18.0.0
       zod: 4.2.1
       zod-to-ts: 2.0.0(typescript@5.9.3)(zod@4.2.1)
     optionalDependencies:
-      '@ai-sdk/openai': 3.0.0(zod@4.2.1)
-      '@ai-sdk/react': 3.0.1(react@19.2.3)(zod@4.2.1)
-      ai: 6.0.1(zod@4.2.1)
+      '@ai-sdk/openai': 3.0.1(zod@4.2.1)
+      '@ai-sdk/react': 3.0.3(react@19.2.3)(zod@4.2.1)
       viem: 2.37.8(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1)
     transitivePeerDependencies:
       - '@cloudflare/workers-types'
@@ -8602,6 +8658,14 @@ snapshots:
       '@ai-sdk/gateway': 3.0.0(zod@4.2.1)
       '@ai-sdk/provider': 3.0.0
       '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      '@opentelemetry/api': 1.9.0
+      zod: 4.2.1
+
+  ai@6.0.3(zod@4.2.1):
+    dependencies:
+      '@ai-sdk/gateway': 3.0.2(zod@4.2.1)
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.1(zod@4.2.1)
       '@opentelemetry/api': 1.9.0
       zod: 4.2.1
 
@@ -9583,7 +9647,7 @@ snapshots:
     dependencies:
       hermes-estree: 0.25.1
 
-  hono@4.11.1: {}
+  hono@4.11.3: {}
 
   http-errors@2.0.0:
     dependencies:
@@ -9818,11 +9882,11 @@ snapshots:
 
   klona@2.0.6: {}
 
-  langchain@1.2.2(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod-to-json-schema@3.25.0(zod@4.2.1)):
+  langchain@1.2.3(@langchain/core@1.1.8(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod-to-json-schema@3.25.0(zod@4.2.1)):
     dependencies:
-      '@langchain/core': 1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))
-      '@langchain/langgraph': 1.0.1(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod-to-json-schema@3.25.0(zod@4.2.1))(zod@4.2.1)
-      '@langchain/langgraph-checkpoint': 1.0.0(@langchain/core@1.1.7(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))
+      '@langchain/core': 1.1.8(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))
+      '@langchain/langgraph': 1.0.1(@langchain/core@1.1.8(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod-to-json-schema@3.25.0(zod@4.2.1))(zod@4.2.1)
+      '@langchain/langgraph-checkpoint': 1.0.0(@langchain/core@1.1.8(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)))
       langsmith: 0.4.0(@opentelemetry/api@1.9.0)(openai@4.92.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))
       uuid: 10.0.0
       zod: 4.2.1
@@ -10038,7 +10102,7 @@ snapshots:
 
   ms@2.1.3: {}
 
-  msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3):
+  msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3):
     dependencies:
       '@inquirer/confirm': 5.1.9(@types/node@25.0.3)
       '@mswjs/interceptors': 0.40.0
@@ -10305,9 +10369,9 @@ snapshots:
 
   parseurl@1.3.3: {}
 
-  partyserver@0.1.0(@cloudflare/workers-types@4.20251221.0):
+  partyserver@0.1.0(@cloudflare/workers-types@4.20251229.0):
     dependencies:
-      '@cloudflare/workers-types': 4.20251221.0
+      '@cloudflare/workers-types': 4.20251229.0
       nanoid: 5.1.6
 
   partysocket@1.1.10:
@@ -11181,11 +11245,11 @@ snapshots:
       tsx: 4.21.0
       yaml: 2.7.1
 
-  vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1):
+  vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1):
     dependencies:
       '@types/chai': 5.2.2
       '@vitest/expect': 3.2.4
-      '@vitest/mocker': 3.2.4(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
+      '@vitest/mocker': 3.2.4(msw@2.12.7(@types/node@25.0.3)(typescript@5.9.3))(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.1)(sugarss@5.0.0(postcss@8.5.6))(tsx@4.21.0)(yaml@2.7.1))
       '@vitest/pretty-format': 3.2.4
       '@vitest/runner': 3.2.4
       '@vitest/snapshot': 3.2.4
@@ -11279,14 +11343,14 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20251217.0
       '@cloudflare/workerd-windows-64': 1.20251217.0
 
-  workers-ai-provider@3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1):
+  workers-ai-provider@3.0.1(@ai-sdk/provider-utils@4.0.1(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.3(zod@4.2.1))(zod@4.2.1):
     dependencies:
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
-      ai: 6.0.1(zod@4.2.1)
+      '@ai-sdk/provider-utils': 4.0.1(zod@4.2.1)
+      ai: 6.0.3(zod@4.2.1)
       zod: 4.2.1
 
-  wrangler@4.56.0(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10):
+  wrangler@4.56.0(@cloudflare/workers-types@4.20251229.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.4.1
       '@cloudflare/unenv-preset': 2.7.13(unenv@2.0.0-rc.24)(workerd@1.20251217.0)
@@ -11297,7 +11361,7 @@ snapshots:
       unenv: 2.0.0-rc.24
       workerd: 1.20251217.0
     optionalDependencies:
-      '@cloudflare/workers-types': 4.20251221.0
+      '@cloudflare/workers-types': 4.20251229.0
       fsevents: 2.3.3
     transitivePeerDependencies:
       - bufferutil

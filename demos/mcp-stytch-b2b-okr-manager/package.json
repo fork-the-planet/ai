@@ -16,15 +16,15 @@
 	"dependencies": {
 		"@stytch/react": "^19.18.0",
 		"@stytch/vanilla-js": "^5.44.0",
-		"agents": "^0.3.0",
+		"agents": "^0.3.1",
 		"commander": "^14.0.2",
-		"hono": "^4.11.1",
+		"hono": "^4.11.3",
 		"lucide-react": "^0.562.0",
 		"react": "^19.2.3",
 		"react-dom": "^19.2.3",
 		"react-router-dom": "^7.11.0",
 		"stytch": "^12.43.1",
-		"zod": "^4.1.8"
+		"zod": "^4.2.1"
 	},
 	"devDependencies": {
 		"@cloudflare/vite-plugin": "^1.19.0",

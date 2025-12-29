@@ -16,8 +16,8 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@ai-sdk/openai": "^3.0.0",
-		"@ai-sdk/react": "^3.0.0",
+		"@ai-sdk/openai": "^3.0.1",
+		"@ai-sdk/react": "^3.0.3",
 		"@mantine/charts": "^8.3.10",
 		"@mantine/code-highlight": "^8.3.10",
 		"@mantine/core": "^8.3.10",
@@ -26,12 +26,12 @@
 		"@mantine/hooks": "^8.3.10",
 		"@mantine/modals": "^8.3.10",
 		"@mantine/notifications": "^8.3.10",
-		"ai": "^6.0.0",
-		"hono": "^4.11.1",
+		"ai": "^6.0.3",
+		"hono": "^4.11.3",
 		"react": "^19.2.3",
 		"react-dom": "^19.2.3",
 		"recharts": "^3.6.0",
-		"zod": "^4.1.8"
+		"zod": "^4.2.1"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.10",
