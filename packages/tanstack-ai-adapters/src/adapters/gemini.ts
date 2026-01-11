@@ -2,24 +2,30 @@ import { GoogleGenAI } from "@google/genai";
 import { GeminiTextAdapter, type GeminiTextModels } from "@tanstack/ai-gemini";
 import type { AiGatewayCredentialsConfig } from "../utils/create-fetcher";
 
+function createGeminiClient(config: AiGatewayCredentialsConfig) {
+	return new GoogleGenAI({
+		apiKey: config.apiKey ?? "unused",
+		httpOptions: {
+			baseUrl: `https://gateway.ai.cloudflare.com/v1/${config.accountId}/${config.gatewayId}/google-ai-studio`,
+			headers: config.cfApiKey
+				? {
+						"cf-aig-authorization": `Bearer ${config.cfApiKey}`,
+					}
+				: undefined,
+		},
+	});
+}
+
 type GeminiModel = (typeof GeminiTextModels)[number];
 
-export class GeminiGatewayAdapter<TModel extends GeminiModel> extends GeminiTextAdapter<TModel> {
+export class GeminiTextGatewayAdapter<
+	TModel extends GeminiModel,
+> extends GeminiTextAdapter<TModel> {
 	constructor(model: TModel, config: AiGatewayCredentialsConfig) {
 		super({ apiKey: config.apiKey ?? "unused" }, model);
 
 		// @ts-expect-error - we need to override the GoogleGenAI client
-		this.client = new GoogleGenAI({
-			apiKey: config.apiKey ?? "unused",
-			httpOptions: {
-				baseUrl: `https://gateway.ai.cloudflare.com/v1/${config.accountId}/${config.gatewayId}/google-ai-studio`,
-				headers: config.cfApiKey
-					? {
-							"cf-aig-authorization": `Bearer ${config.cfApiKey}`,
-						}
-					: undefined,
-			},
-		});
+		this.client = createGeminiClient(config);
 	}
 }
 
@@ -29,6 +35,6 @@ export class GeminiGatewayAdapter<TModel extends GeminiModel> extends GeminiText
  * @param model The Gemini model to use
  * @param config Configuration options
  */
-export function createGemini(model: GeminiModel, config: AiGatewayCredentialsConfig) {
-	return new GeminiGatewayAdapter(model, config);
+export function createGeminiChat(model: GeminiModel, config: AiGatewayCredentialsConfig) {
+	return new GeminiTextGatewayAdapter(model, config);
 }

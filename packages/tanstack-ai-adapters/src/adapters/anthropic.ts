@@ -1,6 +1,17 @@
-import { AnthropicTextAdapter } from "@tanstack/ai-anthropic";
+import { AnthropicTextAdapter, AnthropicSummarizeAdapter } from "@tanstack/ai-anthropic";
 import AnthropicSdk from "@anthropic-ai/sdk";
 import { createGatewayFetch, type AiGatewayConfig } from "../utils/create-fetcher";
+
+export type AnthropicGatewayConfig = AiGatewayConfig & { anthropicVersion?: string };
+
+function createAnthropicClient(config: AnthropicGatewayConfig) {
+	return new AnthropicSdk({
+		apiKey: config.apiKey ?? "unused",
+		fetch: createGatewayFetch("anthropic", config, {
+			"anthropic-version": config.anthropicVersion ?? "2023-06-01",
+		}),
+	});
+}
 
 const ANTHROPIC_MODELS = [
 	"claude-opus-4-5",
@@ -16,19 +27,14 @@ const ANTHROPIC_MODELS = [
 
 type AnthropicModel = (typeof ANTHROPIC_MODELS)[number];
 
-export class AnthropicGatewayAdapter<
+export class AnthropicTextGatewayAdapter<
 	TModel extends AnthropicModel,
 > extends AnthropicTextAdapter<TModel> {
-	constructor(config: AiGatewayConfig, model: TModel) {
+	constructor(config: AnthropicGatewayConfig, model: TModel) {
 		super(config, model);
 
 		// @ts-expect-error - We need to override the Anthropic client
-		this.client = new AnthropicSdk({
-			apiKey: config.apiKey ?? "unused",
-			fetch: createGatewayFetch("anthropic", config, {
-				"anthropic-version": "2023-06-01",
-			}),
-		});
+		this.client = createAnthropicClient(config);
 	}
 }
 
@@ -38,6 +44,27 @@ export class AnthropicGatewayAdapter<
  * @param model The Anthropic model to use
  * @param config Configuration options
  */
-export function createAnthropic(model: AnthropicModel, config: AiGatewayConfig) {
-	return new AnthropicGatewayAdapter(config, model);
+export function createAnthropicChat(model: AnthropicModel, config: AnthropicGatewayConfig) {
+	return new AnthropicTextGatewayAdapter(config, model);
+}
+
+export class AnthropicSummarizeGatewayAdapter<
+	TModel extends AnthropicModel,
+> extends AnthropicSummarizeAdapter<TModel> {
+	constructor(config: AnthropicGatewayConfig, model: TModel) {
+		super(config, model);
+
+		// @ts-expect-error - We need to override the Anthropic client
+		this.client = createAnthropicClient(config);
+	}
+}
+
+/**
+ * Creates an Anthropic summarize adapter which uses Cloudflare AI Gateway.
+ * Supports both binding and credential-based configurations.
+ * @param model The Anthropic model to use
+ * @param config Configuration options
+ */
+export function createAnthropicSummarize(model: AnthropicModel, config: AnthropicGatewayConfig) {
+	return new AnthropicSummarizeGatewayAdapter(config, model);
 }

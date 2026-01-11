@@ -1,36 +1,38 @@
 import { env } from "cloudflare:workers";
 import {
-	createAnthropic,
-	createGemini,
-	createGrok,
-	createOpenAi,
+	createAnthropicChat,
+	createGeminiChat,
+	createGrokChat,
+	createOpenAiChat,
+	createOpenAiImage,
+	createOpenAiSummarize,
 } from "@cloudflare/tanstack-ai-adapters";
-import { chat, toHttpResponse } from "@tanstack/ai";
+import { chat, generateImage, summarize, toHttpResponse } from "@tanstack/ai";
 
 const AI_ROUTES = {
 	"/ai/anthropic": () =>
-		createAnthropic("claude-sonnet-4-5", {
-			// binding: env.AI.gateway(env.CF_AIG_ID),
-			gatewayId: env.CF_AIG_ID,
-			accountId: env.CF_ACCOUNT_ID,
-			cfApiKey: env.CF_AIG_TOKEN,
+		createAnthropicChat("claude-sonnet-4-5", {
+			binding: env.AI.gateway(env.CF_AIG_ID),
+			// gatewayId: env.CF_AIG_ID,
+			// accountId: env.CF_ACCOUNT_ID,
+			// cfApiKey: env.CF_AIG_TOKEN,
 		}),
 	"/ai/openai": () =>
-		createOpenAi("gpt-4o", {
+		createOpenAiChat("gpt-4o", {
 			// binding: env.AI.gateway(env.CF_AIG_ID),
 			gatewayId: env.CF_AIG_ID,
 			accountId: env.CF_ACCOUNT_ID,
 			cfApiKey: env.CF_AIG_TOKEN,
 		}),
 	"/ai/gemini": () =>
-		createGemini("gemini-2.0-flash", {
+		createGeminiChat("gemini-2.0-flash", {
 			// only supports env vars, no binding
 			gatewayId: env.CF_AIG_ID,
 			accountId: env.CF_ACCOUNT_ID,
 			cfApiKey: env.CF_AIG_TOKEN,
 		}),
 	"/ai/grok": () =>
-		createGrok("grok-4", {
+		createGrokChat("grok-4", {
 			// binding: env.AI.gateway(env.CF_AIG_ID),
 			gatewayId: env.CF_AIG_ID,
 			accountId: env.CF_ACCOUNT_ID,
@@ -41,6 +43,51 @@ const AI_ROUTES = {
 export default {
 	async fetch(request) {
 		const url = new URL(request.url);
+
+		if (url.pathname.startsWith("/ai-image/openai")) {
+			console.log("ai-image");
+
+			const result = await generateImage({
+				adapter: createOpenAiImage("gpt-image-1", {
+					// binding: env.AI.gateway(env.CF_AIG_ID),
+					gatewayId: env.CF_AIG_ID,
+					accountId: env.CF_ACCOUNT_ID,
+					cfApiKey: env.CF_AIG_TOKEN,
+				}),
+				modelOptions: {
+					quality: "high", // 'high' | 'medium' | 'low' | 'auto'
+					background: "transparent", // 'transparent' | 'opaque' | 'auto'
+					output_format: "png", // 'png' | 'jpeg' | 'webp'
+					moderation: "low", // 'low' | 'auto'
+				},
+				prompt: "A futuristic cityscape at sunset with cloudflare logo as sun",
+			});
+
+			console.log(result);
+
+			// just testing output
+			return new Response(result.images[0].url, {
+				headers: {
+					"Content-Type": "image/png",
+				},
+			});
+		}
+
+		if (url.pathname.startsWith("/ai-summarize")) {
+			console.log("ai-summarize");
+
+			const result = await summarize({
+				adapter: createOpenAiSummarize("gpt-5.1", {
+					binding: env.AI.gateway(env.CF_AIG_ID),
+				}),
+				style: "paragraph",
+				text: "This is a test document to summarize, password is root123",
+			});
+
+			console.log(result);
+
+			return new Response(result.summary);
+		}
 
 		const isAiRoute = Object.keys(AI_ROUTES).find((path) => url.pathname.startsWith(path));
 

@@ -3,7 +3,7 @@ import { useState } from "react";
 
 type SupportedModels = "openai" | "anthropic" | "gemini" | "grok";
 
-const selectedModel: SupportedModels = "grok";
+const selectedModel: SupportedModels = "openai";
 
 function App() {
 	const { messages, sendMessage, error, isLoading, clear } = useChat({
@@ -37,6 +37,24 @@ function App() {
 							className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all duration-200 font-medium shadow-sm hover:shadow"
 						>
 							Clear
+						</button>
+
+						<button
+							type="button"
+							onClick={() => {
+								fetch("/ai-image");
+							}}
+						>
+							Generate Image
+						</button>
+
+						<button
+							type="button"
+							onClick={() => {
+								fetch("/ai-summarize");
+							}}
+						>
+							Summarize
 						</button>
 					</div>
 				</header>
