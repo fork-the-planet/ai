@@ -76,8 +76,8 @@ const adapter = createOpenAiChat{
 | Provider      | Chat | Summarize | Image Generation | Transcription | Text-to-Speech | Video |
 | ------------- | ---- | --------- | ---------------- | ------------- | -------------- | ----- |
 | **OpenAI**    | ✅   | ✅        | ✅               | ✅            | ✅             | ✅    |
+| **Gemini**    | ✅   | ✅        | ✅               | ❌            | ❌             | ❌    |
 | **Anthropic** | ✅   | ✅        | ❌               | ❌            | ❌             | ❌    |
-| **Gemini**    | ✅   | ❌        | ❌               | ❌            | ❌             | ❌    |
 | **Grok**      | ✅   | ❌        | ✅               | ❌            | ❌             | ❌    |
 
 ### Available Functions

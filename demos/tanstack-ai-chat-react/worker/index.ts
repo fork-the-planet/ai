@@ -5,7 +5,7 @@ import {
 	createGrokChat,
 	createOpenAiChat,
 	createOpenAiImage,
-	createOpenAiSummarize,
+	createGeminiSummarize,
 } from "@cloudflare/tanstack-ai-adapters";
 import { chat, generateImage, summarize, toHttpResponse } from "@tanstack/ai";
 
@@ -77,8 +77,10 @@ export default {
 			console.log("ai-summarize");
 
 			const result = await summarize({
-				adapter: createOpenAiSummarize("gpt-5.1", {
-					binding: env.AI.gateway(env.CF_AIG_ID),
+				adapter: createGeminiSummarize("gemini-2.0-flash", {
+					gatewayId: env.CF_AIG_ID,
+					accountId: env.CF_ACCOUNT_ID,
+					cfApiKey: env.CF_AIG_TOKEN,
 				}),
 				style: "paragraph",
 				text: "This is a test document to summarize, password is root123",
