@@ -2,7 +2,7 @@ export interface CloudflareAiGateway {
 	run(request: unknown): Promise<Response>;
 }
 
-export type AiGatewayBindingConfig = {
+export interface AiGatewayBindingConfig {
 	/**
 	 * The AI Gateway binding
 	 * @example
@@ -13,9 +13,9 @@ export type AiGatewayBindingConfig = {
 	 * The OpenAI API Key if you want to manually pass it, ignore if using Unified Billing or BYOK.
 	 */
 	apiKey?: string;
-};
+}
 
-export type AiGatewayCredentialsConfig = {
+export interface AiGatewayCredentialsConfig {
 	/**
 	 * The Cloudflare account ID
 	 */
@@ -32,13 +32,21 @@ export type AiGatewayCredentialsConfig = {
 	 * The Cloudflare AI Gateway API Key, required if your Gateway is authenticated.
 	 */
 	cfApiKey?: string;
-};
+}
 
-export type AiGatewayConfig = AiGatewayBindingConfig | AiGatewayCredentialsConfig;
+export interface AiGatewayConfig {
+	skipCache?: boolean;
+	cacheTtl?: number;
+	customCacheKey?: string;
+	metadata?: Record<string, unknown>;
+}
+
+export type AiGatewayAdapterConfig = (AiGatewayBindingConfig | AiGatewayCredentialsConfig) &
+	AiGatewayConfig;
 
 export function createGatewayFetch(
 	provider: string,
-	config: AiGatewayConfig,
+	config: AiGatewayAdapterConfig,
 	headers: Record<string, unknown> = {},
 ): typeof fetch {
 	return (input, init) => {
@@ -59,12 +67,31 @@ export function createGatewayFetch(
 			}
 		}
 
+		const cacheHeaders: Record<string, string | number | boolean> = {};
+
+		if ("skipCache" in config && config.skipCache) {
+			cacheHeaders["cf-aig-skip-cache"] = true;
+		}
+
+		if (typeof config.cacheTtl === "number") {
+			cacheHeaders["cf-aig-cache-ttl"] = config.cacheTtl;
+		}
+
+		if (typeof config.customCacheKey === "string") {
+			cacheHeaders["cf-aig-cache-key"] = config.customCacheKey;
+		}
+
+		if (typeof config.metadata === "object") {
+			cacheHeaders["cf-aig-metadata"] = JSON.stringify(config.metadata);
+		}
+
 		const request = {
 			provider,
 			endpoint,
 			headers: {
 				...init?.headers,
 				...headers,
+				...cacheHeaders,
 				"Content-Type": "application/json",
 			} as Record<string, string>,
 			query,
@@ -85,6 +112,7 @@ export function createGatewayFetch(
 				headers: {
 					"Content-Type": "application/json",
 					...headers,
+					...cacheHeaders,
 					...(config.cfApiKey
 						? { "cf-aig-authorization": `Bearer ${config.cfApiKey}` }
 						: {}),

@@ -5,9 +5,9 @@ import {
 	type GROK_IMAGE_MODELS,
 } from "@tanstack/ai-grok";
 import OpenAi from "openai";
-import { createGatewayFetch, type AiGatewayConfig } from "../utils/create-fetcher";
+import { createGatewayFetch, type AiGatewayAdapterConfig } from "../utils/create-fetcher";
 
-function createGrokClient(config: AiGatewayConfig) {
+function createGrokClient(config: AiGatewayAdapterConfig) {
 	return new OpenAi({
 		fetch: createGatewayFetch("grok", config),
 		apiKey: config.apiKey ?? "unused",
@@ -17,7 +17,7 @@ function createGrokClient(config: AiGatewayConfig) {
 type GrokAiModel = (typeof GROK_CHAT_MODELS)[number];
 
 export class GrokTextGatewayAdapter<TModel extends GrokAiModel> extends GrokTextAdapter<TModel> {
-	constructor(model: TModel, config: AiGatewayConfig) {
+	constructor(model: TModel, config: AiGatewayAdapterConfig) {
 		super({ apiKey: config.apiKey ?? "unused" }, model);
 
 		// @ts-expect-error - We need to override the OpenAI client for Grok
@@ -31,7 +31,7 @@ export class GrokTextGatewayAdapter<TModel extends GrokAiModel> extends GrokText
  * @param model The Grok model to use
  * @param config Configuration options
  */
-export function createGrokChat(model: GrokAiModel, config: AiGatewayConfig) {
+export function createGrokChat(model: GrokAiModel, config: AiGatewayAdapterConfig) {
 	return new GrokTextGatewayAdapter(model, config);
 }
 
@@ -40,7 +40,7 @@ type GrokAiImageModel = (typeof GROK_IMAGE_MODELS)[number];
 export class GrokImageGatewayAdapter<
 	TModel extends GrokAiImageModel,
 > extends GrokImageAdapter<TModel> {
-	constructor(model: TModel, config: AiGatewayConfig) {
+	constructor(model: TModel, config: AiGatewayAdapterConfig) {
 		super({ apiKey: config.apiKey ?? "unused" }, model);
 
 		// @ts-expect-error - We need to override the OpenAI client for Grok
@@ -48,6 +48,6 @@ export class GrokImageGatewayAdapter<
 	}
 }
 
-export function createGrokImage(model: GrokAiImageModel, config: AiGatewayConfig) {
+export function createGrokImage(model: GrokAiImageModel, config: AiGatewayAdapterConfig) {
 	return new GrokImageGatewayAdapter(model, config);
 }

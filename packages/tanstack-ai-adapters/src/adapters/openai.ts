@@ -10,9 +10,9 @@ import {
 	type OPENAI_VIDEO_MODELS,
 } from "@tanstack/ai-openai";
 import OpenAi from "openai";
-import { createGatewayFetch, type AiGatewayConfig } from "../utils/create-fetcher";
+import { createGatewayFetch, type AiGatewayAdapterConfig } from "../utils/create-fetcher";
 
-function createOpenAiClient(config: AiGatewayConfig) {
+function createOpenAiClient(config: AiGatewayAdapterConfig) {
 	return new OpenAi({
 		fetch: createGatewayFetch("openai", config),
 		apiKey: config.apiKey ?? "unused",
@@ -24,7 +24,7 @@ type OpenAiModel = (typeof OPENAI_CHAT_MODELS)[number];
 export class OpenAiTextGatewayAdapter<
 	TModel extends OpenAiModel,
 > extends OpenAITextAdapter<TModel> {
-	constructor(model: TModel, config: AiGatewayConfig) {
+	constructor(model: TModel, config: AiGatewayAdapterConfig) {
 		super({ apiKey: config.apiKey ?? "unused" }, model);
 
 		// @ts-expect-error - we need to override the OpenAI client
@@ -38,14 +38,14 @@ export class OpenAiTextGatewayAdapter<
  * @param model The OpenAI model to use
  * @param config Configuration options
  */
-export function createOpenAiChat(model: OpenAiModel, config: AiGatewayConfig) {
+export function createOpenAiChat(model: OpenAiModel, config: AiGatewayAdapterConfig) {
 	return new OpenAiTextGatewayAdapter(model, config);
 }
 
 export class OpenAiSummarizeGatewayAdapter<
 	TModel extends OpenAiModel,
 > extends OpenAISummarizeAdapter<TModel> {
-	constructor(model: TModel, config: AiGatewayConfig) {
+	constructor(model: TModel, config: AiGatewayAdapterConfig) {
 		super({ apiKey: config.apiKey ?? "unused" }, model);
 
 		// @ts-expect-error - we need to override the text adapter
@@ -53,7 +53,7 @@ export class OpenAiSummarizeGatewayAdapter<
 	}
 }
 
-export function createOpenAiSummarize(model: OpenAiModel, config: AiGatewayConfig) {
+export function createOpenAiSummarize(model: OpenAiModel, config: AiGatewayAdapterConfig) {
 	return new OpenAiSummarizeGatewayAdapter(model, config);
 }
 
@@ -62,7 +62,7 @@ type OpenAiImageModel = (typeof OPENAI_IMAGE_MODELS)[number];
 export class OpenAiImageGatewayAdapter<
 	TModel extends OpenAiImageModel,
 > extends OpenAIImageAdapter<TModel> {
-	constructor(model: TModel, config: AiGatewayConfig) {
+	constructor(model: TModel, config: AiGatewayAdapterConfig) {
 		super({ apiKey: config.apiKey ?? "unused" }, model);
 
 		// @ts-expect-error - we need to override the OpenAI client
@@ -70,7 +70,7 @@ export class OpenAiImageGatewayAdapter<
 	}
 }
 
-export function createOpenAiImage(model: OpenAiImageModel, config: AiGatewayConfig) {
+export function createOpenAiImage(model: OpenAiImageModel, config: AiGatewayAdapterConfig) {
 	return new OpenAiImageGatewayAdapter(model, config);
 }
 
@@ -79,7 +79,7 @@ type OpenAiTranscriptionModel = (typeof OPENAI_TRANSCRIPTION_MODELS)[number];
 export class OpenAiTranscriptionGatewayAdapter<
 	TModel extends OpenAiTranscriptionModel,
 > extends OpenAITranscriptionAdapter<TModel> {
-	constructor(model: TModel, config: AiGatewayConfig) {
+	constructor(model: TModel, config: AiGatewayAdapterConfig) {
 		super({ apiKey: config.apiKey ?? "unused" }, model);
 
 		// @ts-expect-error - we need to override the OpenAI client
@@ -89,7 +89,7 @@ export class OpenAiTranscriptionGatewayAdapter<
 
 export function createOpenAiTranscription(
 	model: OpenAiTranscriptionModel,
-	config: AiGatewayConfig,
+	config: AiGatewayAdapterConfig,
 ) {
 	return new OpenAiTranscriptionGatewayAdapter(model, config);
 }
@@ -101,7 +101,7 @@ type OpenAiTtsModel = (typeof OPENAI_TTS_MODELS)[number];
 export class OpenAiTtsGatewayAdapter<
 	TModel extends OpenAiTtsModel,
 > extends OpenAITTSAdapter<TModel> {
-	constructor(model: TModel, config: AiGatewayConfig) {
+	constructor(model: TModel, config: AiGatewayAdapterConfig) {
 		super({ apiKey: config.apiKey ?? "unused" }, model);
 
 		// @ts-expect-error - we need to override the OpenAI client
@@ -109,7 +109,7 @@ export class OpenAiTtsGatewayAdapter<
 	}
 }
 
-export function createOpenAiTts(model: OpenAiTtsModel, config: AiGatewayConfig) {
+export function createOpenAiTts(model: OpenAiTtsModel, config: AiGatewayAdapterConfig) {
 	return new OpenAiTtsGatewayAdapter(model, config);
 }
 
@@ -118,7 +118,7 @@ type OpenAiVideoModel = (typeof OPENAI_VIDEO_MODELS)[number];
 export class OpenAiVideoGatewayAdapter<
 	TModel extends OpenAiVideoModel,
 > extends OpenAIVideoAdapter<TModel> {
-	constructor(model: TModel, config: AiGatewayConfig) {
+	constructor(model: TModel, config: AiGatewayAdapterConfig) {
 		super({ apiKey: config.apiKey ?? "unused" }, model);
 
 		// @ts-expect-error - we need to override the OpenAI client
@@ -126,6 +126,6 @@ export class OpenAiVideoGatewayAdapter<
 	}
 }
 
-export function createOpenAiVideo(model: OpenAiVideoModel, config: AiGatewayConfig) {
+export function createOpenAiVideo(model: OpenAiVideoModel, config: AiGatewayAdapterConfig) {
 	return new OpenAiVideoGatewayAdapter(model, config);
 }

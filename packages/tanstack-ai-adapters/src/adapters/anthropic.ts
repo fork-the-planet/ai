@@ -1,8 +1,8 @@
 import { AnthropicTextAdapter, AnthropicSummarizeAdapter } from "@tanstack/ai-anthropic";
 import AnthropicSdk from "@anthropic-ai/sdk";
-import { createGatewayFetch, type AiGatewayConfig } from "../utils/create-fetcher";
+import { createGatewayFetch, type AiGatewayAdapterConfig } from "../utils/create-fetcher";
 
-export type AnthropicGatewayConfig = AiGatewayConfig & { anthropicVersion?: string };
+export type AnthropicGatewayConfig = AiGatewayAdapterConfig & { anthropicVersion?: string };
 
 function createAnthropicClient(config: AnthropicGatewayConfig) {
 	return new AnthropicSdk({
