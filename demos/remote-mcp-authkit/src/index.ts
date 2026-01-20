@@ -67,8 +67,8 @@ export class MyMCP extends McpAgent<Env, unknown, Props> {
 }
 
 export default new OAuthProvider({
-	apiRoute: "/sse",
-	apiHandler: MyMCP.mount("/sse") as any, // Use 'any' for maximum flexibility
+	apiRoute: "/mcp",
+	apiHandler: MyMCP.serve("/mcp") as any, // Use 'any' for maximum flexibility
 	defaultHandler: AuthkitHandler as any, // Use 'any' for maximum flexibility
 	authorizeEndpoint: "/authorize",
 	tokenEndpoint: "/token",

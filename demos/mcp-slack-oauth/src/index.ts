@@ -132,8 +132,8 @@ export class SlackMCP extends McpAgent<Env, unknown, Props> {
 }
 
 export default new OAuthProvider({
-	apiHandler: SlackMCP.mount("/sse") as any,
-	apiRoute: "/sse",
+	apiHandler: SlackMCP.serve("/mcp") as any,
+	apiRoute: "/mcp",
 	authorizeEndpoint: "/authorize",
 	clientRegistrationEndpoint: "/register",
 	defaultHandler: SlackHandler as any,

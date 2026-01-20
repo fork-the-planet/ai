@@ -72,12 +72,10 @@ app.post("/authorize", confirmConsent);
 app.get("/callback", callback);
 
 export default new OAuthProvider({
-	// TODO: fix these types
-	apiHandler: AuthenticatedMCP.mount("/sse"),
-	apiRoute: "/sse",
+	apiHandler: AuthenticatedMCP.serve("/mcp"),
+	apiRoute: "/mcp",
 	authorizeEndpoint: "/authorize",
 	clientRegistrationEndpoint: "/register",
-	// TODO: fix these types
 	// @ts-expect-error
 	defaultHandler: app,
 	tokenEndpoint: "/token",
