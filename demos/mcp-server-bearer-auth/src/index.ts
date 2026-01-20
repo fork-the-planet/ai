@@ -44,7 +44,7 @@ app.get("/", async (c) => {
 	return c.html(layout(content, "MCP Remote Auth Demo - Home"));
 });
 
-app.mount("/", (req, env, ctx) => {
+app.mount("/mcp", (req, env, ctx) => {
 	// This could technically be pulled out into a middleware function, but is left here for clarity
 	const authHeader = req.headers.get("authorization");
 	if (!authHeader) {
@@ -56,7 +56,7 @@ app.mount("/", (req, env, ctx) => {
 		// could also add arbitrary headers/parameters here to pass into the MCP client
 	};
 
-	return MyMCP.mount("/sse").fetch(req, env, ctx);
+	return MyMCP.serve("/mcp").fetch(req, env, ctx);
 });
 
 export default app;

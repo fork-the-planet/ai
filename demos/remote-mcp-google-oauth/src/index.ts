@@ -26,12 +26,8 @@ export class MyMCP extends McpAgent<Env, Record<string, never>, Props> {
 }
 
 export default new OAuthProvider({
-	// NOTE - during the summer 2025, the SSE protocol was deprecated and replaced by the Streamable-HTTP protocol
-	// https://developers.cloudflare.com/agents/model-context-protocol/transport/#mcp-server-with-authentication
-	apiHandlers: {
-		"/sse": MyMCP.serveSSE("/sse"), // deprecated SSE protocol - use /mcp instead
-		"/mcp": MyMCP.serve("/mcp"), // Streamable-HTTP protocol
-	},
+	apiHandler: MyMCP.serve("/mcp"),
+	apiRoute: "/mcp",
 	authorizeEndpoint: "/authorize",
 	clientRegistrationEndpoint: "/register",
 	defaultHandler: GoogleHandler as any,
