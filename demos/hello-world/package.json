@@ -10,10 +10,10 @@
 	},
 	"keywords": [],
 	"dependencies": {
-		"agents": "^0.2.19"
+		"agents": "^0.3.1"
 	},
 	"devDependencies": {
 		"typescript": "5.9.3",
-		"wrangler": "^4.45.2"
+		"wrangler": "^4.56.0"
 	}
 }
