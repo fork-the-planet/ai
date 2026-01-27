@@ -79,17 +79,17 @@ export function convertToWorkersAIChatMessages(prompt: LanguageModelV3Prompt): {
 							break;
 						}
 
-					case "tool-call": {
-						toolCalls.push({
-							function: {
-								arguments: JSON.stringify(part.input),
-								name: part.toolName,
-							},
-							id: part.toolCallId,
-							type: "function",
-						});
-						break;
-					}
+						case "tool-call": {
+							toolCalls.push({
+								function: {
+									arguments: JSON.stringify(part.input),
+									name: part.toolName,
+								},
+								id: part.toolCallId,
+								type: "function",
+							});
+							break;
+						}
 
 						case "tool-result": {
 							// Handle tool results in assistant messages (V3)
