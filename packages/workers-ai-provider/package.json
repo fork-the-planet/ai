@@ -45,10 +45,10 @@
 		"zod": "^3.25.0 || ^4.0.0"
 	},
 	"devDependencies": {
-		"@ai-sdk/provider": "^3.0.0",
-		"@ai-sdk/provider-utils": "^4.0.1",
-		"@cloudflare/workers-types": "^4.20251229.0",
-		"ai": "^6.0.3",
-		"zod": "^4.2.1"
+		"@ai-sdk/provider": "^3.0.5",
+		"@ai-sdk/provider-utils": "^4.0.10",
+		"@cloudflare/workers-types": "^4.20260128.0",
+		"ai": "^6.0.59",
+		"zod": "^4.3.6"
 	}
 }
