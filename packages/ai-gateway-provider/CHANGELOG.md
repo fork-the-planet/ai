@@ -1,5 +1,11 @@
 # ai-gateway-provider
 
+## 3.1.1
+
+### Patch Changes
+
+- [`8b1d870`](https://github.com/cloudflare/ai/commit/8b1d8705792470fbfebc344118bfc52e4c0075ba) Thanks [@threepointone](https://github.com/threepointone)! - Update dependencies
+
 ## 3.1.0
 
 ### Minor Changes
