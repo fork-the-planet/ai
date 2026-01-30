@@ -1,13 +1,13 @@
-import { env } from "cloudflare:workers";
 import {
 	createAnthropicChat,
 	createGeminiChat,
+	createGeminiSummarize,
 	createGrokChat,
 	createOpenAiChat,
 	createOpenAiImage,
-	createGeminiSummarize,
-} from "@cloudflare/tanstack-ai-adapters";
+} from "@cloudflare/tanstack-ai";
 import { chat, generateImage, summarize, toHttpResponse } from "@tanstack/ai";
+import { env } from "cloudflare:workers";
 
 const AI_ROUTES = {
 	"/ai/anthropic": () =>
@@ -91,7 +91,9 @@ export default {
 			return new Response(result.summary);
 		}
 
-		const isAiRoute = Object.keys(AI_ROUTES).find((path) => url.pathname.startsWith(path));
+		const isAiRoute = Object.keys(AI_ROUTES).find((path) =>
+			url.pathname.startsWith(path),
+		);
 
 		if (isAiRoute) {
 			const {

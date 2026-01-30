@@ -12,7 +12,7 @@ Cloudflare AI Gateway adapters for [TanStack AI](https://tanstack.com/ai), enabl
 ## Installation
 
 ```bash
-npm install @cloudflare/tanstack-ai-adapters @tanstack/ai
+npm install @cloudflare/tanstack-ai @tanstack/ai
 ```
 
 Install the provider SDKs you need:
@@ -37,7 +37,7 @@ npm install @tanstack/ai-grok
 
 ```typescript
 import { env } from "cloudflare:workers";
-import { createOpenAiChat } from "@cloudflare/tanstack-ai-adapters";
+import { createOpenAiChat } from "@cloudflare/tanstack-ai";
 import { chat } from "@tanstack/ai";
 
 const adapter = createOpenAiChat("gpt-4o", {
