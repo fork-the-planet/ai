@@ -1,6 +1,7 @@
-import type { LanguageModelV3StreamPart, LanguageModelV3Usage } from "@ai-sdk/provider";
+import type { LanguageModelV3FinishReason, LanguageModelV3StreamPart, LanguageModelV3Usage } from "@ai-sdk/provider";
 import { generateId } from "ai";
 import { events } from "fetch-event-stream";
+import { mapWorkersAIFinishReason } from "./map-workersai-finish-reason";
 import { mapWorkersAIUsage } from "./map-workersai-usage";
 import { processPartialToolCalls } from "./utils";
 
@@ -23,6 +24,7 @@ export function getMappedStream(response: Response) {
 	// Track start/delta/end IDs per v5 streaming protocol
 	let textId: string | null = null;
 	let reasoningId: string | null = null;
+	let finishReason: LanguageModelV3FinishReason | null = null;
 
 	return new ReadableStream<LanguageModelV3StreamPart>({
 		async start(controller) {
@@ -33,13 +35,23 @@ export function getMappedStream(response: Response) {
 				if (event.data === "[DONE]") {
 					break;
 				}
-				const chunk = JSON.parse(event.data);
-				if (chunk.usage) {
-					usage = mapWorkersAIUsage(chunk);
-				}
-				if (chunk.tool_calls) {
-					partialToolCalls.push(...chunk.tool_calls);
-				}
+			const chunk = JSON.parse(event.data);
+			if (chunk.usage) {
+				usage = mapWorkersAIUsage(chunk);
+			}
+			if (chunk.tool_calls) {
+				partialToolCalls.push(...chunk.tool_calls);
+			}
+
+			// Extract finish_reason from chunk (only update if non-null to avoid overwriting)
+			const choiceFinishReason = chunk?.choices?.[0]?.finish_reason;
+			const directFinishReason = chunk?.finish_reason;
+			
+			if (choiceFinishReason != null) {
+				finishReason = mapWorkersAIFinishReason(choiceFinishReason);
+			} else if (directFinishReason != null) {
+				finishReason = mapWorkersAIFinishReason(directFinishReason);
+			}
 
 				// Handle top-level response text
 				if (chunk.response?.length) {
@@ -100,11 +112,11 @@ export function getMappedStream(response: Response) {
 				textId = null;
 			}
 
-			controller.enqueue({
-				finishReason: { unified: "stop", raw: "stop" },
-				type: "finish",
-				usage: usage,
-			});
+		controller.enqueue({
+			finishReason: finishReason ?? { unified: "stop", raw: "stop" },
+			type: "finish",
+			usage: usage,
+		});
 			controller.close();
 		},
 	});
