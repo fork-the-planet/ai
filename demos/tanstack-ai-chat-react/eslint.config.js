@@ -7,10 +7,7 @@ export default tseslint.config([
 	globalIgnores(["dist", "worker-configuration.d.ts"]),
 	{
 		files: ["**/*.{ts,tsx}"],
-		extends: [
-			js.configs.recommended,
-			tseslint.configs.recommended,
-		],
+		extends: [js.configs.recommended, tseslint.configs.recommended],
 		languageOptions: {
 			ecmaVersion: 2020,
 			globals: globals.browser,

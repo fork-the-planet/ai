@@ -14,7 +14,8 @@
 		"@tanstack/ai": "^0.2.2",
 		"@tanstack/ai-react": "^0.2.2",
 		"react": "^19.1.1",
-		"react-dom": "^19.1.1"
+		"react-dom": "^19.1.1",
+		"zod": "^4.3.6"
 	},
 	"devDependencies": {
 		"@cloudflare/vite-plugin": "^1.19.0",

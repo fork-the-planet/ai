@@ -1,9 +1,9 @@
 import { fetchHttpStream, useChat } from "@tanstack/ai-react";
 import { useState } from "react";
 
-type SupportedModels = "openai" | "anthropic" | "gemini" | "grok";
+type SupportedModels = "openai" | "anthropic" | "gemini" | "grok" | "workers-ai";
 
-const selectedModel: SupportedModels = "openai";
+const selectedModel: SupportedModels = "workers-ai";
 
 function App() {
 	const { messages, sendMessage, error, isLoading, clear } = useChat({

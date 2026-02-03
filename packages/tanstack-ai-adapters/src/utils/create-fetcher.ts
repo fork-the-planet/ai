@@ -25,7 +25,7 @@ export interface AiGatewayCredentialsConfig {
 	 */
 	gatewayId: string;
 	/**
-	 * The OpenAI API Key if you want to manually pass it, ignore if using Unified Billing or BYOK.
+	 * The Provider API Key if you want to manually pass it, ignore if using Unified Billing or BYOK.
 	 */
 	apiKey?: string;
 	/**
@@ -97,12 +97,18 @@ export function createGatewayFetch(
 			query,
 		};
 
-		if ("binding" in config) {
-			return config.binding.run(request);
+		if (provider === "workers-ai") {
+			request.endpoint = query.model as string;
+			delete query.model;
+			delete query.intructions;
 		}
 
 		if (config.apiKey) {
 			request.headers["authorization"] = `Bearer ${config.apiKey}`;
+		}
+
+		if ("binding" in config) {
+			return config.binding.run(request);
 		}
 
 		return fetch(

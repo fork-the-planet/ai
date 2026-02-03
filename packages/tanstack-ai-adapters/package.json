@@ -31,6 +31,11 @@
 			"types": "./dist/adapters/grok.d.ts",
 			"import": "./dist/adapters/grok.mjs",
 			"require": "./dist/adapters/grok.js"
+		},
+		"./adapters/workers-ai": {
+			"types": "./dist/adapters/workers-ai.d.ts",
+			"import": "./dist/adapters/workers-ai.mjs",
+			"require": "./dist/adapters/workers-ai.js"
 		}
 	},
 	"scripts": {
@@ -46,6 +51,7 @@
 	},
 	"optionalDependencies": {
 		"@anthropic-ai/sdk": "^0.71.2",
+		"@cloudflare/workers-types": "^4.20260128.0",
 		"@google/genai": "^1.35.0",
 		"@tanstack/ai-anthropic": "^0.2.0",
 		"@tanstack/ai-gemini": "^0.3.2",
