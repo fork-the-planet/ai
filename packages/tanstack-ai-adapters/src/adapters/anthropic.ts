@@ -27,36 +27,14 @@ const ANTHROPIC_MODELS = [
 
 type AnthropicModel = (typeof ANTHROPIC_MODELS)[number];
 
-export class AnthropicTextGatewayAdapter<
-	TModel extends AnthropicModel,
-> extends AnthropicTextAdapter<TModel> {
-	constructor(config: AnthropicGatewayConfig, model: TModel) {
-		super(config, model);
-
-		// @ts-expect-error - We need to override the Anthropic client
-		this.client = createAnthropicClient(config);
-	}
-}
-
 /**
- * Creates an Anthropic adapter which uses Cloudflare AI Gateway.
+ * Creates an Anthropic chat adapter which uses Cloudflare AI Gateway.
  * Supports both binding and credential-based configurations.
  * @param model The Anthropic model to use
  * @param config Configuration options
  */
 export function createAnthropicChat(model: AnthropicModel, config: AnthropicGatewayConfig) {
-	return new AnthropicTextGatewayAdapter(config, model);
-}
-
-export class AnthropicSummarizeGatewayAdapter<
-	TModel extends AnthropicModel,
-> extends AnthropicSummarizeAdapter<TModel> {
-	constructor(config: AnthropicGatewayConfig, model: TModel) {
-		super(config, model);
-
-		// @ts-expect-error - We need to override the Anthropic client
-		this.client = createAnthropicClient(config);
-	}
+	return new AnthropicTextGatewayAdapter(model, config);
 }
 
 /**
@@ -66,5 +44,30 @@ export class AnthropicSummarizeGatewayAdapter<
  * @param config Configuration options
  */
 export function createAnthropicSummarize(model: AnthropicModel, config: AnthropicGatewayConfig) {
-	return new AnthropicSummarizeGatewayAdapter(config, model);
+	return new AnthropicSummarizeGatewayAdapter(model, config);
+}
+
+// Internal subclasses: override the Anthropic SDK client to route through AI Gateway.
+// TODO: File upstream issue on @tanstack/ai-anthropic to support client/fetch injection
+// so we can avoid this @ts-expect-error pattern.
+class AnthropicTextGatewayAdapter<
+	TModel extends AnthropicModel,
+> extends AnthropicTextAdapter<TModel> {
+	constructor(model: TModel, config: AnthropicGatewayConfig) {
+		super(config, model);
+
+		// @ts-expect-error - TanStack's AnthropicTextAdapter doesn't expose client injection
+		this.client = createAnthropicClient(config);
+	}
+}
+
+class AnthropicSummarizeGatewayAdapter<
+	TModel extends AnthropicModel,
+> extends AnthropicSummarizeAdapter<TModel> {
+	constructor(model: TModel, config: AnthropicGatewayConfig) {
+		super(config, model);
+
+		// @ts-expect-error - TanStack's AnthropicSummarizeAdapter doesn't expose client injection
+		this.client = createAnthropicClient(config);
+	}
 }

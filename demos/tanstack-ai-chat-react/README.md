@@ -1,69 +1,81 @@
-# React + TypeScript + Vite
+# @cloudflare/tanstack-ai demo
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Multi-provider AI demo showcasing [`@cloudflare/tanstack-ai`](../../packages/tanstack-ai-adapters). Features **Chat**, **Image Generation**, and **Summarization** across Workers AI and third-party providers (OpenAI, Anthropic, Gemini, Grok) through Cloudflare AI Gateway.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Chat
 
-## Expanding the ESLint configuration
+| Provider | Model | Config Mode |
+| --- | --- | --- |
+| **Llama 4 Scout** | `@cf/meta/llama-4-scout-17b-16e-instruct` | Workers AI direct |
+| **Qwen3 30B** | `@cf/qwen/qwen3-30b-a3b-fp8` | Workers AI via AI Gateway |
+| **GPT-5.2** | `gpt-5.2` | OpenAI via AI Gateway |
+| **Claude Sonnet 4.5** | `claude-sonnet-4-5` | Anthropic via AI Gateway |
+| **Gemini 2.5 Flash** | `gemini-2.5-flash` | Gemini via AI Gateway |
+| **Grok 4** | `grok-4-1-fast-reasoning` | Grok via AI Gateway |
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Image Generation
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+| Provider | Model |
+| --- | --- |
+| **OpenAI** | `gpt-image-1` |
+| **Gemini** | `imagen-4.0-generate-001` |
+| **Grok** | `grok-2-image-1212` |
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+### Summarization
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| Provider | Model |
+| --- | --- |
+| **OpenAI** | `gpt-5.2` |
+| **Anthropic** | `claude-sonnet-4-5` |
+| **Gemini** | `gemini-2.0-flash` |
+
+## Setup
+
+### Option 1: Enter credentials in the UI (recommended for trying it out)
+
+1. Install and run:
+
+```bash
+pnpm install
+pnpm dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. Click **"Add API keys"** in the top-right corner and enter your Cloudflare Account ID, AI Gateway ID, and API Token. Credentials are stored in your browser's localStorage and sent as request headers -- never persisted on the server.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Option 2: Use environment variables (recommended for deploying)
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1. Copy the environment variables template:
+
+```bash
+cp .dev.vars.example .dev.vars
 ```
+
+2. Fill in your `.dev.vars`:
+
+```
+CLOUDFLARE_ACCOUNT_ID=your-cloudflare-account-id
+CLOUDFLARE_AI_GATEWAY_ID=your-ai-gateway-id
+CLOUDFLARE_API_TOKEN=your-cloudflare-api-token
+```
+
+3. Install and run:
+
+```bash
+pnpm install
+pnpm dev
+```
+
+> When both are present, user-provided credentials (from the UI) take precedence over environment variables.
+
+## What It Demonstrates
+
+- **Workers AI direct** -- `createWorkersAiChat(model, { binding: env.AI })` or REST API with `{ accountId, apiKey }`
+- **Workers AI through AI Gateway** -- `createWorkersAiChat(model, { binding: env.AI.gateway(id) })` or credentials mode
+- **Third-party providers through AI Gateway** -- `createOpenAiChat`, `createAnthropicChat`, `createGeminiChat`, `createGrokChat`
+- **Image generation** -- `generateImage()` with `createOpenAiImage`, `createGeminiImage`, `createGrokImage`
+- **Summarization** -- `summarize()` with `createOpenAiSummarize`, `createAnthropicSummarize`, `createGeminiSummarize`
+- **Streaming** -- chat providers stream responses via TanStack AI's `chat()` + `toHttpResponse()`
+- **Tool calling** -- server-side tools (math, time, web scrape) work across all chat providers
+- **Dynamic credentials** -- user-provided API keys passed via request headers, with env var fallback

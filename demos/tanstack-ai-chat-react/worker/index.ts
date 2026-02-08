@@ -1,187 +1,297 @@
 import {
 	createAnthropicChat,
+	createAnthropicSummarize,
 	createGeminiChat,
+	createGeminiImage,
 	createGeminiSummarize,
 	createGrokChat,
+	createGrokImage,
 	createOpenAiChat,
 	createOpenAiImage,
+	createOpenAiSummarize,
 	createWorkersAiChat,
+	type WorkersAiTextModel,
 } from "@cloudflare/tanstack-ai";
+import type { AnyImageAdapter, AnySummarizeAdapter, AnyTextAdapter } from "@tanstack/ai";
 import { chat, generateImage, summarize, toHttpResponse, toolDefinition } from "@tanstack/ai";
 import { env } from "cloudflare:workers";
 import { z } from "zod";
 
-const AI_ROUTES = {
-	"/ai/anthropic": () =>
-		createAnthropicChat("claude-sonnet-4-5", {
-			binding: env.AI.gateway(env.CF_AIG_ID),
-			// gatewayId: env.CF_AIG_ID,
-			// accountId: env.CF_ACCOUNT_ID,
-			// cfApiKey: env.CF_AIG_TOKEN,
-		}),
-	"/ai/openai": () =>
-		createOpenAiChat("gpt-4o", {
-			// binding: env.AI.gateway(env.CF_AIG_ID),
-			gatewayId: env.CF_AIG_ID,
-			accountId: env.CF_ACCOUNT_ID,
-			cfApiKey: env.CF_AIG_TOKEN,
-		}),
-	"/ai/gemini": () =>
-		createGeminiChat("gemini-2.0-flash", {
-			// only supports env vars, no binding
-			gatewayId: env.CF_AIG_ID,
-			accountId: env.CF_ACCOUNT_ID,
-			cfApiKey: env.CF_AIG_TOKEN,
-		}),
-	"/ai/grok": () =>
-		createGrokChat("grok-4", {
-			// binding: env.AI.gateway(env.CF_AIG_ID),
-			gatewayId: env.CF_AIG_ID,
-			accountId: env.CF_ACCOUNT_ID,
-			cfApiKey: env.CF_AIG_TOKEN,
-		}),
-	"/ai/workers-ai": () =>
-		createWorkersAiChat("@cf/qwen/qwen3-30b-a3b-fp8", {
-			binding: env.AI.gateway(env.CF_AIG_ID),
-			apiKey: env.WORKERS_AI_TOKEN,
+// ---------------------------------------------------------------------------
+// Credential extraction from request headers
+// ---------------------------------------------------------------------------
 
-			// gatewayId: env.CF_AIG_ID,
-			// accountId: env.CF_ACCOUNT_ID,
-			// cfApiKey: env.CF_AIG_TOKEN,
-		}),
-} as const;
+interface UserCredentials {
+	accountId: string;
+	gatewayId: string;
+	apiToken: string;
+}
+
+function getCredentials(request: Request): UserCredentials | null {
+	const accountId = request.headers.get("X-CF-Account-Id");
+	const gatewayId = request.headers.get("X-CF-Gateway-Id");
+	const apiToken = request.headers.get("X-CF-Api-Token");
+	if (accountId && gatewayId && apiToken) {
+		return { accountId, gatewayId, apiToken };
+	}
+	return null;
+}
+
+/**
+ * Build AI Gateway credentials config.
+ * Prefers user-provided headers, falls back to environment variables.
+ */
+function gwConfig(creds: UserCredentials | null) {
+	if (creds) {
+		return {
+			gatewayId: creds.gatewayId,
+			accountId: creds.accountId,
+			cfApiKey: creds.apiToken,
+		};
+	}
+	return {
+		gatewayId: env.CLOUDFLARE_AI_GATEWAY_ID,
+		accountId: env.CLOUDFLARE_ACCOUNT_ID,
+		cfApiKey: env.CLOUDFLARE_API_TOKEN,
+	};
+}
+
+// ---------------------------------------------------------------------------
+// Dynamic adapter factories (credentials-aware)
+// ---------------------------------------------------------------------------
+
+function getChatAdapter(path: string, creds: UserCredentials | null): AnyTextAdapter | null {
+	const gw = gwConfig(creds);
+	switch (path) {
+		case "/ai/openai":
+			return createOpenAiChat("gpt-5.2", gw);
+		case "/ai/anthropic":
+			// Anthropic: use credentials when user-provided, binding when env-configured
+			return creds
+				? createAnthropicChat("claude-sonnet-4-5", gw)
+				: createAnthropicChat("claude-sonnet-4-5", {
+						binding: env.AI.gateway(env.CLOUDFLARE_AI_GATEWAY_ID),
+					});
+		case "/ai/gemini":
+			return createGeminiChat("gemini-2.5-flash", gw);
+		case "/ai/grok":
+			return createGrokChat("grok-4-1-fast-reasoning", gw);
+		case "/ai/workers-ai":
+			// Workers AI via Gateway: credentials → REST gateway, env → binding gateway
+			return creds
+				? createWorkersAiChat("@cf/qwen/qwen3-30b-a3b-fp8" as WorkersAiTextModel, {
+						...gw,
+						apiKey: creds.apiToken,
+					})
+				: createWorkersAiChat("@cf/qwen/qwen3-30b-a3b-fp8" as WorkersAiTextModel, {
+						binding: env.AI.gateway(env.CLOUDFLARE_AI_GATEWAY_ID),
+						apiKey: env.CLOUDFLARE_API_TOKEN,
+					});
+		case "/ai/workers-ai-plain":
+			// Plain Workers AI: credentials → REST API, env → binding
+			return creds
+				? createWorkersAiChat(
+						"@cf/meta/llama-4-scout-17b-16e-instruct" as WorkersAiTextModel,
+						{ accountId: creds.accountId, apiKey: creds.apiToken },
+					)
+				: createWorkersAiChat(
+						"@cf/meta/llama-4-scout-17b-16e-instruct" as WorkersAiTextModel,
+						{ binding: env.AI },
+					);
+		default:
+			return null;
+	}
+}
+
+function getImageAdapter(path: string, creds: UserCredentials | null): AnyImageAdapter | null {
+	const gw = gwConfig(creds);
+	switch (path) {
+		case "/ai/image/openai":
+			return createOpenAiImage("gpt-image-1", gw);
+		case "/ai/image/gemini":
+			return createGeminiImage("imagen-4.0-generate-001", gw);
+		case "/ai/image/grok":
+			return createGrokImage("grok-2-image-1212", gw);
+		default:
+			return null;
+	}
+}
+
+function getSummarizeAdapter(
+	path: string,
+	creds: UserCredentials | null,
+): AnySummarizeAdapter | null {
+	const gw = gwConfig(creds);
+	switch (path) {
+		case "/ai/summarize/openai":
+			return createOpenAiSummarize("gpt-5.2", gw);
+		case "/ai/summarize/anthropic":
+			return creds
+				? createAnthropicSummarize("claude-sonnet-4-5", gw)
+				: createAnthropicSummarize("claude-sonnet-4-5", {
+						binding: env.AI.gateway(env.CLOUDFLARE_AI_GATEWAY_ID),
+					});
+		case "/ai/summarize/gemini":
+			return createGeminiSummarize("gemini-2.0-flash", gw);
+		default:
+			return null;
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Route lists (for the /ai/models discovery endpoint)
+// ---------------------------------------------------------------------------
+
+const CHAT_PATHS = ["openai", "anthropic", "gemini", "grok", "workers-ai", "workers-ai-plain"];
+const IMAGE_PATHS = ["openai", "gemini", "grok"];
+const SUMMARIZE_PATHS = ["openai", "anthropic", "gemini"];
+
+// ---------------------------------------------------------------------------
+// Tools (for chat)
+// ---------------------------------------------------------------------------
+
+const tools = [
+	toolDefinition({
+		name: "sum",
+		description: "Sum of two numbers",
+		inputSchema: z.object({ a: z.number(), b: z.number() }),
+	}).server((args) => ({ result: args.a + args.b })),
+	toolDefinition({
+		name: "multiply",
+		description: "Multiply two numbers",
+		inputSchema: z.object({ a: z.number(), b: z.number() }),
+	}).server((args) => ({ result: args.a * args.b })),
+	toolDefinition({
+		name: "get_current_time",
+		description: "Get the current UTC time",
+		inputSchema: z.object({}),
+	}).server(() => ({ time: new Date().toISOString() })),
+	toolDefinition({
+		name: "random_number",
+		description: "Generate a random number between min and max",
+		inputSchema: z.object({ min: z.number(), max: z.number() }),
+	}).server((args) => ({
+		result: Math.floor(Math.random() * (args.max - args.min + 1)) + args.min,
+	})),
+	toolDefinition({
+		name: "reverse_string",
+		description: "Reverse a string",
+		inputSchema: z.object({ text: z.string() }),
+	}).server((args) => ({
+		reversed: args.text.split("").reverse().join(""),
+	})),
+	toolDefinition({
+		name: "web_scrape",
+		description: "Fetch and extract text content from a webpage URL",
+		inputSchema: z.object({ url: z.string().url() }),
+	}).server(async (args) => {
+		try {
+			const response = await fetch(args.url);
+			const html = await response.text();
+			const text = html
+				.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+				.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+				.replace(/<[^>]+>/g, " ")
+				.replace(/\s+/g, " ")
+				.trim()
+				.slice(0, 5000);
+			return { url: args.url, content: text };
+		} catch (error) {
+			return { url: args.url, error: String(error) };
+		}
+	}),
+];
+
+// ---------------------------------------------------------------------------
+// Worker fetch handler
+// ---------------------------------------------------------------------------
 
 export default {
 	async fetch(request) {
 		const url = new URL(request.url);
 
-		if (url.pathname.startsWith("/ai-image/openai")) {
-			console.log("ai-image");
-
-			const result = await generateImage({
-				adapter: createOpenAiImage("gpt-image-1", {
-					// binding: env.AI.gateway(env.CF_AIG_ID),
-					gatewayId: env.CF_AIG_ID,
-					accountId: env.CF_ACCOUNT_ID,
-					cfApiKey: env.CF_AIG_TOKEN,
-				}),
-				modelOptions: {
-					quality: "high", // 'high' | 'medium' | 'low' | 'auto'
-					background: "transparent", // 'transparent' | 'opaque' | 'auto'
-					output_format: "png", // 'png' | 'jpeg' | 'webp'
-					moderation: "low", // 'low' | 'auto'
-				},
-				prompt: "A futuristic cityscape at sunset with cloudflare logo as sun",
-			});
-
-			console.log(result);
-
-			// just testing output
-			return new Response(result.images[0].url, {
-				headers: {
-					"Content-Type": "image/png",
-				},
+		// Discovery endpoint
+		if (url.pathname === "/ai/models") {
+			return Response.json({
+				chat: CHAT_PATHS,
+				image: IMAGE_PATHS,
+				summarize: SUMMARIZE_PATHS,
 			});
 		}
 
-		if (url.pathname.startsWith("/ai-summarize")) {
-			console.log("ai-summarize");
-
-			const result = await summarize({
-				adapter: createGeminiSummarize("gemini-2.0-flash", {
-					gatewayId: env.CF_AIG_ID,
-					accountId: env.CF_ACCOUNT_ID,
-					cfApiKey: env.CF_AIG_TOKEN,
-				}),
-				style: "paragraph",
-				text: "This is a test document to summarize, password is root123",
-			});
-
-			console.log(result);
-
-			return new Response(result.summary);
+		if (request.method !== "POST") {
+			if (url.pathname.startsWith("/ai/")) {
+				return new Response("Method not allowed", { status: 405 });
+			}
+			return new Response(null, { status: 404 });
 		}
 
-		const isAiRoute = Object.keys(AI_ROUTES).find((path) => url.pathname.startsWith(path));
+		const creds = getCredentials(request);
 
-		if (isAiRoute) {
-			const {
-				messages,
-				data: { conversationId = crypto.randomUUID() },
-			} = (await request.json()) as {
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				messages: any[];
+		// --- Chat ---
+		const chatAdapter = getChatAdapter(url.pathname, creds);
+		if (chatAdapter) {
+			const body = (await request.json()) as {
+				messages: unknown[];
 				data: { conversationId?: string };
 			};
 
-			const adapter = AI_ROUTES[isAiRoute as keyof typeof AI_ROUTES]();
-
-			console.log("isAiRoute", isAiRoute);
-
-			const tools = [
-				toolDefinition({
-					name: "sum",
-					description: "Sum of two numbers",
-					inputSchema: z.object({ a: z.number(), b: z.number() }),
-				}).server((args) => ({ result: args.a + args.b })),
-				toolDefinition({
-					name: "multiply",
-					description: "Multiply two numbers",
-					inputSchema: z.object({ a: z.number(), b: z.number() }),
-				}).server((args) => ({ result: args.a * args.b })),
-				toolDefinition({
-					name: "get_current_time",
-					description: "Get the current UTC time",
-					inputSchema: z.object({}),
-				}).server(() => ({ time: new Date().toISOString() })),
-				toolDefinition({
-					name: "random_number",
-					description: "Generate a random number between min and max",
-					inputSchema: z.object({ min: z.number(), max: z.number() }),
-				}).server((args) => ({
-					result: Math.floor(Math.random() * (args.max - args.min + 1)) + args.min,
-				})),
-				toolDefinition({
-					name: "reverse_string",
-					description: "Reverse a string",
-					inputSchema: z.object({ text: z.string() }),
-				}).server((args) => ({
-					reversed: args.text.split("").reverse().join(""),
-				})),
-				toolDefinition({
-					name: "web_scrape",
-					description: "Fetch and extract text content from a webpage URL",
-					inputSchema: z.object({ url: z.string().url() }),
-				}).server(async (args) => {
-					try {
-						const response = await fetch(args.url);
-						const html = await response.text();
-						const text = html
-							.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-							.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-							.replace(/<[^>]+>/g, " ")
-							.replace(/\s+/g, " ")
-							.trim()
-							.slice(0, 5000);
-						return { url: args.url, content: text };
-					} catch (error) {
-						return { url: args.url, error: String(error) };
-					}
-				}),
-			];
-
 			const response = chat({
-				adapter,
+				adapter: chatAdapter,
 				stream: true,
-				conversationId,
-				messages,
+				conversationId: body.data?.conversationId ?? crypto.randomUUID(),
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				messages: body.messages as any,
 				temperature: 0.6,
-				// outputSchema: PersonSchema,
 				tools,
 			});
 
-			// return new Response(JSON.stringify(await response));
 			return toHttpResponse(response);
+		}
+
+		// --- Image generation ---
+		const imageAdapter = getImageAdapter(url.pathname, creds);
+		if (imageAdapter) {
+			try {
+				const { prompt } = (await request.json()) as { prompt: string };
+				if (!prompt?.trim()) {
+					return Response.json({ error: "prompt is required" }, { status: 400 });
+				}
+
+				const result = await generateImage({ adapter: imageAdapter, prompt });
+				return Response.json(result);
+			} catch (error) {
+				return Response.json(
+					{
+						error: error instanceof Error ? error.message : String(error),
+					},
+					{ status: 500 },
+				);
+			}
+		}
+
+		// --- Summarization ---
+		const summarizeAdapter = getSummarizeAdapter(url.pathname, creds);
+		if (summarizeAdapter) {
+			try {
+				const { text } = (await request.json()) as { text: string };
+				if (!text?.trim()) {
+					return Response.json({ error: "text is required" }, { status: 400 });
+				}
+
+				const result = await summarize({
+					adapter: summarizeAdapter,
+					text,
+				});
+				return Response.json(result);
+			} catch (error) {
+				return Response.json(
+					{
+						error: error instanceof Error ? error.message : String(error),
+					},
+					{ status: 500 },
+				);
+			}
 		}
 
 		return new Response(null, { status: 404 });

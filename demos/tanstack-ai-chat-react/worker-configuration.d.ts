@@ -6,10 +6,9 @@ declare namespace Cloudflare {
 		mainModule: typeof import("./worker/index");
 	}
 	interface Env {
-		CF_AIG_TOKEN: string;
-		CF_AIG_ID: string;
-		CF_ACCOUNT_ID: string;
-		WORKERS_AI_TOKEN: string;
+		CLOUDFLARE_ACCOUNT_ID: string;
+		CLOUDFLARE_AI_GATEWAY_ID: string;
+		CLOUDFLARE_API_TOKEN: string;
 		AI: Ai;
 	}
 }

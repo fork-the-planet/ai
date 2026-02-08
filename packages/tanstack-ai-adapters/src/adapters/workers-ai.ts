@@ -6,16 +6,158 @@ import {
 	type StructuredOutputResult,
 } from "@tanstack/ai/adapters";
 import OpenAI from "openai";
-import { type AiGatewayAdapterConfig, createGatewayFetch } from "../utils/create-fetcher";
+import {
+	type WorkersAiAdapterConfig,
+	type AiGatewayAdapterConfig,
+	createGatewayFetch,
+	createWorkersAiBindingFetch,
+	isDirectBindingConfig,
+	isDirectCredentialsConfig,
+} from "../utils/create-fetcher";
+
+// ---------------------------------------------------------------------------
+// Model types derived from @cloudflare/workers-types
+// ---------------------------------------------------------------------------
 
 export type WorkersAiTextModel = {
 	[K in keyof AiModels]: AiModels[K] extends BaseAiTextGeneration ? K : never;
 }[keyof AiModels];
 
-type WorkersAiGatewayConfig = AiGatewayAdapterConfig & { apiKey: string };
+// ---------------------------------------------------------------------------
+// Helpers: build the right OpenAI client depending on config mode
+// ---------------------------------------------------------------------------
+
+function buildWorkersAiClient(config: WorkersAiAdapterConfig): OpenAI {
+	if (isDirectBindingConfig(config)) {
+		// Plain binding mode: shim translates OpenAI fetch calls to env.AI.run()
+		return new OpenAI({
+			apiKey: "unused",
+			fetch: createWorkersAiBindingFetch(config.binding),
+		});
+	}
+
+	if (isDirectCredentialsConfig(config)) {
+		// Plain REST mode: point OpenAI SDK at Workers AI's OpenAI-compatible endpoint
+		return new OpenAI({
+			baseURL: `https://api.cloudflare.com/client/v4/accounts/${config.accountId}/ai/v1`,
+			apiKey: config.apiKey,
+		});
+	}
+
+	// Gateway mode (existing): use createGatewayFetch
+	const gatewayConfig = config as AiGatewayAdapterConfig;
+	return new OpenAI({
+		fetch: createGatewayFetch("workers-ai", gatewayConfig),
+		apiKey: gatewayConfig.apiKey ?? "unused",
+	});
+}
+
+// ---------------------------------------------------------------------------
+// Shared message-building helpers
+// ---------------------------------------------------------------------------
+
+interface MessageLike {
+	role: string;
+	content: string | null | Array<{ type: string; content?: string }>;
+	toolCalls?: Array<{
+		id: string;
+		function: { name: string; arguments: string };
+	}>;
+	toolCallId?: string;
+}
+
+function extractTextContent(
+	content: string | null | Array<{ type: string; content?: string }>,
+): string {
+	if (content === null) return "";
+	if (typeof content === "string") return content;
+	return content
+		.filter((p) => p.type === "text")
+		.map((p) => p.content || "")
+		.join("");
+}
+
+function buildOpenAIMessages(
+	systemPrompts: string[] | undefined,
+	messages: MessageLike[],
+	options?: { includeToolMessages?: boolean },
+): OpenAI.Chat.ChatCompletionMessageParam[] {
+	const includeTools = options?.includeToolMessages ?? true;
+	const openAIMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
+
+	if (systemPrompts && systemPrompts.length > 0) {
+		openAIMessages.push({
+			role: "system",
+			content: systemPrompts.join("\n"),
+		});
+	}
+
+	for (const message of messages) {
+		if (message.role === "user") {
+			openAIMessages.push({
+				role: "user",
+				content: extractTextContent(message.content),
+			});
+		} else if (message.role === "assistant") {
+			const assistantMessage: OpenAI.Chat.ChatCompletionAssistantMessageParam = {
+				role: "assistant",
+				content: extractTextContent(message.content),
+			};
+			if (includeTools && message.toolCalls && message.toolCalls.length > 0) {
+				assistantMessage.tool_calls = message.toolCalls.map((tc) => ({
+					id: tc.id,
+					type: "function" as const,
+					function: {
+						name: tc.function.name,
+						arguments: tc.function.arguments,
+					},
+				}));
+			}
+			openAIMessages.push(assistantMessage);
+		} else if (includeTools && message.role === "tool") {
+			let toolContent: string;
+			if (typeof message.content === "string") {
+				try {
+					JSON.parse(message.content);
+					toolContent = message.content;
+				} catch {
+					toolContent = JSON.stringify(message.content);
+				}
+			} else {
+				toolContent = JSON.stringify(message.content);
+			}
+			openAIMessages.push({
+				role: "tool",
+				tool_call_id: message.toolCallId || "",
+				content: toolContent,
+			});
+		}
+	}
+
+	return openAIMessages;
+}
+
+function buildOpenAITools(
+	tools: Array<{ name: string; description: string; inputSchema?: unknown }> | undefined,
+): OpenAI.Chat.ChatCompletionTool[] | undefined {
+	if (!tools) return undefined;
+	return tools.map((tool) => ({
+		type: "function" as const,
+		function: {
+			name: tool.name,
+			description: tool.description,
+			parameters: tool.inputSchema as Record<string, unknown>,
+		},
+	}));
+}
+
+// ---------------------------------------------------------------------------
+// WorkersAiTextAdapter: chat / structured output via OpenAI Chat Completions
+// ---------------------------------------------------------------------------
 
 export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends BaseTextAdapter<
 	TModel,
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- BaseTextAdapter generic params are opaque
 	any,
 	any,
 	any
@@ -24,78 +166,16 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 
 	private client: OpenAI;
 
-	constructor(config: AiGatewayAdapterConfig, model: TModel) {
-		super({ apiKey: config.apiKey }, model);
-		this.client = new OpenAI({
-			fetch: createGatewayFetch("workers-ai", config),
-			apiKey: config.apiKey,
-		});
+	constructor(model: TModel, config: WorkersAiAdapterConfig) {
+		super({ apiKey: "unused" }, model);
+		this.client = buildWorkersAiClient(config);
 	}
 
 	async *chatStream(options: TextOptions<any>): AsyncIterable<StreamChunk> {
 		const { systemPrompts, messages, tools, temperature, model } = options;
 
-		const openAIMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
-
-		if (systemPrompts && systemPrompts.length > 0) {
-			openAIMessages.push({
-				role: "system",
-				content: systemPrompts.join("\n"),
-			});
-		}
-
-		for (const message of messages) {
-			if (message.role === "user") {
-				openAIMessages.push({
-					role: "user",
-					content: this.extractTextContent(message.content),
-				});
-			} else if (message.role === "assistant") {
-				const assistantMessage: OpenAI.Chat.ChatCompletionAssistantMessageParam = {
-					role: "assistant",
-					content: this.extractTextContent(message.content),
-				};
-				if (message.toolCalls && message.toolCalls.length > 0) {
-					assistantMessage.tool_calls = message.toolCalls.map((tc) => ({
-						id: tc.id,
-						type: "function" as const,
-						function: {
-							name: tc.function.name,
-							arguments: tc.function.arguments,
-						},
-					}));
-				}
-				openAIMessages.push(assistantMessage);
-			} else if (message.role === "tool") {
-				let toolContent: string;
-				if (typeof message.content === "string") {
-					try {
-						JSON.parse(message.content);
-						toolContent = message.content;
-					} catch {
-						toolContent = JSON.stringify(message.content);
-					}
-				} else {
-					toolContent = JSON.stringify(message.content);
-				}
-				openAIMessages.push({
-					role: "tool",
-					tool_call_id: message.toolCallId || "",
-					content: toolContent,
-				});
-			}
-		}
-
-		const openAITools: OpenAI.Chat.ChatCompletionTool[] | undefined = tools
-			? tools.map((tool) => ({
-					type: "function" as const,
-					function: {
-						name: tool.name,
-						description: tool.description,
-						parameters: tool.inputSchema as Record<string, unknown>,
-					},
-				}))
-			: undefined;
+		const openAIMessages = buildOpenAIMessages(systemPrompts, messages);
+		const openAITools = buildOpenAITools(tools);
 
 		const stream = await this.client.chat.completions.create({
 			model: model || this.model,
@@ -111,7 +191,11 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 		const toolCallsMap = new Map<number, { id: string; name: string; arguments: string }>();
 		let finishReason: "stop" | "length" | "tool_calls" | "content_filter" | null = null;
 		let usage:
-			| { promptTokens: number; completionTokens: number; totalTokens: number }
+			| {
+					promptTokens: number;
+					completionTokens: number;
+					totalTokens: number;
+			  }
 			| undefined;
 
 		for await (const chunk of stream) {
@@ -202,45 +286,15 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 		} satisfies StreamChunk;
 	}
 
-	private extractTextContent(
-		content: string | null | Array<{ type: string; content?: string }>,
-	): string {
-		if (content === null) return "";
-		if (typeof content === "string") return content;
-		return content
-			.filter((p) => p.type === "text")
-			.map((p) => p.content || "")
-			.join("");
-	}
-
 	async structuredOutput(
 		options: StructuredOutputOptions<any>,
 	): Promise<StructuredOutputResult<unknown>> {
 		const { outputSchema, chatOptions } = options;
 		const { systemPrompts, messages, temperature, model } = chatOptions;
 
-		const openAIMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
-
-		if (systemPrompts && systemPrompts.length > 0) {
-			openAIMessages.push({
-				role: "system",
-				content: systemPrompts.join("\n"),
-			});
-		}
-
-		for (const message of messages) {
-			if (message.role === "user") {
-				openAIMessages.push({
-					role: "user",
-					content: this.extractTextContent(message.content),
-				});
-			} else if (message.role === "assistant") {
-				openAIMessages.push({
-					role: "assistant",
-					content: this.extractTextContent(message.content),
-				});
-			}
-		}
+		const openAIMessages = buildOpenAIMessages(systemPrompts, messages, {
+			includeToolMessages: false,
+		});
 
 		const response = await this.client.chat.completions.create({
 			model: model || this.model,
@@ -260,8 +314,9 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 		const choice = response.choices?.[0];
 
 		if (!choice) {
-			console.error("No choices in response:", JSON.stringify(response));
-			return { data: null, rawText: "" };
+			throw new Error(
+				`Workers AI structured output returned no choices: ${JSON.stringify(response)}`,
+			);
 		}
 
 		const rawText = choice.message?.content || "";
@@ -277,6 +332,10 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 	}
 }
 
-export function createWorkersAiChat(model: WorkersAiTextModel, config: WorkersAiGatewayConfig) {
-	return new WorkersAiTextAdapter(config, model);
+// ---------------------------------------------------------------------------
+// Factory functions
+// ---------------------------------------------------------------------------
+
+export function createWorkersAiChat(model: WorkersAiTextModel, config: WorkersAiAdapterConfig) {
+	return new WorkersAiTextAdapter(model, config);
 }

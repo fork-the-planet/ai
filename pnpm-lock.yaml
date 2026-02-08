@@ -1619,6 +1619,10 @@ importers:
         version: 2.1.1(ai@6.0.1(zod@4.3.6))(zod@4.3.6)
 
   packages/tanstack-ai-adapters:
+    dependencies:
+      openai:
+        specifier: ^6.16.0
+        version: 6.17.0(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.3.6)
     devDependencies:
       '@tanstack/ai':
         specifier: ^0.2.2
@@ -1645,9 +1649,6 @@ importers:
       '@tanstack/ai-openai':
         specifier: ^0.2.1
         version: 0.2.1(@tanstack/ai@0.2.2)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.3.6)
-      openai:
-        specifier: ^6.16.0
-        version: 6.17.0(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.3.6)
 
   packages/workers-ai-provider:
     devDependencies:
@@ -10942,7 +10943,6 @@ snapshots:
     optionalDependencies:
       ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       zod: 4.3.6
-    optional: true
 
   optionator@0.9.4:
     dependencies:

@@ -9,7 +9,10 @@ import {
 } from "@tanstack/ai-gemini";
 import type { AiGatewayCredentialsConfig } from "../utils/create-fetcher";
 
-function createGeminiClient(config: AiGatewayCredentialsConfig) {
+/** Gemini-specific gateway config (credentials only, no binding support). */
+export type GeminiGatewayConfig = AiGatewayCredentialsConfig;
+
+function createGeminiClient(config: GeminiGatewayConfig) {
 	return new GoogleGenAI({
 		apiKey: config.apiKey ?? "unused",
 		httpOptions: {
@@ -25,56 +28,57 @@ function createGeminiClient(config: AiGatewayCredentialsConfig) {
 
 type GeminiChatModel = (typeof GeminiTextModels)[number];
 
-export class GeminiTextGatewayAdapter<
-	TModel extends GeminiChatModel,
-> extends GeminiTextAdapter<TModel> {
-	constructor(model: TModel, config: AiGatewayCredentialsConfig) {
+// Internal subclass: overrides the GoogleGenAI client to route through AI Gateway.
+// TODO: File upstream issue on @tanstack/ai-gemini to support client injection
+// so we can avoid this @ts-expect-error pattern.
+class GeminiTextGatewayAdapter<TModel extends GeminiChatModel> extends GeminiTextAdapter<TModel> {
+	constructor(model: TModel, config: GeminiGatewayConfig) {
 		super({ apiKey: config.apiKey ?? "unused" }, model);
 
-		// @ts-expect-error - we need to override the GoogleGenAI client
+		// @ts-expect-error - TanStack's GeminiTextAdapter doesn't expose client injection
 		this.client = createGeminiClient(config);
 	}
 }
 
 /**
  * Creates a Gemini adapter which uses Cloudflare AI Gateway.
- * Does not support the AI binding.
+ * Does not support the AI binding (Google GenAI SDK lacks custom fetch support).
  * @param model The Gemini model to use
- * @param config Configuration options
+ * @param config Configuration options (credentials only)
  */
-export function createGeminiChat(model: GeminiChatModel, config: AiGatewayCredentialsConfig) {
+export function createGeminiChat(model: GeminiChatModel, config: GeminiGatewayConfig) {
 	return new GeminiTextGatewayAdapter(model, config);
 }
 
 type GeminiImageModel = (typeof GeminiImageModels)[number];
 
-export class GeminiImageGatewayAdapter<
+class GeminiImageGatewayAdapter<
 	TModel extends GeminiImageModel,
 > extends GeminiImageAdapter<TModel> {
-	constructor(model: TModel, config: AiGatewayCredentialsConfig) {
+	constructor(model: TModel, config: GeminiGatewayConfig) {
 		super({ apiKey: config.apiKey ?? "unused" }, model);
 
-		// @ts-expect-error - we need to override the GoogleGenAI client
+		// @ts-expect-error - TanStack's GeminiImageAdapter doesn't expose client injection
 		this.client = createGeminiClient(config);
 	}
 }
 
 /**
  * Creates a Gemini Image adapter which uses Cloudflare AI Gateway.
- * Does not support the AI binding.
+ * Does not support the AI binding (Google GenAI SDK lacks custom fetch support).
  * @param model The Gemini model to use
- * @param config Configuration options
+ * @param config Configuration options (credentials only)
  */
-export function createGeminiImage(model: GeminiImageModel, config: AiGatewayCredentialsConfig) {
+export function createGeminiImage(model: GeminiImageModel, config: GeminiGatewayConfig) {
 	return new GeminiImageGatewayAdapter(model, config);
 }
 
 type GeminiSummarizeModel = (typeof GeminiSummarizeModels)[number];
 
-export class GeminiSummarizeGatewayAdapter<
+class GeminiSummarizeGatewayAdapter<
 	TModel extends GeminiSummarizeModel,
 > extends GeminiSummarizeAdapter<TModel> {
-	constructor(model: TModel, config: AiGatewayCredentialsConfig) {
+	constructor(model: TModel, config: GeminiGatewayConfig) {
 		const client = createGeminiClient(config);
 		super(client, model);
 	}
@@ -82,13 +86,10 @@ export class GeminiSummarizeGatewayAdapter<
 
 /**
  * Creates a Gemini Summarize adapter which uses Cloudflare AI Gateway.
- * Does not support the AI binding.
+ * Does not support the AI binding (Google GenAI SDK lacks custom fetch support).
  * @param model The Gemini model to use
- * @param config Configuration options
+ * @param config Configuration options (credentials only)
  */
-export function createGeminiSummarize(
-	model: GeminiSummarizeModel,
-	config: AiGatewayCredentialsConfig,
-) {
+export function createGeminiSummarize(model: GeminiSummarizeModel, config: GeminiGatewayConfig) {
 	return new GeminiSummarizeGatewayAdapter(model, config);
 }

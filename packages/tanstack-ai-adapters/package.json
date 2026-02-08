@@ -1,50 +1,76 @@
 {
 	"name": "@cloudflare/tanstack-ai",
-	"private": true,
+	"type": "module",
 	"version": "0.0.0",
-	"description": "AI Gateway Adapters for TanStack AI",
-	"main": "dist/index.js",
-	"module": "dist/index.mjs",
-	"types": "dist/index.d.ts",
+	"description": "Use TanStack AI with Cloudflare Workers AI and AI Gateway",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
-			"import": "./dist/index.mjs",
-			"require": "./dist/index.js"
+			"import": "./dist/index.js",
+			"require": "./dist/index.cjs"
 		},
 		"./adapters/openai": {
 			"types": "./dist/adapters/openai.d.ts",
-			"import": "./dist/adapters/openai.mjs",
-			"require": "./dist/adapters/openai.js"
+			"import": "./dist/adapters/openai.js",
+			"require": "./dist/adapters/openai.cjs"
 		},
 		"./adapters/anthropic": {
 			"types": "./dist/adapters/anthropic.d.ts",
-			"import": "./dist/adapters/anthropic.mjs",
-			"require": "./dist/adapters/anthropic.js"
+			"import": "./dist/adapters/anthropic.js",
+			"require": "./dist/adapters/anthropic.cjs"
 		},
 		"./adapters/gemini": {
 			"types": "./dist/adapters/gemini.d.ts",
-			"import": "./dist/adapters/gemini.mjs",
-			"require": "./dist/adapters/gemini.js"
+			"import": "./dist/adapters/gemini.js",
+			"require": "./dist/adapters/gemini.cjs"
 		},
 		"./adapters/grok": {
 			"types": "./dist/adapters/grok.d.ts",
-			"import": "./dist/adapters/grok.mjs",
-			"require": "./dist/adapters/grok.js"
+			"import": "./dist/adapters/grok.js",
+			"require": "./dist/adapters/grok.cjs"
 		},
 		"./adapters/workers-ai": {
 			"types": "./dist/adapters/workers-ai.d.ts",
-			"import": "./dist/adapters/workers-ai.mjs",
-			"require": "./dist/adapters/workers-ai.js"
+			"import": "./dist/adapters/workers-ai.js",
+			"require": "./dist/adapters/workers-ai.cjs"
 		}
+	},
+	"files": [
+		"dist",
+		"README.md"
+	],
+	"keywords": [
+		"cloudflare",
+		"workers",
+		"ai",
+		"tanstack",
+		"gateway",
+		"chat",
+		"serverless"
+	],
+	"author": "Cloudflare Inc.",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+ssh://git@github.com/cloudflare/ai.git"
+	},
+	"bugs": {
+		"url": "https://github.com/cloudflare/ai/issues"
 	},
 	"scripts": {
 		"build": "rm -rf dist && tsup --config tsup.config.ts",
 		"format": "biome format --write",
-		"type-check": "tsc --noEmit"
+		"type-check": "tsc --noEmit",
+		"test": "vitest",
+		"test:ci": "vitest --watch=false"
 	},
 	"devDependencies": {
 		"@tanstack/ai": "^0.2.2"
+	},
+	"dependencies": {
+		"openai": "^6.16.0"
 	},
 	"peerDependencies": {
 		"@tanstack/ai": "^0.2.2"
@@ -56,8 +82,10 @@
 		"@tanstack/ai-anthropic": "^0.2.0",
 		"@tanstack/ai-gemini": "^0.3.2",
 		"@tanstack/ai-grok": "^0.1.0",
-		"@tanstack/ai-openai": "^0.2.1",
-		"openai": "^6.16.0"
+		"@tanstack/ai-openai": "^0.2.1"
+	},
+	"publishConfig": {
+		"access": "public"
 	},
 	"packageManager": "pnpm@10.26.2"
 }
