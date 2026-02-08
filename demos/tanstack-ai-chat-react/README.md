@@ -1,6 +1,6 @@
 # @cloudflare/tanstack-ai demo
 
-Multi-provider AI demo showcasing [`@cloudflare/tanstack-ai`](../../packages/tanstack-ai-adapters). Features **Chat**, **Image Generation**, and **Summarization** across Workers AI and third-party providers (OpenAI, Anthropic, Gemini, Grok) through Cloudflare AI Gateway.
+Multi-provider AI demo showcasing [`@cloudflare/tanstack-ai`](../../packages/tanstack-ai). Features **Chat**, **Image Generation**, and **Summarization** across Workers AI and third-party providers (OpenAI, Anthropic, Gemini, Grok) through Cloudflare AI Gateway.
 
 ## Features
 
