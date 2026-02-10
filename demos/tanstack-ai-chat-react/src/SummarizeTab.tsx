@@ -10,7 +10,7 @@ const PROVIDERS = {
 	},
 	anthropic: {
 		label: "Anthropic",
-		model: "claude-sonnet-4-5",
+		model: "claude-opus-4-6",
 		badge: "AI Gateway",
 		badgeColor: "bg-amber-100 text-amber-700",
 	},

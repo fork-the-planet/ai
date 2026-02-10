@@ -11,10 +11,28 @@ export interface CloudflareConfig {
 	apiToken: string;
 }
 
+export interface ProviderKeys {
+	openai: string;
+	anthropic: string;
+	gemini: string;
+	grok: string;
+}
+
+export interface DemoConfig {
+	cloudflare: CloudflareConfig;
+	providerKeys: ProviderKeys;
+	/** When true, the worker uses env.AI / env.AI.gateway() bindings instead of REST credentials. */
+	useBinding: boolean;
+}
+
 interface ConfigContextValue {
-	config: CloudflareConfig;
-	setConfig: (config: CloudflareConfig) => void;
-	isConfigured: boolean;
+	config: DemoConfig;
+	setCloudflare: (config: CloudflareConfig) => void;
+	setProviderKey: (provider: keyof ProviderKeys, key: string) => void;
+	setUseBinding: (value: boolean) => void;
+	clearAll: () => void;
+	isCloudflareConfigured: boolean;
+	hasAnyProviderKey: boolean;
 	/** Headers to include in every request to the worker */
 	headers: Record<string, string>;
 }
@@ -23,26 +41,39 @@ interface ConfigContextValue {
 // LocalStorage helpers
 // ---------------------------------------------------------------------------
 
-const STORAGE_KEY = "cf-tanstack-ai-config";
+const STORAGE_KEY = "cf-tanstack-ai-config-v2";
 
-function loadConfig(): CloudflareConfig {
+const EMPTY_CLOUDFLARE: CloudflareConfig = { accountId: "", gatewayId: "", apiToken: "" };
+const EMPTY_PROVIDER_KEYS: ProviderKeys = { openai: "", anthropic: "", gemini: "", grok: "" };
+const EMPTY_CONFIG: DemoConfig = { cloudflare: EMPTY_CLOUDFLARE, providerKeys: EMPTY_PROVIDER_KEYS, useBinding: true };
+
+function loadConfig(): DemoConfig {
 	try {
 		const raw = localStorage.getItem(STORAGE_KEY);
 		if (raw) {
-			const parsed = JSON.parse(raw) as Partial<CloudflareConfig>;
+			const parsed = JSON.parse(raw) as Partial<DemoConfig>;
 			return {
-				accountId: parsed.accountId ?? "",
-				gatewayId: parsed.gatewayId ?? "",
-				apiToken: parsed.apiToken ?? "",
+				cloudflare: {
+					accountId: parsed.cloudflare?.accountId ?? "",
+					gatewayId: parsed.cloudflare?.gatewayId ?? "",
+					apiToken: parsed.cloudflare?.apiToken ?? "",
+				},
+				providerKeys: {
+					openai: parsed.providerKeys?.openai ?? "",
+					anthropic: parsed.providerKeys?.anthropic ?? "",
+					gemini: parsed.providerKeys?.gemini ?? "",
+					grok: parsed.providerKeys?.grok ?? "",
+				},
+				useBinding: parsed.useBinding ?? true,
 			};
 		}
 	} catch {
 		// Ignore parse errors
 	}
-	return { accountId: "", gatewayId: "", apiToken: "" };
+	return EMPTY_CONFIG;
 }
 
-function saveConfig(config: CloudflareConfig) {
+function saveConfig(config: DemoConfig) {
 	try {
 		localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
 	} catch {
@@ -57,31 +88,76 @@ function saveConfig(config: CloudflareConfig) {
 const ConfigContext = createContext<ConfigContextValue | null>(null);
 
 export function ConfigProvider({ children }: { children: ReactNode }) {
-	const [config, setConfigState] = useState<CloudflareConfig>(loadConfig);
+	const [config, setConfigState] = useState<DemoConfig>(loadConfig);
 
-	const setConfig = useCallback((next: CloudflareConfig) => {
-		setConfigState(next);
-		saveConfig(next);
+	const setCloudflare = useCallback((cf: CloudflareConfig) => {
+		setConfigState((prev) => {
+			const next = { ...prev, cloudflare: cf };
+			saveConfig(next);
+			return next;
+		});
 	}, []);
 
-	const isConfigured = !!(
-		config.accountId.trim() &&
-		config.gatewayId.trim() &&
-		config.apiToken.trim()
+	const setProviderKey = useCallback((provider: keyof ProviderKeys, key: string) => {
+		setConfigState((prev) => {
+			const next = { ...prev, providerKeys: { ...prev.providerKeys, [provider]: key } };
+			saveConfig(next);
+			return next;
+		});
+	}, []);
+
+	const setUseBinding = useCallback((value: boolean) => {
+		setConfigState((prev) => {
+			const next = { ...prev, useBinding: value };
+			saveConfig(next);
+			return next;
+		});
+	}, []);
+
+	const clearAll = useCallback(() => {
+		setConfigState(EMPTY_CONFIG);
+		saveConfig(EMPTY_CONFIG);
+	}, []);
+
+	const cf = config.cloudflare;
+	const pk = config.providerKeys;
+
+	const isCloudflareConfigured = !!(
+		cf.accountId.trim() &&
+		cf.gatewayId.trim() &&
+		cf.apiToken.trim()
+	);
+
+	const hasAnyProviderKey = !!(
+		pk.openai.trim() ||
+		pk.anthropic.trim() ||
+		pk.gemini.trim() ||
+		pk.grok.trim()
 	);
 
 	const headers = useMemo((): Record<string, string> => {
-		if (!isConfigured) return {};
-		return {
-			"X-CF-Account-Id": config.accountId.trim(),
-			"X-CF-Gateway-Id": config.gatewayId.trim(),
-			"X-CF-Api-Token": config.apiToken.trim(),
-		};
-	}, [config.accountId, config.gatewayId, config.apiToken, isConfigured]);
+		const h: Record<string, string> = {};
+		if (config.useBinding) {
+			h["X-Use-Binding"] = "true";
+			// Binding mode still needs a gateway ID for env.AI.gateway(id)
+			if (cf.gatewayId.trim()) h["X-CF-Gateway-Id"] = cf.gatewayId.trim();
+		} else {
+			// Cloudflare REST credentials
+			if (cf.accountId.trim()) h["X-CF-Account-Id"] = cf.accountId.trim();
+			if (cf.gatewayId.trim()) h["X-CF-Gateway-Id"] = cf.gatewayId.trim();
+			if (cf.apiToken.trim()) h["X-CF-Api-Token"] = cf.apiToken.trim();
+		}
+		// Provider API keys (sent in both modes — useful for BYOK override)
+		if (pk.openai.trim()) h["X-OpenAI-Api-Key"] = pk.openai.trim();
+		if (pk.anthropic.trim()) h["X-Anthropic-Api-Key"] = pk.anthropic.trim();
+		if (pk.gemini.trim()) h["X-Gemini-Api-Key"] = pk.gemini.trim();
+		if (pk.grok.trim()) h["X-Grok-Api-Key"] = pk.grok.trim();
+		return h;
+	}, [config.useBinding, cf.accountId, cf.gatewayId, cf.apiToken, pk.openai, pk.anthropic, pk.gemini, pk.grok]);
 
 	const value = useMemo<ConfigContextValue>(
-		() => ({ config, setConfig, isConfigured, headers }),
-		[config, setConfig, isConfigured, headers],
+		() => ({ config, setCloudflare, setProviderKey, setUseBinding, clearAll, isCloudflareConfigured, hasAnyProviderKey, headers }),
+		[config, setCloudflare, setProviderKey, setUseBinding, clearAll, isCloudflareConfigured, hasAnyProviderKey, headers],
 	);
 
 	return <ConfigContext.Provider value={value}>{children}</ConfigContext.Provider>;

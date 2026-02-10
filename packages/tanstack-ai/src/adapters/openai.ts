@@ -5,25 +5,26 @@ import {
 	OpenAITranscriptionAdapter,
 	OpenAITTSAdapter,
 	OpenAIVideoAdapter,
-	type OPENAI_CHAT_MODELS,
-	type OPENAI_IMAGE_MODELS,
-	type OPENAI_TRANSCRIPTION_MODELS,
-	type OPENAI_TTS_MODELS,
-	type OPENAI_VIDEO_MODELS,
+	OPENAI_CHAT_MODELS,
+	OPENAI_IMAGE_MODELS,
+	OPENAI_TRANSCRIPTION_MODELS,
+	OPENAI_TTS_MODELS,
+	OPENAI_VIDEO_MODELS,
+	type OpenAIChatModel,
+	type OpenAIImageModel,
+	type OpenAITranscriptionModel,
+	type OpenAITTSModel,
+	type OpenAIVideoModel,
 } from "@tanstack/ai-openai";
 import { createGatewayFetch, type AiGatewayAdapterConfig } from "../utils/create-fetcher";
 
-type OpenAiModel = (typeof OPENAI_CHAT_MODELS)[number];
-type OpenAiImageModel = (typeof OPENAI_IMAGE_MODELS)[number];
-type OpenAiTranscriptionModel = (typeof OPENAI_TRANSCRIPTION_MODELS)[number];
-type OpenAiTtsModel = (typeof OPENAI_TTS_MODELS)[number];
-type OpenAiVideoModel = (typeof OPENAI_VIDEO_MODELS)[number];
+export type OpenAiGatewayConfig = AiGatewayAdapterConfig;
 
 /**
  * Builds an OpenAI-compatible config that injects the gateway fetch.
  * OpenAITextConfig extends OpenAI SDK's ClientOptions, which supports a `fetch` parameter.
  */
-function buildOpenAiConfig(provider: string, config: AiGatewayAdapterConfig) {
+function buildOpenAiConfig(provider: string, config: OpenAiGatewayConfig) {
 	return {
 		apiKey: config.apiKey ?? "unused",
 		fetch: createGatewayFetch(provider, config),
@@ -36,7 +37,7 @@ function buildOpenAiConfig(provider: string, config: AiGatewayAdapterConfig) {
  * @param model The OpenAI model to use
  * @param config Configuration options
  */
-export function createOpenAiChat(model: OpenAiModel, config: AiGatewayAdapterConfig) {
+export function createOpenAiChat(model: OpenAIChatModel, config: OpenAiGatewayConfig) {
 	return new OpenAITextAdapter(buildOpenAiConfig("openai", config), model);
 }
 
@@ -45,7 +46,7 @@ export function createOpenAiChat(model: OpenAiModel, config: AiGatewayAdapterCon
  * @param model The OpenAI model to use
  * @param config Configuration options
  */
-export function createOpenAiSummarize(model: OpenAiModel, config: AiGatewayAdapterConfig) {
+export function createOpenAiSummarize(model: OpenAIChatModel, config: OpenAiGatewayConfig) {
 	return new OpenAISummarizeAdapter(buildOpenAiConfig("openai", config), model);
 }
 
@@ -54,7 +55,7 @@ export function createOpenAiSummarize(model: OpenAiModel, config: AiGatewayAdapt
  * @param model The OpenAI image model to use
  * @param config Configuration options
  */
-export function createOpenAiImage(model: OpenAiImageModel, config: AiGatewayAdapterConfig) {
+export function createOpenAiImage(model: OpenAIImageModel, config: OpenAiGatewayConfig) {
 	return new OpenAIImageAdapter(buildOpenAiConfig("openai", config), model);
 }
 
@@ -64,8 +65,8 @@ export function createOpenAiImage(model: OpenAiImageModel, config: AiGatewayAdap
  * @param config Configuration options
  */
 export function createOpenAiTranscription(
-	model: OpenAiTranscriptionModel,
-	config: AiGatewayAdapterConfig,
+	model: OpenAITranscriptionModel,
+	config: OpenAiGatewayConfig,
 ) {
 	return new OpenAITranscriptionAdapter(buildOpenAiConfig("openai", config), model);
 }
@@ -75,7 +76,7 @@ export function createOpenAiTranscription(
  * @param model The OpenAI TTS model to use
  * @param config Configuration options
  */
-export function createOpenAiTts(model: OpenAiTtsModel, config: AiGatewayAdapterConfig) {
+export function createOpenAiTts(model: OpenAITTSModel, config: OpenAiGatewayConfig) {
 	return new OpenAITTSAdapter(buildOpenAiConfig("openai", config), model);
 }
 
@@ -84,6 +85,19 @@ export function createOpenAiTts(model: OpenAiTtsModel, config: AiGatewayAdapterC
  * @param model The OpenAI video model to use
  * @param config Configuration options
  */
-export function createOpenAiVideo(model: OpenAiVideoModel, config: AiGatewayAdapterConfig) {
+export function createOpenAiVideo(model: OpenAIVideoModel, config: OpenAiGatewayConfig) {
 	return new OpenAIVideoAdapter(buildOpenAiConfig("openai", config), model);
 }
+
+export {
+	OPENAI_CHAT_MODELS,
+	OPENAI_IMAGE_MODELS,
+	OPENAI_TRANSCRIPTION_MODELS,
+	OPENAI_TTS_MODELS,
+	OPENAI_VIDEO_MODELS,
+	type OpenAIChatModel,
+	type OpenAIImageModel,
+	type OpenAITranscriptionModel,
+	type OpenAITTSModel,
+	type OpenAIVideoModel,
+};

@@ -65,7 +65,7 @@ const adapter = createWorkersAiChat("@cf/meta/llama-3.3-70b-instruct-fp8-fast", 
 });
 ```
 
-> **Coming soon:** Workers AI embeddings and image generation will be added once TanStack AI standardizes base adapter interfaces for these capabilities.
+> **Coming soon:** Workers AI embeddings and image generation adapters are implemented but held back until TanStack AI adds higher-level activity functions (like `generateImage()` and `embed()`) that match the `chat()` pattern.
 
 ## AI Gateway
 
@@ -148,7 +148,7 @@ const grok = createGrokChat("grok-4", config);
 | **OpenAI**     | ✅   | ✅        | ❌         | ✅        | ✅            | ✅  | ✅    |
 | **Gemini**     | ✅   | ✅        | ❌         | ✅        | ❌            | ❌  | ❌    |
 | **Anthropic**  | ✅   | ✅        | ❌         | ❌        | ❌            | ❌  | ❌    |
-| **Grok**       | ✅   | ❌        | ❌         | ✅        | ❌            | ❌  | ❌    |
+| **Grok**       | ✅   | ✅        | ❌         | ✅        | ❌            | ❌  | ❌    |
 
 ### All Functions
 
@@ -181,6 +181,7 @@ const grok = createGrokChat("grok-4", config);
 **Grok:**
 
 - `createGrokChat(model, config)`
+- `createGrokSummarize(model, config)`
 - `createGrokImage(model, config)`
 
 ## Workers AI Configuration Modes

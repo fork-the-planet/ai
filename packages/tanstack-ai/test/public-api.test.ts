@@ -17,19 +17,31 @@ vi.mock("@tanstack/ai-openai", () => ({
 	OpenAITranscriptionAdapter: class {},
 	OpenAITTSAdapter: class {},
 	OpenAIVideoAdapter: class {},
+	OPENAI_CHAT_MODELS: ["gpt-4o"],
+	OPENAI_IMAGE_MODELS: ["dall-e-3"],
+	OPENAI_TRANSCRIPTION_MODELS: ["whisper-1"],
+	OPENAI_TTS_MODELS: ["tts-1"],
+	OPENAI_VIDEO_MODELS: ["sora"],
 }));
 vi.mock("@tanstack/ai-anthropic", () => ({
 	AnthropicTextAdapter: class {},
 	AnthropicSummarizeAdapter: class {},
+	ANTHROPIC_MODELS: ["claude-sonnet-4-5"],
 }));
 vi.mock("@tanstack/ai-gemini", () => ({
 	GeminiTextAdapter: class {},
 	GeminiSummarizeAdapter: class {},
 	GeminiImageAdapter: class {},
+	GeminiTextModels: ["gemini-2.5-flash"],
+	GeminiImageModels: ["imagen-4.0-generate-001"],
+	GeminiSummarizeModels: ["gemini-2.0-flash"],
 }));
 vi.mock("@tanstack/ai-grok", () => ({
 	GrokTextAdapter: class {},
 	GrokImageAdapter: class {},
+	GrokSummarizeAdapter: class {},
+	GROK_CHAT_MODELS: ["grok-3"],
+	GROK_IMAGE_MODELS: ["grok-2-image-1212"],
 }));
 vi.mock("openai", () => ({ default: class {} }));
 vi.mock("@anthropic-ai/sdk", () => ({ default: class {} }));
@@ -51,6 +63,7 @@ describe("public API exports", () => {
 		expect(typeof exports.createAnthropicChat).toBe("function");
 		expect(typeof exports.createGeminiChat).toBe("function");
 		expect(typeof exports.createGrokChat).toBe("function");
+		expect(typeof exports.createGrokSummarize).toBe("function");
 	});
 
 	it("should export config types (verified via factory functions)", async () => {
@@ -70,6 +83,26 @@ describe("public API exports", () => {
 		expect((exports as any).isGatewayConfig).toBeUndefined();
 		expect((exports as any).createWorkersAiBindingFetch).toBeUndefined();
 		expect((exports as any).createGatewayFetch).toBeUndefined();
+	});
+
+	it("should export upstream model constants", async () => {
+		const exports = await import("../src/index");
+
+		// Anthropic
+		expect(exports.ANTHROPIC_MODELS).toBeDefined();
+
+		// OpenAI
+		expect(exports.OPENAI_CHAT_MODELS).toBeDefined();
+		expect(exports.OPENAI_IMAGE_MODELS).toBeDefined();
+
+		// Gemini
+		expect(exports.GeminiTextModels).toBeDefined();
+		expect(exports.GeminiImageModels).toBeDefined();
+		expect(exports.GeminiSummarizeModels).toBeDefined();
+
+		// Grok
+		expect(exports.GROK_CHAT_MODELS).toBeDefined();
+		expect(exports.GROK_IMAGE_MODELS).toBeDefined();
 	});
 
 	it("should NOT export internal Gemini adapter classes", async () => {

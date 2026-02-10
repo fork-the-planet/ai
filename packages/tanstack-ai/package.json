@@ -64,25 +64,30 @@
 		"format": "biome format --write",
 		"type-check": "tsc --noEmit",
 		"test": "vitest",
-		"test:ci": "vitest --watch=false"
+		"test:ci": "vitest --watch=false",
+		"test:e2e": "vitest --config vitest.e2e.config.ts --watch=false",
+		"test:e2e:rest": "vitest --config vitest.e2e.config.ts --watch=false test/e2e/workers-ai-rest.e2e.test.ts",
+		"test:e2e:binding": "vitest --config vitest.e2e.config.ts --watch=false test/e2e/workers-ai-binding.e2e.test.ts"
 	},
 	"devDependencies": {
-		"@tanstack/ai": "^0.2.2"
+		"@microsoft/api-extractor": "^7.56.3",
+		"@tanstack/ai": "^0.4.2",
+		"dotenv": "^17.2.3"
 	},
 	"dependencies": {
 		"openai": "^6.16.0"
 	},
 	"peerDependencies": {
-		"@tanstack/ai": "^0.2.2"
+		"@tanstack/ai": "^0.4.2"
 	},
 	"optionalDependencies": {
 		"@anthropic-ai/sdk": "^0.71.2",
 		"@cloudflare/workers-types": "^4.20260128.0",
 		"@google/genai": "^1.35.0",
-		"@tanstack/ai-anthropic": "^0.2.0",
-		"@tanstack/ai-gemini": "^0.3.2",
-		"@tanstack/ai-grok": "^0.1.0",
-		"@tanstack/ai-openai": "^0.2.1"
+		"@tanstack/ai-anthropic": "^0.4.2",
+		"@tanstack/ai-gemini": "^0.4.1",
+		"@tanstack/ai-grok": "^0.4.1",
+		"@tanstack/ai-openai": "^0.4.0"
 	},
 	"publishConfig": {
 		"access": "public"

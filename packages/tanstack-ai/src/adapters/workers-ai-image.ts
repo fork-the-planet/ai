@@ -1,6 +1,6 @@
-// TODO: Export from index.ts once TanStack AI adds BaseImageAdapter.
-// This adapter is implemented and tested, but held back from the public API
-// to avoid shipping a custom interface that would break when TanStack standardizes it.
+// TODO: Rewrite to extend BaseImageAdapter (now exported from @tanstack/ai 0.4.2)
+// and export from index.ts. This adapter is implemented and tested, but held back
+// from the public API pending a rewrite to the standard interface.
 
 import type { AiModels, BaseAiTextToImage } from "@cloudflare/workers-types";
 import {

@@ -10,7 +10,7 @@ const PROVIDERS = {
 	},
 	gemini: {
 		label: "Gemini",
-		model: "imagen-4.0-generate-001",
+		model: "gemini-3-pro-image-preview",
 		badge: "AI Gateway",
 		badgeColor: "bg-amber-100 text-amber-700",
 	},

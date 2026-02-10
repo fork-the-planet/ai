@@ -223,6 +223,58 @@ export function createGatewayFetch(
 // ---------------------------------------------------------------------------
 
 /**
+ * Normalize messages before passing to Workers AI binding.
+ *
+ * The binding has strict schema validation that may differ from the OpenAI API:
+ * - `content` must be a string (not null)
+ * - `tool_call_id` must match `[a-zA-Z0-9]{9}` pattern
+ *
+ * This function patches these fields so that the full tool-call round-trip works
+ * even though the binding's own generated IDs may not pass its validation.
+ */
+function normalizeMessagesForBinding(
+	messages: Record<string, unknown>[],
+): Record<string, unknown>[] {
+	return messages.map((msg) => {
+		const normalized = { ...msg };
+
+		// content: null → content: ""
+		if (normalized.content === null || normalized.content === undefined) {
+			normalized.content = "";
+		}
+
+		// Normalize tool_call_id on tool messages
+		if (normalized.tool_call_id && typeof normalized.tool_call_id === "string") {
+			normalized.tool_call_id = sanitizeToolCallId(normalized.tool_call_id);
+		}
+
+		// Normalize tool_calls[].id on assistant messages
+		if (Array.isArray(normalized.tool_calls)) {
+			normalized.tool_calls = (normalized.tool_calls as Record<string, unknown>[]).map(
+				(tc) => {
+					if (tc.id && typeof tc.id === "string") {
+						return { ...tc, id: sanitizeToolCallId(tc.id) };
+					}
+					return tc;
+				},
+			);
+		}
+
+		return normalized;
+	});
+}
+
+/**
+ * Strip non-alphanumeric characters and ensure the ID is exactly 9 chars,
+ * matching Workers AI's `[a-zA-Z0-9]{9}` validation pattern.
+ */
+function sanitizeToolCallId(id: string): string {
+	const alphanumeric = id.replace(/[^a-zA-Z0-9]/g, "");
+	// Pad with zeros if too short, truncate if too long
+	return alphanumeric.slice(0, 9).padEnd(9, "0");
+}
+
+/**
  * Creates a fetch function that intercepts OpenAI SDK requests and translates them
  * to Workers AI binding calls (env.AI.run). This allows the WorkersAiTextAdapter
  * to use the OpenAI SDK against a plain Workers AI binding.
@@ -249,7 +301,11 @@ export function createWorkersAiBindingFetch(binding: WorkersAiBinding): typeof f
 
 		// Build Workers AI inputs from OpenAI format
 		const inputs: Record<string, unknown> = {};
-		if (body.messages) inputs.messages = body.messages;
+		if (body.messages) {
+			inputs.messages = normalizeMessagesForBinding(
+				body.messages as Record<string, unknown>[],
+			);
+		}
 		if (body.tools) inputs.tools = body.tools;
 		if (typeof body.temperature === "number") inputs.temperature = body.temperature;
 		if (typeof body.max_tokens === "number") inputs.max_tokens = body.max_tokens;
@@ -292,22 +348,22 @@ export function createWorkersAiBindingFetch(binding: WorkersAiBinding): typeof f
 		if (Array.isArray(responseObj.tool_calls) && responseObj.tool_calls.length > 0) {
 			finishReason = "tool_calls";
 			message.tool_calls = responseObj.tool_calls.map(
-				(tc: { name: string; arguments: unknown }, i: number) => ({
-					id: `call_${Date.now()}_${i}`,
+				(tc: { id?: string; name?: string; arguments: unknown; function?: { name: string; arguments?: unknown } }) => ({
+					id: sanitizeToolCallId(tc.id || crypto.randomUUID()),
 					type: "function",
 					function: {
-						name: tc.name,
+						name: tc.function?.name || tc.name || "",
 						arguments:
-							typeof tc.arguments === "string"
-								? tc.arguments
-								: JSON.stringify(tc.arguments),
+							typeof (tc.function?.arguments ?? tc.arguments) === "string"
+								? (tc.function?.arguments ?? tc.arguments) as string
+								: JSON.stringify(tc.function?.arguments ?? tc.arguments ?? {}),
 					},
 				}),
 			);
 		}
 
 		const openAiResponse = {
-			id: `workers-ai-${Date.now()}`,
+			id: `workers-ai-${crypto.randomUUID()}`,
 			object: "chat.completion",
 			created: Math.floor(Date.now() / 1000),
 			model,
@@ -328,7 +384,11 @@ export function createWorkersAiBindingFetch(binding: WorkersAiBinding): typeof f
 /**
  * Transforms a Workers AI SSE stream (data: {"response":"chunk"}) into
  * an OpenAI-compatible SSE stream (data: {"choices":[{"delta":{"content":"chunk"}}]}).
- * Also handles tool_calls in the Workers AI response.
+ *
+ * Workers AI binding streams tool calls in an OpenAI-like nested format:
+ *   { tool_calls: [{ id, type, index, function: { name, arguments } }] }
+ * Arguments are streamed incrementally across multiple SSE chunks, so the
+ * transformer must forward them as incremental deltas rather than a single blob.
  */
 function transformWorkersAiStream(
 	source: ReadableStream<Uint8Array>,
@@ -338,11 +398,17 @@ function transformWorkersAiStream(
 	const encoder = new TextEncoder();
 	// Generate a stable ID and timestamp for the entire stream, matching OpenAI's
 	// convention where all chunks in a single response share the same id/created.
-	const streamId = `workers-ai-${Date.now()}`;
+	const streamId = `workers-ai-${crypto.randomUUID()}`;
 	const created = Math.floor(Date.now() / 1000);
 	let buffer = "";
 	let hasToolCalls = false;
-	let toolCallCounter = 0;
+	// When true, the source stream is already in OpenAI format (some models
+	// like Qwen3, Kimi K2.5 stream OpenAI-compatible SSE through the binding).
+	// In that case, flush() should only emit [DONE] and skip the finish chunk.
+	let isOpenAiFormat = false;
+	// Track which tool call indices we've already emitted an `id` for,
+	// so subsequent argument deltas don't duplicate the id/type/name fields.
+	const emittedToolCallStart = new Set<number>();
 
 	return source.pipeThrough(
 		new TransformStream<Uint8Array, Uint8Array>({
@@ -356,11 +422,38 @@ function transformWorkersAiStream(
 					if (!trimmed || !trimmed.startsWith("data: ")) continue;
 					const data = trimmed.slice(6);
 
-					// Swallow source [DONE]; we emit our own clean finish in flush()
+					// Swallow source [DONE]; we emit our own in flush()
 					if (data === "[DONE]") continue;
 
 					try {
 						const parsed = JSON.parse(data);
+
+						// Some models (Qwen3, Kimi K2.5) return OpenAI-compatible format
+						// directly through the binding, with `choices[].delta.content` and
+						// optional `reasoning_content`. Detect this and pass through as-is.
+						if (parsed.choices !== undefined) {
+							// Already OpenAI format — pass through with only tool_call_id
+							// sanitization for any tool calls present.
+							isOpenAiFormat = true;
+							const choice = parsed.choices?.[0];
+							if (choice?.delta?.tool_calls) {
+								hasToolCalls = true;
+								for (const tc of choice.delta.tool_calls) {
+									if (tc.id && typeof tc.id === "string") {
+										tc.id = sanitizeToolCallId(tc.id);
+									}
+								}
+							}
+							if (choice?.finish_reason === "tool_calls") {
+								hasToolCalls = true;
+							}
+							controller.enqueue(
+								encoder.encode(`data: ${JSON.stringify(parsed)}\n\n`),
+							);
+							continue;
+						}
+
+						// --- Workers AI native format handling below ---
 
 						// Text content
 						if (parsed.response != null && parsed.response !== "") {
@@ -382,11 +475,56 @@ function transformWorkersAiStream(
 							);
 						}
 
-						// Tool calls
+						// Tool calls — Workers AI binding streams these incrementally:
+						//   Chunk A: { id, type, index, function: { name } }          — start
+						//   Chunk B: { index, function: { arguments: "partial..." } }  — args delta
+						//   Chunk C: { index, function: { arguments: "rest..." } }     — args delta
+						//   Chunk D: { id: null, type: null, index, function: { name: null, arguments: "" } } — finalize (skip)
 						if (Array.isArray(parsed.tool_calls) && parsed.tool_calls.length > 0) {
-							hasToolCalls = true;
-							for (let i = 0; i < parsed.tool_calls.length; i++) {
-								const tc = parsed.tool_calls[i];
+							for (const tc of parsed.tool_calls) {
+								const tcIndex = tc.index ?? 0;
+
+								// Resolve name and arguments from either nested or flat format
+								const tcName = tc.function?.name ?? tc.name ?? null;
+								const tcArgs = tc.function?.arguments ?? tc.arguments ?? null;
+								const tcId = tc.id ?? null;
+
+								// Skip finalization chunks where everything is null/empty
+								if (!tcId && !tcName && (!tcArgs || tcArgs === "")) continue;
+
+								hasToolCalls = true;
+
+								// Build the OpenAI-compatible tool_calls delta
+								const toolCallDelta: Record<string, unknown> = {
+									index: tcIndex,
+								};
+
+								if (!emittedToolCallStart.has(tcIndex)) {
+									// First chunk for this tool call index — emit id, type, name.
+									// Use sanitizeToolCallId so the ID survives round-trip through
+									// the binding's strict `[a-zA-Z0-9]{9}` validation.
+									emittedToolCallStart.add(tcIndex);
+									const rawId = tcId || `call${streamId}${tcIndex}`;
+									toolCallDelta.id = sanitizeToolCallId(rawId);
+									toolCallDelta.type = "function";
+									toolCallDelta.function = {
+										name: tcName || "",
+										// Include arguments if they arrive in the same chunk
+										arguments: tcArgs != null
+											? (typeof tcArgs === "string" ? tcArgs : JSON.stringify(tcArgs))
+											: "",
+									};
+								} else {
+									// Subsequent chunks — only include arguments delta
+									if (tcArgs != null && tcArgs !== "") {
+										toolCallDelta.function = {
+											arguments: typeof tcArgs === "string" ? tcArgs : JSON.stringify(tcArgs),
+										};
+									} else {
+										continue; // Nothing useful to forward
+									}
+								}
+
 								const toolChunk = {
 									id: streamId,
 									object: "chat.completion.chunk",
@@ -395,22 +533,7 @@ function transformWorkersAiStream(
 									choices: [
 										{
 											index: 0,
-											delta: {
-												tool_calls: [
-													{
-														index: i,
-														id: `call_${streamId}_${toolCallCounter++}`,
-														type: "function",
-														function: {
-															name: tc.name,
-															arguments:
-																typeof tc.arguments === "string"
-																	? tc.arguments
-																	: JSON.stringify(tc.arguments),
-														},
-													},
-												],
-											},
+											delta: { tool_calls: [toolCallDelta] },
 											finish_reason: null,
 										},
 									],
@@ -426,21 +549,25 @@ function transformWorkersAiStream(
 				}
 			},
 			flush(controller) {
-				// Emit exactly one finish chunk and one [DONE]
-				const finalChunk = {
-					id: streamId,
-					object: "chat.completion.chunk",
-					created,
-					model,
-					choices: [
-						{
-							index: 0,
-							delta: {},
-							finish_reason: hasToolCalls ? "tool_calls" : "stop",
-						},
-					],
-				};
-				controller.enqueue(encoder.encode(`data: ${JSON.stringify(finalChunk)}\n\n`));
+				if (!isOpenAiFormat) {
+					// Workers AI native format: emit a finish chunk with stop/tool_calls
+					const finalChunk = {
+						id: streamId,
+						object: "chat.completion.chunk",
+						created,
+						model,
+						choices: [
+							{
+								index: 0,
+								delta: {},
+								finish_reason: hasToolCalls ? "tool_calls" : "stop",
+							},
+						],
+					};
+					controller.enqueue(encoder.encode(`data: ${JSON.stringify(finalChunk)}\n\n`));
+				}
+				// OpenAI format already includes its own finish_reason in the stream.
+				// Either way, emit a [DONE] sentinel.
 				controller.enqueue(encoder.encode("data: [DONE]\n\n"));
 			},
 		}),

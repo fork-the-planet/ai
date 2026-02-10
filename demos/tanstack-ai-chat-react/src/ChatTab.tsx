@@ -2,20 +2,34 @@ import { fetchHttpStream, useChat } from "@tanstack/ai-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useConfig } from "./config";
 
+const WORKERS_AI_MODELS = [
+	{ id: "@cf/moonshotai/kimi-k2.5", label: "Kimi K2.5" },
+	{ id: "@cf/qwen/qwen3-30b-a3b-fp8", label: "Qwen3 30B" },
+	{ id: "@cf/openai/gpt-oss-120b", label: "GPT-OSS 120B" },
+	{ id: "@cf/openai/gpt-oss-20b", label: "GPT-OSS 20B" },
+	{ id: "@cf/meta/llama-4-scout-17b-16e-instruct", label: "Llama 4 Scout 17B" },
+	{ id: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", label: "Llama 3.3 70B" },
+	{ id: "@cf/google/gemma-3-12b-it", label: "Gemma 3 12B" },
+	{ id: "@cf/mistralai/mistral-small-3.1-24b-instruct", label: "Mistral Small 3.1" },
+	{ id: "@cf/qwen/qwq-32b", label: "QwQ 32B" },
+	{ id: "@cf/deepseek/deepseek-r1-distill-qwen-32b", label: "DeepSeek R1 32B" },
+	{ id: "@cf/ibm/granite-4.0-h-micro", label: "Granite 4.0 Micro" },
+] as const;
+
 const PROVIDERS = {
 	"workers-ai-plain": {
-		label: "Llama 4 Scout",
-		model: "@cf/meta/llama-4-scout-17b-16e-instruct",
+		label: "Workers AI (Plain)",
 		group: "Workers AI",
 		badge: "Workers AI",
 		badgeColor: "bg-emerald-100 text-emerald-700",
+		hasModelSelector: true,
 	},
 	"workers-ai": {
-		label: "Qwen3 30B",
-		model: "@cf/qwen/qwen3-30b-a3b-fp8",
+		label: "Workers AI (Gateway)",
 		group: "Workers AI via Gateway",
 		badge: "AI Gateway",
 		badgeColor: "bg-amber-100 text-amber-700",
+		hasModelSelector: true,
 	},
 	openai: {
 		label: "GPT-5.2",
@@ -23,20 +37,23 @@ const PROVIDERS = {
 		group: "Third-party via Gateway",
 		badge: "AI Gateway",
 		badgeColor: "bg-amber-100 text-amber-700",
+		hasModelSelector: false,
 	},
 	anthropic: {
-		label: "Claude Sonnet 4.5",
-		model: "claude-sonnet-4-5",
+		label: "Claude Opus 4.6",
+		model: "claude-opus-4-6",
 		group: "Third-party via Gateway",
 		badge: "AI Gateway",
 		badgeColor: "bg-amber-100 text-amber-700",
+		hasModelSelector: false,
 	},
 	gemini: {
-		label: "Gemini 2.5 Flash",
-		model: "gemini-2.5-flash",
+		label: "Gemini 3 Flash",
+		model: "gemini-3-flash-preview",
 		group: "Third-party via Gateway",
 		badge: "AI Gateway",
 		badgeColor: "bg-amber-100 text-amber-700",
+		hasModelSelector: false,
 	},
 	grok: {
 		label: "Grok 4",
@@ -44,32 +61,87 @@ const PROVIDERS = {
 		group: "Third-party via Gateway",
 		badge: "AI Gateway",
 		badgeColor: "bg-amber-100 text-amber-700",
+		hasModelSelector: false,
 	},
 } as const;
 
 type ProviderId = keyof typeof PROVIDERS;
 
-export function ChatTab() {
-	const [selectedProvider, setSelectedProvider] = useState<ProviderId>("workers-ai-plain");
+// ---------------------------------------------------------------------------
+// Inner chat view — remounted (via key) when provider changes so useChat
+// gets a fresh connection.
+// ---------------------------------------------------------------------------
+
+function ChatView({
+	selectedProvider,
+	workersAiModel,
+}: { selectedProvider: ProviderId; workersAiModel: string }) {
 	const provider = PROVIDERS[selectedProvider];
 	const { headers } = useConfig();
 
-	// Use a ref so the dynamic options callback always reads the latest headers
-	// without causing the connection (and ChatClient) to be recreated.
+	// Merge in the Workers AI model override header when applicable
 	const headersRef = useRef(headers);
 	headersRef.current = headers;
+	const workersAiModelRef = useRef(workersAiModel);
+	workersAiModelRef.current = workersAiModel;
 
 	const connection = useMemo(
 		() =>
-			fetchHttpStream(`/ai/${selectedProvider}`, () => ({
-				headers: headersRef.current,
-			})),
+			fetchHttpStream(`/ai/${selectedProvider}`, () => {
+				const h: Record<string, string> = { ...headersRef.current };
+				if (workersAiModelRef.current) {
+					h["X-Workers-AI-Model"] = workersAiModelRef.current;
+				}
+				return { headers: h };
+			}),
 		[selectedProvider],
 	);
 
-	const { messages, sendMessage, error, isLoading, clear } = useChat({
+	const { messages, sendMessage, error, isLoading } = useChat({
 		connection,
 	});
+
+	const displayModel = provider.hasModelSelector
+		? workersAiModel
+		: (provider as { model: string }).model;
+
+	// Debug: log completed messages (only when streaming finishes) and errors
+	const prevLoadingRef = useRef(isLoading);
+	useEffect(() => {
+		if (prevLoadingRef.current && !isLoading && messages.length > 0) {
+			const lastMsg = messages[messages.length - 1];
+			console.log(
+				"[ChatTab] response complete",
+				JSON.stringify(
+					{
+						provider: selectedProvider,
+						model: displayModel,
+						badge: provider.badge,
+						message: {
+							id: lastMsg.id,
+							role: lastMsg.role,
+							parts: lastMsg.parts.map((p) => ({
+								type: p.type,
+								...(p.type === "text" ? { content: (p as any).content } : {}),
+								...(p.type === "tool-call" ? { toolName: (p as any).toolName, args: (p as any).args } : {}),
+								...(p.type === "tool-result" ? { toolName: (p as any).toolName, result: (p as any).result } : {}),
+							})),
+						},
+						totalMessages: messages.length,
+					},
+					null,
+					2,
+				),
+			);
+		}
+		prevLoadingRef.current = isLoading;
+	}, [isLoading, messages, selectedProvider, displayModel, provider.badge]);
+
+	useEffect(() => {
+		if (error) {
+			console.error(`[ChatTab] error: provider=${selectedProvider} model=${displayModel}`, error);
+		}
+	}, [error, selectedProvider, displayModel]);
 
 	const [input, setInput] = useState("");
 	const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -81,11 +153,10 @@ export function ChatTab() {
 		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 	}, [messages.length]);
 
-	// Focus input on provider change
-	// biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger on provider change
+	// Focus input on mount
 	useEffect(() => {
 		inputRef.current?.focus();
-	}, [selectedProvider]);
+	}, []);
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -96,52 +167,7 @@ export function ChatTab() {
 	};
 
 	return (
-		<div className="flex flex-col h-full">
-			{/* Provider selector */}
-			<div className="px-4 sm:px-6 pt-4 pb-3 border-b border-gray-200 bg-white">
-				<div className="flex items-center justify-between mb-3">
-					<div className="flex gap-1.5 flex-wrap">
-						{Object.entries(PROVIDERS).map(([id, p]) => (
-							<button
-								key={id}
-								type="button"
-								onClick={() => {
-									if (id !== selectedProvider) {
-										setSelectedProvider(id as ProviderId);
-										clear();
-									}
-								}}
-								className={`px-2.5 py-1.5 rounded-md text-xs font-medium transition-all ${
-									id === selectedProvider
-										? "bg-gray-900 text-white shadow-sm"
-										: "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-								}`}
-							>
-								{p.label}
-							</button>
-						))}
-					</div>
-					<button
-						type="button"
-						onClick={clear}
-						disabled={messages.length === 0}
-						className="px-3 py-1.5 rounded-md text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 disabled:opacity-0 disabled:pointer-events-none transition-all"
-					>
-						Clear
-					</button>
-				</div>
-
-				{/* Active provider info */}
-				<div className="flex items-center gap-2">
-					<span
-						className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide ${provider.badgeColor}`}
-					>
-						{provider.badge}
-					</span>
-					<span className="text-xs text-gray-400">{provider.model}</span>
-				</div>
-			</div>
-
+		<>
 			{/* Error */}
 			{error && (
 				<div className="mx-4 sm:mx-6 mt-3 px-3 py-2.5 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
@@ -198,7 +224,12 @@ export function ChatTab() {
 					</div>
 				) : (
 					<div className="space-y-4 pb-2">
-						{messages.map((message) => (
+						{messages.filter((m) =>
+							// Hide messages with no visible content (only empty text parts)
+							m.parts.some((p) =>
+								p.type !== "text" || !!(p as { content?: string }).content,
+							),
+						).map((message) => (
 							<div
 								key={message.id}
 								className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
@@ -213,6 +244,8 @@ export function ChatTab() {
 									<div className="space-y-1">
 										{message.parts.map((part, idx) => {
 											if (part.type === "text") {
+												// Skip empty text parts (e.g. from TEXT_MESSAGE_START before a tool call)
+												if (!(part as { content?: string }).content) return null;
 												return (
 													<div
 														key={`${message.id}-text-${idx}`}
@@ -355,6 +388,75 @@ export function ChatTab() {
 					web_scrape
 				</p>
 			</div>
+		</>
+	);
+}
+
+// ---------------------------------------------------------------------------
+// Outer shell — handles provider selection, renders ChatView with key
+// ---------------------------------------------------------------------------
+
+export function ChatTab() {
+	const [selectedProvider, setSelectedProvider] = useState<ProviderId>("workers-ai-plain");
+	const [workersAiModel, setWorkersAiModel] = useState(WORKERS_AI_MODELS[0].id as string);
+	const provider = PROVIDERS[selectedProvider];
+
+	return (
+		<div className="flex flex-col h-full">
+			{/* Provider selector */}
+			<div className="px-4 sm:px-6 pt-4 pb-3 border-b border-gray-200 bg-white">
+				<div className="flex items-center justify-between mb-3">
+					<div className="flex gap-1.5 flex-wrap">
+						{Object.entries(PROVIDERS).map(([id, p]) => (
+							<button
+								key={id}
+								type="button"
+								onClick={() => setSelectedProvider(id as ProviderId)}
+								className={`px-2.5 py-1.5 rounded-md text-xs font-medium transition-all ${
+									id === selectedProvider
+										? "bg-gray-900 text-white shadow-sm"
+										: "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+								}`}
+							>
+								{p.label}
+							</button>
+						))}
+					</div>
+				</div>
+
+				{/* Active provider info */}
+				<div className="flex items-center gap-2">
+					<span
+						className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide ${provider.badgeColor}`}
+					>
+						{provider.badge}
+					</span>
+					{provider.hasModelSelector ? (
+						<select
+							value={workersAiModel}
+							onChange={(e) => setWorkersAiModel(e.target.value)}
+							className="text-xs text-gray-600 bg-white border border-gray-200 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300 cursor-pointer hover:border-gray-300 transition-colors"
+						>
+							{WORKERS_AI_MODELS.map((m) => (
+								<option key={m.id} value={m.id}>
+									{m.label} — {m.id}
+								</option>
+							))}
+						</select>
+					) : (
+						<span className="text-xs text-gray-400">
+							{(provider as { model: string }).model}
+						</span>
+					)}
+				</div>
+			</div>
+
+			{/* Chat view — key forces remount when provider or model changes */}
+			<ChatView
+				key={`${selectedProvider}:${provider.hasModelSelector ? workersAiModel : ""}`}
+				selectedProvider={selectedProvider}
+				workersAiModel={workersAiModel}
+			/>
 		</div>
 	);
 }

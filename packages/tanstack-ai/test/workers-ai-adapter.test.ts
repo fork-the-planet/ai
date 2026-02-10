@@ -66,7 +66,7 @@ async function collectChunks(iterable: AsyncIterable<unknown>) {
 // ---------------------------------------------------------------------------
 
 describe("WorkersAiTextAdapter.chatStream", () => {
-	it("should stream text content and yield content + done chunks", async () => {
+	it("should stream AG-UI events: RUN_STARTED, TEXT_MESSAGE_START, TEXT_MESSAGE_CONTENT, TEXT_MESSAGE_END, RUN_FINISHED", async () => {
 		const binding = createStreamingBinding([
 			'data: {"response":"Hello"}\n\n',
 			'data: {"response":" world"}\n\n',
@@ -80,28 +80,32 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 			} as any),
 		);
 
-		// Should have 2 content chunks + 1 done chunk
-		const contentChunks = chunks.filter((c: any) => c.type === "content");
-		expect(contentChunks).toHaveLength(2);
+		// RUN_STARTED
+		const runStarted = chunks.find((c: any) => c.type === "RUN_STARTED");
+		expect(runStarted).toBeDefined();
+		expect(runStarted.runId).toMatch(/^workers-ai-/);
 
-		// First content chunk
+		// TEXT_MESSAGE_START
+		const msgStart = chunks.find((c: any) => c.type === "TEXT_MESSAGE_START");
+		expect(msgStart).toBeDefined();
+		expect(msgStart.role).toBe("assistant");
+
+		// TEXT_MESSAGE_CONTENT chunks
+		const contentChunks = chunks.filter((c: any) => c.type === "TEXT_MESSAGE_CONTENT");
+		expect(contentChunks).toHaveLength(2);
 		expect(contentChunks[0].delta).toBe("Hello");
 		expect(contentChunks[0].content).toBe("Hello");
-		expect(contentChunks[0].role).toBe("assistant");
-
-		// Second content chunk accumulates
 		expect(contentChunks[1].delta).toBe(" world");
 		expect(contentChunks[1].content).toBe("Hello world");
 
-		// Done chunk
-		const doneChunk = chunks.find((c: any) => c.type === "done");
-		expect(doneChunk).toBeDefined();
-		expect(doneChunk.finishReason).toBe("stop");
+		// TEXT_MESSAGE_END
+		const msgEnd = chunks.find((c: any) => c.type === "TEXT_MESSAGE_END");
+		expect(msgEnd).toBeDefined();
 
-		// All chunks share the same response ID
-		const ids = new Set(chunks.map((c: any) => c.id));
-		expect(ids.size).toBe(1);
-		expect([...ids][0]).toMatch(/^workers-ai-/);
+		// RUN_FINISHED
+		const runFinished = chunks.find((c: any) => c.type === "RUN_FINISHED");
+		expect(runFinished).toBeDefined();
+		expect(runFinished.finishReason).toBe("stop");
 	});
 
 	it("should pass system prompts to the binding", async () => {
@@ -126,7 +130,7 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 		});
 	});
 
-	it("should handle tool calls in streaming response", async () => {
+	it("should emit TOOL_CALL_START, TOOL_CALL_ARGS, TOOL_CALL_END events", async () => {
 		const binding = createStreamingBinding([
 			'data: {"response":"","tool_calls":[{"name":"get_weather","arguments":{"location":"SF"}}]}\n\n',
 		]);
@@ -149,15 +153,21 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 			} as any),
 		);
 
-		const toolChunks = chunks.filter((c: any) => c.type === "tool_call");
-		expect(toolChunks).toHaveLength(1);
-		expect(toolChunks[0].toolCall.function.name).toBe("get_weather");
-		expect(JSON.parse(toolChunks[0].toolCall.function.arguments)).toEqual({
-			location: "SF",
-		});
+		// TOOL_CALL_START
+		const toolStart = chunks.filter((c: any) => c.type === "TOOL_CALL_START");
+		expect(toolStart.length).toBeGreaterThanOrEqual(1);
+		expect(toolStart[0].toolName).toBe("get_weather");
 
-		const doneChunk = chunks.find((c: any) => c.type === "done");
-		expect(doneChunk.finishReason).toBe("tool_calls");
+		// TOOL_CALL_END
+		const toolEnd = chunks.filter((c: any) => c.type === "TOOL_CALL_END");
+		expect(toolEnd).toHaveLength(1);
+		expect(toolEnd[0].toolName).toBe("get_weather");
+		expect(toolEnd[0].input).toEqual({ location: "SF" });
+
+		// RUN_FINISHED with tool_calls reason
+		const runFinished = chunks.find((c: any) => c.type === "RUN_FINISHED");
+		expect(runFinished).toBeDefined();
+		expect(runFinished.finishReason).toBe("tool_calls");
 	});
 
 	it("should forward tools to the binding", async () => {
@@ -249,10 +259,10 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 		expect(messages[1].tool_calls).toHaveLength(1);
 		expect(messages[1].tool_calls[0].function.name).toBe("get_weather");
 
-		// tool result
-		expect(messages[2].role).toBe("tool");
-		expect(messages[2].tool_call_id).toBe("call_1");
-		expect(messages[2].content).toBe('{"temp":72}');
+	// tool result — tool_call_id is sanitized to 9-char alphanumeric for binding compatibility
+	expect(messages[2].role).toBe("tool");
+	expect(messages[2].tool_call_id).toBe("call10000");
+	expect(messages[2].content).toBe('{"temp":72}');
 	});
 
 	it("should handle multi-part content arrays", async () => {

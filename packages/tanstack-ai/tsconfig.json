@@ -16,5 +16,5 @@
 		"noUnusedParameters": true,
 		"types": ["@cloudflare/workers-types/experimental"]
 	},
-	"include": ["src"]
+	"include": ["src", "test"]
 }

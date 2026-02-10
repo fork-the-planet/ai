@@ -21,97 +21,185 @@ import { z } from "zod";
 // Credential extraction from request headers
 // ---------------------------------------------------------------------------
 
-interface UserCredentials {
+interface CloudflareCredentials {
 	accountId: string;
 	gatewayId: string;
 	apiToken: string;
 }
 
-function getCredentials(request: Request): UserCredentials | null {
+interface ProviderKeys {
+	openai?: string;
+	anthropic?: string;
+	gemini?: string;
+	grok?: string;
+}
+
+interface RequestCredentials {
+	/** When true, use env.AI / env.AI.gateway() bindings directly */
+	useBinding: boolean;
+	cloudflare: CloudflareCredentials | null;
+	/** Gateway ID (available in both modes, used for env.AI.gateway(id) in binding mode) */
+	gatewayId?: string;
+	providerKeys: ProviderKeys;
+	/** Optional Workers AI model override from the frontend model selector */
+	workersAiModel?: string;
+}
+
+function extractCredentials(request: Request): RequestCredentials {
+	const useBinding = request.headers.get("X-Use-Binding") === "true";
 	const accountId = request.headers.get("X-CF-Account-Id");
 	const gatewayId = request.headers.get("X-CF-Gateway-Id");
 	const apiToken = request.headers.get("X-CF-Api-Token");
-	if (accountId && gatewayId && apiToken) {
-		return { accountId, gatewayId, apiToken };
-	}
-	return null;
+
+	return {
+		useBinding,
+		// In binding mode, gatewayId can come alone (for env.AI.gateway(id))
+		cloudflare:
+			!useBinding && accountId && gatewayId && apiToken
+				? { accountId, gatewayId, apiToken }
+				: null,
+		// Gateway ID is available separately for binding mode
+		gatewayId: gatewayId || undefined,
+		providerKeys: {
+			openai: request.headers.get("X-OpenAI-Api-Key") || undefined,
+			anthropic: request.headers.get("X-Anthropic-Api-Key") || undefined,
+			gemini: request.headers.get("X-Gemini-Api-Key") || undefined,
+			grok: request.headers.get("X-Grok-Api-Key") || undefined,
+		},
+		workersAiModel: request.headers.get("X-Workers-AI-Model") || undefined,
+	};
 }
 
 /**
- * Build AI Gateway credentials config.
+ * Build AI Gateway REST credentials config.
  * Prefers user-provided headers, falls back to environment variables.
+ * Optionally injects the provider API key.
  */
-function gwConfig(creds: UserCredentials | null) {
-	if (creds) {
-		return {
-			gatewayId: creds.gatewayId,
-			accountId: creds.accountId,
-			cfApiKey: creds.apiToken,
-		};
-	}
-	return {
-		gatewayId: env.CLOUDFLARE_AI_GATEWAY_ID,
-		accountId: env.CLOUDFLARE_ACCOUNT_ID,
-		cfApiKey: env.CLOUDFLARE_API_TOKEN,
-	};
+function gwRestConfig(creds: RequestCredentials, providerApiKey?: string) {
+	const base = creds.cloudflare
+		? {
+				gatewayId: creds.cloudflare.gatewayId,
+				accountId: creds.cloudflare.accountId,
+				cfApiKey: creds.cloudflare.apiToken,
+			}
+		: {
+				gatewayId: env.CLOUDFLARE_AI_GATEWAY_ID,
+				accountId: env.CLOUDFLARE_ACCOUNT_ID,
+				cfApiKey: env.CLOUDFLARE_API_TOKEN,
+			};
+
+	return providerApiKey ? { ...base, apiKey: providerApiKey } : base;
+}
+
+/**
+ * Build AI Gateway binding config using env.AI.gateway().
+ * Uses the user-provided gateway ID or falls back to the env var.
+ * Optionally injects the provider API key.
+ */
+function resolveGatewayId(creds: RequestCredentials): string {
+	return creds.gatewayId || env.CLOUDFLARE_AI_GATEWAY_ID || "default";
+}
+
+function gwBindingConfig(creds: RequestCredentials, providerApiKey?: string) {
+	const base = { binding: env.AI.gateway(resolveGatewayId(creds)) };
+	return providerApiKey ? { ...base, apiKey: providerApiKey } : base;
 }
 
 // ---------------------------------------------------------------------------
 // Dynamic adapter factories (credentials-aware)
 // ---------------------------------------------------------------------------
 
-function getChatAdapter(path: string, creds: UserCredentials | null): AnyTextAdapter | null {
-	const gw = gwConfig(creds);
+/** Default model per Workers AI route (used when no override header is provided) */
+const DEFAULT_WORKERS_AI_MODELS: Record<string, string> = {
+	"/ai/workers-ai-plain": "@cf/moonshotai/kimi-k2.5",
+	"/ai/workers-ai": "@cf/qwen/qwen3-30b-a3b-fp8",
+};
+
+function getChatAdapter(path: string, creds: RequestCredentials): AnyTextAdapter | null {
+	const pk = creds.providerKeys;
+	// Allow frontend to override the Workers AI model via header
+	const waiModel = (creds.workersAiModel || DEFAULT_WORKERS_AI_MODELS[path] || "@cf/moonshotai/kimi-k2.5") as WorkersAiTextModel;
+
+	if (creds.useBinding) {
+		// Binding mode: use env.AI / env.AI.gateway() directly
+		switch (path) {
+			case "/ai/openai":
+				return createOpenAiChat("gpt-5.2", gwBindingConfig(creds, pk.openai));
+			case "/ai/anthropic":
+				return createAnthropicChat("claude-opus-4-6", gwBindingConfig(creds, pk.anthropic));
+			case "/ai/gemini":
+				// Gemini SDK can't use binding (no fetch override) — fall back to REST via env vars
+				return createGeminiChat("gemini-3-flash-preview", gwRestConfig(creds, pk.gemini));
+			case "/ai/grok":
+				return createGrokChat("grok-4-1-fast-reasoning", gwBindingConfig(creds, pk.grok));
+			case "/ai/workers-ai":
+				return createWorkersAiChat(waiModel, {
+					binding: env.AI.gateway(resolveGatewayId(creds)),
+					apiKey: env.CLOUDFLARE_API_TOKEN,
+				});
+			case "/ai/workers-ai-plain":
+				return createWorkersAiChat(waiModel, { binding: env.AI });
+			default:
+				return null;
+		}
+	}
+
+	// REST mode: use credentials from UI or env vars
 	switch (path) {
 		case "/ai/openai":
-			return createOpenAiChat("gpt-5.2", gw);
+			return createOpenAiChat("gpt-5.2", gwRestConfig(creds, pk.openai));
 		case "/ai/anthropic":
-			// Anthropic: use credentials when user-provided, binding when env-configured
-			return creds
-				? createAnthropicChat("claude-sonnet-4-5", gw)
-				: createAnthropicChat("claude-sonnet-4-5", {
-						binding: env.AI.gateway(env.CLOUDFLARE_AI_GATEWAY_ID),
-					});
+			return createAnthropicChat("claude-opus-4-6", gwRestConfig(creds, pk.anthropic));
 		case "/ai/gemini":
-			return createGeminiChat("gemini-2.5-flash", gw);
+			return createGeminiChat("gemini-3-flash-preview", gwRestConfig(creds, pk.gemini));
 		case "/ai/grok":
-			return createGrokChat("grok-4-1-fast-reasoning", gw);
+			return createGrokChat("grok-4-1-fast-reasoning", gwRestConfig(creds, pk.grok));
 		case "/ai/workers-ai":
-			// Workers AI via Gateway: credentials → REST gateway, env → binding gateway
-			return creds
-				? createWorkersAiChat("@cf/qwen/qwen3-30b-a3b-fp8" as WorkersAiTextModel, {
-						...gw,
-						apiKey: creds.apiToken,
+			return creds.cloudflare
+				? createWorkersAiChat(waiModel, {
+						...gwRestConfig(creds),
+						apiKey: creds.cloudflare.apiToken,
 					})
-				: createWorkersAiChat("@cf/qwen/qwen3-30b-a3b-fp8" as WorkersAiTextModel, {
-						binding: env.AI.gateway(env.CLOUDFLARE_AI_GATEWAY_ID),
+				: createWorkersAiChat(waiModel, {
+						binding: env.AI.gateway(resolveGatewayId(creds)),
 						apiKey: env.CLOUDFLARE_API_TOKEN,
 					});
 		case "/ai/workers-ai-plain":
-			// Plain Workers AI: credentials → REST API, env → binding
-			return creds
-				? createWorkersAiChat(
-						"@cf/meta/llama-4-scout-17b-16e-instruct" as WorkersAiTextModel,
-						{ accountId: creds.accountId, apiKey: creds.apiToken },
-					)
-				: createWorkersAiChat(
-						"@cf/meta/llama-4-scout-17b-16e-instruct" as WorkersAiTextModel,
-						{ binding: env.AI },
-					);
+			return creds.cloudflare
+				? createWorkersAiChat(waiModel, {
+						accountId: creds.cloudflare.accountId,
+						apiKey: creds.cloudflare.apiToken,
+					})
+				: createWorkersAiChat(waiModel, { binding: env.AI });
 		default:
 			return null;
 	}
 }
 
-function getImageAdapter(path: string, creds: UserCredentials | null): AnyImageAdapter | null {
-	const gw = gwConfig(creds);
+function getImageAdapter(path: string, creds: RequestCredentials): AnyImageAdapter | null {
+	const pk = creds.providerKeys;
+
+	if (creds.useBinding) {
+		switch (path) {
+			case "/ai/image/openai":
+				return createOpenAiImage("gpt-image-1", gwBindingConfig(creds, pk.openai));
+			case "/ai/image/gemini":
+				// Gemini SDK can't use binding — fall back to REST via env vars
+				return createGeminiImage("gemini-3-pro-image-preview", gwRestConfig(creds, pk.gemini));
+			case "/ai/image/grok":
+				return createGrokImage("grok-2-image-1212", gwBindingConfig(creds, pk.grok));
+			default:
+				return null;
+		}
+	}
+
 	switch (path) {
 		case "/ai/image/openai":
-			return createOpenAiImage("gpt-image-1", gw);
+			return createOpenAiImage("gpt-image-1", gwRestConfig(creds, pk.openai));
 		case "/ai/image/gemini":
-			return createGeminiImage("imagen-4.0-generate-001", gw);
+			return createGeminiImage("gemini-3-pro-image-preview", gwRestConfig(creds, pk.gemini));
 		case "/ai/image/grok":
-			return createGrokImage("grok-2-image-1212", gw);
+			return createGrokImage("grok-2-image-1212", gwRestConfig(creds, pk.grok));
 		default:
 			return null;
 	}
@@ -119,20 +207,31 @@ function getImageAdapter(path: string, creds: UserCredentials | null): AnyImageA
 
 function getSummarizeAdapter(
 	path: string,
-	creds: UserCredentials | null,
+	creds: RequestCredentials,
 ): AnySummarizeAdapter | null {
-	const gw = gwConfig(creds);
+	const pk = creds.providerKeys;
+
+	if (creds.useBinding) {
+		switch (path) {
+			case "/ai/summarize/openai":
+				return createOpenAiSummarize("gpt-5.2", gwBindingConfig(creds, pk.openai));
+			case "/ai/summarize/anthropic":
+				return createAnthropicSummarize("claude-opus-4-6", gwBindingConfig(creds, pk.anthropic));
+			case "/ai/summarize/gemini":
+				// Gemini SDK can't use binding — fall back to REST via env vars
+				return createGeminiSummarize("gemini-2.0-flash", gwRestConfig(creds, pk.gemini));
+			default:
+				return null;
+		}
+	}
+
 	switch (path) {
 		case "/ai/summarize/openai":
-			return createOpenAiSummarize("gpt-5.2", gw);
+			return createOpenAiSummarize("gpt-5.2", gwRestConfig(creds, pk.openai));
 		case "/ai/summarize/anthropic":
-			return creds
-				? createAnthropicSummarize("claude-sonnet-4-5", gw)
-				: createAnthropicSummarize("claude-sonnet-4-5", {
-						binding: env.AI.gateway(env.CLOUDFLARE_AI_GATEWAY_ID),
-					});
+			return createAnthropicSummarize("claude-opus-4-6", gwRestConfig(creds, pk.anthropic));
 		case "/ai/summarize/gemini":
-			return createGeminiSummarize("gemini-2.0-flash", gw);
+			return createGeminiSummarize("gemini-2.0-flash", gwRestConfig(creds, pk.gemini));
 		default:
 			return null;
 	}
@@ -226,7 +325,7 @@ export default {
 			return new Response(null, { status: 404 });
 		}
 
-		const creds = getCredentials(request);
+		const creds = extractCredentials(request);
 
 		// --- Chat ---
 		const chatAdapter = getChatAdapter(url.pathname, creds);

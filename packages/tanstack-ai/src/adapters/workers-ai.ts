@@ -152,9 +152,20 @@ function buildOpenAITools(
 }
 
 // ---------------------------------------------------------------------------
+// ID generation
+// ---------------------------------------------------------------------------
+
+function generateId(prefix: string): string {
+	return `${prefix}-${crypto.randomUUID()}`;
+}
+
+// ---------------------------------------------------------------------------
 // WorkersAiTextAdapter: chat / structured output via OpenAI Chat Completions
 // ---------------------------------------------------------------------------
 
+// TODO: Replace `any` generic params with proper types once BaseTextAdapter's
+// provider-options generics stabilize. Workers AI doesn't have provider-specific
+// options in the TanStack sense, so `any` is pragmatic for now.
 export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends BaseTextAdapter<
 	TModel,
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- BaseTextAdapter generic params are opaque
@@ -177,113 +188,203 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 		const openAIMessages = buildOpenAIMessages(systemPrompts, messages);
 		const openAITools = buildOpenAITools(tools);
 
-		const stream = await this.client.chat.completions.create({
-			model: model || this.model,
-			messages: openAIMessages,
-			tools: openAITools,
-			temperature,
-			stream: true,
-		});
-
 		const timestamp = Date.now();
-		const responseId = `workers-ai-${timestamp}`;
+		const runId = generateId("workers-ai");
+		const messageId = generateId("workers-ai");
+		let hasEmittedRunStarted = false;
+		let hasEmittedTextMessageStart = false;
 		let accumulatedContent = "";
-		const toolCallsMap = new Map<number, { id: string; name: string; arguments: string }>();
-		let finishReason: "stop" | "length" | "tool_calls" | "content_filter" | null = null;
-		let usage:
-			| {
-					promptTokens: number;
-					completionTokens: number;
-					totalTokens: number;
-			  }
-			| undefined;
+		const toolCallsInProgress = new Map<
+			number,
+			{ id: string; name: string; arguments: string; started: boolean }
+		>();
 
-		for await (const chunk of stream) {
-			if (!chunk.choices || chunk.choices.length === 0) continue;
-			const choice = chunk.choices[0];
-			if (!choice) continue;
+		try {
+			const stream = await this.client.chat.completions.create({
+				model: model || this.model,
+				messages: openAIMessages,
+				tools: openAITools,
+				temperature,
+				stream: true,
+				stream_options: { include_usage: true },
+			});
 
-			const delta = choice.delta;
+			for await (const chunk of stream) {
+				if (!chunk.choices || chunk.choices.length === 0) continue;
+				const choice = chunk.choices[0];
+				if (!choice) continue;
 
-			if (delta.content) {
-				accumulatedContent += delta.content;
-				yield {
-					type: "content",
-					id: responseId,
-					model: model || this.model,
-					timestamp,
-					delta: delta.content,
-					content: accumulatedContent,
-					role: "assistant",
-				} satisfies StreamChunk;
-			}
+				// Emit RUN_STARTED on first chunk
+				if (!hasEmittedRunStarted) {
+					hasEmittedRunStarted = true;
+					yield {
+						type: "RUN_STARTED",
+						runId,
+						model: chunk.model || model || this.model,
+						timestamp,
+					} satisfies StreamChunk;
+				}
 
-			if (delta.tool_calls) {
-				for (const toolCallDelta of delta.tool_calls) {
-					const index = toolCallDelta.index;
-					let existing = toolCallsMap.get(index);
+				const delta = choice.delta;
 
-					if (!existing) {
-						existing = {
-							id: toolCallDelta.id || "",
-							name: toolCallDelta.function?.name || "",
-							arguments: "",
-						};
-						toolCallsMap.set(index, existing);
+				// Text content
+				if (delta.content) {
+					if (!hasEmittedTextMessageStart) {
+						hasEmittedTextMessageStart = true;
+						yield {
+							type: "TEXT_MESSAGE_START",
+							messageId,
+							model: chunk.model || model || this.model,
+							timestamp,
+							role: "assistant",
+						} satisfies StreamChunk;
 					}
 
-					if (toolCallDelta.id) {
-						existing.id = toolCallDelta.id;
-					}
-					if (toolCallDelta.function?.name) {
-						existing.name = toolCallDelta.function.name;
-					}
-					if (toolCallDelta.function?.arguments) {
-						existing.arguments += toolCallDelta.function.arguments;
+					accumulatedContent += delta.content;
+					yield {
+						type: "TEXT_MESSAGE_CONTENT",
+						messageId,
+						model: chunk.model || model || this.model,
+						timestamp,
+						delta: delta.content,
+						content: accumulatedContent,
+					} satisfies StreamChunk;
+				}
+
+				// Tool calls
+				if (delta.tool_calls) {
+					for (const toolCallDelta of delta.tool_calls) {
+						const index = toolCallDelta.index;
+
+						if (!toolCallsInProgress.has(index)) {
+							toolCallsInProgress.set(index, {
+								id: toolCallDelta.id || "",
+								name: toolCallDelta.function?.name || "",
+								arguments: "",
+								started: false,
+							});
+						}
+
+						const toolCall = toolCallsInProgress.get(index)!;
+
+						if (toolCallDelta.id) {
+							toolCall.id = toolCallDelta.id;
+						}
+						if (toolCallDelta.function?.name) {
+							toolCall.name = toolCallDelta.function.name;
+						}
+						if (toolCallDelta.function?.arguments) {
+							toolCall.arguments += toolCallDelta.function.arguments;
+						}
+
+						// Emit TOOL_CALL_START once we have id and name
+						if (toolCall.id && toolCall.name && !toolCall.started) {
+							toolCall.started = true;
+							yield {
+								type: "TOOL_CALL_START",
+								toolCallId: toolCall.id,
+								toolName: toolCall.name,
+								model: chunk.model || model || this.model,
+								timestamp,
+								index,
+							} satisfies StreamChunk;
+						}
+
+						// Stream tool call arguments
+						if (toolCallDelta.function?.arguments && toolCall.started) {
+							yield {
+								type: "TOOL_CALL_ARGS",
+								toolCallId: toolCall.id,
+								model: chunk.model || model || this.model,
+								timestamp,
+								delta: toolCallDelta.function.arguments,
+							} satisfies StreamChunk;
+						}
 					}
 				}
-			}
 
-			if (choice.finish_reason) {
-				const reason = choice.finish_reason;
-				finishReason = reason === "function_call" ? "tool_calls" : reason;
-			}
+				// Finish
+				if (choice.finish_reason) {
+					// End tool calls
+					if (
+						choice.finish_reason === "tool_calls" ||
+						toolCallsInProgress.size > 0
+					) {
+						for (const [, toolCall] of toolCallsInProgress) {
+							let parsedInput: unknown = {};
+							try {
+								parsedInput = toolCall.arguments
+									? JSON.parse(toolCall.arguments)
+									: {};
+							} catch {
+								parsedInput = {};
+							}
+							yield {
+								type: "TOOL_CALL_END",
+								toolCallId: toolCall.id,
+								toolName: toolCall.name,
+								model: chunk.model || model || this.model,
+								timestamp,
+								input: parsedInput,
+							} satisfies StreamChunk;
+						}
+					}
 
-			if (chunk.usage) {
-				usage = {
-					promptTokens: chunk.usage.prompt_tokens,
-					completionTokens: chunk.usage.completion_tokens,
-					totalTokens: chunk.usage.total_tokens,
-				};
-			}
-		}
+					const computedFinishReason =
+						choice.finish_reason === "tool_calls" ||
+						choice.finish_reason === "function_call" ||
+						toolCallsInProgress.size > 0
+							? "tool_calls"
+							: (choice.finish_reason as "stop" | "length" | "content_filter");
 
-		for (const [index, toolCall] of toolCallsMap) {
+					// End text message if started
+					if (hasEmittedTextMessageStart) {
+						yield {
+							type: "TEXT_MESSAGE_END",
+							messageId,
+							model: chunk.model || model || this.model,
+							timestamp,
+						} satisfies StreamChunk;
+					}
+
+					// Emit RUN_FINISHED
+					yield {
+						type: "RUN_FINISHED",
+						runId,
+						model: chunk.model || model || this.model,
+						timestamp,
+						usage: chunk.usage
+							? {
+									promptTokens: chunk.usage.prompt_tokens,
+									completionTokens: chunk.usage.completion_tokens,
+									totalTokens: chunk.usage.total_tokens,
+								}
+							: undefined,
+						finishReason: computedFinishReason,
+					} satisfies StreamChunk;
+				}
+			}
+		} catch (error) {
+			const err = error as Error & { code?: string };
+			if (!hasEmittedRunStarted) {
+				yield {
+					type: "RUN_STARTED",
+					runId,
+					model: model || this.model,
+					timestamp,
+				} satisfies StreamChunk;
+			}
 			yield {
-				type: "tool_call",
-				id: responseId,
+				type: "RUN_ERROR",
+				runId,
 				model: model || this.model,
 				timestamp,
-				index,
-				toolCall: {
-					id: toolCall.id,
-					type: "function",
-					function: {
-						name: toolCall.name,
-						arguments: toolCall.arguments,
-					},
+				error: {
+					message: err.message || "Unknown error",
+					code: err.code,
 				},
 			} satisfies StreamChunk;
 		}
-
-		yield {
-			type: "done",
-			id: responseId,
-			model: model || this.model,
-			timestamp,
-			finishReason,
-			usage,
-		} satisfies StreamChunk;
 	}
 
 	async structuredOutput(
@@ -319,13 +420,24 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 			);
 		}
 
-		const rawText = choice.message?.content || "";
+		const rawContent = choice.message?.content ?? "";
 
+		// Workers AI REST endpoint may return `content` as an already-parsed object
+		// when using json_schema response format, so normalise both cases.
 		let data: unknown;
-		try {
-			data = JSON.parse(rawText);
-		} catch {
-			data = rawText;
+		let rawText: string;
+
+		if (typeof rawContent === "string") {
+			rawText = rawContent;
+			try {
+				data = JSON.parse(rawText);
+			} catch {
+				data = rawText;
+			}
+		} else {
+			// Already an object — stringify for rawText, use directly for data
+			data = rawContent;
+			rawText = JSON.stringify(rawContent);
 		}
 
 		return { data, rawText };

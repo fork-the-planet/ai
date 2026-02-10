@@ -203,7 +203,7 @@ describe("message building (via chatStream)", () => {
 						content: "",
 						toolCalls: [
 							{
-								id: "call_abc",
+								id: "callabc00",
 								function: {
 									name: "search",
 									arguments: '{"q":"test"}',
@@ -220,7 +220,7 @@ describe("message building (via chatStream)", () => {
 		expect(messages[0].role).toBe("assistant");
 		expect(messages[0].tool_calls).toHaveLength(1);
 		expect(messages[0].tool_calls[0]).toEqual({
-			id: "call_abc",
+			id: "callabc00",
 			type: "function",
 			function: { name: "search", arguments: '{"q":"test"}' },
 		});
@@ -257,7 +257,8 @@ describe("message building (via chatStream)", () => {
 		);
 
 		const toolMsg = messages.find((m: any) => m.role === "tool");
-		expect(toolMsg.tool_call_id).toBe("call_1");
+		// tool_call_id is sanitized to 9-char alphanumeric for binding compatibility
+		expect(toolMsg.tool_call_id).toBe("call10000");
 		// Valid JSON string should be passed through as-is
 		expect(toolMsg.content).toBe('{"result":"success"}');
 	});
