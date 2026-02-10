@@ -1,5 +1,19 @@
 # workers-ai-provider
 
+## 3.0.4
+
+### Patch Changes
+
+- [#390](https://github.com/cloudflare/ai/pull/390) [`41b92a3`](https://github.com/cloudflare/ai/commit/41b92a34ce4d9dffba8bb42b4933bbc06e4b1aaa) Thanks [@mchenco](https://github.com/mchenco)! - fix(workers-ai-provider): extract actual finish reason in streaming instead of hardcoded "stop"
+
+  Previously, the streaming implementation always returned `finishReason: "stop"` regardless of the actual completion reason. This caused:
+  - Tool calling scenarios to incorrectly report "stop" instead of "tool-calls"
+  - Multi-turn tool conversations to fail because the AI SDK couldn't detect when tools were requested
+  - Length limit scenarios to show "stop" instead of "length"
+  - Error scenarios to show "stop" instead of "error"
+
+  The fix extracts the actual `finish_reason` from streaming chunks and uses the existing `mapWorkersAIFinishReason()` function to properly map it to the AI SDK's finish reason format. This enables proper multi-turn tool calling and accurate completion status reporting.
+
 ## 3.0.3
 
 ### Patch Changes

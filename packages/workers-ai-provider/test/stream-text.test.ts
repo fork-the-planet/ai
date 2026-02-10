@@ -1033,6 +1033,327 @@ describe("Binding - Streaming Text Tests", () => {
 	});
 });
 
+describe("REST API - Finish Reason Handling", () => {
+	beforeAll(() => server.listen());
+	afterEach(() => server.resetHandlers());
+	afterAll(() => server.close());
+
+	describe("Finish Reason Extraction", () => {
+		it("should extract 'stop' finish reason from stream", async () => {
+			server.use(
+				http.post(
+					`https://api.cloudflare.com/client/v4/accounts/${TEST_ACCOUNT_ID}/ai/run/${TEST_MODEL}`,
+					async () => {
+						return new Response(
+							[
+								`data: {"choices":[{"delta":{"content":"Hello"},"finish_reason":null}]}\n\n`,
+								`data: {"choices":[{"delta":{"content":" world"},"finish_reason":"stop"}]}\n\n`,
+								"data: [DONE]\n\n",
+							].join(""),
+							{
+								headers: {
+									"Content-Type": "text/event-stream",
+									"Transfer-Encoding": "chunked",
+								},
+								status: 200,
+							},
+						);
+					},
+				),
+			);
+
+			const workersai = createWorkersAI({
+				accountId: TEST_ACCOUNT_ID,
+				apiKey: TEST_API_KEY,
+			});
+
+			const result = streamText({
+				model: workersai(TEST_MODEL),
+				prompt: "test",
+			});
+
+			await result.text;
+			const finishReason = await result.finishReason;
+
+			expect(finishReason).toBe("stop");
+		});
+
+		it("should extract 'tool-calls' finish reason from stream", async () => {
+			server.use(
+				http.post(
+					`https://api.cloudflare.com/client/v4/accounts/${TEST_ACCOUNT_ID}/ai/run/${TEST_MODEL}`,
+					async () => {
+						return new Response(
+							[
+								`data: {"choices":[{"delta":{"content":"Calling weather"},"finish_reason":null}]}\n\n`,
+								`data: {"choices":[{"delta":{},"finish_reason":"tool_calls"}]}\n\n`,
+								"data: [DONE]\n\n",
+							].join(""),
+							{
+								headers: {
+									"Content-Type": "text/event-stream",
+									"Transfer-Encoding": "chunked",
+								},
+								status: 200,
+							},
+						);
+					},
+				),
+			);
+
+			const workersai = createWorkersAI({
+				accountId: TEST_ACCOUNT_ID,
+				apiKey: TEST_API_KEY,
+			});
+
+			const result = streamText({
+				model: workersai(TEST_MODEL),
+				prompt: "test",
+			});
+
+			await result.text;
+			const finishReason = await result.finishReason;
+
+			expect(finishReason).toBe("tool-calls");
+		});
+
+		it("should extract 'length' finish reason from stream", async () => {
+			server.use(
+				http.post(
+					`https://api.cloudflare.com/client/v4/accounts/${TEST_ACCOUNT_ID}/ai/run/${TEST_MODEL}`,
+					async () => {
+						return new Response(
+							[
+								`data: {"choices":[{"delta":{"content":"Hello"},"finish_reason":null}]}\n\n`,
+								`data: {"choices":[{"delta":{"content":" world"},"finish_reason":"length"}]}\n\n`,
+								"data: [DONE]\n\n",
+							].join(""),
+							{
+								headers: {
+									"Content-Type": "text/event-stream",
+									"Transfer-Encoding": "chunked",
+								},
+								status: 200,
+							},
+						);
+					},
+				),
+			);
+
+			const workersai = createWorkersAI({
+				accountId: TEST_ACCOUNT_ID,
+				apiKey: TEST_API_KEY,
+			});
+
+			const result = streamText({
+				model: workersai(TEST_MODEL),
+				prompt: "test",
+			});
+
+			await result.text;
+			const finishReason = await result.finishReason;
+
+			expect(finishReason).toBe("length");
+		});
+
+		it("should extract 'model_length' and map to 'length'", async () => {
+			server.use(
+				http.post(
+					`https://api.cloudflare.com/client/v4/accounts/${TEST_ACCOUNT_ID}/ai/run/${TEST_MODEL}`,
+					async () => {
+						return new Response(
+							[
+								`data: {"choices":[{"delta":{"content":"Hello"},"finish_reason":null}]}\n\n`,
+								`data: {"choices":[{"delta":{"content":" world"},"finish_reason":"model_length"}]}\n\n`,
+								"data: [DONE]\n\n",
+							].join(""),
+							{
+								headers: {
+									"Content-Type": "text/event-stream",
+									"Transfer-Encoding": "chunked",
+								},
+								status: 200,
+							},
+						);
+					},
+				),
+			);
+
+			const workersai = createWorkersAI({
+				accountId: TEST_ACCOUNT_ID,
+				apiKey: TEST_API_KEY,
+			});
+
+			const result = streamText({
+				model: workersai(TEST_MODEL),
+				prompt: "test",
+			});
+
+			await result.text;
+			const finishReason = await result.finishReason;
+
+			expect(finishReason).toBe("length");
+		});
+
+		it("should extract 'error' finish reason from stream", async () => {
+			server.use(
+				http.post(
+					`https://api.cloudflare.com/client/v4/accounts/${TEST_ACCOUNT_ID}/ai/run/${TEST_MODEL}`,
+					async () => {
+						return new Response(
+							[
+								`data: {"choices":[{"delta":{"content":"Hello"},"finish_reason":null}]}\n\n`,
+								`data: {"choices":[{"delta":{},"finish_reason":"error"}]}\n\n`,
+								"data: [DONE]\n\n",
+							].join(""),
+							{
+								headers: {
+									"Content-Type": "text/event-stream",
+									"Transfer-Encoding": "chunked",
+								},
+								status: 200,
+							},
+						);
+					},
+				),
+			);
+
+			const workersai = createWorkersAI({
+				accountId: TEST_ACCOUNT_ID,
+				apiKey: TEST_API_KEY,
+			});
+
+			const result = streamText({
+				model: workersai(TEST_MODEL),
+				prompt: "test",
+			});
+
+			await result.text;
+			const finishReason = await result.finishReason;
+
+			expect(finishReason).toBe("error");
+		});
+
+		it("should default to 'stop' when no finish_reason in stream", async () => {
+			server.use(
+				http.post(
+					`https://api.cloudflare.com/client/v4/accounts/${TEST_ACCOUNT_ID}/ai/run/${TEST_MODEL}`,
+					async () => {
+						return new Response(
+							[
+								`data: {"choices":[{"delta":{"content":"Hello"},"finish_reason":null}]}\n\n`,
+								`data: {"choices":[{"delta":{"content":" world"},"finish_reason":null}]}\n\n`,
+								"data: [DONE]\n\n",
+							].join(""),
+							{
+								headers: {
+									"Content-Type": "text/event-stream",
+									"Transfer-Encoding": "chunked",
+								},
+								status: 200,
+							},
+						);
+					},
+				),
+			);
+
+			const workersai = createWorkersAI({
+				accountId: TEST_ACCOUNT_ID,
+				apiKey: TEST_API_KEY,
+			});
+
+			const result = streamText({
+				model: workersai(TEST_MODEL),
+				prompt: "test",
+			});
+
+			await result.text;
+			const finishReason = await result.finishReason;
+
+			expect(finishReason).toBe("stop");
+		});
+
+		it("should handle finish_reason from direct property (not in choices)", async () => {
+			server.use(
+				http.post(
+					`https://api.cloudflare.com/client/v4/accounts/${TEST_ACCOUNT_ID}/ai/run/${TEST_MODEL}`,
+					async () => {
+						return new Response(
+							[
+								`data: {"response":"Hello","finish_reason":null}\n\n`,
+								`data: {"response":" world","finish_reason":"stop"}\n\n`,
+								"data: [DONE]\n\n",
+							].join(""),
+							{
+								headers: {
+									"Content-Type": "text/event-stream",
+									"Transfer-Encoding": "chunked",
+								},
+								status: 200,
+							},
+						);
+					},
+				),
+			);
+
+			const workersai = createWorkersAI({
+				accountId: TEST_ACCOUNT_ID,
+				apiKey: TEST_API_KEY,
+			});
+
+			const result = streamText({
+				model: workersai(TEST_MODEL),
+				prompt: "test",
+			});
+
+			await result.text;
+			const finishReason = await result.finishReason;
+
+			expect(finishReason).toBe("stop");
+		});
+
+		it("should use last finish_reason when multiple chunks provide it", async () => {
+			server.use(
+				http.post(
+					`https://api.cloudflare.com/client/v4/accounts/${TEST_ACCOUNT_ID}/ai/run/${TEST_MODEL}`,
+					async () => {
+						return new Response(
+							[
+								`data: {"choices":[{"delta":{"content":"Hello"},"finish_reason":"length"}]}\n\n`,
+								`data: {"choices":[{"delta":{"content":" world"},"finish_reason":"stop"}]}\n\n`,
+								"data: [DONE]\n\n",
+							].join(""),
+							{
+								headers: {
+									"Content-Type": "text/event-stream",
+									"Transfer-Encoding": "chunked",
+								},
+								status: 200,
+							},
+						);
+					},
+				),
+			);
+
+			const workersai = createWorkersAI({
+				accountId: TEST_ACCOUNT_ID,
+				apiKey: TEST_API_KEY,
+			});
+
+			const result = streamText({
+				model: workersai(TEST_MODEL),
+				prompt: "test",
+			});
+
+			await result.text;
+			const finishReason = await result.finishReason;
+
+			// Should use the last one
+			expect(finishReason).toBe("stop");
+		});
+	});
+});
+
 /**
  * Helper to produce SSE lines in a Node ReadableStream.
  * This is the crucial part: each line is preceded by "data: ",
