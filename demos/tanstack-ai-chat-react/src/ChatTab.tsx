@@ -101,48 +101,6 @@ function ChatView({
 		connection,
 	});
 
-	const displayModel = provider.hasModelSelector
-		? workersAiModel
-		: (provider as { model: string }).model;
-
-	// Debug: log completed messages (only when streaming finishes) and errors
-	const prevLoadingRef = useRef(isLoading);
-	useEffect(() => {
-		if (prevLoadingRef.current && !isLoading && messages.length > 0) {
-			const lastMsg = messages[messages.length - 1];
-			console.log(
-				"[ChatTab] response complete",
-				JSON.stringify(
-					{
-						provider: selectedProvider,
-						model: displayModel,
-						badge: provider.badge,
-						message: {
-							id: lastMsg.id,
-							role: lastMsg.role,
-							parts: lastMsg.parts.map((p) => ({
-								type: p.type,
-								...(p.type === "text" ? { content: (p as any).content } : {}),
-								...(p.type === "tool-call" ? { toolName: (p as any).toolName, args: (p as any).args } : {}),
-								...(p.type === "tool-result" ? { toolName: (p as any).toolName, result: (p as any).result } : {}),
-							})),
-						},
-						totalMessages: messages.length,
-					},
-					null,
-					2,
-				),
-			);
-		}
-		prevLoadingRef.current = isLoading;
-	}, [isLoading, messages, selectedProvider, displayModel, provider.badge]);
-
-	useEffect(() => {
-		if (error) {
-			console.error(`[ChatTab] error: provider=${selectedProvider} model=${displayModel}`, error);
-		}
-	}, [error, selectedProvider, displayModel]);
-
 	const [input, setInput] = useState("");
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLInputElement>(null);

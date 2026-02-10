@@ -11,7 +11,7 @@
  *
  * These are excluded from the default `pnpm test` / `pnpm test:ci` runs.
  */
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it, vi } from "vitest";
 
 // Load env vars from .env at package root
 import { config } from "dotenv";
@@ -20,7 +20,6 @@ config({ path: new URL("../../.env", import.meta.url).pathname });
 // We need to mock @tanstack/ai and @tanstack/ai/adapters so the adapter
 // module can be imported without the full TanStack dependency graph being
 // present in the test runner.
-import { vi } from "vitest";
 vi.mock("@tanstack/ai/adapters", () => ({
 	BaseTextAdapter: class {
 		model: string;

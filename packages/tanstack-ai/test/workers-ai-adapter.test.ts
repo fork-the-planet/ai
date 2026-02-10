@@ -259,10 +259,10 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 		expect(messages[1].tool_calls).toHaveLength(1);
 		expect(messages[1].tool_calls[0].function.name).toBe("get_weather");
 
-	// tool result — tool_call_id is sanitized to 9-char alphanumeric for binding compatibility
-	expect(messages[2].role).toBe("tool");
-	expect(messages[2].tool_call_id).toBe("call10000");
-	expect(messages[2].content).toBe('{"temp":72}');
+		// tool result — tool_call_id is sanitized to 9-char alphanumeric for binding compatibility
+		expect(messages[2].role).toBe("tool");
+		expect(messages[2].tool_call_id).toBe("call10000");
+		expect(messages[2].content).toBe('{"temp":72}');
 	});
 
 	it("should handle multi-part content arrays", async () => {
