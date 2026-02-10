@@ -1,5 +1,5 @@
 import { WorkflowEntrypoint, type WorkflowEvent, type WorkflowStep } from "cloudflare:workers";
-import { generateObject } from "ai";
+import { generateText, Output } from "ai";
 import { createWorkersAI } from "workers-ai-provider";
 import z from "zod";
 
@@ -26,10 +26,10 @@ export class RoutingWorkflow extends WorkflowEntrypoint<Env, RoutingWorkflowPara
 		// Step 1: Grade the prompt using the smaller model.
 		const gradeObj = await step.do("grade prompt", async () => {
 			const gradePrompt = `Please evaluate the following prompt and assign a grade between 0 and 100 based on its complexity and difficulty. A higher number = more complex and difficult:\n\n${prompt}\n\nReturn a JSON object like { "grade": 75 } where the number represents the grade.`;
-			const { object } = await generateObject({
+			const { output: object } = await generateText({
 				model: smallModel,
-				schema: gradeSchema,
 				prompt: gradePrompt,
+				output: Output.object({ schema: gradeSchema }),
 			});
 			return object;
 		});
@@ -39,10 +39,10 @@ export class RoutingWorkflow extends WorkflowEntrypoint<Env, RoutingWorkflowPara
 		// Step 2: Generate the final detailed response.
 		const finalObj = await step.do("generate final output", async () => {
 			const finalPrompt = `Using the prompt provided below, please produce a detailed and well-formulated response:\n\n${prompt}\n\nPlease return your result as a JSON object like { "result": "Your detailed response here." }`;
-			const { object } = await generateObject({
+			const { output: object } = await generateText({
 				model: selectedModel,
-				schema: finalOutputSchema,
 				prompt: finalPrompt,
+				output: Output.object({ schema: finalOutputSchema }),
 			});
 			return object;
 		});

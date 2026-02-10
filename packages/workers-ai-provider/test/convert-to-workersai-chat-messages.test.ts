@@ -201,4 +201,96 @@ describe("convertToWorkersAIChatMessages", () => {
 			expect(messages[0].tool_calls).toBeUndefined();
 		});
 	});
+
+	describe("image handling", () => {
+		it("should extract images from user file parts", () => {
+			const imageData = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
+
+			const prompt = [
+				{
+					role: "user" as const,
+					content: [
+						{ type: "text" as const, text: "What's in this image?" },
+						{
+							type: "file" as const,
+							data: imageData,
+							mediaType: "image/png",
+							providerOptions: undefined,
+						},
+					],
+				},
+			];
+
+			const { messages, images } = convertToWorkersAIChatMessages(prompt);
+
+			expect(messages).toHaveLength(1);
+			expect(messages[0].content).toBe("What's in this image?");
+			expect(images).toHaveLength(1);
+			expect(images[0].image).toEqual(imageData);
+			expect(images[0].mediaType).toBe("image/png");
+		});
+
+		it("should not add empty strings for image parts in user content", () => {
+			const prompt = [
+				{
+					role: "user" as const,
+					content: [
+						{ type: "text" as const, text: "First" },
+						{
+							type: "file" as const,
+							data: new Uint8Array([1, 2, 3]),
+							mediaType: "image/png",
+							providerOptions: undefined,
+						},
+						{ type: "text" as const, text: "Second" },
+					],
+				},
+			];
+
+			const { messages } = convertToWorkersAIChatMessages(prompt);
+
+			// Should be "First\nSecond", not "First\n\nSecond" (no empty string from image)
+			expect(messages[0].content).toBe("First\nSecond");
+		});
+
+		it("should handle user message with only an image (no text)", () => {
+			const prompt = [
+				{
+					role: "user" as const,
+					content: [
+						{
+							type: "file" as const,
+							data: new Uint8Array([1, 2, 3]),
+							mediaType: "image/jpeg",
+							providerOptions: undefined,
+						},
+					],
+				},
+			];
+
+			const { messages, images } = convertToWorkersAIChatMessages(prompt);
+
+			expect(messages).toHaveLength(1);
+			expect(messages[0].content).toBe("");
+			expect(images).toHaveLength(1);
+		});
+	});
+
+	describe("reasoning content", () => {
+		it("should concatenate reasoning text into assistant content", () => {
+			const prompt = [
+				{
+					role: "assistant" as const,
+					content: [
+						{ type: "reasoning" as const, text: "Let me think..." },
+						{ type: "text" as const, text: "The answer is 42." },
+					],
+				},
+			];
+
+			const { messages } = convertToWorkersAIChatMessages(prompt);
+
+			expect(messages[0].content).toBe("Let me think...The answer is 42.");
+		});
+	});
 });

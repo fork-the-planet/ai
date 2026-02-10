@@ -1,10 +1,10 @@
-import { AutoRAGChatLanguageModel } from "./autorag-chat-language-model";
-import type { AutoRAGChatSettings } from "./autorag-chat-settings";
+import { AISearchChatLanguageModel } from "./aisearch-chat-language-model";
+import type { AISearchChatSettings } from "./aisearch-chat-settings";
 import { createRun } from "./utils";
 import {
 	WorkersAIEmbeddingModel,
 	type WorkersAIEmbeddingSettings,
-} from "./workers-ai-embedding-model";
+} from "./workersai-embedding-model";
 import { WorkersAIChatLanguageModel } from "./workersai-chat-language-model";
 import type { WorkersAIChatSettings } from "./workersai-chat-settings";
 import { WorkersAIImageModel } from "./workersai-image-model";
@@ -14,6 +14,18 @@ import type {
 	ImageGenerationModels,
 	TextGenerationModels,
 } from "./workersai-models";
+
+// Re-export deprecated AutoRAG aliases
+export { AutoRAGChatLanguageModel } from "./autorag-chat-language-model";
+export type { AutoRAGChatSettings } from "./autorag-chat-settings";
+
+// Export new AI Search types
+export { AISearchChatLanguageModel } from "./aisearch-chat-language-model";
+export type { AISearchChatSettings } from "./aisearch-chat-settings";
+
+// ---------------------------------------------------------------------------
+// Workers AI
+// ---------------------------------------------------------------------------
 
 export type WorkersAISettings = (
 	| {
@@ -75,15 +87,18 @@ export interface WorkersAI {
 	 * Creates a model for image generation.
 	 **/
 	image(modelId: ImageGenerationModels, settings?: WorkersAIImageSettings): WorkersAIImageModel;
+	imageModel(
+		modelId: ImageGenerationModels,
+		settings?: WorkersAIImageSettings,
+	): WorkersAIImageModel;
 }
 
 /**
  * Create a Workers AI provider instance.
  */
 export function createWorkersAI(options: WorkersAISettings): WorkersAI {
-	// Use a binding if one is directly provided. Otherwise use credentials to create
-	// a `run` method that calls the Cloudflare REST API.
 	let binding: Ai | undefined;
+	const isBinding = !!options.binding;
 
 	if (options.binding) {
 		binding = options.binding;
@@ -103,6 +118,7 @@ export function createWorkersAI(options: WorkersAISettings): WorkersAI {
 			binding,
 			gateway: options.gateway,
 			provider: "workersai.chat",
+			isBinding,
 		});
 
 	const createImageModel = (
@@ -141,38 +157,49 @@ export function createWorkersAI(options: WorkersAISettings): WorkersAI {
 	return provider;
 }
 
-export type AutoRAGSettings = {
+// ---------------------------------------------------------------------------
+// AI Search (formerly AutoRAG)
+// ---------------------------------------------------------------------------
+
+export type AISearchSettings = {
 	binding: AutoRAG;
 };
 
-export interface AutoRAGProvider {
-	(options?: AutoRAGChatSettings): AutoRAGChatLanguageModel;
+export interface AISearchProvider {
+	(settings?: AISearchChatSettings): AISearchChatLanguageModel;
 	/**
 	 * Creates a model for text generation.
 	 **/
-	chat(settings?: AutoRAGChatSettings): AutoRAGChatLanguageModel;
+	chat(settings?: AISearchChatSettings): AISearchChatLanguageModel;
 }
 
 /**
- * Create a Workers AI provider instance.
+ * Create an AI Search provider instance.
+ *
+ * AI Search (formerly AutoRAG) is Cloudflare's managed search service.
+ * @see https://developers.cloudflare.com/ai-search/
  */
-export function createAutoRAG(options: AutoRAGSettings): AutoRAGProvider {
+export function createAISearch(
+	options: AISearchSettings,
+	/** @internal */
+	providerName = "aisearch.chat",
+): AISearchProvider {
 	const binding = options.binding;
 
-	const createChatModel = (settings: AutoRAGChatSettings = {}) =>
-		new AutoRAGChatLanguageModel(
+	const createChatModel = (settings: AISearchChatSettings = {}) =>
+		new AISearchChatLanguageModel(
 			// @ts-expect-error Needs fix from @cloudflare/workers-types for custom types
 			"@cf/meta/llama-3.3-70b-instruct-fp8-fast",
 			settings,
 			{
 				binding,
-				provider: "autorag.chat",
+				provider: providerName,
 			},
 		);
 
-	const provider = (settings?: AutoRAGChatSettings) => {
+	const provider = (settings?: AISearchChatSettings) => {
 		if (new.target) {
-			throw new Error("The WorkersAI model function cannot be called with the new keyword.");
+			throw new Error("The AISearch model function cannot be called with the new keyword.");
 		}
 		return createChatModel(settings);
 	};
@@ -180,4 +207,38 @@ export function createAutoRAG(options: AutoRAGSettings): AutoRAGProvider {
 	provider.chat = createChatModel;
 
 	return provider;
+}
+
+// ---------------------------------------------------------------------------
+// Deprecated AutoRAG aliases
+// ---------------------------------------------------------------------------
+
+/**
+ * @deprecated Use `AISearchSettings` instead. AutoRAG has been renamed to AI Search.
+ * @see https://developers.cloudflare.com/ai-search/
+ */
+export type AutoRAGSettings = AISearchSettings;
+
+/**
+ * @deprecated Use `AISearchProvider` instead. AutoRAG has been renamed to AI Search.
+ * @see https://developers.cloudflare.com/ai-search/
+ */
+export type AutoRAGProvider = AISearchProvider;
+
+let autoRAGWarned = false;
+
+/**
+ * @deprecated Use `createAISearch` instead. AutoRAG has been renamed to AI Search.
+ * @see https://developers.cloudflare.com/ai-search/
+ */
+export function createAutoRAG(options: AISearchSettings): AISearchProvider {
+	if (!autoRAGWarned) {
+		autoRAGWarned = true;
+		console.warn(
+			"[workers-ai-provider] createAutoRAG is deprecated. Use createAISearch instead. " +
+				"AutoRAG has been renamed to AI Search. " +
+				"See https://developers.cloudflare.com/ai-search/",
+		);
+	}
+	return createAISearch(options, "autorag.chat");
 }

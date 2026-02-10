@@ -113,4 +113,44 @@ describe("Binding - Embedding Tests", () => {
 		});
 		expect(result.embeddings).toEqual(embedManyResponse);
 	});
+
+	it("should throw TooManyEmbeddingValuesForCallError when exceeding limit", async () => {
+		const workersai = createWorkersAI({
+			binding: {
+				run: async () => {
+					return { data: [] };
+				},
+			},
+		});
+
+		const model = workersai.embedding(TEST_EMBEDDING_MODEL);
+
+		// The model's doEmbed method checks maxEmbeddingsPerCall (default 3000)
+		// We need to call doEmbed directly to test this since embedMany handles batching
+		await expect(
+			model.doEmbed({
+				values: Array.from({ length: 3001 }, (_, i) => `text ${i}`),
+			}),
+		).rejects.toThrow("Too many values");
+	});
+
+	it("should respect custom maxEmbeddingsPerCall setting", async () => {
+		const workersai = createWorkersAI({
+			binding: {
+				run: async () => {
+					return { data: [] };
+				},
+			},
+		});
+
+		const model = workersai.embedding(TEST_EMBEDDING_MODEL, {
+			maxEmbeddingsPerCall: 2,
+		});
+
+		await expect(
+			model.doEmbed({
+				values: ["one", "two", "three"],
+			}),
+		).rejects.toThrow("Too many values");
+	});
 });

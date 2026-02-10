@@ -2,6 +2,7 @@ packages:
   - ./libs/*
   - ./demos/*
   - ./demos/remote-mcp-auth0/*
+  - ./examples/*
   - ./packages/*
   - ./tools/aicli
   - "!./demos/remote-mcp-auth0"

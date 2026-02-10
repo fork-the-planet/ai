@@ -1,30 +1,83 @@
 import type { LanguageModelV3, LanguageModelV3ToolCall } from "@ai-sdk/provider";
 import { generateId } from "ai";
+import type { WorkersAIChatPrompt } from "./workersai-chat-prompt";
+
+// ---------------------------------------------------------------------------
+// Workers AI quirk workarounds
+// ---------------------------------------------------------------------------
+
+/**
+ * Strip non-alphanumeric characters and ensure the ID is exactly 9 chars,
+ * matching Workers AI binding's `[a-zA-Z0-9]{9}` validation pattern.
+ *
+ * The Workers AI binding validates `tool_call_id` with a strict regex, but
+ * generates IDs like `chatcmpl-tool-875d3ec6179676ae` (with dashes, >9 chars).
+ * Those IDs are rejected when sent back in a follow-up request.
+ *
+ * Once Workers AI fixes the validation, this becomes an idempotent no-op for
+ * IDs that already match the pattern.
+ */
+export function sanitizeToolCallId(id: string): string {
+	const alphanumeric = id.replace(/[^a-zA-Z0-9]/g, "");
+	return alphanumeric.slice(0, 9).padEnd(9, "0");
+}
+
+/**
+ * Normalize messages before passing to the Workers AI binding.
+ *
+ * The binding has strict schema validation that differs from the OpenAI API:
+ * - `content` must be a string (not null)
+ * - `tool_call_id` must match `[a-zA-Z0-9]{9}` pattern
+ *
+ * This patches fields so the full tool-call round-trip works even though
+ * the binding's own generated IDs may not pass its own validation.
+ */
+export function normalizeMessagesForBinding(messages: WorkersAIChatPrompt): WorkersAIChatPrompt {
+	return messages.map((msg) => {
+		const normalized = { ...msg };
+
+		// content: null → content: ""
+		if (normalized.content === null || normalized.content === undefined) {
+			(normalized as { content: string }).content = "";
+		}
+
+		// Normalize tool_call_id on tool messages
+		if ("tool_call_id" in normalized && typeof normalized.tool_call_id === "string") {
+			normalized.tool_call_id = sanitizeToolCallId(normalized.tool_call_id);
+		}
+
+		// Normalize tool_calls[].id on assistant messages
+		if ("tool_calls" in normalized && Array.isArray(normalized.tool_calls)) {
+			normalized.tool_calls = normalized.tool_calls.map((tc) => ({
+				...tc,
+				id: sanitizeToolCallId(tc.id),
+			}));
+		}
+
+		return normalized;
+	});
+}
+
+// ---------------------------------------------------------------------------
+// REST API client
+// ---------------------------------------------------------------------------
 
 /**
  * General AI run interface with overloads to handle distinct return types.
- *
- * The behaviour depends on the combination of parameters:
- * 1. `returnRawResponse: true` => returns the raw Response object.
- * 2. `stream: true`           => returns a ReadableStream (if available).
- * 3. Otherwise                => returns post-processed AI results.
  */
 export interface AiRun {
-	// (1) Return raw Response if `options.returnRawResponse` is `true`.
 	<Name extends keyof AiModels>(
 		model: Name,
 		inputs: AiModels[Name]["inputs"],
 		options: AiOptions & { returnRawResponse: true },
 	): Promise<Response>;
 
-	// (2) Return a stream if the input has `stream: true`.
 	<Name extends keyof AiModels>(
 		model: Name,
 		inputs: AiModels[Name]["inputs"] & { stream: true },
 		options?: AiOptions,
 	): Promise<ReadableStream<Uint8Array>>;
 
-	// (3) Return post-processed outputs by default.
 	<Name extends keyof AiModels>(
 		model: Name,
 		inputs: AiModels[Name]["inputs"],
@@ -32,65 +85,56 @@ export interface AiRun {
 	): Promise<AiModels[Name]["postProcessedOutputs"]>;
 }
 
-export type StringLike = string | { toString(): string };
-
 /**
  * Parameters for configuring the Cloudflare-based AI runner.
  */
 export interface CreateRunConfig {
 	/** Your Cloudflare account identifier. */
 	accountId: string;
-
 	/** Cloudflare API token/key with appropriate permissions. */
 	apiKey: string;
 }
 
 /**
  * Creates a run method that emulates the Cloudflare Workers AI binding,
- * but uses the Cloudflare REST API under the hood. Headers and abort
- * signals are configured at creation time, rather than per-request.
- *
- * @param config An object containing:
- *   - `accountId`: Cloudflare account identifier.
- *   - `apiKey`: Cloudflare API token/key with suitable permissions.
- *   - `headers`: Optional custom headers to merge with defaults.
- *   - `signal`: Optional AbortSignal for request cancellation.
- *
- * @returns A function matching the AiRun interface.
+ * but uses the Cloudflare REST API under the hood.
  */
 export function createRun(config: CreateRunConfig): AiRun {
 	const { accountId, apiKey } = config;
 
-	// Return the AiRun-compatible function.
 	return async function run<Name extends keyof AiModels>(
 		model: Name,
 		inputs: AiModels[Name]["inputs"],
-		options?: AiOptions & Record<string, StringLike>,
+		options?: AiOptions & Record<string, unknown>,
 	): Promise<Response | ReadableStream<Uint8Array> | AiModels[Name]["postProcessedOutputs"]> {
 		const { gateway, prefix, extraHeaders, returnRawResponse, ...passthroughOptions } =
 			options || {};
 
 		const urlParams = new URLSearchParams();
 		for (const [key, value] of Object.entries(passthroughOptions)) {
-			// throw a useful error if the value is not to-stringable
+			if (value === undefined || value === null) {
+				throw new Error(
+					`Value for option '${key}' is not able to be coerced into a string.`,
+				);
+			}
 			try {
-				const valueStr = value.toString();
+				const valueStr = String(value);
 				if (!valueStr) {
 					continue;
 				}
 				urlParams.append(key, valueStr);
-			} catch (_error) {
+			} catch {
 				throw new Error(
 					`Value for option '${key}' is not able to be coerced into a string.`,
 				);
 			}
 		}
 
+		const queryString = urlParams.toString();
 		const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${model}${
-			urlParams ? `?${urlParams}` : ""
+			queryString ? `?${queryString}` : ""
 		}`;
 
-		// Merge default and custom headers.
 		const headers = {
 			Authorization: `Bearer ${apiKey}`,
 			"Content-Type": "application/json",
@@ -98,19 +142,29 @@ export function createRun(config: CreateRunConfig): AiRun {
 
 		const body = JSON.stringify(inputs);
 
-		// Execute the POST request. The optional AbortSignal is applied here.
 		const response = await fetch(url, {
 			body,
 			headers,
 			method: "POST",
 		});
 
-		// (1) If the user explicitly requests the raw Response, return it as-is.
+		// Check for HTTP errors before processing
+		if (!response.ok && !returnRawResponse) {
+			let errorBody: string;
+			try {
+				errorBody = await response.text();
+			} catch {
+				errorBody = "<unable to read response body>";
+			}
+			throw new Error(
+				`Workers AI API error (${response.status} ${response.statusText}): ${errorBody}`,
+			);
+		}
+
 		if (returnRawResponse) {
 			return response;
 		}
 
-		// (2) If the AI input requests streaming, return the ReadableStream if available.
 		if ((inputs as AiTextGenerationInput).stream === true) {
 			if (response.body) {
 				return response.body;
@@ -118,13 +172,16 @@ export function createRun(config: CreateRunConfig): AiRun {
 			throw new Error("No readable body available for streaming.");
 		}
 
-		// (3) In all other cases, parse JSON and return the result field.
 		const data = await response.json<{
 			result: AiModels[Name]["postProcessedOutputs"];
 		}>();
 		return data.result;
 	};
 }
+
+// ---------------------------------------------------------------------------
+// Tool preparation
+// ---------------------------------------------------------------------------
 
 export function prepareToolsAndToolChoice(
 	tools: Parameters<LanguageModelV3["doGenerate"]>[0]["tools"],
@@ -157,7 +214,7 @@ export function prepareToolsAndToolChoice(
 		case "required":
 			return { tool_choice: "any", tools: mappedTools };
 
-		// workersAI does not support tool mode directly,
+		// Workers AI does not support tool mode directly,
 		// so we filter the tools and force the tool choice through 'any'
 		case "tool":
 			return {
@@ -171,15 +228,53 @@ export function prepareToolsAndToolChoice(
 	}
 }
 
-export function lastMessageWasUser<T extends { role: string }>(messages: T[]) {
-	return messages.length > 0 && messages[messages.length - 1]!.role === "user";
+// ---------------------------------------------------------------------------
+// Message helpers
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Tool call processing
+// ---------------------------------------------------------------------------
+
+/** Workers AI flat tool call format (non-streaming, native) */
+interface FlatToolCall {
+	name: string;
+	arguments: unknown;
+	id?: string;
 }
 
-function mergePartialToolCalls(partialCalls: any[]) {
-	const mergedCallsByIndex: any = {};
+/** Workers AI OpenAI-compatible tool call format */
+interface OpenAIToolCall {
+	id: string;
+	type: "function";
+	function: {
+		name: string;
+		arguments: unknown;
+	};
+}
+
+/** Partial tool call from streaming (has index for merging) */
+interface PartialToolCall {
+	index?: number;
+	id?: string;
+	type?: string;
+	function?: {
+		name?: string;
+		arguments?: string;
+	};
+	// Flat format fields
+	name?: string;
+	arguments?: string;
+}
+
+function mergePartialToolCalls(partialCalls: PartialToolCall[]) {
+	const mergedCallsByIndex: Record<
+		number,
+		{ function: { arguments: string; name: string }; id: string; type: string }
+	> = {};
 
 	for (const partialCall of partialCalls) {
-		const index = partialCall.index;
+		const index = partialCall.index ?? 0;
 
 		if (!mergedCallsByIndex[index]) {
 			mergedCallsByIndex[index] = {
@@ -197,13 +292,12 @@ function mergePartialToolCalls(partialCalls: any[]) {
 			if (partialCall.type) {
 				mergedCallsByIndex[index].type = partialCall.type;
 			}
-
 			if (partialCall.function?.name) {
 				mergedCallsByIndex[index].function.name = partialCall.function.name;
 			}
 		}
 
-		// Append arguments if available, this assumes arguments come in the right order
+		// Append arguments if available (they arrive in order during streaming)
 		if (partialCall.function?.arguments) {
 			mergedCallsByIndex[index].function.arguments += partialCall.function.arguments;
 		}
@@ -212,68 +306,94 @@ function mergePartialToolCalls(partialCalls: any[]) {
 	return Object.values(mergedCallsByIndex);
 }
 
-function processToolCall(toolCall: any): LanguageModelV3ToolCall {
-	// Check for OpenAI format tool calls first
-	if (toolCall.function && toolCall.id) {
+function processToolCall(toolCall: FlatToolCall | OpenAIToolCall): LanguageModelV3ToolCall {
+	// OpenAI format: has function.name (the key discriminator)
+	const fn =
+		"function" in toolCall && typeof toolCall.function === "object" && toolCall.function
+			? (toolCall.function as { name?: string; arguments?: unknown })
+			: null;
+
+	if (fn?.name) {
 		return {
 			input:
-				typeof toolCall.function.arguments === "string"
-					? toolCall.function.arguments
-					: JSON.stringify(toolCall.function.arguments || {}),
+				typeof fn.arguments === "string"
+					? fn.arguments
+					: JSON.stringify(fn.arguments || {}),
 			toolCallId: toolCall.id || generateId(),
 			type: "tool-call",
-			toolName: toolCall.function.name,
+			toolName: fn.name,
 		};
 	}
+
+	// Flat format (native Workers AI non-streaming): has top-level name
+	const flat = toolCall as FlatToolCall;
 	return {
 		input:
-			typeof toolCall.arguments === "string"
-				? toolCall.arguments
-				: JSON.stringify(toolCall.arguments || {}),
-		toolCallId: toolCall.id || generateId(),
+			typeof flat.arguments === "string"
+				? flat.arguments
+				: JSON.stringify(flat.arguments || {}),
+		toolCallId: flat.id || generateId(),
 		type: "tool-call",
-		toolName: toolCall.name,
+		toolName: flat.name,
 	};
 }
 
-export function processToolCalls(output: any): LanguageModelV3ToolCall[] {
+export function processToolCalls(output: Record<string, unknown>): LanguageModelV3ToolCall[] {
 	if (output.tool_calls && Array.isArray(output.tool_calls)) {
-		return output.tool_calls.map((toolCall: any) => {
-			const processedToolCall = processToolCall(toolCall);
-			return processedToolCall;
-		});
+		return output.tool_calls.map((toolCall: FlatToolCall | OpenAIToolCall) =>
+			processToolCall(toolCall),
+		);
 	}
 
-	if (
-		output?.choices?.[0]?.message?.tool_calls &&
-		Array.isArray(output.choices[0].message.tool_calls)
-	) {
-		return output.choices[0].message.tool_calls.map((toolCall: any) => {
-			const processedToolCall = processToolCall(toolCall);
-			return processedToolCall;
-		});
+	const choices = output.choices as
+		| Array<{ message?: { tool_calls?: Array<FlatToolCall | OpenAIToolCall> } }>
+		| undefined;
+	if (choices?.[0]?.message?.tool_calls && Array.isArray(choices[0].message.tool_calls)) {
+		return choices[0].message.tool_calls.map((toolCall) => processToolCall(toolCall));
 	}
 
 	return [];
 }
 
-export function processPartialToolCalls(partialToolCalls: any[]) {
+export function processPartialToolCalls(partialToolCalls: PartialToolCall[]) {
 	const mergedToolCalls = mergePartialToolCalls(partialToolCalls);
 	return processToolCalls({ tool_calls: mergedToolCalls });
 }
 
-export function processText(output: AiTextGenerationOutput): string | undefined {
-	// @ts-expect-error OpenAI format not typed yet
-	if (output?.choices?.[0]?.message?.content?.length) {
-		// @ts-expect-error OpenAI format not typed yet
-		return output?.choices?.[0]?.message?.content;
+// ---------------------------------------------------------------------------
+// Text extraction
+// ---------------------------------------------------------------------------
+
+/**
+ * Extract text from a Workers AI response, handling multiple response formats:
+ * - OpenAI format: { choices: [{ message: { content: "..." } }] }
+ * - Native format: { response: "..." }
+ * - Structured output quirk: { response: { ... } } (object instead of string)
+ * - Structured output quirk: { response: "{ ... }" } (JSON string)
+ */
+export function processText(output: Record<string, unknown>): string | undefined {
+	// OpenAI format
+	const choices = output.choices as Array<{ message?: { content?: string | null } }> | undefined;
+	const choiceContent = choices?.[0]?.message?.content;
+	if (choiceContent != null && String(choiceContent).length > 0) {
+		return String(choiceContent);
 	}
 
 	if ("response" in output) {
-		if (typeof output.response === "object" && output.response !== null) {
-			return JSON.stringify(output.response); // ai-sdk expects a string here
+		const response = output.response;
+		// Object response (structured output quirk #2)
+		if (typeof response === "object" && response !== null) {
+			return JSON.stringify(response);
 		}
-
-		return output.response;
+		// Numeric response (quirk #9)
+		if (typeof response === "number") {
+			return String(response);
+		}
+		// Null response (e.g., tool-call-only responses)
+		if (response === null || response === undefined) {
+			return undefined;
+		}
+		return String(response);
 	}
+	return undefined;
 }

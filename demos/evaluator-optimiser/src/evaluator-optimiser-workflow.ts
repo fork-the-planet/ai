@@ -1,5 +1,5 @@
 import { WorkflowEntrypoint, type WorkflowEvent, type WorkflowStep } from "cloudflare:workers";
-import { generateObject } from "ai";
+import { generateText, Output } from "ai";
 import { createWorkersAI } from "workers-ai-provider";
 import z from "zod";
 
@@ -39,10 +39,10 @@ export class EvaluatorOptimiserWorkflow extends WorkflowEntrypoint<
 		Return your response as a JSON object in the format { "draft": "Your initial draft here." }`;
 
 		const draftObj = await step.do("generate draft", async () => {
-			const { object } = await generateObject({
+			const { output: object } = await generateText({
 				model: smallModel,
-				schema: draftSchema,
 				prompt: draftPrompt,
+				output: Output.object({ schema: draftSchema }),
 			});
 			return object;
 		});
@@ -53,10 +53,10 @@ export class EvaluatorOptimiserWorkflow extends WorkflowEntrypoint<
 		Return your evaluation as a JSON object in the format { "feedback": "Your feedback here.", "needsRevision": true/false }`;
 
 		const evaluationObj = await step.do("evaluate draft", async () => {
-			const { object } = await generateObject({
+			const { output: object } = await generateText({
 				model: smallModel,
-				schema: evaluationSchema,
 				prompt: evaluationPrompt,
+				output: Output.object({ schema: evaluationSchema }),
 			});
 			return object;
 		});
@@ -70,10 +70,10 @@ export class EvaluatorOptimiserWorkflow extends WorkflowEntrypoint<
 			Return your optimized draft as a JSON object in the format { "optimizedDraft": "Your optimized draft here." }`;
 
 			const optimizedDraft = await step.do("optimize draft", async () => {
-				const { object } = await generateObject({
+				const { output: object } = await generateText({
 					model: bigModel,
-					schema: optimizedSchema,
 					prompt: optimizerPrompt,
+					output: Output.object({ schema: optimizedSchema }),
 				});
 
 				return object.optimizedDraft;

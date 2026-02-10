@@ -102,6 +102,80 @@ describe("REST API - Text Generation Tests", () => {
 			"Value for option 'isNull' is not able to be coerced into a string.",
 		);
 	});
+	it("should throw on 401 Unauthorized", async () => {
+		server.use(
+			http.post(
+				`https://api.cloudflare.com/client/v4/accounts/${TEST_ACCOUNT_ID}/ai/run/${TEST_MODEL}`,
+				async () => {
+					return HttpResponse.json(
+						{ success: false, errors: [{ message: "Unauthorized" }] },
+						{ status: 401 },
+					);
+				},
+			),
+		);
+
+		const workersai = createWorkersAI({
+			accountId: TEST_ACCOUNT_ID,
+			apiKey: "bad-key",
+		});
+
+		await expect(
+			generateText({
+				model: workersai(TEST_MODEL),
+				prompt: "Hello",
+			}),
+		).rejects.toThrowError("Workers AI API error (401");
+	});
+
+	it("should throw on 404 Not Found for invalid model", async () => {
+		server.use(
+			http.post(
+				`https://api.cloudflare.com/client/v4/accounts/${TEST_ACCOUNT_ID}/ai/run/${TEST_MODEL}`,
+				async () => {
+					return HttpResponse.json(
+						{ success: false, errors: [{ message: "No route for that URI" }] },
+						{ status: 404 },
+					);
+				},
+			),
+		);
+
+		const workersai = createWorkersAI({
+			accountId: TEST_ACCOUNT_ID,
+			apiKey: TEST_API_KEY,
+		});
+
+		await expect(
+			generateText({
+				model: workersai(TEST_MODEL),
+				prompt: "Hello",
+			}),
+		).rejects.toThrowError("Workers AI API error (404");
+	});
+
+	it("should throw on 500 Internal Server Error", async () => {
+		server.use(
+			http.post(
+				`https://api.cloudflare.com/client/v4/accounts/${TEST_ACCOUNT_ID}/ai/run/${TEST_MODEL}`,
+				async () => {
+					return new Response("Internal Server Error", { status: 500 });
+				},
+			),
+		);
+
+		const workersai = createWorkersAI({
+			accountId: TEST_ACCOUNT_ID,
+			apiKey: TEST_API_KEY,
+		});
+
+		await expect(
+			generateText({
+				model: workersai(TEST_MODEL),
+				prompt: "Hello",
+			}),
+		).rejects.toThrowError("Workers AI API error (500");
+	});
 });
 
 describe("Binding - Text Generation Tests", () => {

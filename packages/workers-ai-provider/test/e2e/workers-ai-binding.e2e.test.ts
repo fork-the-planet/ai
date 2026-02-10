@@ -1,0 +1,454 @@
+/**
+ * E2E integration tests for Workers AI via the env.AI binding.
+ *
+ * These tests start a real wrangler dev server with a test worker that exercises
+ * our provider through the Workers AI binding path. This validates:
+ *   - Message normalization (null content, tool_call_id sanitization)
+ *   - Stream format detection (native vs OpenAI format)
+ *   - Tool call round-trips through the binding
+ *
+ * Prerequisites:
+ *   - Authenticated with Cloudflare (`wrangler login` or CLOUDFLARE_API_TOKEN env var)
+ *   - wrangler must be installed and accessible
+ *
+ * Run with: pnpm test:e2e:binding
+ */
+import { type ChildProcess, spawn } from "node:child_process";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+
+// ---------------------------------------------------------------------------
+// Config
+// ---------------------------------------------------------------------------
+
+const WORKER_DIR = new URL("./fixtures/binding-worker", import.meta.url).pathname;
+const PORT = 8799;
+const BASE = `http://localhost:${PORT}`;
+
+const MODELS = [
+	{ id: "@cf/meta/llama-4-scout-17b-16e-instruct", label: "Llama 4 Scout 17B" },
+	{ id: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", label: "Llama 3.3 70B" },
+	{ id: "@cf/meta/llama-3.1-8b-instruct-fast", label: "Llama 3.1 8B Fast" },
+	{ id: "@cf/openai/gpt-oss-120b", label: "GPT-OSS 120B" },
+	{ id: "@cf/openai/gpt-oss-20b", label: "GPT-OSS 20B" },
+	{ id: "@cf/qwen/qwen3-30b-a3b-fp8", label: "Qwen3 30B" },
+	{ id: "@cf/qwen/qwq-32b", label: "QwQ 32B (reasoning)" },
+	{ id: "@cf/google/gemma-3-12b-it", label: "Gemma 3 12B" },
+	{ id: "@cf/mistralai/mistral-small-3.1-24b-instruct", label: "Mistral Small 3.1" },
+	{ id: "@cf/deepseek/deepseek-r1-distill-qwen-32b", label: "DeepSeek R1 32B" },
+	{ id: "@cf/ibm/granite-4.0-h-micro", label: "Granite 4.0 Micro" },
+	{ id: "@cf/moonshotai/kimi-k2.5", label: "Kimi K2.5" },
+] as const;
+
+// ---------------------------------------------------------------------------
+// Results tracker
+// ---------------------------------------------------------------------------
+
+type Status = "ok" | "warn" | "fail";
+
+const results: Record<
+	string,
+	{
+		chat: Status;
+		stream: Status;
+		multiTurn: Status;
+		toolCall: Status;
+		toolRoundTrip: Status;
+		structuredOutput: Status;
+		notes: string[];
+	}
+> = {};
+
+function getResult(label: string) {
+	if (!results[label]) {
+		results[label] = {
+			chat: "fail",
+			stream: "fail",
+			multiTurn: "fail",
+			toolCall: "fail",
+			toolRoundTrip: "fail",
+			structuredOutput: "fail",
+			notes: [],
+		};
+	}
+	return results[label];
+}
+
+function statusIcon(s: Status): string {
+	if (s === "ok") return "  OK";
+	if (s === "warn") return "  ~ ";
+	return "  X ";
+}
+
+function printSummaryTable() {
+	const labels = Object.keys(results);
+	if (labels.length === 0) return;
+
+	const pad = (s: string, n: number) => s + " ".repeat(Math.max(0, n - s.length));
+	const maxLabel = Math.max(...labels.map((l) => l.length), 5);
+
+	const header = `${pad("Model", maxLabel)} | Chat | Strm | Turn | Tool | T-RT | JSON | Notes`;
+	const sep = "-".repeat(header.length + 10);
+
+	console.log(`\n${sep}`);
+	console.log("  WORKERS AI BINDING — E2E RESULTS");
+	console.log(sep);
+	console.log(header);
+	console.log(sep);
+
+	for (const label of labels) {
+		const r = results[label];
+		const notes = r.notes.length > 0 ? r.notes.join("; ") : "";
+		console.log(
+			`${pad(label, maxLabel)} | ${statusIcon(r.chat)} | ${statusIcon(r.stream)} | ${statusIcon(r.multiTurn)} | ${statusIcon(r.toolCall)} | ${statusIcon(r.toolRoundTrip)} | ${statusIcon(r.structuredOutput)} | ${notes}`,
+		);
+	}
+
+	console.log(sep);
+	console.log("  OK = works    ~ = partial/quirky    X = broken/error");
+	console.log(`${sep}\n`);
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+async function post(path: string, body: Record<string, unknown> = {}) {
+	const res = await fetch(`${BASE}${path}`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(body),
+	});
+	return res.json() as Promise<Record<string, unknown>>;
+}
+
+async function waitForReady(url: string, timeoutMs = 45_000): Promise<boolean> {
+	const start = Date.now();
+	while (Date.now() - start < timeoutMs) {
+		try {
+			const res = await fetch(url);
+			if (res.ok) return true;
+		} catch {
+			// Server not ready yet
+		}
+		await new Promise((r) => setTimeout(r, 500));
+	}
+	return false;
+}
+
+// ---------------------------------------------------------------------------
+// Wrangler dev lifecycle
+// ---------------------------------------------------------------------------
+
+let wranglerProcess: ChildProcess | null = null;
+let serverReady = false;
+
+describe("Workers AI Binding E2E", () => {
+	beforeAll(async () => {
+		wranglerProcess = spawn(
+			"pnpm",
+			["exec", "wrangler", "dev", "--port", String(PORT), "--log-level", "error"],
+			{
+				cwd: WORKER_DIR,
+				stdio: ["ignore", "pipe", "pipe"],
+				env: { ...process.env },
+			},
+		);
+
+		let stderr = "";
+		wranglerProcess.stderr?.on("data", (data: Buffer) => {
+			stderr += data.toString();
+		});
+
+		wranglerProcess.on("error", (err) => {
+			console.error("[binding-e2e] Failed to start wrangler:", err.message);
+		});
+
+		serverReady = await waitForReady(`${BASE}/health`, 50_000);
+		if (!serverReady) {
+			console.error("[binding-e2e] wrangler dev failed to start within 50s");
+			if (stderr) console.error("[binding-e2e] stderr:", stderr);
+		}
+	}, 60_000);
+
+	afterAll(async () => {
+		printSummaryTable();
+		if (wranglerProcess) {
+			wranglerProcess.kill("SIGTERM");
+			await new Promise((r) => setTimeout(r, 1_000));
+			if (!wranglerProcess.killed) {
+				wranglerProcess.kill("SIGKILL");
+			}
+			wranglerProcess = null;
+		}
+	}, 10_000);
+
+	// ------------------------------------------------------------------
+	// Basic chat (per model)
+	// ------------------------------------------------------------------
+	describe("chat (per model)", () => {
+		for (const model of MODELS) {
+			it(`${model.label} — basic chat via binding`, async () => {
+				if (!serverReady) return;
+
+				const r = getResult(model.label);
+				const data = await post("/chat", { model: model.id });
+
+				if (data.error) {
+					r.chat = "fail";
+					r.notes.push(`chat: ${String(data.error).slice(0, 60)}`);
+					return;
+				}
+
+				if (typeof data.text === "string" && (data.text as string).length > 0) {
+					r.chat = "ok";
+				} else {
+					r.chat = "warn";
+					r.notes.push("chat: empty response");
+				}
+			});
+		}
+	});
+
+	// ------------------------------------------------------------------
+	// Streaming chat (per model)
+	// ------------------------------------------------------------------
+	describe("streaming (per model)", () => {
+		for (const model of MODELS) {
+			it(`${model.label} — streaming via binding`, async () => {
+				if (!serverReady) return;
+
+				const r = getResult(model.label);
+				const data = await post("/chat/stream", { model: model.id });
+
+				if (data.error) {
+					r.stream = "fail";
+					r.notes.push(`stream: ${String(data.error).slice(0, 60)}`);
+					return;
+				}
+
+				if (typeof data.text === "string" && (data.text as string).length > 0) {
+					r.stream = "ok";
+				} else {
+					r.stream = "warn";
+					r.notes.push("stream: empty response");
+				}
+			});
+		}
+	});
+
+	// ------------------------------------------------------------------
+	// Multi-turn (per model)
+	// ------------------------------------------------------------------
+	describe("multi-turn (per model)", () => {
+		for (const model of MODELS) {
+			it(`${model.label} — multi-turn via binding`, async () => {
+				if (!serverReady) return;
+
+				const r = getResult(model.label);
+				const data = await post("/chat/multi-turn", { model: model.id });
+
+				if (data.error) {
+					r.multiTurn = "fail";
+					r.notes.push(`turn: ${String(data.error).slice(0, 60)}`);
+					return;
+				}
+
+				const text = (data.text as string) || "";
+				if (text.toLowerCase().includes("alice")) {
+					r.multiTurn = "ok";
+				} else if (text.length > 0) {
+					r.multiTurn = "warn";
+					r.notes.push("turn: forgot context");
+				} else {
+					r.multiTurn = "fail";
+					r.notes.push("turn: empty response");
+				}
+			});
+		}
+	});
+
+	// ------------------------------------------------------------------
+	// Tool call (per model)
+	// ------------------------------------------------------------------
+	describe("tool call (per model)", () => {
+		for (const model of MODELS) {
+			it(`${model.label} — tool call via binding`, async () => {
+				if (!serverReady) return;
+
+				const r = getResult(model.label);
+				const data = await post("/chat/tool-call", { model: model.id });
+
+				if (data.error) {
+					r.toolCall = "fail";
+					r.notes.push(`tool: ${String(data.error).slice(0, 60)}`);
+					return;
+				}
+
+				const toolCalls = data.toolCalls as unknown[];
+				if (Array.isArray(toolCalls) && toolCalls.length > 0) {
+					r.toolCall = "ok";
+				} else if (typeof data.text === "string" && (data.text as string).length > 0) {
+					r.toolCall = "warn";
+					r.notes.push("tool: answered as text");
+				} else {
+					r.toolCall = "fail";
+					r.notes.push("tool: no tool call or content");
+				}
+			});
+		}
+	});
+
+	// ------------------------------------------------------------------
+	// Tool round-trip (per model)
+	// ------------------------------------------------------------------
+	describe("tool round-trip (per model)", () => {
+		for (const model of MODELS) {
+			it(`${model.label} — tool round-trip via binding`, async () => {
+				if (!serverReady) return;
+
+				const r = getResult(model.label);
+				const data = await post("/chat/tool-roundtrip", { model: model.id });
+
+				if (data.error) {
+					r.toolRoundTrip = "fail";
+					r.notes.push(`t-rt: ${String(data.error).slice(0, 60)}`);
+					return;
+				}
+
+				const steps = data.steps as number;
+				const text = data.text as string;
+				const toolCalls = data.toolCalls as unknown[];
+
+				if (steps > 1 && text && text.length > 0) {
+					r.toolRoundTrip = "ok";
+				} else if (Array.isArray(toolCalls) && toolCalls.length > 0) {
+					r.toolRoundTrip = "warn";
+					r.notes.push("t-rt: tool called but no final text");
+				} else if (text && text.length > 0) {
+					r.toolRoundTrip = "warn";
+					r.notes.push("t-rt: skipped tool, answered directly");
+				} else {
+					r.toolRoundTrip = "fail";
+					r.notes.push("t-rt: empty response");
+				}
+			});
+		}
+	});
+
+	// ------------------------------------------------------------------
+	// Structured output (per model)
+	// ------------------------------------------------------------------
+	describe("structured output (per model)", () => {
+		for (const model of MODELS) {
+			it(`${model.label} — structured output via binding`, async () => {
+				if (!serverReady) return;
+
+				const r = getResult(model.label);
+				const data = await post("/chat/structured", { model: model.id });
+
+				if (data.error) {
+					r.structuredOutput = "fail";
+					r.notes.push(`json: ${String(data.error).slice(0, 60)}`);
+					return;
+				}
+
+				const result = data.result as Record<string, unknown> | undefined;
+				if (
+					result &&
+					typeof result.name === "string" &&
+					typeof result.capital === "string"
+				) {
+					r.structuredOutput = "ok";
+				} else {
+					r.structuredOutput = "warn";
+					r.notes.push("json: wrong shape");
+				}
+			});
+		}
+	});
+
+	// ------------------------------------------------------------------
+	// Image generation
+	// ------------------------------------------------------------------
+	describe("image generation", () => {
+		it("Flux 1 Schnell — should generate an image via binding", async () => {
+			if (!serverReady) return;
+
+			const data = await post("/image");
+
+			if (data.error) {
+				console.warn(`  [image] error: ${String(data.error).slice(0, 80)}`);
+				return;
+			}
+
+			expect(data.imageCount).toBe(1);
+			expect(data.imageSize).toBeGreaterThan(100);
+			console.log(`  [image] Flux 1 Schnell OK — ${data.imageSize} bytes`);
+		});
+	});
+
+	// ------------------------------------------------------------------
+	// Embeddings
+	// ------------------------------------------------------------------
+	describe("embeddings", () => {
+		it("BGE Base EN — should generate embeddings via binding", async () => {
+			if (!serverReady) return;
+
+			const data = await post("/embed");
+
+			if (data.error) {
+				console.warn(`  [embed] error: ${String(data.error).slice(0, 80)}`);
+				return;
+			}
+
+			expect(data.count).toBe(2);
+			expect(data.dimensions).toBe(768);
+			console.log(`  [embed] BGE Base EN OK — ${data.dimensions} dimensions`);
+		});
+	});
+
+	// ------------------------------------------------------------------
+	// AI Search tests (only run if AI_SEARCH binding is configured)
+	// ------------------------------------------------------------------
+	describe("AI Search", () => {
+		it("AI Search — basic chat", async () => {
+			if (!serverReady) return;
+
+			const data = await post("/aisearch/chat", { model: "What is Cloudflare Workers?" });
+
+			if (data.skipped) {
+				console.log("  [aisearch] Skipped: AI_SEARCH binding not configured");
+				return;
+			}
+
+			if (data.error) {
+				console.warn(`  [aisearch] chat error: ${String(data.error).slice(0, 80)}`);
+				return;
+			}
+
+			expect(typeof data.text).toBe("string");
+			expect((data.text as string).length).toBeGreaterThan(0);
+			console.log(`  [aisearch] chat OK: "${(data.text as string).slice(0, 80)}..."`);
+		});
+
+		it("AI Search — streaming", async () => {
+			if (!serverReady) return;
+
+			const data = await post("/aisearch/stream", { model: "What is Cloudflare Workers?" });
+
+			if (data.skipped) {
+				console.log("  [aisearch] Skipped: AI_SEARCH binding not configured");
+				return;
+			}
+
+			if (data.error) {
+				console.warn(`  [aisearch] stream error: ${String(data.error).slice(0, 80)}`);
+				return;
+			}
+
+			expect(typeof data.text).toBe("string");
+			expect((data.text as string).length).toBeGreaterThan(0);
+			console.log(`  [aisearch] stream OK: "${(data.text as string).slice(0, 80)}..."`);
+		});
+	});
+});

@@ -1,12 +1,9 @@
-import { generateObject, type LanguageModel } from "ai";
+import { generateText, Output, type LanguageModel } from "ai";
 import z from "zod";
 
 export async function extractAlarmType(model: LanguageModel, query: string) {
-	const { object } = await generateObject({
+	const { output: object } = await generateText({
 		model,
-		schema: z.object({
-			type: z.string(),
-		}),
 		prompt: `
 			You are an intelligent alarm scheduler manager. What follows is a user prompt for creating an alarm. Your job is to extract a "type" of alarm.
 			The types of alarm available are:
@@ -35,6 +32,11 @@ export async function extractAlarmType(model: LanguageModel, query: string) {
 			User prompt: remind me in 10 minutes to turn off the oven
 			Your response: { type: "delayed" }
         `,
+		output: Output.object({
+			schema: z.object({
+				type: z.string(),
+			}),
+		}),
 	});
 
 	return object.type;

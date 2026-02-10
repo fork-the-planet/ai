@@ -1,12 +1,9 @@
-import { generateObject, type LanguageModel } from "ai";
+import { generateText, Output, type LanguageModel } from "ai";
 import z from "zod";
 
 export async function extractScheduledDate(model: LanguageModel, query: string) {
-	const { object } = await generateObject({
+	const { output: object } = await generateText({
 		model,
-		schema: z.object({
-			datetime: z.string(),
-		}),
 		prompt: `
 			You are an intelligent alarm scheduler manager. What follows is a user prompt for creating an alarm at a specific time in the future. Your job is to extract the ISO Date Time that is mentioned in the prompt.
 			The current date/time in ISO 8601 format is ${new Date().toISOString()}.
@@ -28,6 +25,11 @@ export async function extractScheduledDate(model: LanguageModel, query: string) 
 			- If not:
 			  { "datetime": undefined }
 			`,
+		output: Output.object({
+			schema: z.object({
+				datetime: z.string(),
+			}),
+		}),
 	});
 
 	return object.datetime;

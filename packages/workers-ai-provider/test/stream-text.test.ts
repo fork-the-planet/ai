@@ -153,30 +153,24 @@ describe("REST API - Streaming Text Tests", () => {
 		expect(capturedOptions).toHaveProperty("aNumber", "1");
 	});
 
-	it("should handle old tool call inside response when last message is user message", async () => {
+	it("should handle streamed tool calls (native format) with tools present", async () => {
 		server.use(
 			http.post(
 				`https://api.cloudflare.com/client/v4/accounts/${TEST_ACCOUNT_ID}/ai/run/${TEST_MODEL}`,
-				// `doStream` calls `doGenerate` underneath when the last message is from the user
 				async () => {
-					return HttpResponse.json({
-						result: {
-							response: null,
-							tool_calls: [
-								{
-									arguments: {
-										location: "London",
-									},
-									name: "get_weather",
-								},
-							],
-							usage: {
-								completion_tokens: 23,
-								prompt_tokens: 168,
-								total_tokens: 191,
+					return new Response(
+						[
+							`data: {"tool_calls":[{"id":"call123","type":"function","index":0,"function":{"name":"get_weather","arguments":"{\\"location\\": \\"London\\"}"}}]}\n\n`,
+							`data: {"finish_reason":"tool_calls"}\n\n`,
+							"data: [DONE]\n\n",
+						].join(""),
+						{
+							headers: {
+								"Content-Type": "text/event-stream",
+								"Transfer-Encoding": "chunked",
 							},
 						},
-					});
+					);
 				},
 			),
 		);
@@ -204,7 +198,6 @@ describe("REST API - Streaming Text Tests", () => {
 		});
 
 		const toolCalls: any = [];
-
 		for await (const chunk of result.fullStream) {
 			if (chunk.type === "tool-call") {
 				toolCalls.push(chunk);
@@ -212,41 +205,29 @@ describe("REST API - Streaming Text Tests", () => {
 		}
 
 		expect(toolCalls).toHaveLength(1);
-		delete toolCalls[0].toolCallId;
-		expect(toolCalls).toMatchObject([
-			{
-				input: { location: "London" },
-				toolName: "get_weather",
-				type: "tool-call",
-			},
-		]);
+		expect(toolCalls[0].toolName).toBe("get_weather");
+		expect(toolCalls[0].toolCallId).toBe("call123");
+		expect(await result.finishReason).toBe("tool-calls");
 	});
 
-	it("should handle new tool call inside response when last message is user message", async () => {
+	it("should handle streamed tool calls (OpenAI format) with tools present", async () => {
 		server.use(
 			http.post(
 				`https://api.cloudflare.com/client/v4/accounts/${TEST_ACCOUNT_ID}/ai/run/${TEST_MODEL}`,
-				// `doStream` calls `doGenerate` underneath when the last message is from the user
 				async () => {
-					return HttpResponse.json({
-						result: {
-							tool_calls: [
-								{
-									function: {
-										arguments: '{"location": "London"}',
-										name: "get_weather",
-									},
-									id: "chatcmpl-tool-b482f0e36b0c4190b9bee3fb61408a9e",
-									type: "function",
-								},
-							],
-							usage: {
-								completion_tokens: 17,
-								prompt_tokens: 179,
-								total_tokens: 196,
+					return new Response(
+						[
+							`data: {"choices":[{"delta":{"tool_calls":[{"id":"chatcmpl-tool-abc","type":"function","index":0,"function":{"name":"get_weather","arguments":"{\\"location\\": \\"London\\"}"}}]},"finish_reason":null}]}\n\n`,
+							`data: {"choices":[{"delta":{},"finish_reason":"tool_calls"}]}\n\n`,
+							"data: [DONE]\n\n",
+						].join(""),
+						{
+							headers: {
+								"Content-Type": "text/event-stream",
+								"Transfer-Encoding": "chunked",
 							},
 						},
-					});
+					);
 				},
 			),
 		);
@@ -274,7 +255,6 @@ describe("REST API - Streaming Text Tests", () => {
 		});
 
 		const toolCalls: any = [];
-
 		for await (const chunk of result.fullStream) {
 			if (chunk.type === "tool-call") {
 				toolCalls.push(chunk);
@@ -282,103 +262,9 @@ describe("REST API - Streaming Text Tests", () => {
 		}
 
 		expect(toolCalls).toHaveLength(1);
-		expect(toolCalls).toMatchObject([
-			{
-				input: { location: "London" },
-				toolCallId: "chatcmpl-tool-b482f0e36b0c4190b9bee3fb61408a9e",
-				toolName: "get_weather",
-				type: "tool-call",
-			},
-		]);
-	});
-
-	it("should handle openai tool call inside response when last message is user message", async () => {
-		server.use(
-			http.post(
-				`https://api.cloudflare.com/client/v4/accounts/${TEST_ACCOUNT_ID}/ai/run/${TEST_MODEL}`,
-				// `doStream` calls `doGenerate` underneath when the last message is from the user
-				async () => {
-					return HttpResponse.json({
-						result: {
-							id: "chatcmpl-2d657a54f93d4ecbb966cc50efd42819",
-							object: "chat.completion",
-							created: 1750346826,
-							model: TEST_MODEL,
-							choices: [
-								{
-									index: 0,
-									message: {
-										role: "assistant",
-										reasoning_content:
-											"\nOkay, the user is asking for the weather in London. Let me check the tools available. There's a function called get_weather that takes a location parameter. Since London is the location mentioned, I need to call that function with \"London\" as the argument. I'll make sure the JSON is correctly formatted and enclosed within the tool_call tags.\n",
-										content: "\n\n",
-										tool_calls: [
-											{
-												id: "chatcmpl-tool-c267de54771c4833a823f423f0def197",
-												type: "function",
-												function: {
-													name: "get_weather",
-													arguments: '{"location": "London"}',
-												},
-											},
-										],
-									},
-									logprobs: null,
-									finish_reason: "tool_calls",
-									stop_reason: null,
-								},
-							],
-							usage: {
-								prompt_tokens: 169,
-								completion_tokens: 94,
-								total_tokens: 263,
-							},
-							prompt_logprobs: null,
-						},
-					});
-				},
-			),
-		);
-
-		const workersai = createWorkersAI({
-			accountId: TEST_ACCOUNT_ID,
-			apiKey: TEST_API_KEY,
-		});
-
-		const result = streamText({
-			model: workersai(TEST_MODEL),
-			prompt: "Get the weather information for London",
-			tools: {
-				get_weather: {
-					description: "Get the weather in a location",
-					execute: async ({ location }) => ({
-						location,
-						weather: location === "London" ? "Raining" : "Sunny",
-					}),
-					inputSchema: z.object({
-						location: z.string().describe("The location to get the weather for"),
-					}),
-				},
-			},
-		});
-
-		const toolCalls: any = [];
-
-		for await (const chunk of result.fullStream) {
-			if (chunk.type === "tool-call") {
-				toolCalls.push(chunk);
-			}
-		}
-
-		expect(toolCalls).toHaveLength(1);
-		expect(toolCalls).toMatchObject([
-			{
-				input: { location: "London" },
-				toolCallId: "chatcmpl-tool-c267de54771c4833a823f423f0def197",
-				toolName: "get_weather",
-				type: "tool-call",
-			},
-		]);
+		expect(toolCalls[0].toolName).toBe("get_weather");
+		expect(toolCalls[0].toolCallId).toBe("chatcmpl-tool-abc");
+		expect(await result.finishReason).toBe("tool-calls");
 	});
 
 	it("should handle content and reasoning_content fields if present", async () => {
@@ -507,26 +393,26 @@ describe("Binding - Streaming Text Tests", () => {
 		expect(capturedOptions).toHaveProperty("aNumber", 1);
 	});
 
-	it("should handle old tool call inside response when last message is user message", async () => {
+	it("should handle streamed tool calls (native format) via binding", async () => {
 		const workersai = createWorkersAI({
 			binding: {
-				run: async (_modelName: string, _inputs: any, _options?: any) => {
-					return {
-						response: null,
-						tool_calls: [
-							{
-								arguments: {
-									location: "London",
+				run: async () => {
+					return mockStream([
+						{
+							tool_calls: [
+								{
+									id: "call_abc",
+									type: "function",
+									index: 0,
+									function: {
+										name: "get_weather",
+										arguments: '{"location": "London"}',
+									},
 								},
-								name: "get_weather",
-							},
-						],
-						usage: {
-							completion_tokens: 23,
-							prompt_tokens: 168,
-							total_tokens: 191,
+							],
 						},
-					};
+						"[DONE]",
+					]);
 				},
 			},
 		});
@@ -549,7 +435,6 @@ describe("Binding - Streaming Text Tests", () => {
 		});
 
 		const toolCalls: any = [];
-
 		for await (const chunk of result.fullStream) {
 			if (chunk.type === "tool-call") {
 				toolCalls.push(chunk);
@@ -557,46 +442,43 @@ describe("Binding - Streaming Text Tests", () => {
 		}
 
 		expect(toolCalls).toHaveLength(1);
-		delete toolCalls[0].toolCallId;
-		expect(toolCalls).toMatchObject([
-			{
-				input: { location: "London" },
-				toolName: "get_weather",
-				type: "tool-call",
-			},
-		]);
+		expect(toolCalls[0].toolName).toBe("get_weather");
+		expect(toolCalls[0].toolCallId).toBe("call_abc");
 	});
 
-	it("should handle new tool call inside response when last message is user message", async () => {
+	it("should handle streamed multiple tool calls via binding", async () => {
 		const workersai = createWorkersAI({
 			binding: {
 				run: async () => {
-					return {
-						tool_calls: [
-							{
-								function: {
-									arguments: '{"location": "London"}',
-									name: "get_weather",
+					return mockStream([
+						{
+							tool_calls: [
+								{
+									id: "call_1",
+									type: "function",
+									index: 0,
+									function: {
+										name: "get_weather",
+										arguments: '{"location": "London"}',
+									},
 								},
-								id: "chatcmpl-tool-b482f0e36b0c4190b9bee3fb61408a9e",
-								type: "function",
-							},
-
-							{
-								function: {
-									arguments: '{"location": "London"}',
-									name: "get_temperature",
-								},
-								id: "chatcmpl-tool-a482f0e36b0c4190b9bee3fb61408a9c",
-								type: "function",
-							},
-						],
-						usage: {
-							completion_tokens: 17,
-							prompt_tokens: 179,
-							total_tokens: 196,
+							],
 						},
-					};
+						{
+							tool_calls: [
+								{
+									id: "call_2",
+									type: "function",
+									index: 1,
+									function: {
+										name: "get_temperature",
+										arguments: '{"location": "London"}',
+									},
+								},
+							],
+						},
+						"[DONE]",
+					]);
 				},
 			},
 		});
@@ -629,7 +511,6 @@ describe("Binding - Streaming Text Tests", () => {
 		});
 
 		const toolCalls: any = [];
-
 		for await (const chunk of result.fullStream) {
 			if (chunk.type === "tool-call") {
 				toolCalls.push(chunk);
@@ -637,68 +518,48 @@ describe("Binding - Streaming Text Tests", () => {
 		}
 
 		expect(toolCalls).toHaveLength(2);
-		expect(toolCalls[0]).toMatchObject({
-			input: { location: "London" },
-			toolCallId: "chatcmpl-tool-b482f0e36b0c4190b9bee3fb61408a9e",
-			toolName: "get_weather",
-			type: "tool-call",
-		});
-		expect(toolCalls[1]).toMatchObject({
-			input: { location: "London" },
-			toolCallId: "chatcmpl-tool-a482f0e36b0c4190b9bee3fb61408a9c",
-			toolName: "get_temperature",
-			type: "tool-call",
-		});
+		expect(toolCalls[0].toolName).toBe("get_weather");
+		expect(toolCalls[1].toolName).toBe("get_temperature");
 	});
 
-	it("should handle new tool call inside response when last message is user message", async () => {
+	it("should handle streamed OpenAI-format tool calls with reasoning via binding", async () => {
 		const workersai = createWorkersAI({
 			binding: {
 				run: async () => {
-					return {
-						id: "chatcmpl-2d657a54f93d4ecbb966cc50efd42819",
-						object: "chat.completion",
-						created: 1750346826,
-						model: TEST_MODEL,
-						choices: [
-							{
-								index: 0,
-								message: {
-									role: "assistant",
-									reasoning_content:
-										"\nOkay, the user is asking for the weather in London. Let me check the tools available. There's a function called get_weather that takes a location parameter. Since London is the location mentioned, I need to call that function with \"London\" as the argument. I'll make sure the JSON is correctly formatted and enclosed within the tool_call tags.\n",
-									content: "\n\n",
-									tool_calls: [
-										{
-											id: "chatcmpl-tool-c267de54771c4833a823f423f0def197",
-											type: "function",
-											function: {
-												name: "get_weather",
-												arguments: '{"location": "London"}',
-											},
-										},
-										{
-											id: "chatcmpl-tool-a482f0e36b0c4190b9bee3fb61408a9c",
-											type: "function",
-											function: {
-												name: "get_temperature",
-												arguments: '{"location": "London"}',
-											},
-										},
-									],
+					return mockStream([
+						{
+							choices: [
+								{
+									delta: { reasoning_content: "Let me check the weather." },
+									finish_reason: null,
 								},
-								logprobs: null,
-								finish_reason: "tool_calls",
-								stop_reason: null,
-							},
-						],
-						usage: {
-							prompt_tokens: 169,
-							completion_tokens: 94,
-							total_tokens: 263,
+							],
 						},
-						prompt_logprobs: null,
-					};
+						{
+							choices: [
+								{
+									delta: {
+										tool_calls: [
+											{
+												id: "chatcmpl-tool-abc",
+												type: "function",
+												index: 0,
+												function: {
+													name: "get_weather",
+													arguments: '{"location": "London"}',
+												},
+											},
+										],
+									},
+									finish_reason: null,
+								},
+							],
+						},
+						{
+							choices: [{ delta: {}, finish_reason: "tool_calls" }],
+						},
+						"[DONE]",
+					]);
 				},
 			},
 		});
@@ -707,16 +568,6 @@ describe("Binding - Streaming Text Tests", () => {
 			model: workersai(TEST_MODEL),
 			prompt: "Get the weather information for London",
 			tools: {
-				get_temperature: {
-					description: "Get the temperature in a location",
-					execute: async ({ location }) => ({
-						location,
-						weather: location === "London" ? "80" : "100",
-					}),
-					inputSchema: z.object({
-						location: z.string().describe("The location to get the temperature for"),
-					}),
-				},
 				get_weather: {
 					description: "Get the weather in a location",
 					execute: async ({ location }) => ({
@@ -737,28 +588,16 @@ describe("Binding - Streaming Text Tests", () => {
 			if (chunk.type === "tool-call") {
 				toolCalls.push(chunk);
 			}
-
 			if (chunk.type === "reasoning-delta") {
 				reasoning += chunk.text;
 			}
 		}
 
-		expect(reasoning).toEqual(
-			"\nOkay, the user is asking for the weather in London. Let me check the tools available. There's a function called get_weather that takes a location parameter. Since London is the location mentioned, I need to call that function with \"London\" as the argument. I'll make sure the JSON is correctly formatted and enclosed within the tool_call tags.\n",
-		);
-		expect(toolCalls).toHaveLength(2);
-		expect(toolCalls[0]).toMatchObject({
-			input: { location: "London" },
-			toolCallId: "chatcmpl-tool-c267de54771c4833a823f423f0def197",
-			toolName: "get_weather",
-			type: "tool-call",
-		});
-		expect(toolCalls[1]).toMatchObject({
-			input: { location: "London" },
-			toolCallId: "chatcmpl-tool-a482f0e36b0c4190b9bee3fb61408a9c",
-			toolName: "get_temperature",
-			type: "tool-call",
-		});
+		expect(reasoning).toBe("Let me check the weather.");
+		expect(toolCalls).toHaveLength(1);
+		expect(toolCalls[0].toolName).toBe("get_weather");
+		expect(toolCalls[0].toolCallId).toBe("chatcmpl-tool-abc");
+		expect(await result.finishReason).toBe("tool-calls");
 	});
 
 	it("should handle content and reasoning_content fields if present", async () => {
@@ -1354,27 +1193,329 @@ describe("REST API - Finish Reason Handling", () => {
 	});
 });
 
+describe("Streaming Error Handling", () => {
+	it("should handle malformed SSE events gracefully", async () => {
+		const workersai = createWorkersAI({
+			binding: {
+				run: async () => {
+					return mockStream(
+						[
+							{ response: "Hello" },
+							"INVALID_JSON{{{",
+							{ response: " world" },
+							"[DONE]",
+						],
+						{ raw: true },
+					);
+				},
+			},
+		});
+
+		const result = streamText({
+			model: workersai(TEST_MODEL),
+			prompt: "Test malformed SSE",
+		});
+
+		let text = "";
+		for await (const chunk of result.textStream) {
+			text += chunk;
+		}
+
+		// Malformed event should be skipped, valid events still processed
+		expect(text).toBe("Hello world");
+	});
+
+	it("should handle empty stream (no events before close)", async () => {
+		const workersai = createWorkersAI({
+			binding: {
+				run: async () => {
+					return mockStream(["[DONE]"]);
+				},
+			},
+		});
+
+		const result = streamText({
+			model: workersai(TEST_MODEL),
+			prompt: "Test empty stream",
+		});
+
+		let text = "";
+		for await (const chunk of result.textStream) {
+			text += chunk;
+		}
+
+		expect(text).toBe("");
+		expect(await result.finishReason).toBe("stop");
+	});
+
+	it("should handle stream with only [DONE] and no content", async () => {
+		const workersai = createWorkersAI({
+			binding: {
+				run: async () => {
+					return mockStream([{ response: "", tool_calls: [] }, "[DONE]"]);
+				},
+			},
+		});
+
+		const result = streamText({
+			model: workersai(TEST_MODEL),
+			prompt: "Test minimal stream",
+		});
+
+		let text = "";
+		for await (const chunk of result.textStream) {
+			text += chunk;
+		}
+
+		expect(text).toBe("");
+	});
+
+	it("should detect premature stream termination (no [DONE])", async () => {
+		const workersai = createWorkersAI({
+			binding: {
+				run: async () => {
+					// Stream ends without [DONE]
+					return mockStream([{ response: "partial" }], { noDone: true });
+				},
+			},
+		});
+
+		const result = streamText({
+			model: workersai(TEST_MODEL),
+			prompt: "Test truncated stream",
+		});
+
+		let text = "";
+		for await (const chunk of result.textStream) {
+			text += chunk;
+		}
+
+		expect(text).toBe("partial");
+		// Should detect truncation and report error finish reason
+		expect(await result.finishReason).toBe("error");
+	});
+});
+
+describe("Streaming Backpressure", () => {
+	it("should deliver chunks incrementally, not buffered all at once", async () => {
+		const workersai = createWorkersAI({
+			binding: {
+				run: async () => {
+					// Simulate a slow stream: each chunk arrives 10ms apart
+					return delayedMockStream(
+						[
+							{ response: "chunk1" },
+							{ response: "chunk2" },
+							{ response: "chunk3" },
+							{ response: "chunk4" },
+							"[DONE]",
+						],
+						10,
+					);
+				},
+			},
+		});
+
+		const result = streamText({
+			model: workersai(TEST_MODEL),
+			prompt: "Test incremental streaming",
+		});
+
+		const chunkTimestamps: number[] = [];
+		const start = Date.now();
+
+		for await (const _chunk of result.textStream) {
+			chunkTimestamps.push(Date.now() - start);
+		}
+
+		// We should have received 4 text chunks
+		expect(chunkTimestamps.length).toBe(4);
+
+		// The chunks should NOT all arrive at the same time.
+		// If buffered, all timestamps would be ~equal (within 1-2ms).
+		// With proper streaming, later chunks arrive later.
+		const lastTimestamp = chunkTimestamps[chunkTimestamps.length - 1];
+		const firstTimestamp = chunkTimestamps[0];
+		const spread = lastTimestamp - firstTimestamp;
+
+		// With 4 chunks at 10ms apart, spread should be >= ~20ms
+		// (some tolerance for scheduling jitter)
+		expect(spread).toBeGreaterThanOrEqual(15);
+	});
+});
+
+describe("Graceful Degradation", () => {
+	it("should wrap non-streaming response as a stream when binding returns object", async () => {
+		const workersai = createWorkersAI({
+			binding: {
+				run: async () => {
+					// Binding returns a complete response instead of a stream
+					return {
+						response: "Hello from non-streaming fallback",
+						usage: {
+							prompt_tokens: 10,
+							completion_tokens: 5,
+						},
+					};
+				},
+			},
+		});
+
+		const result = streamText({
+			model: workersai(TEST_MODEL),
+			prompt: "Test graceful degradation",
+		});
+
+		let text = "";
+		for await (const chunk of result.textStream) {
+			text += chunk;
+		}
+
+		expect(text).toBe("Hello from non-streaming fallback");
+		expect(await result.finishReason).toBe("stop");
+	});
+
+	it("should handle non-streaming OpenAI-format response with tool calls", async () => {
+		const workersai = createWorkersAI({
+			binding: {
+				run: async () => {
+					return {
+						choices: [
+							{
+								message: {
+									content: "",
+									tool_calls: [
+										{
+											id: "call_abc",
+											type: "function",
+											function: {
+												name: "get_weather",
+												arguments: '{"city": "London"}',
+											},
+										},
+									],
+								},
+								finish_reason: "tool_calls",
+							},
+						],
+					};
+				},
+			},
+		});
+
+		const result = streamText({
+			model: workersai(TEST_MODEL),
+			prompt: "What's the weather?",
+			tools: {
+				get_weather: {
+					description: "Get weather",
+					execute: async ({ city }) => ({ city, temp: 18 }),
+					inputSchema: z.object({ city: z.string() }),
+				},
+			},
+		});
+
+		const toolCalls: any[] = [];
+		for await (const chunk of result.fullStream) {
+			if (chunk.type === "tool-call") {
+				toolCalls.push(chunk);
+			}
+		}
+
+		expect(toolCalls).toHaveLength(1);
+		expect(toolCalls[0].toolName).toBe("get_weather");
+		expect(await result.finishReason).toBe("tool-calls");
+	});
+
+	it("should handle non-streaming response with reasoning content", async () => {
+		const workersai = createWorkersAI({
+			binding: {
+				run: async () => {
+					return {
+						choices: [
+							{
+								message: {
+									reasoning_content: "Let me think about this...",
+									content: "The answer is 42.",
+								},
+								finish_reason: "stop",
+							},
+						],
+					};
+				},
+			},
+		});
+
+		const result = streamText({
+			model: workersai(TEST_MODEL),
+			prompt: "Think carefully",
+		});
+
+		let text = "";
+		let reasoning = "";
+		for await (const chunk of result.fullStream) {
+			if (chunk.type === "text-delta") text += chunk.text;
+			if (chunk.type === "reasoning-delta") reasoning += chunk.text;
+		}
+
+		expect(text).toBe("The answer is 42.");
+		expect(reasoning).toBe("Let me think about this...");
+	});
+});
+
 /**
  * Helper to produce SSE lines in a Node ReadableStream.
- * This is the crucial part: each line is preceded by "data: ",
- * followed by JSON or [DONE], then a newline+newline.
  */
-function mockStream(sseLines: any[]): ReadableStream<Uint8Array> {
+function mockStream(
+	sseLines: any[],
+	options?: { raw?: boolean; noDone?: boolean },
+): ReadableStream<Uint8Array> {
 	const encoder = new TextEncoder();
 	return new ReadableStream<Uint8Array>({
 		start(controller) {
 			for (const line of sseLines) {
-				// Typically "line" is either an object or "[DONE]"
 				if (typeof line === "string") {
-					// e.g. the [DONE] marker
-					controller.enqueue(encoder.encode(`data: ${line}\n\n`));
+					if (options?.raw) {
+						controller.enqueue(encoder.encode(`data: ${line}\n\n`));
+					} else {
+						controller.enqueue(encoder.encode(`data: ${line}\n\n`));
+					}
 				} else {
-					// Convert JS object (e.g. { response: "Hello " }) to JSON
 					const jsonText = JSON.stringify(line);
 					controller.enqueue(encoder.encode(`data: ${jsonText}\n\n`));
 				}
 			}
+			if (!options?.noDone && !sseLines.includes("[DONE]")) {
+				// Don't add [DONE] if already present or if noDone is set
+			}
 			controller.close();
+		},
+	});
+}
+
+/**
+ * Helper that enqueues SSE lines with a delay between each, simulating a real
+ * streaming response from Workers AI.
+ */
+function delayedMockStream(sseLines: any[], delayMs: number): ReadableStream<Uint8Array> {
+	const encoder = new TextEncoder();
+	let index = 0;
+
+	return new ReadableStream<Uint8Array>({
+		async pull(controller) {
+			if (index >= sseLines.length) {
+				controller.close();
+				return;
+			}
+
+			await new Promise((r) => setTimeout(r, delayMs));
+
+			const line = sseLines[index++];
+			if (typeof line === "string") {
+				controller.enqueue(encoder.encode(`data: ${line}\n\n`));
+			} else {
+				controller.enqueue(encoder.encode(`data: ${JSON.stringify(line)}\n\n`));
+			}
 		},
 	});
 }
