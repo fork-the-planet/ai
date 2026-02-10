@@ -12,7 +12,6 @@
 		"cf-typegen": "wrangler types"
 	},
 	"dependencies": {
-		"@cloudflare/tanstack-ai": "workspace:*",
 		"@tanstack/ai": "^0.4.2",
 		"@tanstack/ai-react": "^0.5.2",
 		"react": "^19.1.1",

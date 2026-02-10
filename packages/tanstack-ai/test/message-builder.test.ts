@@ -42,7 +42,7 @@ async function getMessages(adapter: WorkersAiTextAdapter<any>, options: any, bin
 	for await (const chunk of adapter.chatStream(options)) {
 		chunks.push(chunk);
 	}
-	const [, inputs] = binding.run.mock.calls[0];
+	const [, inputs] = binding.run.mock.calls[0]!;
 	return inputs.messages;
 }
 
@@ -400,7 +400,7 @@ describe("tool building (via chatStream)", () => {
 			// consume the stream
 		}
 
-		const [, inputs] = binding.run.mock.calls[0];
+		const [, inputs] = binding.run.mock.calls[0]!;
 		expect(inputs.tools).toEqual([
 			{
 				type: "function",
@@ -435,7 +435,7 @@ describe("tool building (via chatStream)", () => {
 			// consume
 		}
 
-		const [, inputs] = binding.run.mock.calls[0];
+		const [, inputs] = binding.run.mock.calls[0]!;
 		expect(inputs.tools).toBeUndefined();
 	});
 
@@ -457,7 +457,7 @@ describe("tool building (via chatStream)", () => {
 			// consume
 		}
 
-		const [, inputs] = binding.run.mock.calls[0];
+		const [, inputs] = binding.run.mock.calls[0]!;
 		expect(inputs.tools[0].function.name).toBe("ping");
 		expect(inputs.tools[0].function.parameters).toBeUndefined();
 	});

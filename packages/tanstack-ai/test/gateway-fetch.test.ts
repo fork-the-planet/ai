@@ -35,7 +35,7 @@ describe("createGatewayFetch", () => {
 			});
 
 			expect(mockBinding.run).toHaveBeenCalledOnce();
-			const request = mockBinding.run.mock.calls[0][0];
+			const request = mockBinding.run.mock.calls[0]![0];
 			expect(request.provider).toBe("openai");
 			expect(request.endpoint).toBe("chat/completions");
 			expect(request.query).toEqual({ model: "gpt-4o", messages: [] });
@@ -50,7 +50,7 @@ describe("createGatewayFetch", () => {
 				body: JSON.stringify({}),
 			});
 
-			const request = mockBinding.run.mock.calls[0][0];
+			const request = mockBinding.run.mock.calls[0]![0];
 			expect(request.endpoint).toBe("audio/transcriptions");
 		});
 
@@ -63,7 +63,7 @@ describe("createGatewayFetch", () => {
 				body: JSON.stringify({ model: "gpt-4o" }),
 			});
 
-			const request = mockBinding.run.mock.calls[0][0];
+			const request = mockBinding.run.mock.calls[0]![0];
 			expect(request.endpoint).toBe("chat/completions");
 		});
 
@@ -79,7 +79,7 @@ describe("createGatewayFetch", () => {
 				body: JSON.stringify({ model: "gpt-4o" }),
 			});
 
-			const request = mockBinding.run.mock.calls[0][0];
+			const request = mockBinding.run.mock.calls[0]![0];
 			expect(request.endpoint).toBe("chat/completions");
 		});
 
@@ -95,7 +95,7 @@ describe("createGatewayFetch", () => {
 				body: JSON.stringify({}),
 			});
 
-			const request = mockBinding.run.mock.calls[0][0];
+			const request = mockBinding.run.mock.calls[0]![0];
 			expect(request.headers["authorization"]).toBe("Bearer sk-test-key");
 		});
 
@@ -107,7 +107,7 @@ describe("createGatewayFetch", () => {
 				body: JSON.stringify({}),
 			});
 
-			const request = mockBinding.run.mock.calls[0][0];
+			const request = mockBinding.run.mock.calls[0]![0];
 			expect(request.headers["authorization"]).toBeUndefined();
 		});
 
@@ -121,7 +121,7 @@ describe("createGatewayFetch", () => {
 				body: JSON.stringify({}),
 			});
 
-			const request = mockBinding.run.mock.calls[0][0];
+			const request = mockBinding.run.mock.calls[0]![0];
 			expect(request.headers["anthropic-version"]).toBe("2023-06-01");
 		});
 
@@ -133,7 +133,7 @@ describe("createGatewayFetch", () => {
 				body: "not-json-content",
 			});
 
-			const request = mockBinding.run.mock.calls[0][0];
+			const request = mockBinding.run.mock.calls[0]![0];
 			expect(request.query).toEqual({ _raw: "not-json-content" });
 		});
 	});
@@ -165,7 +165,7 @@ describe("createGatewayFetch", () => {
 			});
 
 			expect(mockFetch).toHaveBeenCalledOnce();
-			const [url] = mockFetch.mock.calls[0];
+			const [url] = mockFetch.mock.calls[0]!;
 			expect(url).toBe("https://gateway.ai.cloudflare.com/v1/test-account/test-gateway");
 		});
 
@@ -177,7 +177,7 @@ describe("createGatewayFetch", () => {
 				body: JSON.stringify({ model: "gpt-4o", messages: [] }),
 			});
 
-			const [, init] = mockFetch.mock.calls[0];
+			const [, init] = mockFetch.mock.calls[0]!;
 			const body = JSON.parse(init.body);
 			expect(body.provider).toBe("openai");
 			expect(body.endpoint).toBe("chat/completions");
@@ -196,7 +196,7 @@ describe("createGatewayFetch", () => {
 				body: JSON.stringify({}),
 			});
 
-			const [, init] = mockFetch.mock.calls[0];
+			const [, init] = mockFetch.mock.calls[0]!;
 			expect(init.headers["cf-aig-authorization"]).toBe("Bearer cf-test-key");
 		});
 
@@ -208,7 +208,7 @@ describe("createGatewayFetch", () => {
 				body: JSON.stringify({}),
 			});
 
-			const [, init] = mockFetch.mock.calls[0];
+			const [, init] = mockFetch.mock.calls[0]!;
 			expect(init.headers["cf-aig-authorization"]).toBeUndefined();
 		});
 	});
@@ -234,7 +234,7 @@ describe("createGatewayFetch", () => {
 				body: JSON.stringify({}),
 			});
 
-			const request = mockBinding.run.mock.calls[0][0];
+			const request = mockBinding.run.mock.calls[0]![0];
 			expect(request.headers["cf-aig-skip-cache"]).toBe("true");
 		});
 
@@ -250,7 +250,7 @@ describe("createGatewayFetch", () => {
 				body: JSON.stringify({}),
 			});
 
-			const request = mockBinding.run.mock.calls[0][0];
+			const request = mockBinding.run.mock.calls[0]![0];
 			expect(request.headers["cf-aig-cache-ttl"]).toBe("3600");
 		});
 
@@ -266,7 +266,7 @@ describe("createGatewayFetch", () => {
 				body: JSON.stringify({}),
 			});
 
-			const request = mockBinding.run.mock.calls[0][0];
+			const request = mockBinding.run.mock.calls[0]![0];
 			expect(request.headers["cf-aig-cache-key"]).toBe("my-cache-key");
 		});
 
@@ -283,7 +283,7 @@ describe("createGatewayFetch", () => {
 				body: JSON.stringify({}),
 			});
 
-			const request = mockBinding.run.mock.calls[0][0];
+			const request = mockBinding.run.mock.calls[0]![0];
 			expect(request.headers["cf-aig-metadata"]).toBe(JSON.stringify(metadata));
 		});
 
@@ -298,7 +298,7 @@ describe("createGatewayFetch", () => {
 				body: JSON.stringify({}),
 			});
 
-			const request = mockBinding.run.mock.calls[0][0];
+			const request = mockBinding.run.mock.calls[0]![0];
 			expect(request.headers["cf-aig-skip-cache"]).toBeUndefined();
 			expect(request.headers["cf-aig-cache-ttl"]).toBeUndefined();
 			expect(request.headers["cf-aig-cache-key"]).toBeUndefined();
@@ -330,7 +330,7 @@ describe("createGatewayFetch", () => {
 				}),
 			});
 
-			const request = mockBinding.run.mock.calls[0][0];
+			const request = mockBinding.run.mock.calls[0]![0];
 			expect(request.provider).toBe("workers-ai");
 			expect(request.endpoint).toBe("@cf/meta/llama-3.3-70b-instruct-fp8-fast");
 			expect(request.query.model).toBeUndefined();
@@ -353,7 +353,7 @@ describe("createGatewayFetch", () => {
 				}),
 			});
 
-			const request = mockBinding.run.mock.calls[0][0];
+			const request = mockBinding.run.mock.calls[0]![0];
 			expect(request.query.instructions).toBeUndefined();
 			expect(request.query.messages).toEqual([]);
 		});
@@ -378,7 +378,7 @@ describe("createGatewayFetch", () => {
 				body: JSON.stringify({}),
 			});
 
-			const request = mockBinding.run.mock.calls[0][0];
+			const request = mockBinding.run.mock.calls[0]![0];
 			expect(request.endpoint).toBe("files?purpose=assistants");
 		});
 
@@ -390,7 +390,7 @@ describe("createGatewayFetch", () => {
 				body: JSON.stringify({}),
 			});
 
-			const request = mockBinding.run.mock.calls[0][0];
+			const request = mockBinding.run.mock.calls[0]![0];
 			expect(request.endpoint).toBe("messages");
 		});
 	});

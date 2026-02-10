@@ -18,7 +18,7 @@ describe("WorkersAiEmbeddingAdapter", () => {
 		const result = await adapter.embed(["hello", "world"]);
 
 		expect(mockBinding.run).toHaveBeenCalledOnce();
-		const [model, inputs] = mockBinding.run.mock.calls[0];
+		const [model, inputs] = mockBinding.run.mock.calls[0]!;
 		expect(model).toBe("@cf/baai/bge-base-en-v1.5");
 		expect(inputs).toEqual({ text: ["hello", "world"] });
 		expect(result.embeddings).toEqual([[0.1], [0.2]]);
@@ -43,7 +43,7 @@ describe("WorkersAiEmbeddingAdapter", () => {
 		const result = await adapter.embed(["hello", "world"]);
 
 		expect(mockGatewayBinding.run).toHaveBeenCalledOnce();
-		const request = mockGatewayBinding.run.mock.calls[0][0];
+		const request = mockGatewayBinding.run.mock.calls[0]![0];
 		// The gateway request should use Workers AI native field name "text", not "input"
 		expect(request.query.text).toEqual(["hello", "world"]);
 		expect(request.query.input).toBeUndefined();

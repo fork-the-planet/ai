@@ -174,11 +174,16 @@ export function createGatewayFetch(
 			cacheHeaders["cf-aig-metadata"] = JSON.stringify(config.metadata);
 		}
 
-		const request = {
+		const request: {
+			provider: string;
+			endpoint: string;
+			headers: Record<string, string>;
+			query: Record<string, unknown>;
+		} = {
 			provider,
 			endpoint,
 			headers: {
-				...init?.headers,
+				...(init?.headers as Record<string, string> | undefined),
 				...headers,
 				...cacheHeaders,
 				"Content-Type": "application/json",

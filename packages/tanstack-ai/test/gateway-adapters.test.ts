@@ -141,7 +141,7 @@ const credentialsConfigWithCfKey: AiGatewayCredentialsConfig = {
 	cfApiKey: "cf-test-key",
 };
 
-const mockBindingRun = vi.fn(async () => new Response("ok"));
+const mockBindingRun = vi.fn(async (..._args: unknown[]) => new Response("ok"));
 const bindingConfig: AiGatewayBindingConfig = {
 	binding: { run: mockBindingRun },
 	apiKey: "binding-api-key",
@@ -149,7 +149,7 @@ const bindingConfig: AiGatewayBindingConfig = {
 
 function assertFetchInjected(ctor: Mock, expectedApiKey: string) {
 	expect(ctor).toHaveBeenCalledOnce();
-	const [config] = ctor.mock.calls[0];
+	const [config] = ctor.mock.calls[0]!;
 	expect(config.apiKey).toBe(expectedApiKey);
 	expect(typeof config.fetch).toBe("function");
 	return config;
@@ -157,7 +157,7 @@ function assertFetchInjected(ctor: Mock, expectedApiKey: string) {
 
 function assertGeminiConfig(ctor: Mock, expectedApiKey: string) {
 	expect(ctor).toHaveBeenCalledOnce();
-	const [config] = ctor.mock.calls[0];
+	const [config] = ctor.mock.calls[0]!;
 	expect(config.apiKey).toBe(expectedApiKey);
 	expect(config.httpOptions).toBeDefined();
 	expect(config.httpOptions.baseUrl).toContain("gateway.ai.cloudflare.com");
@@ -178,7 +178,7 @@ describe("Anthropic gateway adapters", () => {
 
 		assertFetchInjected(mockAnthropicTextCtor, "test-api-key");
 		// model is second arg
-		expect(mockAnthropicTextCtor.mock.calls[0][1]).toBe("claude-sonnet-4-5");
+		expect(mockAnthropicTextCtor.mock.calls[0]![1]).toBe("claude-sonnet-4-5");
 	});
 
 	it("createAnthropicChat with binding config", async () => {
@@ -198,7 +198,7 @@ describe("Anthropic gateway adapters", () => {
 		const noKeyConfig = { ...credentialsConfig, apiKey: undefined };
 		createAnthropicChat("claude-sonnet-4-5" as any, noKeyConfig as any);
 
-		const [config] = mockAnthropicTextCtor.mock.calls[0];
+		const [config] = mockAnthropicTextCtor.mock.calls[0]!;
 		expect(config.apiKey).toBe("unused");
 	});
 
@@ -207,7 +207,7 @@ describe("Anthropic gateway adapters", () => {
 		createAnthropicSummarize("claude-sonnet-4-5" as any, credentialsConfig);
 
 		assertFetchInjected(mockAnthropicSummarizeCtor, "test-api-key");
-		expect(mockAnthropicSummarizeCtor.mock.calls[0][1]).toBe("claude-sonnet-4-5");
+		expect(mockAnthropicSummarizeCtor.mock.calls[0]![1]).toBe("claude-sonnet-4-5");
 	});
 });
 
@@ -222,14 +222,14 @@ describe("Gemini gateway adapters", () => {
 		expect(config.httpOptions.baseUrl).toBe(
 			"https://gateway.ai.cloudflare.com/v1/test-account/test-gateway/google-ai-studio",
 		);
-		expect(mockGeminiTextCtor.mock.calls[0][1]).toBe("gemini-2.5-flash");
+		expect(mockGeminiTextCtor.mock.calls[0]![1]).toBe("gemini-2.5-flash");
 	});
 
 	it("createGeminiChat includes cf-aig-authorization header when cfApiKey provided", async () => {
 		const { createGeminiChat } = await import("../src/adapters/gemini");
 		createGeminiChat("gemini-2.5-flash" as any, credentialsConfigWithCfKey);
 
-		const [config] = mockGeminiTextCtor.mock.calls[0];
+		const [config] = mockGeminiTextCtor.mock.calls[0]!;
 		expect(config.httpOptions.headers).toEqual({
 			"cf-aig-authorization": "Bearer cf-test-key",
 		});
@@ -239,7 +239,7 @@ describe("Gemini gateway adapters", () => {
 		const { createGeminiChat } = await import("../src/adapters/gemini");
 		createGeminiChat("gemini-2.5-flash" as any, credentialsConfig);
 
-		const [config] = mockGeminiTextCtor.mock.calls[0];
+		const [config] = mockGeminiTextCtor.mock.calls[0]!;
 		expect(config.httpOptions.headers).toBeUndefined();
 	});
 
@@ -248,7 +248,7 @@ describe("Gemini gateway adapters", () => {
 		createGeminiImage("imagen-4.0-generate-001" as any, credentialsConfig);
 
 		assertGeminiConfig(mockGeminiImageCtor, "test-api-key");
-		expect(mockGeminiImageCtor.mock.calls[0][1]).toBe("imagen-4.0-generate-001");
+		expect(mockGeminiImageCtor.mock.calls[0]![1]).toBe("imagen-4.0-generate-001");
 	});
 
 	it("createGeminiSummarize with credentials config", async () => {
@@ -256,7 +256,7 @@ describe("Gemini gateway adapters", () => {
 		createGeminiSummarize("gemini-2.0-flash" as any, credentialsConfig);
 
 		assertGeminiConfig(mockGeminiSummarizeCtor, "test-api-key");
-		expect(mockGeminiSummarizeCtor.mock.calls[0][1]).toBe("gemini-2.0-flash");
+		expect(mockGeminiSummarizeCtor.mock.calls[0]![1]).toBe("gemini-2.0-flash");
 	});
 
 	it("createGeminiChat defaults apiKey to 'unused'", async () => {
@@ -264,7 +264,7 @@ describe("Gemini gateway adapters", () => {
 		const noKeyConfig = { ...credentialsConfig, apiKey: undefined };
 		createGeminiChat("gemini-2.5-flash" as any, noKeyConfig as any);
 
-		const [config] = mockGeminiTextCtor.mock.calls[0];
+		const [config] = mockGeminiTextCtor.mock.calls[0]!;
 		expect(config.apiKey).toBe("unused");
 	});
 });
@@ -277,7 +277,7 @@ describe("Grok gateway adapters", () => {
 		createGrokChat("grok-3" as any, credentialsConfig);
 
 		assertFetchInjected(mockGrokTextCtor, "test-api-key");
-		expect(mockGrokTextCtor.mock.calls[0][1]).toBe("grok-3");
+		expect(mockGrokTextCtor.mock.calls[0]![1]).toBe("grok-3");
 	});
 
 	it("createGrokChat with binding config", async () => {
@@ -296,7 +296,7 @@ describe("Grok gateway adapters", () => {
 		createGrokImage("grok-2-image-1212" as any, credentialsConfig);
 
 		assertFetchInjected(mockGrokImageCtor, "test-api-key");
-		expect(mockGrokImageCtor.mock.calls[0][1]).toBe("grok-2-image-1212");
+		expect(mockGrokImageCtor.mock.calls[0]![1]).toBe("grok-2-image-1212");
 	});
 
 	it("createGrokSummarize with credentials config", async () => {
@@ -304,7 +304,7 @@ describe("Grok gateway adapters", () => {
 		createGrokSummarize("grok-3" as any, credentialsConfig);
 
 		assertFetchInjected(mockGrokSummarizeCtor, "test-api-key");
-		expect(mockGrokSummarizeCtor.mock.calls[0][1]).toBe("grok-3");
+		expect(mockGrokSummarizeCtor.mock.calls[0]![1]).toBe("grok-3");
 	});
 
 	it("createGrokChat defaults apiKey to 'unused'", async () => {
@@ -312,7 +312,7 @@ describe("Grok gateway adapters", () => {
 		const noKeyConfig = { ...credentialsConfig, apiKey: undefined };
 		createGrokChat("grok-3" as any, noKeyConfig as any);
 
-		const [config] = mockGrokTextCtor.mock.calls[0];
+		const [config] = mockGrokTextCtor.mock.calls[0]!;
 		expect(config.apiKey).toBe("unused");
 	});
 });
@@ -325,7 +325,7 @@ describe("OpenAI gateway adapters", () => {
 		createOpenAiChat("gpt-4o" as any, credentialsConfig);
 
 		assertFetchInjected(mockOpenAITextCtor, "test-api-key");
-		expect(mockOpenAITextCtor.mock.calls[0][1]).toBe("gpt-4o");
+		expect(mockOpenAITextCtor.mock.calls[0]![1]).toBe("gpt-4o");
 	});
 
 	it("createOpenAiChat with binding config", async () => {
@@ -344,7 +344,7 @@ describe("OpenAI gateway adapters", () => {
 		createOpenAiSummarize("gpt-4o" as any, credentialsConfig);
 
 		assertFetchInjected(mockOpenAISummarizeCtor, "test-api-key");
-		expect(mockOpenAISummarizeCtor.mock.calls[0][1]).toBe("gpt-4o");
+		expect(mockOpenAISummarizeCtor.mock.calls[0]![1]).toBe("gpt-4o");
 	});
 
 	it("createOpenAiImage with credentials config", async () => {
@@ -352,7 +352,7 @@ describe("OpenAI gateway adapters", () => {
 		createOpenAiImage("dall-e-3" as any, credentialsConfig);
 
 		assertFetchInjected(mockOpenAIImageCtor, "test-api-key");
-		expect(mockOpenAIImageCtor.mock.calls[0][1]).toBe("dall-e-3");
+		expect(mockOpenAIImageCtor.mock.calls[0]![1]).toBe("dall-e-3");
 	});
 
 	it("createOpenAiTranscription with credentials config", async () => {
@@ -360,7 +360,7 @@ describe("OpenAI gateway adapters", () => {
 		createOpenAiTranscription("whisper-1" as any, credentialsConfig);
 
 		assertFetchInjected(mockOpenAITranscriptionCtor, "test-api-key");
-		expect(mockOpenAITranscriptionCtor.mock.calls[0][1]).toBe("whisper-1");
+		expect(mockOpenAITranscriptionCtor.mock.calls[0]![1]).toBe("whisper-1");
 	});
 
 	it("createOpenAiTts with credentials config", async () => {
@@ -368,7 +368,7 @@ describe("OpenAI gateway adapters", () => {
 		createOpenAiTts("tts-1" as any, credentialsConfig);
 
 		assertFetchInjected(mockOpenAITTSCtor, "test-api-key");
-		expect(mockOpenAITTSCtor.mock.calls[0][1]).toBe("tts-1");
+		expect(mockOpenAITTSCtor.mock.calls[0]![1]).toBe("tts-1");
 	});
 
 	it("createOpenAiVideo with credentials config", async () => {
@@ -376,7 +376,7 @@ describe("OpenAI gateway adapters", () => {
 		createOpenAiVideo("sora" as any, credentialsConfig);
 
 		assertFetchInjected(mockOpenAIVideoCtor, "test-api-key");
-		expect(mockOpenAIVideoCtor.mock.calls[0][1]).toBe("sora");
+		expect(mockOpenAIVideoCtor.mock.calls[0]![1]).toBe("sora");
 	});
 
 	it("createOpenAiChat defaults apiKey to 'unused'", async () => {
@@ -384,7 +384,7 @@ describe("OpenAI gateway adapters", () => {
 		const noKeyConfig = { ...credentialsConfig, apiKey: undefined };
 		createOpenAiChat("gpt-4o" as any, noKeyConfig as any);
 
-		const [config] = mockOpenAITextCtor.mock.calls[0];
+		const [config] = mockOpenAITextCtor.mock.calls[0]!;
 		expect(config.apiKey).toBe("unused");
 	});
 });
@@ -394,20 +394,20 @@ describe("gateway fetch integration", () => {
 
 	it("credentials config produces fetch that calls global fetch with gateway URL", async () => {
 		const originalFetch = globalThis.fetch;
-		const mockFetch = vi.fn(async () => new Response("ok"));
+		const mockFetch = vi.fn(async (..._args: unknown[]) => new Response("ok"));
 		globalThis.fetch = mockFetch as any;
 
 		try {
 			const { createOpenAiChat } = await import("../src/adapters/openai");
 			createOpenAiChat("gpt-4o" as any, credentialsConfig);
 
-			const [config] = mockOpenAITextCtor.mock.calls[0];
+			const [config] = mockOpenAITextCtor.mock.calls[0]!;
 			await config.fetch("https://api.openai.com/v1/chat/completions", {
 				body: JSON.stringify({ model: "gpt-4o", messages: [] }),
 			});
 
 			expect(mockFetch).toHaveBeenCalledOnce();
-			const [url] = mockFetch.mock.calls[0];
+			const [url] = mockFetch.mock.calls[0]!;
 			expect(url).toBe("https://gateway.ai.cloudflare.com/v1/test-account/test-gateway");
 		} finally {
 			globalThis.fetch = originalFetch;
@@ -418,13 +418,13 @@ describe("gateway fetch integration", () => {
 		const { createAnthropicChat } = await import("../src/adapters/anthropic");
 		createAnthropicChat("claude-sonnet-4-5" as any, bindingConfig);
 
-		const [config] = mockAnthropicTextCtor.mock.calls[0];
+		const [config] = mockAnthropicTextCtor.mock.calls[0]!;
 		await config.fetch("https://api.anthropic.com/v1/messages", {
 			body: JSON.stringify({ model: "claude-sonnet-4-5", messages: [] }),
 		});
 
 		expect(mockBindingRun).toHaveBeenCalledOnce();
-		const requestPayload = mockBindingRun.mock.calls[0][0];
+		const requestPayload = mockBindingRun.mock.calls[0]![0] as Record<string, any>;
 		expect(requestPayload.provider).toBe("anthropic");
 		expect(requestPayload.headers).toBeDefined();
 		expect(requestPayload.headers["authorization"]).toBe("Bearer binding-api-key");
@@ -432,7 +432,7 @@ describe("gateway fetch integration", () => {
 
 	it("cache headers are passed through when config has caching options", async () => {
 		const originalFetch = globalThis.fetch;
-		const mockFetch = vi.fn(async () => new Response("ok"));
+		const mockFetch = vi.fn(async (..._args: unknown[]) => new Response("ok"));
 		globalThis.fetch = mockFetch as any;
 
 		try {
@@ -445,14 +445,14 @@ describe("gateway fetch integration", () => {
 				metadata: { env: "test" },
 			});
 
-			const [config] = mockGrokTextCtor.mock.calls[0];
+			const [config] = mockGrokTextCtor.mock.calls[0]!;
 			await config.fetch("https://api.x.ai/v1/chat/completions", {
 				body: JSON.stringify({ model: "grok-3", messages: [] }),
 			});
 
 			expect(mockFetch).toHaveBeenCalledOnce();
-			const [, init] = mockFetch.mock.calls[0];
-			const body = JSON.parse(init.body);
+			const [, init] = mockFetch.mock.calls[0]!;
+			const body = JSON.parse((init as any).body);
 			expect(body.headers["cf-aig-skip-cache"]).toBe("true");
 			expect(body.headers["cf-aig-cache-ttl"]).toBe("300");
 			expect(body.headers["cf-aig-cache-key"]).toBe("my-key");

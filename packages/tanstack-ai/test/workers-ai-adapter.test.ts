@@ -121,7 +121,7 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 		);
 
 		expect(binding.run).toHaveBeenCalledOnce();
-		const [, inputs] = binding.run.mock.calls[0];
+		const [, inputs] = binding.run.mock.calls[0]!;
 		// The binding shim receives messages from the OpenAI SDK
 		const messages = inputs.messages;
 		expect(messages[0]).toEqual({
@@ -188,7 +188,7 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 			} as any),
 		);
 
-		const [, inputs] = binding.run.mock.calls[0];
+		const [, inputs] = binding.run.mock.calls[0]!;
 		expect(inputs.tools).toEqual([
 			{
 				type: "function",
@@ -213,7 +213,7 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 			} as any),
 		);
 
-		const [, inputs] = binding.run.mock.calls[0];
+		const [, inputs] = binding.run.mock.calls[0]!;
 		expect(inputs.temperature).toBe(0.3);
 	});
 
@@ -248,7 +248,7 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 			} as any),
 		);
 
-		const [, inputs] = binding.run.mock.calls[0];
+		const [, inputs] = binding.run.mock.calls[0]!;
 		const messages = inputs.messages;
 
 		// user message
@@ -285,7 +285,7 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 			} as any),
 		);
 
-		const [, inputs] = binding.run.mock.calls[0];
+		const [, inputs] = binding.run.mock.calls[0]!;
 		// Should extract only text parts and join them
 		expect(inputs.messages[0].content).toBe("Hello world");
 	});
@@ -304,7 +304,7 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 			} as any),
 		);
 
-		const [, inputs] = binding.run.mock.calls[0];
+		const [, inputs] = binding.run.mock.calls[0]!;
 		expect(inputs.messages[0].content).toBe("");
 	});
 });
@@ -350,7 +350,7 @@ describe("WorkersAiTextAdapter.structuredOutput", () => {
 			},
 		} as any);
 
-		const [, inputs] = binding.run.mock.calls[0];
+		const [, inputs] = binding.run.mock.calls[0]!;
 		expect(inputs.response_format).toEqual({
 			type: "json_schema",
 			json_schema: {
@@ -435,7 +435,7 @@ describe("WorkersAiTextAdapter.structuredOutput", () => {
 			},
 		} as any);
 
-		const [, inputs] = binding.run.mock.calls[0];
+		const [, inputs] = binding.run.mock.calls[0]!;
 		const messages = inputs.messages;
 
 		// Tool messages should be excluded
@@ -464,7 +464,7 @@ describe("WorkersAiTextAdapter.structuredOutput", () => {
 			},
 		} as any);
 
-		const [, inputs] = binding.run.mock.calls[0];
+		const [, inputs] = binding.run.mock.calls[0]!;
 		expect(inputs.temperature).toBe(0);
 	});
 
@@ -481,7 +481,7 @@ describe("WorkersAiTextAdapter.structuredOutput", () => {
 			},
 		} as any);
 
-		const [, inputs] = binding.run.mock.calls[0];
+		const [, inputs] = binding.run.mock.calls[0]!;
 		expect(inputs.messages[0]).toEqual({
 			role: "system",
 			content: "Extract structured data",
