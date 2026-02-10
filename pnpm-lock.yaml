@@ -1158,6 +1158,9 @@ importers:
 
   demos/tanstack-ai-chat-react:
     dependencies:
+      '@cloudflare/tanstack-ai':
+        specifier: file:../../packages/tanstack-ai
+        version: link:../../packages/tanstack-ai
       '@tanstack/ai':
         specifier: ^0.4.2
         version: 0.4.2
