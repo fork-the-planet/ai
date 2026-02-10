@@ -78,12 +78,26 @@ type Status = "ok" | "warn" | "fail";
 
 const results: Record<
 	string,
-	{ chat: Status; multiTurn: Status; toolCalling: Status; toolRoundTrip: Status; structuredOutput: Status; notes: string[] }
+	{
+		chat: Status;
+		multiTurn: Status;
+		toolCalling: Status;
+		toolRoundTrip: Status;
+		structuredOutput: Status;
+		notes: string[];
+	}
 > = {};
 
 function getResult(label: string) {
 	if (!results[label]) {
-		results[label] = { chat: "fail", multiTurn: "fail", toolCalling: "fail", toolRoundTrip: "fail", structuredOutput: "fail", notes: [] };
+		results[label] = {
+			chat: "fail",
+			multiTurn: "fail",
+			toolCalling: "fail",
+			toolRoundTrip: "fail",
+			structuredOutput: "fail",
+			notes: [],
+		};
 	}
 	return results[label];
 }
@@ -148,7 +162,6 @@ const MODELS = [
 // ---------------------------------------------------------------------------
 
 describe.skipIf(skip())("Workers AI REST E2E", () => {
-
 	afterAll(() => {
 		printSummaryTable();
 	});
@@ -356,7 +369,8 @@ describe.skipIf(skip())("Workers AI REST E2E", () => {
 							tools: [
 								{
 									name: "get_current_time",
-									description: "Get the current UTC time. Always use this tool when asked about the time.",
+									description:
+										"Get the current UTC time. Always use this tool when asked about the time.",
 									inputSchema: {
 										type: "object",
 										properties: {},
@@ -432,7 +446,8 @@ describe.skipIf(skip())("Workers AI REST E2E", () => {
 							tools: [
 								{
 									name: "get_current_time",
-									description: "Get the current UTC time. Always use this tool when asked about the time.",
+									description:
+										"Get the current UTC time. Always use this tool when asked about the time.",
 									inputSchema: {
 										type: "object",
 										properties: {},
@@ -466,7 +481,9 @@ describe.skipIf(skip())("Workers AI REST E2E", () => {
 				} else if (secondFinished) {
 					r.toolRoundTrip = "fail";
 					r.notes.push("t-rt: step2 finished but 0 content");
-					console.warn(`  ✗ ${model.label}: tool round-trip EMPTY — model produced no text after tool result`);
+					console.warn(
+						`  ✗ ${model.label}: tool round-trip EMPTY — model produced no text after tool result`,
+					);
 				} else {
 					r.toolRoundTrip = "fail";
 					r.notes.push("t-rt: step2 no finish");

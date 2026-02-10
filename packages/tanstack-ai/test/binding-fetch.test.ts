@@ -295,7 +295,9 @@ describe("createWorkersAiBindingFetch", () => {
 		// tool_call_id should be sanitized to 9 alphanumeric chars
 		expect(messages[2]!.tool_call_id).toBe("callabc00");
 		// assistant's tool_calls[].id should also be sanitized
-		expect((messages[1]!.tool_calls as Array<Record<string, unknown>>)[0]!.id).toBe("callabc00");
+		expect((messages[1]!.tool_calls as Array<Record<string, unknown>>)[0]!.id).toBe(
+			"callabc00",
+		);
 	});
 
 	it("should sanitize tool_call_id with dashes (like binding-generated IDs)", async () => {
@@ -350,11 +352,7 @@ describe("createWorkersAiBindingFetch", () => {
 		const encoder = new TextEncoder();
 		const stream = new ReadableStream({
 			start(controller) {
-				controller.enqueue(
-					encoder.encode(
-						'data: {"response":"","tool_calls":[]}\n\n',
-					),
-				);
+				controller.enqueue(encoder.encode('data: {"response":"","tool_calls":[]}\n\n'));
 				controller.enqueue(
 					encoder.encode(
 						'data: {"tool_calls":[{"id":"chatcmpl-tool-abc123","type":"function","index":0,"function":{"name":"calculator"}}]}\n\n',
@@ -420,7 +418,13 @@ describe("createWorkersAiBindingFetch", () => {
 		// Parse all SSE events and verify tool call chunks are well-formed
 		const events = text.split("data: ").filter((e) => e.trim() && e.trim() !== "[DONE]");
 		const toolCallEvents = events
-			.map((e) => { try { return JSON.parse(e.replace(/\n+$/, "")); } catch { return null; } })
+			.map((e) => {
+				try {
+					return JSON.parse(e.replace(/\n+$/, ""));
+				} catch {
+					return null;
+				}
+			})
 			.filter((e) => e?.choices?.[0]?.delta?.tool_calls);
 		// Should have at least 3 chunks: start (id+name), args part 1, args part 2
 		expect(toolCallEvents.length).toBeGreaterThanOrEqual(3);
@@ -511,9 +515,7 @@ describe("createWorkersAiBindingFetch", () => {
 	});
 
 	it("should pass response_format to binding for structured output", async () => {
-		const binding = mockBinding(
-			vi.fn().mockResolvedValue({ response: '{"name":"test"}' }),
-		);
+		const binding = mockBinding(vi.fn().mockResolvedValue({ response: '{"name":"test"}' }));
 
 		const fetcher = createWorkersAiBindingFetch(binding);
 

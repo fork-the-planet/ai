@@ -25,7 +25,10 @@ function buildAnthropicConfig(config: AnthropicGatewayConfig) {
  * Since AnthropicTextConfig extends the Anthropic SDK's ClientOptions,
  * we can inject the gateway fetch directly — no subclassing needed.
  */
-export function createAnthropicChat(model: AnthropicChatModel, config: AnthropicGatewayConfig): AnyTextAdapter {
+export function createAnthropicChat(
+	model: AnthropicChatModel,
+	config: AnthropicGatewayConfig,
+): AnyTextAdapter {
 	return new AnthropicTextAdapter(buildAnthropicConfig(config), model);
 }
 

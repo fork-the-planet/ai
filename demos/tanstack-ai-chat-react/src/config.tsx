@@ -45,7 +45,11 @@ const STORAGE_KEY = "cf-tanstack-ai-config-v2";
 
 const EMPTY_CLOUDFLARE: CloudflareConfig = { accountId: "", gatewayId: "", apiToken: "" };
 const EMPTY_PROVIDER_KEYS: ProviderKeys = { openai: "", anthropic: "", gemini: "", grok: "" };
-const EMPTY_CONFIG: DemoConfig = { cloudflare: EMPTY_CLOUDFLARE, providerKeys: EMPTY_PROVIDER_KEYS, useBinding: true };
+const EMPTY_CONFIG: DemoConfig = {
+	cloudflare: EMPTY_CLOUDFLARE,
+	providerKeys: EMPTY_PROVIDER_KEYS,
+	useBinding: true,
+};
 
 function loadConfig(): DemoConfig {
 	try {
@@ -154,11 +158,38 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
 		if (pk.gemini.trim()) h["X-Gemini-Api-Key"] = pk.gemini.trim();
 		if (pk.grok.trim()) h["X-Grok-Api-Key"] = pk.grok.trim();
 		return h;
-	}, [config.useBinding, cf.accountId, cf.gatewayId, cf.apiToken, pk.openai, pk.anthropic, pk.gemini, pk.grok]);
+	}, [
+		config.useBinding,
+		cf.accountId,
+		cf.gatewayId,
+		cf.apiToken,
+		pk.openai,
+		pk.anthropic,
+		pk.gemini,
+		pk.grok,
+	]);
 
 	const value = useMemo<ConfigContextValue>(
-		() => ({ config, setCloudflare, setProviderKey, setUseBinding, clearAll, isCloudflareConfigured, hasAnyProviderKey, headers }),
-		[config, setCloudflare, setProviderKey, setUseBinding, clearAll, isCloudflareConfigured, hasAnyProviderKey, headers],
+		() => ({
+			config,
+			setCloudflare,
+			setProviderKey,
+			setUseBinding,
+			clearAll,
+			isCloudflareConfigured,
+			hasAnyProviderKey,
+			headers,
+		}),
+		[
+			config,
+			setCloudflare,
+			setProviderKey,
+			setUseBinding,
+			clearAll,
+			isCloudflareConfigured,
+			hasAnyProviderKey,
+			headers,
+		],
 	);
 
 	return <ConfigContext.Provider value={value}>{children}</ConfigContext.Provider>;

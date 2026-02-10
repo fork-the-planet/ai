@@ -356,14 +356,19 @@ export function createWorkersAiBindingFetch(binding: WorkersAiBinding): typeof f
 		if (Array.isArray(responseObj.tool_calls) && responseObj.tool_calls.length > 0) {
 			finishReason = "tool_calls";
 			message.tool_calls = responseObj.tool_calls.map(
-				(tc: { id?: string; name?: string; arguments: unknown; function?: { name: string; arguments?: unknown } }) => ({
+				(tc: {
+					id?: string;
+					name?: string;
+					arguments: unknown;
+					function?: { name: string; arguments?: unknown };
+				}) => ({
 					id: sanitizeToolCallId(tc.id || crypto.randomUUID()),
 					type: "function",
 					function: {
 						name: tc.function?.name || tc.name || "",
 						arguments:
 							typeof (tc.function?.arguments ?? tc.arguments) === "string"
-								? (tc.function?.arguments ?? tc.arguments) as string
+								? ((tc.function?.arguments ?? tc.arguments) as string)
 								: JSON.stringify(tc.function?.arguments ?? tc.arguments ?? {}),
 					},
 				}),
@@ -518,15 +523,21 @@ function transformWorkersAiStream(
 									toolCallDelta.function = {
 										name: tcName || "",
 										// Include arguments if they arrive in the same chunk
-										arguments: tcArgs != null
-											? (typeof tcArgs === "string" ? tcArgs : JSON.stringify(tcArgs))
-											: "",
+										arguments:
+											tcArgs != null
+												? typeof tcArgs === "string"
+													? tcArgs
+													: JSON.stringify(tcArgs)
+												: "",
 									};
 								} else {
 									// Subsequent chunks — only include arguments delta
 									if (tcArgs != null && tcArgs !== "") {
 										toolCallDelta.function = {
-											arguments: typeof tcArgs === "string" ? tcArgs : JSON.stringify(tcArgs),
+											arguments:
+												typeof tcArgs === "string"
+													? tcArgs
+													: JSON.stringify(tcArgs),
 										};
 									} else {
 										continue; // Nothing useful to forward

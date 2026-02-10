@@ -306,10 +306,7 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 				// Finish
 				if (choice.finish_reason) {
 					// End tool calls
-					if (
-						choice.finish_reason === "tool_calls" ||
-						toolCallsInProgress.size > 0
-					) {
+					if (choice.finish_reason === "tool_calls" || toolCallsInProgress.size > 0) {
 						for (const [, toolCall] of toolCallsInProgress) {
 							let parsedInput: unknown = {};
 							try {
@@ -365,8 +362,7 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 				}
 			}
 		} catch (error) {
-			const message =
-				error instanceof Error ? error.message : String(error);
+			const message = error instanceof Error ? error.message : String(error);
 			const code =
 				error instanceof Error ? (error as Error & { code?: string }).code : undefined;
 			if (!hasEmittedRunStarted) {

@@ -398,7 +398,9 @@ describe("Workers AI Binding E2E", () => {
 				if (step2Content.length > 0 && step2Finished) {
 					const text = step2Content[step2Content.length - 1].content;
 					r.toolRoundTrip = "ok";
-					console.log(`  ✓ ${model.label}: binding tool round-trip OK — "${text.slice(0, 80)}"`);
+					console.log(
+						`  ✓ ${model.label}: binding tool round-trip OK — "${text.slice(0, 80)}"`,
+					);
 				} else if (step2Finished) {
 					r.toolRoundTrip = "fail";
 					r.notes.push("t-rt: step2 finished but 0 content");

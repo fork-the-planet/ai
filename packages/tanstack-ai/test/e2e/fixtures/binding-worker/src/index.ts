@@ -6,10 +6,7 @@
  *
  * This worker is started by wrangler dev during integration tests.
  */
-import {
-	createWorkersAiChat,
-	type WorkersAiTextModel,
-} from "../../../../../src/index";
+import { createWorkersAiChat, type WorkersAiTextModel } from "../../../../../src/index";
 
 interface Env {
 	AI: Ai;
@@ -167,8 +164,7 @@ export default {
 							messages: [
 								{
 									role: "user",
-									content:
-										"What time is it? Use the get_current_time tool.",
+									content: "What time is it? Use the get_current_time tool.",
 								},
 							],
 							tools: [
@@ -188,9 +184,7 @@ export default {
 					);
 
 					// Extract tool call info from step 1
-					const toolEnd = step1Chunks.find(
-						(c: any) => c.type === "TOOL_CALL_END",
-					) as any;
+					const toolEnd = step1Chunks.find((c: any) => c.type === "TOOL_CALL_END") as any;
 
 					if (!toolEnd || !toolEnd.toolName) {
 						return jsonResponse({
@@ -206,8 +200,7 @@ export default {
 							messages: [
 								{
 									role: "user",
-									content:
-										"What time is it? Use the get_current_time tool.",
+									content: "What time is it? Use the get_current_time tool.",
 								},
 								{
 									role: "assistant",
@@ -217,9 +210,7 @@ export default {
 											id: toolEnd.toolCallId,
 											function: {
 												name: toolEnd.toolName,
-												arguments: JSON.stringify(
-													toolEnd.input || {},
-												),
+												arguments: JSON.stringify(toolEnd.input || {}),
 											},
 										},
 									],

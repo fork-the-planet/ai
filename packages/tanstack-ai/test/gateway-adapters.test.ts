@@ -1,5 +1,8 @@
 import { describe, expect, it, vi, beforeEach, type Mock } from "vitest";
-import type { AiGatewayBindingConfig, AiGatewayCredentialsConfig } from "../src/utils/create-fetcher";
+import type {
+	AiGatewayBindingConfig,
+	AiGatewayCredentialsConfig,
+} from "../src/utils/create-fetcher";
 
 // ---------------------------------------------------------------------------
 // Mock upstream adapter classes — capture constructor args for assertions.
@@ -405,9 +408,7 @@ describe("gateway fetch integration", () => {
 
 			expect(mockFetch).toHaveBeenCalledOnce();
 			const [url] = mockFetch.mock.calls[0];
-			expect(url).toBe(
-				"https://gateway.ai.cloudflare.com/v1/test-account/test-gateway",
-			);
+			expect(url).toBe("https://gateway.ai.cloudflare.com/v1/test-account/test-gateway");
 		} finally {
 			globalThis.fetch = originalFetch;
 		}

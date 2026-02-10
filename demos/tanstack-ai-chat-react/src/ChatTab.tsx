@@ -75,7 +75,10 @@ type ProviderId = keyof typeof PROVIDERS;
 function ChatView({
 	selectedProvider,
 	workersAiModel,
-}: { selectedProvider: ProviderId; workersAiModel: string }) {
+}: {
+	selectedProvider: ProviderId;
+	workersAiModel: string;
+}) {
 	const provider = PROVIDERS[selectedProvider];
 	const { headers } = useConfig();
 
@@ -182,79 +185,83 @@ function ChatView({
 					</div>
 				) : (
 					<div className="space-y-4 pb-2">
-						{messages.filter((m) =>
-							// Hide messages with no visible content (only empty text parts)
-							m.parts.some((p) =>
-								p.type !== "text" || !!(p as { content?: string }).content,
-							),
-						).map((message) => (
-							<div
-								key={message.id}
-								className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-							>
+						{messages
+							.filter((m) =>
+								// Hide messages with no visible content (only empty text parts)
+								m.parts.some(
+									(p) =>
+										p.type !== "text" || !!(p as { content?: string }).content,
+								),
+							)
+							.map((message) => (
 								<div
-									className={`max-w-[85%] sm:max-w-[75%] rounded-2xl px-4 py-2.5 ${
-										message.role === "user"
-											? "bg-gray-900 text-white"
-											: "bg-white text-gray-900 border border-gray-200 shadow-sm"
-									}`}
+									key={message.id}
+									className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
 								>
-									<div className="space-y-1">
-										{message.parts.map((part, idx) => {
-											if (part.type === "text") {
-												// Skip empty text parts (e.g. from TEXT_MESSAGE_START before a tool call)
-												if (!(part as { content?: string }).content) return null;
-												return (
-													<div
-														key={`${message.id}-text-${idx}`}
-														className="text-sm leading-relaxed whitespace-pre-wrap break-words"
-													>
-														{part.content}
-													</div>
-												);
-											}
-											if (
-												part.type === "tool-call" ||
-												part.type === "tool-result"
-											) {
-												return (
-													<div
-														key={`${message.id}-tool-${idx}`}
-														className={`text-xs rounded-lg px-2.5 py-1.5 font-mono ${
-															message.role === "user"
-																? "bg-gray-800 text-gray-300"
-																: "bg-gray-50 text-gray-500 border border-gray-100"
-														}`}
-													>
-														<span className="font-semibold">
-															{"toolName" in part
-																? (
-																		part as {
-																			toolName: string;
-																		}
-																	).toolName
-																: "tool"}
-														</span>
-														{"result" in part && (
-															<span className="ml-1.5 opacity-75">
-																{JSON.stringify(
-																	(
-																		part as {
-																			result?: unknown;
-																		}
-																	).result,
-																)}
+									<div
+										className={`max-w-[85%] sm:max-w-[75%] rounded-2xl px-4 py-2.5 ${
+											message.role === "user"
+												? "bg-gray-900 text-white"
+												: "bg-white text-gray-900 border border-gray-200 shadow-sm"
+										}`}
+									>
+										<div className="space-y-1">
+											{message.parts.map((part, idx) => {
+												if (part.type === "text") {
+													// Skip empty text parts (e.g. from TEXT_MESSAGE_START before a tool call)
+													if (!(part as { content?: string }).content)
+														return null;
+													return (
+														<div
+															key={`${message.id}-text-${idx}`}
+															className="text-sm leading-relaxed whitespace-pre-wrap break-words"
+														>
+															{part.content}
+														</div>
+													);
+												}
+												if (
+													part.type === "tool-call" ||
+													part.type === "tool-result"
+												) {
+													return (
+														<div
+															key={`${message.id}-tool-${idx}`}
+															className={`text-xs rounded-lg px-2.5 py-1.5 font-mono ${
+																message.role === "user"
+																	? "bg-gray-800 text-gray-300"
+																	: "bg-gray-50 text-gray-500 border border-gray-100"
+															}`}
+														>
+															<span className="font-semibold">
+																{"toolName" in part
+																	? (
+																			part as {
+																				toolName: string;
+																			}
+																		).toolName
+																	: "tool"}
 															</span>
-														)}
-													</div>
-												);
-											}
-											return null;
-										})}
+															{"result" in part && (
+																<span className="ml-1.5 opacity-75">
+																	{JSON.stringify(
+																		(
+																			part as {
+																				result?: unknown;
+																			}
+																		).result,
+																	)}
+																</span>
+															)}
+														</div>
+													);
+												}
+												return null;
+											})}
+										</div>
 									</div>
 								</div>
-							</div>
-						))}
+							))}
 						{isLoading && messages[messages.length - 1]?.role === "user" && (
 							<div className="flex justify-start">
 								<div className="bg-white border border-gray-200 shadow-sm rounded-2xl px-4 py-3">

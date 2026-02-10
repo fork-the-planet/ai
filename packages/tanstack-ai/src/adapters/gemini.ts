@@ -12,7 +12,10 @@ import {
 import type { AnyTextAdapter } from "@tanstack/ai";
 import type { AiGatewayCredentialsConfig } from "../utils/create-fetcher";
 
-/** Gemini-specific gateway config (credentials only, no binding support). */
+/**
+ * Gemini-specific gateway config (credentials only, no binding support).
+ * See {@link https://github.com/googleapis/js-genai/issues/999 | googleapis/js-genai#999}.
+ */
 export type GeminiGatewayConfig = AiGatewayCredentialsConfig;
 
 /**
@@ -22,8 +25,19 @@ export type GeminiGatewayConfig = AiGatewayCredentialsConfig;
  *
  * The Google GenAI SDK doesn't support a custom `fetch` override,
  * so we set the baseUrl to the AI Gateway endpoint for Google AI Studio.
+ *
+ * Tracking issue: https://github.com/googleapis/js-genai/issues/999
  */
 function buildGeminiGatewayConfig(config: GeminiGatewayConfig) {
+	// Runtime guard: catch binding configs that bypass TypeScript (JS callers, `as any`, etc.)
+	if ("binding" in config) {
+		throw new Error(
+			"Gemini adapters do not support binding config. " +
+				"The Google GenAI SDK does not accept a custom fetch function, so only " +
+				"credential-based config ({ accountId, gatewayId }) is supported. " +
+				"See https://github.com/googleapis/js-genai/issues/999",
+		);
+	}
 	return {
 		apiKey: config.apiKey ?? "unused",
 		httpOptions: {
@@ -41,16 +55,21 @@ export type GeminiChatModel = GeminiTextModel;
 /**
  * Creates a Gemini adapter which uses Cloudflare AI Gateway.
  * Does not support the AI binding (Google GenAI SDK lacks custom fetch support).
+ * See {@link https://github.com/googleapis/js-genai/issues/999 | googleapis/js-genai#999}.
  * @param model The Gemini model to use
  * @param config Configuration options (credentials only)
  */
-export function createGeminiChat(model: GeminiChatModel, config: GeminiGatewayConfig): AnyTextAdapter {
+export function createGeminiChat(
+	model: GeminiChatModel,
+	config: GeminiGatewayConfig,
+): AnyTextAdapter {
 	return new GeminiTextAdapter(buildGeminiGatewayConfig(config), model);
 }
 
 /**
  * Creates a Gemini Image adapter which uses Cloudflare AI Gateway.
  * Does not support the AI binding (Google GenAI SDK lacks custom fetch support).
+ * See {@link https://github.com/googleapis/js-genai/issues/999 | googleapis/js-genai#999}.
  * @param model The Gemini model to use
  * @param config Configuration options (credentials only)
  */
@@ -61,13 +80,11 @@ export function createGeminiImage(model: GeminiImageModel, config: GeminiGateway
 /**
  * Creates a Gemini Summarize adapter which uses Cloudflare AI Gateway.
  * Does not support the AI binding (Google GenAI SDK lacks custom fetch support).
+ * See {@link https://github.com/googleapis/js-genai/issues/999 | googleapis/js-genai#999}.
  * @param model The Gemini model to use
  * @param config Configuration options (credentials only)
  */
-export function createGeminiSummarize(
-	model: GeminiSummarizeModel,
-	config: GeminiGatewayConfig,
-) {
+export function createGeminiSummarize(model: GeminiSummarizeModel, config: GeminiGatewayConfig) {
 	return new GeminiSummarizeAdapter(buildGeminiGatewayConfig(config), model);
 }
 

@@ -118,7 +118,9 @@ const DEFAULT_WORKERS_AI_MODELS: Record<string, string> = {
 function getChatAdapter(path: string, creds: RequestCredentials): AnyTextAdapter | null {
 	const pk = creds.providerKeys;
 	// Allow frontend to override the Workers AI model via header
-	const waiModel = (creds.workersAiModel || DEFAULT_WORKERS_AI_MODELS[path] || "@cf/moonshotai/kimi-k2.5") as WorkersAiTextModel;
+	const waiModel = (creds.workersAiModel ||
+		DEFAULT_WORKERS_AI_MODELS[path] ||
+		"@cf/moonshotai/kimi-k2.5") as WorkersAiTextModel;
 
 	if (creds.useBinding) {
 		// Binding mode: use env.AI / env.AI.gateway() directly
@@ -185,7 +187,10 @@ function getImageAdapter(path: string, creds: RequestCredentials): AnyImageAdapt
 				return createOpenAiImage("gpt-image-1", gwBindingConfig(creds, pk.openai));
 			case "/ai/image/gemini":
 				// Gemini SDK can't use binding — fall back to REST via env vars
-				return createGeminiImage("gemini-3-pro-image-preview", gwRestConfig(creds, pk.gemini));
+				return createGeminiImage(
+					"gemini-3-pro-image-preview",
+					gwRestConfig(creds, pk.gemini),
+				);
 			case "/ai/image/grok":
 				return createGrokImage("grok-2-image-1212", gwBindingConfig(creds, pk.grok));
 			default:
@@ -205,10 +210,7 @@ function getImageAdapter(path: string, creds: RequestCredentials): AnyImageAdapt
 	}
 }
 
-function getSummarizeAdapter(
-	path: string,
-	creds: RequestCredentials,
-): AnySummarizeAdapter | null {
+function getSummarizeAdapter(path: string, creds: RequestCredentials): AnySummarizeAdapter | null {
 	const pk = creds.providerKeys;
 
 	if (creds.useBinding) {
@@ -216,7 +218,10 @@ function getSummarizeAdapter(
 			case "/ai/summarize/openai":
 				return createOpenAiSummarize("gpt-5.2", gwBindingConfig(creds, pk.openai));
 			case "/ai/summarize/anthropic":
-				return createAnthropicSummarize("claude-opus-4-6", gwBindingConfig(creds, pk.anthropic));
+				return createAnthropicSummarize(
+					"claude-opus-4-6",
+					gwBindingConfig(creds, pk.anthropic),
+				);
 			case "/ai/summarize/gemini":
 				// Gemini SDK can't use binding — fall back to REST via env vars
 				return createGeminiSummarize("gemini-2.0-flash", gwRestConfig(creds, pk.gemini));
@@ -281,7 +286,8 @@ const tools = [
 	})),
 	toolDefinition({
 		name: "web_scrape",
-		description: "Fetch and extract text content from a webpage URL. Only works with public HTTP/HTTPS URLs.",
+		description:
+			"Fetch and extract text content from a webpage URL. Only works with public HTTP/HTTPS URLs.",
 		inputSchema: z.object({ url: z.string().url() }),
 	}).server(async (args) => {
 		try {

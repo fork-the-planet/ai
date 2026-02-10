@@ -57,4 +57,10 @@ export function createGrokSummarize(model: GrokSummarizeModel, config: GrokGatew
 	);
 }
 
-export { GROK_CHAT_MODELS, GROK_IMAGE_MODELS, type GrokChatModel, type GrokImageModel, type GrokSummarizeModel };
+export {
+	GROK_CHAT_MODELS,
+	GROK_IMAGE_MODELS,
+	type GrokChatModel,
+	type GrokImageModel,
+	type GrokSummarizeModel,
+};

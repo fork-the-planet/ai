@@ -69,7 +69,15 @@ type TabId = keyof typeof TABS;
 function AppContent() {
 	const [activeTab, setActiveTab] = useState<TabId>("chat");
 	const [showSettings, setShowSettings] = useState(false);
-	const { config, setCloudflare, setProviderKey, setUseBinding, clearAll, isCloudflareConfigured, hasAnyProviderKey } = useConfig();
+	const {
+		config,
+		setCloudflare,
+		setProviderKey,
+		setUseBinding,
+		clearAll,
+		isCloudflareConfigured,
+		hasAnyProviderKey,
+	} = useConfig();
 	const isConfigured = config.useBinding || isCloudflareConfigured || hasAnyProviderKey;
 
 	return (
@@ -129,178 +137,202 @@ function AppContent() {
 						</button>
 					</div>
 
-				{/* Settings panel (collapsible) */}
-				{showSettings && (
-					<div className="mb-4 space-y-3">
-						{/* Connection mode toggle */}
-						<div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
-							<div className="flex items-center justify-between">
-								<div>
-									<p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-										Connection Mode
-									</p>
-									<p className="text-[11px] text-gray-500 mt-1 leading-relaxed">
-										{config.useBinding
-											? "Using env.AI binding directly. Works in local dev (wrangler) and deployed Workers."
-											: "Using REST credentials to connect to AI Gateway."}
-									</p>
-								</div>
-								<div className="flex items-center gap-2 ml-4 shrink-0">
-									<span className={`text-[10px] font-medium ${config.useBinding ? "text-gray-400" : "text-gray-700"}`}>
-										REST
-									</span>
-									<button
-										type="button"
-										role="switch"
-										aria-checked={config.useBinding}
-										onClick={() => setUseBinding(!config.useBinding)}
-										className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 ${
-											config.useBinding ? "bg-emerald-500" : "bg-gray-300"
-										}`}
-									>
+					{/* Settings panel (collapsible) */}
+					{showSettings && (
+						<div className="mb-4 space-y-3">
+							{/* Connection mode toggle */}
+							<div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+								<div className="flex items-center justify-between">
+									<div>
+										<p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+											Connection Mode
+										</p>
+										<p className="text-[11px] text-gray-500 mt-1 leading-relaxed">
+											{config.useBinding
+												? "Using env.AI binding directly. Works in local dev (wrangler) and deployed Workers."
+												: "Using REST credentials to connect to AI Gateway."}
+										</p>
+									</div>
+									<div className="flex items-center gap-2 ml-4 shrink-0">
 										<span
-											className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-												config.useBinding ? "translate-x-4" : "translate-x-0"
+											className={`text-[10px] font-medium ${config.useBinding ? "text-gray-400" : "text-gray-700"}`}
+										>
+											REST
+										</span>
+										<button
+											type="button"
+											role="switch"
+											aria-checked={config.useBinding}
+											onClick={() => setUseBinding(!config.useBinding)}
+											className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 ${
+												config.useBinding ? "bg-emerald-500" : "bg-gray-300"
 											}`}
-										/>
-									</button>
-									<span className={`text-[10px] font-medium ${config.useBinding ? "text-gray-700" : "text-gray-400"}`}>
-										Binding
-									</span>
+										>
+											<span
+												className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+													config.useBinding
+														? "translate-x-4"
+														: "translate-x-0"
+												}`}
+											/>
+										</button>
+										<span
+											className={`text-[10px] font-medium ${config.useBinding ? "text-gray-700" : "text-gray-400"}`}
+										>
+											Binding
+										</span>
+									</div>
 								</div>
 							</div>
-						</div>
 
-						{/* Provider API Keys */}
-						<div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
-							<div className="flex items-center justify-between mb-3">
-								<p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-									Provider API Keys
+							{/* Provider API Keys */}
+							<div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+								<div className="flex items-center justify-between mb-3">
+									<p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+										Provider API Keys
+									</p>
+									{(hasAnyProviderKey || isCloudflareConfigured) && (
+										<button
+											type="button"
+											onClick={clearAll}
+											className="text-[10px] text-red-500 hover:text-red-700 font-medium"
+										>
+											Clear all
+										</button>
+									)}
+								</div>
+								<p className="text-[11px] text-gray-500 mb-3 leading-relaxed">
+									Optional if your AI Gateway has provider keys configured via
+									BYOK. Otherwise, enter keys for the providers you want to test.
+									Keys are stored in your browser only.
 								</p>
-								{(hasAnyProviderKey || isCloudflareConfigured) && (
-									<button
-										type="button"
-										onClick={clearAll}
-										className="text-[10px] text-red-500 hover:text-red-700 font-medium"
-									>
-										Clear all
-									</button>
-								)}
-							</div>
-							<p className="text-[11px] text-gray-500 mb-3 leading-relaxed">
-								Optional if your AI Gateway has provider keys configured via BYOK.
-								Otherwise, enter keys for the providers you want to test.
-								Keys are stored in your browser only.
-							</p>
-							<div className="grid grid-cols-2 gap-2.5">
-								{([
-									{ key: "openai" as const, label: "OpenAI", placeholder: "sk-..." },
-									{ key: "anthropic" as const, label: "Anthropic", placeholder: "sk-ant-..." },
-									{ key: "gemini" as const, label: "Gemini", placeholder: "AI..." },
-									{ key: "grok" as const, label: "Grok", placeholder: "xai-..." },
-								]).map(({ key, label, placeholder }) => (
-									<div key={key}>
-										<label
-											htmlFor={`cfg-${key}`}
-											className="block text-[10px] font-medium text-gray-600 mb-0.5"
-										>
-											{label}
-										</label>
-										<input
-											id={`cfg-${key}`}
-											type="password"
-											value={config.providerKeys[key]}
-											onChange={(e) => setProviderKey(key, e.target.value)}
-											placeholder={placeholder}
-											className="w-full px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-										/>
-									</div>
-								))}
-							</div>
-						</div>
-
-						{/* Cloudflare Credentials */}
-						<div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
-							<p className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-3">
-								{config.useBinding ? "AI Gateway" : "Cloudflare Credentials"}
-							</p>
-							<p className="text-[11px] text-gray-500 mb-3 leading-relaxed">
-								{config.useBinding
-									? "Specify the gateway ID for env.AI.gateway(). Falls back to CLOUDFLARE_AI_GATEWAY_ID env var."
-									: "Required for REST mode. Without these, the demo falls back to server-configured environment variables."}
-							</p>
-							<div className="grid gap-2.5">
-								{!config.useBinding && (
-									<div>
-										<label
-											htmlFor="cfg-account"
-											className="block text-[10px] font-medium text-gray-600 mb-0.5"
-										>
-											Account ID
-										</label>
-										<input
-											id="cfg-account"
-											type="text"
-											value={config.cloudflare.accountId}
-											onChange={(e) =>
-												setCloudflare({
-													...config.cloudflare,
-													accountId: e.target.value,
-												})
-											}
-											placeholder="e.g. abc123def456..."
-											className="w-full px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-										/>
-									</div>
-								)}
-								<div>
-									<label
-										htmlFor="cfg-gateway"
-										className="block text-[10px] font-medium text-gray-600 mb-0.5"
-									>
-										AI Gateway ID
-									</label>
-									<input
-										id="cfg-gateway"
-										type="text"
-										value={config.cloudflare.gatewayId}
-										onChange={(e) =>
-											setCloudflare({
-												...config.cloudflare,
-												gatewayId: e.target.value,
-											})
-										}
-										placeholder="default"
-										className="w-full px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-									/>
+								<div className="grid grid-cols-2 gap-2.5">
+									{[
+										{
+											key: "openai" as const,
+											label: "OpenAI",
+											placeholder: "sk-...",
+										},
+										{
+											key: "anthropic" as const,
+											label: "Anthropic",
+											placeholder: "sk-ant-...",
+										},
+										{
+											key: "gemini" as const,
+											label: "Gemini",
+											placeholder: "AI...",
+										},
+										{
+											key: "grok" as const,
+											label: "Grok",
+											placeholder: "xai-...",
+										},
+									].map(({ key, label, placeholder }) => (
+										<div key={key}>
+											<label
+												htmlFor={`cfg-${key}`}
+												className="block text-[10px] font-medium text-gray-600 mb-0.5"
+											>
+												{label}
+											</label>
+											<input
+												id={`cfg-${key}`}
+												type="password"
+												value={config.providerKeys[key]}
+												onChange={(e) =>
+													setProviderKey(key, e.target.value)
+												}
+												placeholder={placeholder}
+												className="w-full px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+											/>
+										</div>
+									))}
 								</div>
-								{!config.useBinding && (
+							</div>
+
+							{/* Cloudflare Credentials */}
+							<div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+								<p className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-3">
+									{config.useBinding ? "AI Gateway" : "Cloudflare Credentials"}
+								</p>
+								<p className="text-[11px] text-gray-500 mb-3 leading-relaxed">
+									{config.useBinding
+										? "Specify the gateway ID for env.AI.gateway(). Falls back to CLOUDFLARE_AI_GATEWAY_ID env var."
+										: "Required for REST mode. Without these, the demo falls back to server-configured environment variables."}
+								</p>
+								<div className="grid gap-2.5">
+									{!config.useBinding && (
+										<div>
+											<label
+												htmlFor="cfg-account"
+												className="block text-[10px] font-medium text-gray-600 mb-0.5"
+											>
+												Account ID
+											</label>
+											<input
+												id="cfg-account"
+												type="text"
+												value={config.cloudflare.accountId}
+												onChange={(e) =>
+													setCloudflare({
+														...config.cloudflare,
+														accountId: e.target.value,
+													})
+												}
+												placeholder="e.g. abc123def456..."
+												className="w-full px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+											/>
+										</div>
+									)}
 									<div>
 										<label
-											htmlFor="cfg-token"
+											htmlFor="cfg-gateway"
 											className="block text-[10px] font-medium text-gray-600 mb-0.5"
 										>
-											Cloudflare API Token
+											AI Gateway ID
 										</label>
 										<input
-											id="cfg-token"
-											type="password"
-											value={config.cloudflare.apiToken}
+											id="cfg-gateway"
+											type="text"
+											value={config.cloudflare.gatewayId}
 											onChange={(e) =>
 												setCloudflare({
 													...config.cloudflare,
-													apiToken: e.target.value,
+													gatewayId: e.target.value,
 												})
 											}
-											placeholder="Your Cloudflare API token"
+											placeholder="default"
 											className="w-full px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
 										/>
 									</div>
-								)}
+									{!config.useBinding && (
+										<div>
+											<label
+												htmlFor="cfg-token"
+												className="block text-[10px] font-medium text-gray-600 mb-0.5"
+											>
+												Cloudflare API Token
+											</label>
+											<input
+												id="cfg-token"
+												type="password"
+												value={config.cloudflare.apiToken}
+												onChange={(e) =>
+													setCloudflare({
+														...config.cloudflare,
+														apiToken: e.target.value,
+													})
+												}
+												placeholder="Your Cloudflare API token"
+												className="w-full px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+											/>
+										</div>
+									)}
+								</div>
 							</div>
 						</div>
-					</div>
-				)}
+					)}
 
 					{/* Tab bar */}
 					<div className="flex border-b border-gray-200 -mb-px">
