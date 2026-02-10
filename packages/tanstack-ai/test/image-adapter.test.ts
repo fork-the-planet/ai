@@ -12,16 +12,18 @@ describe("WorkersAiImageAdapter", () => {
 			.fn()
 			.mockResolvedValue(new Response("Model not found", { status: 404 })) as any;
 
-		const adapter = new WorkersAiImageAdapter(
-			"@cf/stabilityai/stable-diffusion-xl-base-1.0" as any,
-			{ accountId: "abc", apiKey: "key" },
-		);
+		try {
+			const adapter = new WorkersAiImageAdapter(
+				"@cf/stabilityai/stable-diffusion-xl-base-1.0" as any,
+				{ accountId: "abc", apiKey: "key" },
+			);
 
-		await expect(adapter.generate("a cat")).rejects.toThrow(
-			/Workers AI image request failed \(404\)/,
-		);
-
-		globalThis.fetch = originalFetch;
+			await expect(adapter.generate("a cat")).rejects.toThrow(
+				/Workers AI image request failed \(404\)/,
+			);
+		} finally {
+			globalThis.fetch = originalFetch;
+		}
 	});
 
 	it("generateViaBinding: handles Uint8Array result", async () => {

@@ -363,7 +363,9 @@ describe("message building (via chatStream)", () => {
 		);
 
 		const toolMsg = messages.find((m: any) => m.role === "tool");
-		expect(toolMsg.tool_call_id).toBe("");
+		// When toolCallId is missing, the adapter generates a fallback ID (tool_<uuid>),
+		// which then gets sanitized by the binding shim (strips underscore, truncates to 9 chars).
+		expect(toolMsg.tool_call_id).toMatch(/^tool[a-f0-9]{5}$/);
 	});
 });
 

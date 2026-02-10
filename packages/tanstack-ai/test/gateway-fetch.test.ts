@@ -234,9 +234,9 @@ describe("createGatewayFetch", () => {
 				body: JSON.stringify({}),
 			});
 
-			const request = mockBinding.run.mock.calls[0][0];
-			expect(request.headers["cf-aig-skip-cache"]).toBe(true);
-		});
+		const request = mockBinding.run.mock.calls[0][0];
+		expect(request.headers["cf-aig-skip-cache"]).toBe("true");
+	});
 
 		it("should set cf-aig-cache-ttl when cacheTtl is provided", async () => {
 			const config: AiGatewayAdapterConfig = {
@@ -251,7 +251,7 @@ describe("createGatewayFetch", () => {
 			});
 
 			const request = mockBinding.run.mock.calls[0][0];
-			expect(request.headers["cf-aig-cache-ttl"]).toBe(3600);
+			expect(request.headers["cf-aig-cache-ttl"]).toBe("3600");
 		});
 
 		it("should set cf-aig-cache-key when customCacheKey is provided", async () => {

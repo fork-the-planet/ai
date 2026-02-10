@@ -490,6 +490,59 @@ describe("WorkersAiTextAdapter.structuredOutput", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Error handling
+// ---------------------------------------------------------------------------
+
+describe("WorkersAiTextAdapter error handling", () => {
+	it("should emit RUN_ERROR when binding.run throws", async () => {
+		const binding = {
+			run: vi.fn().mockRejectedValue(new Error("Connection refused")),
+			gateway: () => ({ run: () => Promise.resolve(new Response("ok")) }),
+		};
+		const adapter = new WorkersAiTextAdapter(MODEL, { binding });
+
+		const chunks = await collectChunks(
+			adapter.chatStream({
+				model: MODEL,
+				messages: [{ role: "user", content: "Hi" }],
+			} as any),
+		);
+
+		const runStarted = chunks.find((c: any) => c.type === "RUN_STARTED");
+		const runError = chunks.find((c: any) => c.type === "RUN_ERROR");
+
+		expect(runStarted).toBeDefined();
+		expect(runError).toBeDefined();
+		// The OpenAI SDK wraps binding errors, so we just verify a RUN_ERROR is emitted
+		// with a non-empty message.
+		expect(typeof runError.error.message).toBe("string");
+		expect(runError.error.message.length).toBeGreaterThan(0);
+	});
+
+	it("should not emit RUN_FINISHED when binding.run throws", async () => {
+		const binding = {
+			run: vi.fn().mockRejectedValue(new Error("kaboom")),
+			gateway: () => ({ run: () => Promise.resolve(new Response("ok")) }),
+		};
+		const adapter = new WorkersAiTextAdapter(MODEL, { binding });
+
+		const chunks = await collectChunks(
+			adapter.chatStream({
+				model: MODEL,
+				messages: [{ role: "user", content: "Hi" }],
+			} as any),
+		);
+
+		const runFinished = chunks.find((c: any) => c.type === "RUN_FINISHED");
+		const runError = chunks.find((c: any) => c.type === "RUN_ERROR");
+
+		// Should emit RUN_ERROR but NOT RUN_FINISHED
+		expect(runError).toBeDefined();
+		expect(runFinished).toBeUndefined();
+	});
+});
+
+// ---------------------------------------------------------------------------
 // Config modes (constructor behavior)
 // ---------------------------------------------------------------------------
 

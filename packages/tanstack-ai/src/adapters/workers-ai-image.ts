@@ -137,6 +137,13 @@ export class WorkersAiImageAdapter {
 			}),
 		});
 
+		if (!response.ok) {
+			const errorText = await response.text();
+			throw new Error(
+				`Workers AI image gateway request failed (${response.status}): ${errorText}`,
+			);
+		}
+
 		const buffer = await response.arrayBuffer();
 		return { image: uint8ArrayToBase64(new Uint8Array(buffer)) };
 	}

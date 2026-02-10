@@ -281,10 +281,29 @@ const tools = [
 	})),
 	toolDefinition({
 		name: "web_scrape",
-		description: "Fetch and extract text content from a webpage URL",
+		description: "Fetch and extract text content from a webpage URL. Only works with public HTTP/HTTPS URLs.",
 		inputSchema: z.object({ url: z.string().url() }),
 	}).server(async (args) => {
 		try {
+			// Only allow http(s) URLs to prevent SSRF against internal services
+			const parsed = new URL(args.url);
+			if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+				return { url: args.url, error: "Only http and https URLs are allowed" };
+			}
+			// Block private/internal IPs (cloud metadata, localhost, RFC1918)
+			const hostname = parsed.hostname.toLowerCase();
+			if (
+				hostname === "localhost" ||
+				hostname.startsWith("127.") ||
+				hostname.startsWith("10.") ||
+				hostname.startsWith("192.168.") ||
+				hostname === "169.254.169.254" ||
+				hostname.startsWith("172.") ||
+				hostname === "[::1]" ||
+				hostname === "0.0.0.0"
+			) {
+				return { url: args.url, error: "Private/internal URLs are not allowed" };
+			}
 			const response = await fetch(args.url);
 			const html = await response.text();
 			const text = html
@@ -330,22 +349,29 @@ export default {
 		// --- Chat ---
 		const chatAdapter = getChatAdapter(url.pathname, creds);
 		if (chatAdapter) {
-			const body = (await request.json()) as {
-				messages: unknown[];
-				data: { conversationId?: string };
-			};
+			try {
+				const body = (await request.json()) as {
+					messages: unknown[];
+					data: { conversationId?: string };
+				};
 
-			const response = chat({
-				adapter: chatAdapter,
-				stream: true,
-				conversationId: body.data?.conversationId ?? crypto.randomUUID(),
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				messages: body.messages as any,
-				temperature: 0.6,
-				tools,
-			});
+				const response = chat({
+					adapter: chatAdapter,
+					stream: true,
+					conversationId: body.data?.conversationId ?? crypto.randomUUID(),
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					messages: body.messages as any,
+					temperature: 0.6,
+					tools,
+				});
 
-			return toHttpResponse(response);
+				return toHttpResponse(response);
+			} catch (error) {
+				return Response.json(
+					{ error: error instanceof Error ? error.message : String(error) },
+					{ status: 500 },
+				);
+			}
 		}
 
 		// --- Image generation ---

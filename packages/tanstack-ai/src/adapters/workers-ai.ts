@@ -128,7 +128,7 @@ function buildOpenAIMessages(
 			}
 			openAIMessages.push({
 				role: "tool",
-				tool_call_id: message.toolCallId || "",
+				tool_call_id: message.toolCallId || `tool_${crypto.randomUUID().slice(0, 8)}`,
 				content: toolContent,
 			});
 		}
@@ -201,7 +201,7 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 
 		try {
 			const stream = await this.client.chat.completions.create({
-				model: model || this.model,
+				model: model ?? this.model,
 				messages: openAIMessages,
 				tools: openAITools,
 				temperature,
@@ -365,23 +365,26 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 				}
 			}
 		} catch (error) {
-			const err = error as Error & { code?: string };
+			const message =
+				error instanceof Error ? error.message : String(error);
+			const code =
+				error instanceof Error ? (error as Error & { code?: string }).code : undefined;
 			if (!hasEmittedRunStarted) {
 				yield {
 					type: "RUN_STARTED",
 					runId,
-					model: model || this.model,
+					model: model ?? this.model,
 					timestamp,
 				} satisfies StreamChunk;
 			}
 			yield {
 				type: "RUN_ERROR",
 				runId,
-				model: model || this.model,
+				model: model ?? this.model,
 				timestamp,
 				error: {
-					message: err.message || "Unknown error",
-					code: err.code,
+					message: message || "Unknown error",
+					code,
 				},
 			} satisfies StreamChunk;
 		}
@@ -398,7 +401,7 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 		});
 
 		const response = await this.client.chat.completions.create({
-			model: model || this.model,
+			model: model ?? this.model,
 			messages: openAIMessages,
 			temperature,
 			stream: false,

@@ -9,6 +9,15 @@ import { createGatewayFetch, type AiGatewayAdapterConfig } from "../utils/create
 
 export type AnthropicGatewayConfig = AiGatewayAdapterConfig & { anthropicVersion?: string };
 
+function buildAnthropicConfig(config: AnthropicGatewayConfig) {
+	return {
+		apiKey: config.apiKey ?? "unused",
+		fetch: createGatewayFetch("anthropic", config, {
+			"anthropic-version": config.anthropicVersion ?? "2023-06-01",
+		}),
+	};
+}
+
 /**
  * Creates an Anthropic chat adapter which uses Cloudflare AI Gateway.
  * Supports both binding and credential-based configurations.
@@ -17,15 +26,7 @@ export type AnthropicGatewayConfig = AiGatewayAdapterConfig & { anthropicVersion
  * we can inject the gateway fetch directly — no subclassing needed.
  */
 export function createAnthropicChat(model: AnthropicChatModel, config: AnthropicGatewayConfig): AnyTextAdapter {
-	return new AnthropicTextAdapter(
-		{
-			apiKey: config.apiKey ?? "unused",
-			fetch: createGatewayFetch("anthropic", config, {
-				"anthropic-version": config.anthropicVersion ?? "2023-06-01",
-			}),
-		},
-		model,
-	);
+	return new AnthropicTextAdapter(buildAnthropicConfig(config), model);
 }
 
 /**
@@ -36,15 +37,7 @@ export function createAnthropicSummarize(
 	model: AnthropicChatModel,
 	config: AnthropicGatewayConfig,
 ) {
-	return new AnthropicSummarizeAdapter(
-		{
-			apiKey: config.apiKey ?? "unused",
-			fetch: createGatewayFetch("anthropic", config, {
-				"anthropic-version": config.anthropicVersion ?? "2023-06-01",
-			}),
-		},
-		model,
-	);
+	return new AnthropicSummarizeAdapter(buildAnthropicConfig(config), model);
 }
 
 export { ANTHROPIC_MODELS, type AnthropicChatModel };

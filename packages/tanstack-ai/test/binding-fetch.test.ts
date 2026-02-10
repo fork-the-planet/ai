@@ -431,6 +431,73 @@ describe("createWorkersAiBindingFetch", () => {
 		expect(firstTc.function.name).toBe("calculator");
 	});
 
+	it("should pass through OpenAI-format streams (Qwen3/Kimi-style binding output)", async () => {
+		// Some models (Qwen3, Kimi K2.5) stream in OpenAI-compatible format through
+		// the binding, with `choices[].delta.content` instead of `response`.
+		// The transformer should detect this and pass through as-is.
+		const encoder = new TextEncoder();
+		const stream = new ReadableStream({
+			start(controller) {
+				controller.enqueue(
+					encoder.encode(
+						'data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"thinking..."},"finish_reason":null}]}\n\n',
+					),
+				);
+				controller.enqueue(
+					encoder.encode(
+						'data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Hello"},"finish_reason":null}]}\n\n',
+					),
+				);
+				controller.enqueue(
+					encoder.encode(
+						'data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":" world"},"finish_reason":null}]}\n\n',
+					),
+				);
+				controller.enqueue(
+					encoder.encode(
+						'data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}\n\n',
+					),
+				);
+				controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+				controller.close();
+			},
+		});
+
+		const binding = mockBinding(vi.fn().mockResolvedValue(stream));
+		const fetcher = createWorkersAiBindingFetch(binding);
+
+		const response = await fetcher("https://api.openai.com/v1/chat/completions", {
+			method: "POST",
+			body: JSON.stringify({
+				model: "@cf/qwen/qwen3-30b-a3b-fp8",
+				messages: [{ role: "user", content: "Hi" }],
+				stream: true,
+			}),
+		});
+
+		const reader = response.body!.getReader();
+		const decoder = new TextDecoder();
+		let text = "";
+		while (true) {
+			const { done, value } = await reader.read();
+			if (done) break;
+			text += decoder.decode(value, { stream: true });
+		}
+
+		// Should preserve the original OpenAI-format content
+		expect(text).toContain('"content":"Hello"');
+		expect(text).toContain('"content":" world"');
+		expect(text).toContain('"reasoning_content":"thinking..."');
+		// Should include the original finish reason from the stream
+		expect(text).toContain('"finish_reason":"stop"');
+		// Should NOT contain a workers-ai-* id (passthrough keeps original id)
+		expect(text).toContain('"id":"chatcmpl-abc"');
+		expect(text).not.toContain("workers-ai-");
+		// Should have exactly one [DONE]
+		const doneCount = (text.match(/data: \[DONE\]/g) || []).length;
+		expect(doneCount).toBe(1);
+	});
+
 	it("should return 400 when no body is provided", async () => {
 		const binding = mockBinding(vi.fn());
 		const fetcher = createWorkersAiBindingFetch(binding);

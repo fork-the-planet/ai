@@ -452,8 +452,8 @@ describe("gateway fetch integration", () => {
 			expect(mockFetch).toHaveBeenCalledOnce();
 			const [, init] = mockFetch.mock.calls[0];
 			const body = JSON.parse(init.body);
-			expect(body.headers["cf-aig-skip-cache"]).toBe(true);
-			expect(body.headers["cf-aig-cache-ttl"]).toBe(300);
+			expect(body.headers["cf-aig-skip-cache"]).toBe("true");
+			expect(body.headers["cf-aig-cache-ttl"]).toBe("300");
 			expect(body.headers["cf-aig-cache-key"]).toBe("my-key");
 			expect(body.headers["cf-aig-metadata"]).toBe(JSON.stringify({ env: "test" }));
 		} finally {

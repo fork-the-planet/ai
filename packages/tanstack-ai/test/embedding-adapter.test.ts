@@ -57,15 +57,17 @@ describe("WorkersAiEmbeddingAdapter", () => {
 			.fn()
 			.mockResolvedValue(new Response("Unauthorized", { status: 401 })) as any;
 
-		const adapter = new WorkersAiEmbeddingAdapter("@cf/baai/bge-base-en-v1.5" as any, {
-			accountId: "abc",
-			apiKey: "bad-key",
-		});
+		try {
+			const adapter = new WorkersAiEmbeddingAdapter("@cf/baai/bge-base-en-v1.5" as any, {
+				accountId: "abc",
+				apiKey: "bad-key",
+			});
 
-		await expect(adapter.embed(["hello"])).rejects.toThrow(
-			/Workers AI embedding request failed \(401\)/,
-		);
-
-		globalThis.fetch = originalFetch;
+			await expect(adapter.embed(["hello"])).rejects.toThrow(
+				/Workers AI embedding request failed \(401\)/,
+			);
+		} finally {
+			globalThis.fetch = originalFetch;
+		}
 	});
 });

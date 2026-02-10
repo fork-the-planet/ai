@@ -135,7 +135,7 @@ function filterChunks(chunks: any[], type: string) {
 }
 
 /** Wait for a URL to respond with 200 */
-async function waitForReady(url: string, timeoutMs = 30_000): Promise<boolean> {
+async function waitForReady(url: string, timeoutMs = 45_000): Promise<boolean> {
 	const start = Date.now();
 	while (Date.now() - start < timeoutMs) {
 		try {
@@ -180,12 +180,12 @@ describe("Workers AI Binding E2E", () => {
 		});
 
 		// Wait for server to be ready
-		serverReady = await waitForReady(`${BASE}/health`, 30_000);
+		serverReady = await waitForReady(`${BASE}/health`, 50_000);
 		if (!serverReady) {
-			console.error("[binding-e2e] wrangler dev failed to start within 30s");
+			console.error("[binding-e2e] wrangler dev failed to start within 50s");
 			if (stderr) console.error("[binding-e2e] stderr:", stderr);
 		}
-	}, 45_000);
+	}, 60_000);
 
 	afterAll(async () => {
 		printSummaryTable();

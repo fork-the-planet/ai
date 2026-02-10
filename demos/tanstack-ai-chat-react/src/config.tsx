@@ -38,7 +38,7 @@ interface ConfigContextValue {
 }
 
 // ---------------------------------------------------------------------------
-// LocalStorage helpers
+// SessionStorage helpers
 // ---------------------------------------------------------------------------
 
 const STORAGE_KEY = "cf-tanstack-ai-config-v2";
@@ -49,7 +49,8 @@ const EMPTY_CONFIG: DemoConfig = { cloudflare: EMPTY_CLOUDFLARE, providerKeys: E
 
 function loadConfig(): DemoConfig {
 	try {
-		const raw = localStorage.getItem(STORAGE_KEY);
+		// Use sessionStorage so API keys are not persisted beyond the browser tab.
+		const raw = sessionStorage.getItem(STORAGE_KEY);
 		if (raw) {
 			const parsed = JSON.parse(raw) as Partial<DemoConfig>;
 			return {
@@ -75,7 +76,7 @@ function loadConfig(): DemoConfig {
 
 function saveConfig(config: DemoConfig) {
 	try {
-		localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+		sessionStorage.setItem(STORAGE_KEY, JSON.stringify(config));
 	} catch {
 		// Ignore storage errors (e.g. private browsing)
 	}

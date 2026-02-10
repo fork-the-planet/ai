@@ -156,14 +156,14 @@ export function createGatewayFetch(
 			}
 		}
 
-		const cacheHeaders: Record<string, string | number | boolean> = {};
+		const cacheHeaders: Record<string, string> = {};
 
 		if ("skipCache" in config && config.skipCache) {
-			cacheHeaders["cf-aig-skip-cache"] = true;
+			cacheHeaders["cf-aig-skip-cache"] = "true";
 		}
 
 		if (typeof config.cacheTtl === "number") {
-			cacheHeaders["cf-aig-cache-ttl"] = config.cacheTtl;
+			cacheHeaders["cf-aig-cache-ttl"] = String(config.cacheTtl);
 		}
 
 		if (typeof config.customCacheKey === "string") {
@@ -182,7 +182,7 @@ export function createGatewayFetch(
 				...headers,
 				...cacheHeaders,
 				"Content-Type": "application/json",
-			} as Record<string, string>,
+			},
 			query,
 		};
 
@@ -267,6 +267,14 @@ function normalizeMessagesForBinding(
 /**
  * Strip non-alphanumeric characters and ensure the ID is exactly 9 chars,
  * matching Workers AI's `[a-zA-Z0-9]{9}` validation pattern.
+ *
+ * **Why this exists:** The Workers AI binding validates `tool_call_id` with
+ * a strict `[a-zA-Z0-9]{9}` regex, but it *generates* IDs like
+ * `chatcmpl-tool-875d3ec6179676ae` (with dashes, >9 chars). Those IDs are
+ * then rejected when sent back in a follow-up request. This is a known
+ * Workers AI issue — see workers-ai.md (Issue 3). Once the Workers AI team
+ * fixes the validation, this function becomes an idempotent no-op for
+ * IDs that already match the pattern.
  */
 function sanitizeToolCallId(id: string): string {
 	const alphanumeric = id.replace(/[^a-zA-Z0-9]/g, "");
@@ -543,8 +551,9 @@ function transformWorkersAiStream(
 								);
 							}
 						}
-					} catch {
-						// Skip malformed SSE events
+					} catch (e) {
+						// Log malformed SSE events for debugging; don't break the stream.
+						console.warn("[workers-ai stream] failed to parse SSE event:", data, e);
 					}
 				}
 			},
