@@ -1,6 +1,6 @@
 import { TextEncoder } from "node:util";
 import { streamText } from "ai";
-import { type DefaultBodyType, HttpResponse, http } from "msw";
+import { type DefaultBodyType, http } from "msw";
 import { setupServer } from "msw/node";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod/v4";

@@ -24,6 +24,7 @@ export default function App() {
 			<nav className="tabs">
 				{tabs.map((tab) => (
 					<button
+						type="button"
 						key={tab.id}
 						className={activeTab === tab.id ? "active" : ""}
 						onClick={() => setActiveTab(tab.id)}
