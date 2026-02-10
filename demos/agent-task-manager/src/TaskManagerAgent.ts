@@ -1,5 +1,5 @@
 import { Agent } from "agents";
-import { generateObject } from "ai";
+import { generateText, Output } from "ai";
 import { createWorkersAI } from "workers-ai-provider";
 import z from "zod";
 
@@ -26,12 +26,8 @@ export class TaskManagerAgent extends Agent<Env, TaskManagerState> {
 		const workersai = createWorkersAI({ binding: this.env.AI });
 		const aiModel = workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast");
 
-		const { object } = await generateObject({
+		const { output: object } = await generateText({
 			model: aiModel,
-			schema: z.object({
-				action: z.string(),
-				message: z.string().optional(),
-			}),
 			prompt: `
 				You are an intelligent task manager. Based on the user's prompt, determine whether to:
 				- "add" a new task,
@@ -57,14 +53,17 @@ export class TaskManagerAgent extends Agent<Env, TaskManagerState> {
 				- To do nothing:
 				  { "action": "none", message: "[the reason why you are doing nothing]" }
 			`,
+			output: Output.object({
+				schema: z.object({
+					action: z.string(),
+					message: z.string().optional(),
+				}),
+			}),
 		});
 
 		if (object.action === "add") {
-			const { object } = await generateObject({
+			const { output: object } = await generateText({
 				model: aiModel,
-				schema: z.object({
-					title: z.string().optional(),
-				}),
 				prompt: `
 				  You are an intelligent task manager. Your mission is to extract a title for the task that is described in the user prompt.
 
@@ -78,6 +77,11 @@ export class TaskManagerAgent extends Agent<Env, TaskManagerState> {
 					- If you are not able to extract a task title from the user prompt:
 					  { "title": undefined }
 				`,
+				output: Output.object({
+					schema: z.object({
+						title: z.string().optional(),
+					}),
+				}),
 			});
 
 			if (!object.title) {
@@ -90,11 +94,8 @@ export class TaskManagerAgent extends Agent<Env, TaskManagerState> {
 		}
 
 		if (object.action === "delete") {
-			const { object } = await generateObject({
+			const { output: object } = await generateText({
 				model: aiModel,
-				schema: z.object({
-					taskId: z.string().optional(),
-				}),
 				prompt: `
 				You are an intelligent task manager. You have have a user prompt that is asking you to delete a task.
 				Please review the user prompt to determine which task to delete. You will be given a list of tasks.
@@ -111,6 +112,11 @@ export class TaskManagerAgent extends Agent<Env, TaskManagerState> {
 					- If there is no matching task in the list of current tasks:
 					  { "taskId": undefined }
 				`,
+				output: Output.object({
+					schema: z.object({
+						taskId: z.string().optional(),
+					}),
+				}),
 			});
 
 			if (object.taskId) {

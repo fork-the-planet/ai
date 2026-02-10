@@ -1,5 +1,5 @@
 import { Agent } from "agents";
-import { generateObject } from "ai";
+import { generateText, Output } from "ai";
 import { createWorkersAI } from "workers-ai-provider";
 import z from "zod";
 
@@ -56,12 +56,8 @@ export class TaskManagerAgent extends Agent<Env, TaskManagerState> {
 		const aiModel = workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast");
 
 		// First, determine the desired action: add, delete, list, or none.
-		const { object: actionObject } = await generateObject({
+		const { output: actionObject } = await generateText({
 			model: aiModel,
-			schema: z.object({
-				action: z.string(),
-				message: z.string().optional(),
-			}),
 			prompt: `
         You are an intelligent task manager. Based on the user's prompt, decide whether to:
           - "add" a new task,
@@ -87,6 +83,12 @@ export class TaskManagerAgent extends Agent<Env, TaskManagerState> {
         - To do nothing:
           { "action": "none", "message": "[explanation]" }
       `,
+			output: Output.object({
+				schema: z.object({
+					action: z.string(),
+					message: z.string().optional(),
+				}),
+			}),
 		});
 
 		// If user wants to list tasks, return them immediately.
@@ -101,11 +103,8 @@ export class TaskManagerAgent extends Agent<Env, TaskManagerState> {
 
 		// If user wants to add a task, figure out what the task title should be.
 		if (actionObject.action === "add") {
-			const { object: addObject } = await generateObject({
+			const { output: addObject } = await generateText({
 				model: aiModel,
-				schema: z.object({
-					title: z.string().optional(),
-				}),
 				prompt: `
           You are an intelligent task manager. Extract a title from the user's prompt.
 
@@ -118,6 +117,11 @@ export class TaskManagerAgent extends Agent<Env, TaskManagerState> {
             - If not:
               { "title": undefined }
         `,
+				output: Output.object({
+					schema: z.object({
+						title: z.string().optional(),
+					}),
+				}),
 			});
 
 			if (!addObject.title) {
@@ -144,11 +148,8 @@ export class TaskManagerAgent extends Agent<Env, TaskManagerState> {
 
 		// If user wants to delete a task, figure out which task ID to delete.
 		if (actionObject.action === "delete") {
-			const { object: deleteObject } = await generateObject({
+			const { output: deleteObject } = await generateText({
 				model: aiModel,
-				schema: z.object({
-					taskId: z.string().optional(),
-				}),
 				prompt: `
           You are an intelligent task manager. The user requested deleting a task.
           Try to figure out which task ID from the list below is the best match.
@@ -163,6 +164,11 @@ export class TaskManagerAgent extends Agent<Env, TaskManagerState> {
             { "taskId": undefined }
           if there is no match.
         `,
+				output: Output.object({
+					schema: z.object({
+						taskId: z.string().optional(),
+					}),
+				}),
 			});
 
 			if (!deleteObject.taskId) {

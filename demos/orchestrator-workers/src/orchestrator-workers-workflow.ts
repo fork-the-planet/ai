@@ -1,5 +1,5 @@
 import { WorkflowEntrypoint, type WorkflowEvent, type WorkflowStep } from "cloudflare:workers";
-import { generateObject } from "ai";
+import { generateText, Output } from "ai";
 import { createWorkersAI } from "workers-ai-provider";
 import z from "zod";
 
@@ -33,10 +33,10 @@ export class OrchestratorWorkersWorkflow extends WorkflowEntrypoint<
 		// --- Step 1: Orchestrator Generates Subtasks ---
 		const orchestratorResult = await step.do("generate subtasks", async () => {
 			const orchestratorPrompt = `Given the following complex coding task:\n\n${prompt}\n\nPlease break it down into a list of subtasks needed to complete the task. Return your answer as a JSON object in the format { "tasks": ["Task 1", "Task 2", ...] }`;
-			const { object } = await generateObject({
+			const { output: object } = await generateText({
 				model: bigModel,
-				schema: orchestratorSchema,
 				prompt: orchestratorPrompt,
+				output: Output.object({ schema: orchestratorSchema }),
 			});
 			return object;
 		});
@@ -45,10 +45,10 @@ export class OrchestratorWorkersWorkflow extends WorkflowEntrypoint<
 		const workerResponses = await step.do("execute subtasks in parallel", async () => {
 			const workerPromises = orchestratorResult.tasks.map(async (taskPrompt) => {
 				const workerLLMPrompt = `You are a specialised coding assistant. Please complete the following subtask:\n\n${taskPrompt}\n\nReturn your result as a JSON object in the format { "response": "Your detailed response here." }`;
-				const { object } = await generateObject({
+				const { output: object } = await generateText({
 					model: smallModel,
-					schema: workerOutputSchema,
 					prompt: workerLLMPrompt,
+					output: Output.object({ schema: workerOutputSchema }),
 				});
 
 				return object.response;
@@ -64,10 +64,10 @@ export class OrchestratorWorkersWorkflow extends WorkflowEntrypoint<
 					.join("\n\n")}
 				\n\nPlease synthesise these responses into a single, comprehensive final result.
 				Return your answer as a JSON object in the format { "finalResult": "Your comprehensive result here." }`;
-			const { object } = await generateObject({
+			const { output: object } = await generateText({
 				model: bigModel,
-				schema: aggregatorSchema,
 				prompt: aggregatorPrompt,
+				output: Output.object({ schema: aggregatorSchema }),
 			});
 			return object;
 		});

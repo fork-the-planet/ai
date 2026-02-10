@@ -4,7 +4,6 @@ import type {
 	EmbeddingModelV3Result,
 } from "@ai-sdk/provider";
 import { TooManyEmbeddingValuesForCallError } from "@ai-sdk/provider";
-import type { StringLike } from "./utils";
 import type { EmbeddingModels } from "./workersai-models";
 
 export type WorkersAIEmbeddingConfig = {
@@ -17,34 +16,26 @@ export type WorkersAIEmbeddingSettings = {
 	gateway?: GatewayOptions;
 	maxEmbeddingsPerCall?: number;
 	supportsParallelCalls?: boolean;
-} & {
+
 	/**
-	 * Arbitrary provider-specific options forwarded unmodified.
+	 * Passthrough settings that are provided directly to the run function.
 	 */
-	[key: string]: StringLike;
+	[key: string]: unknown;
 };
 
 export class WorkersAIEmbeddingModel implements EmbeddingModelV3 {
-	/**
-	 * Semantic version of the {@link EmbeddingModelV3} specification implemented
-	 * by this class. It never changes.
-	 */
 	readonly specificationVersion = "v3";
 	readonly modelId: EmbeddingModels;
 	private readonly config: WorkersAIEmbeddingConfig;
 	private readonly settings: WorkersAIEmbeddingSettings;
 
-	/**
-	 * Provider name exposed for diagnostics and error reporting.
-	 */
 	get provider(): string {
 		return this.config.provider;
 	}
 
 	get maxEmbeddingsPerCall(): number {
 		// https://developers.cloudflare.com/workers-ai/platform/limits/#text-embeddings
-		const maxEmbeddingsPerCall = 3000;
-		return this.settings.maxEmbeddingsPerCall ?? maxEmbeddingsPerCall;
+		return this.settings.maxEmbeddingsPerCall ?? 3000;
 	}
 
 	get supportsParallelCalls(): boolean {
@@ -71,7 +62,8 @@ export class WorkersAIEmbeddingModel implements EmbeddingModelV3 {
 			});
 		}
 
-		const { gateway, ...passthroughOptions } = this.settings;
+		const { gateway, maxEmbeddingsPerCall, supportsParallelCalls, ...passthroughOptions } =
+			this.settings;
 
 		const response = await this.config.binding.run(
 			this.modelId,

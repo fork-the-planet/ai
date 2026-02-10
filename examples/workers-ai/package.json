@@ -1,0 +1,29 @@
+{
+	"name": "workers-ai-example",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview",
+		"deploy": "vite build && wrangler deploy"
+	},
+	"dependencies": {
+		"@ai-sdk/react": "^3.0.61",
+		"ai": "^6.0.59",
+		"react": "^19.2.4",
+		"react-dom": "^19.2.4",
+		"workers-ai-provider": "workspace:*",
+		"zod": "^4.3.6"
+	},
+	"devDependencies": {
+		"@cloudflare/vite-plugin": "^1.24.0",
+		"@cloudflare/workers-types": "^4.20260210.0",
+		"@types/react": "^19.2.10",
+		"@types/react-dom": "^19.2.3",
+		"@vitejs/plugin-react": "^5.1.2",
+		"typescript": "5.9.3",
+		"vite": "^7.3.1",
+		"wrangler": "^4.64.0"
+	}
+}

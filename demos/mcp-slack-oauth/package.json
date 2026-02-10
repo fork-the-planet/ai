@@ -17,10 +17,10 @@
 		"octokit": "^5.0.5"
 	},
 	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20260128.0",
+		"@cloudflare/workers-types": "^4.20260210.0",
 		"prettier": "^3.8.1",
 		"typescript": "5.9.3",
-		"wrangler": "^4.61.0",
+		"wrangler": "^4.64.0",
 		"zod": "^4.3.6"
 	}
 }

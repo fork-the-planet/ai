@@ -1,12 +1,9 @@
-import { generateObject, type LanguageModel } from "ai";
+import { generateText, Output, type LanguageModel } from "ai";
 import z from "zod";
 
 export async function extractCronSchedule(model: LanguageModel, query: string) {
-	const { object } = await generateObject({
+	const { output: object } = await generateText({
 		model,
-		schema: z.object({
-			cron: z.string(),
-		}),
 		prompt: `
 			You are an intelligent alarm scheduler manager. What follows is a user prompt for creating an alarm at a regular schedule. Your job is to convert that regular schedule into a cron string.
 
@@ -52,6 +49,11 @@ export async function extractCronSchedule(model: LanguageModel, query: string) {
 			8. Run a command at 10:00 PM on the 1st day of every month.
 				0 22 1 * *
 			`,
+		output: Output.object({
+			schema: z.object({
+				cron: z.string(),
+			}),
+		}),
 	});
 
 	return object.cron;

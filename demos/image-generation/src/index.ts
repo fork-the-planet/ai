@@ -1,4 +1,4 @@
-import { experimental_generateImage as generateImage } from "ai";
+import { generateImage } from "ai";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { createWorkersAI } from "workers-ai-provider";

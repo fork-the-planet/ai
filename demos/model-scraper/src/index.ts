@@ -1,5 +1,5 @@
 import { createOpenAI } from "@ai-sdk/openai";
-import { generateObject, generateText } from "ai";
+import { generateText, Output } from "ai";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import z from "zod";
@@ -43,19 +43,16 @@ app.post("/query", async (c) => {
 	const criteriaPrompt = `Please evaluate the following prompt:\n\n${JSON.stringify(
 		prompt,
 	)}\n\nReturn a JSON object with a boolean field "structured" that is true if the prompt would be best returned as a JSON structured response, or false if it should just return a text-based response.`;
-	const { object: evaluationObject } = await generateObject({
+	const { output: evaluationObject } = await generateText({
 		model,
-		schema: criteriaSchema,
 		maxRetries: 5,
 		prompt: criteriaPrompt,
+		output: Output.object({ schema: criteriaSchema }),
 	});
 
 	if (evaluationObject.structured) {
-		const { object } = await generateObject({
+		const { output: object } = await generateText({
 			model,
-			schema: z.object({
-				response: z.any(),
-			}),
 			maxRetries: 5,
 			prompt: `
 		Using the available models data, please answer the following prompt:
@@ -64,6 +61,11 @@ app.post("/query", async (c) => {
 		Models Data:
 		${JSON.stringify(modelsObj)}
 		`,
+			output: Output.object({
+				schema: z.object({
+					response: z.any(),
+				}),
+			}),
 		});
 
 		return c.json(object);

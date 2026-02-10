@@ -1,5 +1,5 @@
 import { createOpenAI } from "@ai-sdk/openai";
-import { generateObject } from "ai";
+import { generateText, Output } from "ai";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { z } from "zod/v3";
@@ -34,10 +34,10 @@ app.post("/api", async (c) => {
 	// --- Step 1: Generate the Initial Draft ---
 	const draftPrompt = `Please generate an initial draft for the following task:\n\n${prompt}\n\n
 		Return your response as a JSON object in the format { "draft": "Your initial draft here." }`;
-	const { object: draftObj } = await generateObject({
+	const { output: draftObj } = await generateText({
 		model: smallModel,
-		schema: draftSchema,
 		prompt: draftPrompt,
+		output: Output.object({ schema: draftSchema }),
 	});
 
 	console.log("evaluating draft...");
@@ -46,10 +46,10 @@ app.post("/api", async (c) => {
 	const evaluationPrompt = `Please evaluate the following draft and provide constructive feedback on how to improve it:\n\n
 		${draftObj.draft}\n\n
 		Return your evaluation as a JSON object in the format { "feedback": "Your feedback here.", "needsRevision": true/false }`;
-	const { object: evaluationObj } = await generateObject({
+	const { output: evaluationObj } = await generateText({
 		model: smallModel,
-		schema: evaluationSchema,
 		prompt: evaluationPrompt,
+		output: Output.object({ schema: evaluationSchema }),
 	});
 
 	console.log("optimizing draft...");
@@ -61,10 +61,10 @@ app.post("/api", async (c) => {
 			Initial Draft:\n${draftObj.draft}\n\n
 			Evaluator Feedback:\n${evaluationObj.feedback}\n\n
 			Return your optimized draft as a JSON object in the format { "optimizedDraft": "Your optimized draft here." }`;
-		const { object } = await generateObject({
+		const { output: object } = await generateText({
 			model: bigModel,
-			schema: optimizedSchema,
 			prompt: optimizerPrompt,
+			output: Output.object({ schema: optimizedSchema }),
 		});
 		optimizedResult = object;
 	}
