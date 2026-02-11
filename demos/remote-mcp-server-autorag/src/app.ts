@@ -74,7 +74,7 @@ app.post("/approve", async (c) => {
 		// but you could validate them here
 		// Ex:
 		// if (email !== "user@example.com" || password !== "password") {
-		// biome-ignore lint/correctness/noConstantCondition: This is a demo
+		// eslint-disable-next-line no-constant-condition -- This is a demo
 		if (false) {
 			return c.html(
 				layout(

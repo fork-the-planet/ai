@@ -7,7 +7,7 @@
 ```jsonc
 // wrangler.jsonc
 {
-  "ai": { "binding": "AI" }
+	"ai": { "binding": "AI" },
 }
 ```
 
@@ -16,16 +16,16 @@ import { createWorkersAI } from "workers-ai-provider";
 import { streamText } from "ai";
 
 export default {
-  async fetch(req: Request, env: { AI: Ai }) {
-    const workersai = createWorkersAI({ binding: env.AI });
+	async fetch(req: Request, env: { AI: Ai }) {
+		const workersai = createWorkersAI({ binding: env.AI });
 
-    const result = streamText({
-      model: workersai("@cf/meta/llama-4-scout-17b-16e-instruct"),
-      messages: [{ role: "user", content: "Write a haiku about Cloudflare" }],
-    });
+		const result = streamText({
+			model: workersai("@cf/meta/llama-4-scout-17b-16e-instruct"),
+			messages: [{ role: "user", content: "Write a haiku about Cloudflare" }],
+		});
 
-    return result.toTextStreamResponse();
-  },
+		return result.toTextStreamResponse();
+	},
 };
 ```
 
@@ -49,8 +49,8 @@ Outside of Workers (Node.js, Bun, etc.), use your Cloudflare credentials:
 
 ```ts
 const workersai = createWorkersAI({
-  accountId: process.env.CLOUDFLARE_ACCOUNT_ID,
-  apiKey: process.env.CLOUDFLARE_API_TOKEN,
+	accountId: process.env.CLOUDFLARE_ACCOUNT_ID,
+	apiKey: process.env.CLOUDFLARE_API_TOKEN,
 });
 ```
 
@@ -60,8 +60,8 @@ Route requests through [AI Gateway](https://developers.cloudflare.com/ai-gateway
 
 ```ts
 const workersai = createWorkersAI({
-  binding: env.AI,
-  gateway: { id: "my-gateway" },
+	binding: env.AI,
+	gateway: { id: "my-gateway" },
 });
 ```
 
@@ -71,13 +71,13 @@ Browse the full catalog at [developers.cloudflare.com/workers-ai/models](https:/
 
 Some good defaults:
 
-| Task | Model | Notes |
-|------|-------|-------|
-| Chat | `@cf/meta/llama-4-scout-17b-16e-instruct` | Fast, strong tool calling |
-| Chat | `@cf/meta/llama-3.3-70b-instruct-fp8-fast` | Largest Llama, best quality |
-| Reasoning | `@cf/qwen/qwq-32b` | Emits `reasoning_content` |
-| Embeddings | `@cf/baai/bge-base-en-v1.5` | 768-dim, English |
-| Images | `@cf/black-forest-labs/flux-1-schnell` | Fast image generation |
+| Task       | Model                                      | Notes                       |
+| ---------- | ------------------------------------------ | --------------------------- |
+| Chat       | `@cf/meta/llama-4-scout-17b-16e-instruct`  | Fast, strong tool calling   |
+| Chat       | `@cf/meta/llama-3.3-70b-instruct-fp8-fast` | Largest Llama, best quality |
+| Reasoning  | `@cf/qwen/qwq-32b`                         | Emits `reasoning_content`   |
+| Embeddings | `@cf/baai/bge-base-en-v1.5`                | 768-dim, English            |
+| Images     | `@cf/black-forest-labs/flux-1-schnell`     | Fast image generation       |
 
 ## Text Generation
 
@@ -85,8 +85,8 @@ Some good defaults:
 import { generateText } from "ai";
 
 const { text } = await generateText({
-  model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
-  prompt: "Explain Workers AI in one paragraph",
+	model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
+	prompt: "Explain Workers AI in one paragraph",
 });
 ```
 
@@ -96,12 +96,12 @@ Streaming:
 import { streamText } from "ai";
 
 const result = streamText({
-  model: workersai("@cf/meta/llama-4-scout-17b-16e-instruct"),
-  messages: [{ role: "user", content: "Write a short story" }],
+	model: workersai("@cf/meta/llama-4-scout-17b-16e-instruct"),
+	messages: [{ role: "user", content: "Write a short story" }],
 });
 
 for await (const chunk of result.textStream) {
-  process.stdout.write(chunk);
+	process.stdout.write(chunk);
 }
 ```
 
@@ -112,16 +112,16 @@ import { generateText, stepCountIs } from "ai";
 import { z } from "zod";
 
 const { text } = await generateText({
-  model: workersai("@cf/meta/llama-4-scout-17b-16e-instruct"),
-  prompt: "What's the weather in London?",
-  tools: {
-    getWeather: {
-      description: "Get the current weather for a city",
-      inputSchema: z.object({ city: z.string() }),
-      execute: async ({ city }) => ({ city, temperature: 18, condition: "Cloudy" }),
-    },
-  },
-  stopWhen: stepCountIs(2),
+	model: workersai("@cf/meta/llama-4-scout-17b-16e-instruct"),
+	prompt: "What's the weather in London?",
+	tools: {
+		getWeather: {
+			description: "Get the current weather for a city",
+			inputSchema: z.object({ city: z.string() }),
+			execute: async ({ city }) => ({ city, temperature: 18, condition: "Cloudy" }),
+		},
+	},
+	stopWhen: stepCountIs(2),
 });
 ```
 
@@ -132,15 +132,15 @@ import { generateText, Output } from "ai";
 import { z } from "zod";
 
 const { output } = await generateText({
-  model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
-  prompt: "Recipe for spaghetti bolognese",
-  output: Output.object({
-    schema: z.object({
-      name: z.string(),
-      ingredients: z.array(z.object({ name: z.string(), amount: z.string() })),
-      steps: z.array(z.string()),
-    }),
-  }),
+	model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
+	prompt: "Recipe for spaghetti bolognese",
+	output: Output.object({
+		schema: z.object({
+			name: z.string(),
+			ingredients: z.array(z.object({ name: z.string(), amount: z.string() })),
+			steps: z.array(z.string()),
+		}),
+	}),
 });
 ```
 
@@ -150,8 +150,8 @@ const { output } = await generateText({
 import { embedMany } from "ai";
 
 const { embeddings } = await embedMany({
-  model: workersai.textEmbedding("@cf/baai/bge-base-en-v1.5"),
-  values: ["sunny day at the beach", "rainy afternoon in the city"],
+	model: workersai.textEmbedding("@cf/baai/bge-base-en-v1.5"),
+	values: ["sunny day at the beach", "rainy afternoon in the city"],
 });
 ```
 
@@ -161,9 +161,9 @@ const { embeddings } = await embedMany({
 import { generateImage } from "ai";
 
 const { images } = await generateImage({
-  model: workersai.image("@cf/black-forest-labs/flux-1-schnell"),
-  prompt: "A mountain landscape at sunset",
-  size: "1024x1024",
+	model: workersai.image("@cf/black-forest-labs/flux-1-schnell"),
+	prompt: "A mountain landscape at sunset",
+	size: "1024x1024",
 });
 
 // images[0].uint8Array contains the PNG bytes
@@ -176,7 +176,7 @@ const { images } = await generateImage({
 ```jsonc
 // wrangler.jsonc
 {
-  "ai_search": [{ "binding": "AI_SEARCH", "name": "my-search-index" }]
+	"ai_search": [{ "binding": "AI_SEARCH", "name": "my-search-index" }],
 }
 ```
 
@@ -187,8 +187,8 @@ import { generateText } from "ai";
 const aisearch = createAISearch({ binding: env.AI_SEARCH });
 
 const { text } = await generateText({
-  model: aisearch(),
-  messages: [{ role: "user", content: "How do I setup AI Gateway?" }],
+	model: aisearch(),
+	messages: [{ role: "user", content: "How do I setup AI Gateway?" }],
 });
 ```
 
@@ -200,36 +200,36 @@ Streaming works the same way -- use `streamText` instead of `generateText`.
 
 ### `createWorkersAI(options)`
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `binding` | `Ai` | Workers AI binding (`env.AI`). Use this OR credentials. |
-| `accountId` | `string` | Cloudflare account ID. Required with `apiKey`. |
-| `apiKey` | `string` | Cloudflare API token. Required with `accountId`. |
-| `gateway` | `GatewayOptions` | Optional [AI Gateway](https://developers.cloudflare.com/ai-gateway/) config. |
+| Option      | Type             | Description                                                                  |
+| ----------- | ---------------- | ---------------------------------------------------------------------------- |
+| `binding`   | `Ai`             | Workers AI binding (`env.AI`). Use this OR credentials.                      |
+| `accountId` | `string`         | Cloudflare account ID. Required with `apiKey`.                               |
+| `apiKey`    | `string`         | Cloudflare API token. Required with `accountId`.                             |
+| `gateway`   | `GatewayOptions` | Optional [AI Gateway](https://developers.cloudflare.com/ai-gateway/) config. |
 
 Returns a provider with model factories for each AI SDK function:
 
 ```ts
 // For generateText / streamText:
-workersai(modelId)
-workersai.chat(modelId)
+workersai(modelId);
+workersai.chat(modelId);
 
 // For embedMany / embed:
-workersai.textEmbedding(modelId)
+workersai.textEmbedding(modelId);
 
 // For generateImage:
-workersai.image(modelId)
+workersai.image(modelId);
 ```
 
 ### `createAISearch(options)`
 
-| Option | Type | Description |
-|--------|------|-------------|
+| Option    | Type      | Description                          |
+| --------- | --------- | ------------------------------------ |
 | `binding` | `AutoRAG` | AI Search binding (`env.AI_SEARCH`). |
 
 Returns a callable provider:
 
 ```ts
-aisearch()       // AI Search model (shorthand)
-aisearch.chat()  // AI Search model
+aisearch(); // AI Search model (shorthand)
+aisearch.chat(); // AI Search model
 ```

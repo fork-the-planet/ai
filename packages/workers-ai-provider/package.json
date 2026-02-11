@@ -1,29 +1,24 @@
 {
 	"name": "workers-ai-provider",
-	"description": "Workers AI Provider for the vercel AI SDK",
-	"type": "module",
 	"version": "3.0.4",
-	"main": "dist/index.js",
-	"types": "dist/index.d.ts",
-	"repository": {
-		"type": "git",
-		"url": "git://github.com/cloudflare/ai.git"
-	},
+	"description": "Workers AI Provider for the vercel AI SDK",
+	"keywords": [
+		"ai",
+		"chat",
+		"cloudflare",
+		"provider",
+		"sdk",
+		"serverless",
+		"vercel",
+		"workers"
+	],
 	"bugs": {
 		"url": "https://github.com/cloudflare/ai/issues"
 	},
-	"authors": "Cloudflare Inc.",
 	"license": "MIT",
-	"scripts": {
-		"build": "rm -rf dist && tsup src/index.ts --dts --sourcemap --format esm --target es2020",
-		"prepare": "pnpm build",
-		"format": "biome format --write",
-		"test:ci": "vitest --watch=false",
-		"test": "vitest",
-		"test:e2e": "vitest --config vitest.e2e.config.ts --watch=false",
-		"test:e2e:rest": "vitest --config vitest.e2e.config.ts --watch=false test/e2e/workers-ai-rest.e2e.test.ts",
-		"test:e2e:binding": "vitest --config vitest.e2e.config.ts --watch=false test/e2e/workers-ai-binding.e2e.test.ts",
-		"type-check": "tsc --noEmit"
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/cloudflare/ai.git"
 	},
 	"files": [
 		"dist",
@@ -31,24 +26,29 @@
 		"README.md",
 		"package.json"
 	],
-	"keywords": [
-		"workers",
-		"cloudflare",
-		"ai",
-		"vercel",
-		"sdk",
-		"provider",
-		"chat",
-		"serverless"
-	],
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "rm -rf dist && tsup src/index.ts --dts --sourcemap --format esm --target es2020",
+		"prepare": "pnpm build",
+		"format": "oxfmt --write .",
+		"test:ci": "vitest --watch=false",
+		"test": "vitest",
+		"test:e2e": "vitest --config vitest.e2e.config.ts --watch=false",
+		"test:e2e:rest": "vitest --config vitest.e2e.config.ts --watch=false test/e2e/workers-ai-rest.e2e.test.ts",
+		"test:e2e:binding": "vitest --config vitest.e2e.config.ts --watch=false test/e2e/workers-ai-binding.e2e.test.ts",
+		"type-check": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"@ai-sdk/provider": "^3.0.8",
+		"@cloudflare/workers-types": "^4.20260210.0",
+		"ai": "^6.0.78",
+		"zod": "^4.3.6"
+	},
 	"peerDependencies": {
 		"@ai-sdk/provider": "^3.0.0",
 		"ai": "^6.0.0"
 	},
-	"devDependencies": {
-		"@ai-sdk/provider": "^3.0.5",
-		"@cloudflare/workers-types": "^4.20260210.0",
-		"ai": "^6.0.59",
-		"zod": "^4.3.6"
-	}
+	"authors": "Cloudflare Inc."
 }

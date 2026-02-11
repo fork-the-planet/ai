@@ -61,7 +61,7 @@ The "generateImage" tool is restricted to specific Access users listed in the `A
 
 ```typescript
 // Add user emails for image generation access
-const ALLOWED_EMAILS = new Set(['employee1@mycompany.com', 'teammate1@mycompany.com'])
+const ALLOWED_EMAILS = new Set(["employee1@mycompany.com", "teammate1@mycompany.com"]);
 ```
 
 ### Access the remote MCP server from Claude Desktop

@@ -7,8 +7,8 @@
 		"cf-typegen": "wrangler types",
 		"deploy": "npm run build && wrangler deploy",
 		"dev": "vite",
-		"format": "biome lint --error-on-warnings",
-		"lint": "biome lint --error-on-warnings",
+		"format": "oxfmt --write .",
+		"lint": "oxlint",
 		"preview": "npm run build && vite preview",
 		"start": "npm run dev",
 		"test": "vitest",
@@ -16,14 +16,16 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
-		"ai": "^6.0.59",
-		"hono": "^4.11.7",
+		"ai": "^6.0.78",
+		"hono": "^4.11.9",
 		"workers-ai-provider": "^3.0.4",
 		"zod": "^4.3.6"
 	},
 	"devDependencies": {
 		"@cloudflare/vite-plugin": "^1.24.0",
-		"@cloudflare/vitest-pool-workers": "^0.12.7",
+		"@cloudflare/vitest-pool-workers": "^0.12.11",
+		"oxfmt": "^0.31.0",
+		"oxlint": "^1.46.0",
 		"typescript": "5.9.3",
 		"vite": "^7.3.1",
 		"vitest": "~3.2.4",

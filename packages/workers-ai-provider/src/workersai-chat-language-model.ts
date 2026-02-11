@@ -151,7 +151,7 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 	 * Get passthrough options for binding.run() from settings.
 	 */
 	private getRunOptions() {
-		const { gateway, safePrompt, ...passthroughOptions } = this.settings;
+		const { gateway, safePrompt: _safePrompt, ...passthroughOptions } = this.settings;
 		return {
 			gateway: this.config.gateway ?? gateway,
 			...passthroughOptions,

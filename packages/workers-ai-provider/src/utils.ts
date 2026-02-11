@@ -107,8 +107,13 @@ export function createRun(config: CreateRunConfig): AiRun {
 		inputs: AiModels[Name]["inputs"],
 		options?: AiOptions & Record<string, unknown>,
 	): Promise<Response | ReadableStream<Uint8Array> | AiModels[Name]["postProcessedOutputs"]> {
-		const { gateway, prefix, extraHeaders, returnRawResponse, ...passthroughOptions } =
-			options || {};
+		const {
+			gateway: _gateway,
+			prefix: _prefix,
+			extraHeaders: _extraHeaders,
+			returnRawResponse,
+			...passthroughOptions
+		} = options || {};
 
 		const urlParams = new URLSearchParams();
 		for (const [key, value] of Object.entries(passthroughOptions)) {

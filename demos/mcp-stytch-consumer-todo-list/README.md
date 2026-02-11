@@ -2,9 +2,9 @@
 
 This is a Workers server that composes three functions:
 
-* A static website built using React and Vite on top of [Worker Assets](https://developers.cloudflare.com/workers/static-assets/)
-* A REST API built using Hono on top of [Workers KV](https://developers.cloudflare.com/kv/)
-* A [Model Context Protocol](https://modelcontextprotocol.io/introduction) Server built using on top of [Workers Durable Objects](https://developers.cloudflare.com/durable-objects/)
+- A static website built using React and Vite on top of [Worker Assets](https://developers.cloudflare.com/workers/static-assets/)
+- A REST API built using Hono on top of [Workers KV](https://developers.cloudflare.com/kv/)
+- A [Model Context Protocol](https://modelcontextprotocol.io/introduction) Server built using on top of [Workers Durable Objects](https://developers.cloudflare.com/durable-objects/)
 
 User and client identity is managed using [Stytch](https://stytch.com/). Put together, these three features show how to extend a traditional full-stack application for use by an AI agent.
 
@@ -45,7 +45,7 @@ Next, create an `.env.local` file by running the command below which copies the 
 cp .env.template .env.local
 ```
 
-Open `.env.local` in the text editor of your choice, and set the environment variables using the `public_token` and `project domain` found on [Project Settings](https://stytch.com/dashboard/project-settings?env=test). 
+Open `.env.local` in the text editor of your choice, and set the environment variables using the `public_token` and `project domain` found on [Project Settings](https://stytch.com/dashboard/project-settings?env=test).
 
 ```
 # This is what a completed .env.local file will look like
@@ -59,7 +59,7 @@ Create a `.dev.vars` file by running the command below which copies the contents
 cp .dev.vars.template .dev.vars
 ```
 
-Open `.dev.vars` in the text editor of your choice, and set the environment variables using the `Project ID` and `Secret`  found on [Project Settings](https://stytch.com/dashboard/project-settings?env=test).
+Open `.dev.vars` in the text editor of your choice, and set the environment variables using the `Project ID` and `Secret` found on [Project Settings](https://stytch.com/dashboard/project-settings?env=test).
 
 ```
 // This is what a completed .dev.vars file will look like
@@ -84,11 +84,11 @@ npx @modelcontextprotocol/inspector@latest
 
 ## Deploy to Cloudflare Workers
 
-Click the button - **you'll need to configure environment variables after the initial deployment**. 
+Click the button - **you'll need to configure environment variables after the initial deployment**.
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/stytchauth/mcp-stytch-consumer-todo-list.git)
 
-Or, if you want to follow the steps by hand: 
+Or, if you want to follow the steps by hand:
 
 1. Create a KV namespace for the TODO app to use
 
@@ -120,12 +120,11 @@ npm run deploy
 ```
 
 5. Grant your deployment access to your Stytch project. Assuming your Stytch project was deployed at `https://mcp-stytch-consumer-todo-list.$YOUR_ACCOUNT_NAME.workers.dev`:
-   1. Add `https://mcp-stytch-consumer-todo-list.$YOUR_ACCOUNT_NAME.workers.dev/authenticate` as an allowed [Redirect URL](https://stytch.com/dashboard/redirect-urls?env=test)
-   2. Add `https://mcp-stytch-consumer-todo-list.$YOUR_ACCOUNT_NAME.workers.dev` as an allowed Authorized Application in the [Frontend SDKs](https://stytch.com/dashboard/sdk-configuration?env=test) configuration
+    1. Add `https://mcp-stytch-consumer-todo-list.$YOUR_ACCOUNT_NAME.workers.dev/authenticate` as an allowed [Redirect URL](https://stytch.com/dashboard/redirect-urls?env=test)
+    2. Add `https://mcp-stytch-consumer-todo-list.$YOUR_ACCOUNT_NAME.workers.dev` as an allowed Authorized Application in the [Frontend SDKs](https://stytch.com/dashboard/sdk-configuration?env=test) configuration
 
 ## Get help and join the community
 
 #### :speech_balloon: Stytch community Slack
 
 Join the discussion, ask questions, and suggest new features in our [Slack community](https://stytch.com/docs/resources/support/overview)!
-

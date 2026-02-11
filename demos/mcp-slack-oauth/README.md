@@ -33,42 +33,44 @@ Acts as OAuth Client to your real OAuth server (in this case, Slack)
 
 1. In the left sidebar, click on "OAuth & Permissions"
 2. Add the following scopes under "Bot Token Scopes":
-   - `channels:history`
-   - `channels:read`
-   - `users:read`
+    - `channels:history`
+    - `channels:read`
+    - `users:read`
 3. Add your redirect URL: `https://mcp-slack-oauth.<your-subdomain>.workers.dev/callback`
 4. Make note of your Client ID and Client Secret from the "Basic Information" page
-5. *Optional* enable "Token Rotation" to use short-lived access tokens, which are automatically refreshed when the MCP client refreshes _its_ tokens (see `refreshSlackToken` for more details)
+5. _Optional_ enable "Token Rotation" to use short-lived access tokens, which are automatically refreshed when the MCP client refreshes _its_ tokens (see `refreshSlackToken` for more details)
 
 ### Deploy to Cloudflare Workers
 
 1. Add your Slack credentials (Slack Client ID and Client Secret) and cookie encryption key using Wrangler:
-   ```bash
-   wrangler secret put SLACK_CLIENT_ID
-   wrangler secret put SLACK_CLIENT_SECRET
-   wrangler secret put COOKIE_ENCRYPTION_KEY # add any random string here e.g. openssl rand -hex 32
-   ```
+
+    ```bash
+    wrangler secret put SLACK_CLIENT_ID
+    wrangler secret put SLACK_CLIENT_SECRET
+    wrangler secret put COOKIE_ENCRYPTION_KEY # add any random string here e.g. openssl rand -hex 32
+    ```
 
 2. Create a KV namespace for OAuth state storage:
-   ```bash
-   npx wrangler kv namespace create OAUTH_KV
-   ```
 
-   Update the KV namespace in the `wrangler.jsonc` file with the ID you receive.
+    ```bash
+    npx wrangler kv namespace create OAUTH_KV
+    ```
 
-   ```json
-   "kv_namespaces": [
-     {
-       "binding": "OAUTH_KV",
-       "id": "your-kv-namespace-id"
-     }
-   ]
-   ```
+    Update the KV namespace in the `wrangler.jsonc` file with the ID you receive.
+
+    ```json
+    "kv_namespaces": [
+      {
+        "binding": "OAUTH_KV",
+        "id": "your-kv-namespace-id"
+      }
+    ]
+    ```
 
 3. Deploy the Worker:
-   ```bash
-   npm run deploy
-   ```
+    ```bash
+    npm run deploy
+    ```
 
 ## Usage
 
@@ -83,18 +85,20 @@ You'll be prompted to authorize with Slack, and then you can use the available t
 ## Testing
 
 #### Using Inspector
-Test the remote server using [Inspector](https://modelcontextprotocol.io/docs/tools/inspector): 
+
+Test the remote server using [Inspector](https://modelcontextprotocol.io/docs/tools/inspector):
 
 ```
 npx @modelcontextprotocol/inspector@latest
 ```
-Enter `https://mcp-slack-oauth.<your-subdomain>.workers.dev/sse` and hit connect. Once you go through the authentication flow, you'll see the Tools working. 
+
+Enter `https://mcp-slack-oauth.<your-subdomain>.workers.dev/sse` and hit connect. Once you go through the authentication flow, you'll see the Tools working.
 
 #### Access the remote MCP server from Claude Desktop
 
 Open Claude Desktop and navigate to Settings -> Developer -> Edit Config. This opens the configuration file that controls which MCP servers Claude can access.
 
-Replace the content with the following configuration. Once you restart Claude Desktop, a browser window will open showing your OAuth login page. Complete the authentication flow to grant Claude access to your MCP server. After you grant access, the tools will become available for you to use. 
+Replace the content with the following configuration. Once you restart Claude Desktop, a browser window will open showing your OAuth login page. Complete the authentication flow to grant Claude access to your MCP server. After you grant access, the tools will become available for you to use.
 
 ```
 {
@@ -113,25 +117,30 @@ Replace the content with the following configuration. Once you restart Claude De
 ## Development
 
 1. Install dependencies:
-   ```bash
-   npm install
-   ```
+
+    ```bash
+    npm install
+    ```
 
 2. Start the development server:
-   ```bash
-   npm run dev
-   ```
+    ```bash
+    npm run dev
+    ```
 
-## How does it work? 
+## How does it work?
 
 #### OAuth Provider
+
 The OAuth Provider library serves as a complete OAuth 2.1 server implementation for Cloudflare Workers. It handles the complexities of the OAuth flow, including token issuance, validation, and management. In this project, it plays the dual role of:
+
 - Authenticating MCP clients that connect to your server
 - Managing the connection to Slack's OAuth services
 - Securely storing tokens and authentication state in KV storage
 
 #### McpAgent
+
 McpAgent extends the base MCP functionality with Cloudflare's Agents SDK, providing:
+
 - Persistent state management for your MCP server
 - Secure storage of authentication context between requests
 - Access to authenticated user information via this.props
@@ -139,7 +148,9 @@ McpAgent extends the base MCP functionality with Cloudflare's Agents SDK, provid
 - Integration with Cloudflare's Agent platform for extended AI capabilities
 
 #### MCP Remote
+
 The MCP Remote library enables your server to expose tools that can be invoked by MCP clients like the Inspector. It:
+
 - Defines the protocol for communication between clients and your server
 - Provides a structured way to define tools
 - Handles serialization and deserialization of requests and responses

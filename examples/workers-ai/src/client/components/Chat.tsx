@@ -67,12 +67,12 @@ function ChatSession({ model }: { model: string }) {
 						<div className="message-content">
 							{message.parts.map((part, i) => {
 								if (part.type === "text") {
-									// biome-ignore lint/suspicious/noArrayIndexKey: index is used as key
+									// eslint-disable-next-line react/no-array-index-key
 									return <span key={i}>{part.text}</span>;
 								}
 								if (part.type === "reasoning") {
 									return (
-										// biome-ignore lint/suspicious/noArrayIndexKey: index is used as key
+										// eslint-disable-next-line react/no-array-index-key
 										<details key={i} className="reasoning" open>
 											<summary>Reasoning</summary>
 											<div className="reasoning-content">{part.text}</div>
@@ -87,7 +87,7 @@ function ChatSession({ model }: { model: string }) {
 										state?: string;
 									};
 									return (
-										// biome-ignore lint/suspicious/noArrayIndexKey: index is used as key
+										// eslint-disable-next-line react/no-array-index-key
 										<div key={i} className="tool-call">
 											<div className="tool-name">Tool: {toolName}</div>
 											{toolPart.input != null && (

@@ -40,20 +40,20 @@ To explore your new MCP api, you can use the [MCP Inspector](https://modelcontex
 
 ```json
 {
-  "mcpServers": {
-    "remote-mcp-server-bearer-auth": {
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "http://localhost:8787/sse",
-        "--header",
-        "Authorization: Bearer ${AUTH_TOKEN}"
-      ]
-    },
-    "env": {
-      "AUTH_TOKEN": "..."
-    }
-  }
+	"mcpServers": {
+		"remote-mcp-server-bearer-auth": {
+			"command": "npx",
+			"args": [
+				"mcp-remote",
+				"http://localhost:8787/sse",
+				"--header",
+				"Authorization: Bearer ${AUTH_TOKEN}"
+			]
+		},
+		"env": {
+			"AUTH_TOKEN": "..."
+		}
+	}
 }
 ```
 

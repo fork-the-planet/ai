@@ -62,8 +62,12 @@ export class WorkersAIEmbeddingModel implements EmbeddingModelV3 {
 			});
 		}
 
-		const { gateway, maxEmbeddingsPerCall, supportsParallelCalls, ...passthroughOptions } =
-			this.settings;
+		const {
+			gateway,
+			maxEmbeddingsPerCall: _maxEmbeddingsPerCall,
+			supportsParallelCalls: _supportsParallelCalls,
+			...passthroughOptions
+		} = this.settings;
 
 		const response = await this.config.binding.run(
 			this.modelId,

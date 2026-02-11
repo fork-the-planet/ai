@@ -16,8 +16,8 @@ Before you begin, ensure you have:
 ## Develop locally
 
 1. Get your credentials from the Descope Console:
-   - [Project ID](https://app.descope.com/settings/project)
-   - [Management Key](https://app.descope.com/settings/company/managementkeys)
+    - [Project ID](https://app.descope.com/settings/project)
+    - [Management Key](https://app.descope.com/settings/company/managementkeys)
 
 2. Create a KV namespace for OAuth state storage:
 
@@ -36,6 +36,7 @@ COOKIE_ENCRYPTION_KEY="your_cookie_encryption_key"
 ```
 
 Generate the cookie encryption key:
+
 ```bash
 openssl rand -hex 32
 ```

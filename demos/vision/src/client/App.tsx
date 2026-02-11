@@ -61,20 +61,17 @@ function App() {
 		}
 	}, []);
 
-	const handleFileInput = useCallback(
-		(e: React.ChangeEvent<HTMLInputElement>) => {
-			const file = e.target.files?.[0];
-			if (file) {
-				const reader = new FileReader();
-				reader.onload = (event) => {
-					setSelectedImage(event.target?.result as string);
-					analyzeImage(file);
-				};
-				reader.readAsDataURL(file);
-			}
-		},
-		[]
-	);
+	const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (file) {
+			const reader = new FileReader();
+			reader.onload = (event) => {
+				setSelectedImage(event.target?.result as string);
+				analyzeImage(file);
+			};
+			reader.readAsDataURL(file);
+		}
+	}, []);
 
 	return (
 		<div className="app">

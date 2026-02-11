@@ -101,7 +101,7 @@ export function Embeddings() {
 
 					<div className="embed-details">
 						{result.embeddings.map((emb, i) => (
-							// biome-ignore lint/suspicious/noArrayIndexKey: index is used as key
+							// eslint-disable-next-line react/no-array-index-key
 							<div key={i} className="embed-vector">
 								<div className="embed-label">
 									Text {i + 1} ({emb.dimensions} dimensions)

@@ -72,6 +72,7 @@ function App() {
 					name: serverName,
 					server_url: serverUrl,
 					state: "connecting",
+					error: null,
 				},
 			},
 		});

@@ -6,13 +6,13 @@
 
 - [#390](https://github.com/cloudflare/ai/pull/390) [`41b92a3`](https://github.com/cloudflare/ai/commit/41b92a34ce4d9dffba8bb42b4933bbc06e4b1aaa) Thanks [@mchenco](https://github.com/mchenco)! - fix(workers-ai-provider): extract actual finish reason in streaming instead of hardcoded "stop"
 
-  Previously, the streaming implementation always returned `finishReason: "stop"` regardless of the actual completion reason. This caused:
-  - Tool calling scenarios to incorrectly report "stop" instead of "tool-calls"
-  - Multi-turn tool conversations to fail because the AI SDK couldn't detect when tools were requested
-  - Length limit scenarios to show "stop" instead of "length"
-  - Error scenarios to show "stop" instead of "error"
+    Previously, the streaming implementation always returned `finishReason: "stop"` regardless of the actual completion reason. This caused:
+    - Tool calling scenarios to incorrectly report "stop" instead of "tool-calls"
+    - Multi-turn tool conversations to fail because the AI SDK couldn't detect when tools were requested
+    - Length limit scenarios to show "stop" instead of "length"
+    - Error scenarios to show "stop" instead of "error"
 
-  The fix extracts the actual `finish_reason` from streaming chunks and uses the existing `mapWorkersAIFinishReason()` function to properly map it to the AI SDK's finish reason format. This enables proper multi-turn tool calling and accurate completion status reporting.
+    The fix extracts the actual `finish_reason` from streaming chunks and uses the existing `mapWorkersAIFinishReason()` function to properly map it to the AI SDK's finish reason format. This enables proper multi-turn tool calling and accurate completion status reporting.
 
 ## 3.0.3
 
@@ -56,7 +56,7 @@
 
 - [#256](https://github.com/cloudflare/ai/pull/256) [`a538901`](https://github.com/cloudflare/ai/commit/a5389013b9a512707fb1de1501a1547fce20c014) Thanks [@jahands](https://github.com/jahands)! - feat: Migrate to AI SDK v5
 
-  This updates workers-ai-provider and ai-gateway-provider to use the AI SDK v5. Please refer to the official migration guide to migrate your code https://ai-sdk.dev/docs/migration-guides/migration-guide-5-0
+    This updates workers-ai-provider and ai-gateway-provider to use the AI SDK v5. Please refer to the official migration guide to migrate your code https://ai-sdk.dev/docs/migration-guides/migration-guide-5-0
 
 ### Patch Changes
 

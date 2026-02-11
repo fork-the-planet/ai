@@ -20,32 +20,32 @@ This is a demo application showcasing Cloudflare Workers AI's vision capabilitie
 
 1. Install dependencies:
 
-   ```bash
-   npm install
-   ```
+    ```bash
+    npm install
+    ```
 
 2. Start the development server:
 
-   ```bash
-   npm run dev
-   ```
+    ```bash
+    npm run dev
+    ```
 
 3. Build for production:
 
-   ```bash
-   npm run build
-   ```
+    ```bash
+    npm run build
+    ```
 
 4. Deploy to Cloudflare Workers:
-   ```bash
-   npm run deploy
-   ```
+    ```bash
+    npm run deploy
+    ```
 
 ## Project Structure
 
 - `/src` - Source code
-  - `/client` - React frontend code
-  - `/server` - Cloudflare Workers backend code
+    - `/client` - React frontend code
+    - `/server` - Cloudflare Workers backend code
 
 ## Technologies Used
 
