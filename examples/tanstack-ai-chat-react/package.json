@@ -5,13 +5,14 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
+		"build": "vite build",
 		"lint": "eslint .",
 		"preview": "pnpm run build && vite preview",
 		"deploy": "pnpm run build && wrangler deploy",
 		"cf-typegen": "wrangler types"
 	},
 	"dependencies": {
-		"@cloudflare/tanstack-ai": "file:../../packages/tanstack-ai",
+		"@cloudflare/tanstack-ai": "workspace:*",
 		"@tanstack/ai": "^0.4.2",
 		"@tanstack/ai-react": "^0.5.2",
 		"react": "^19.1.1",
