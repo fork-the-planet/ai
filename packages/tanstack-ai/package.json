@@ -1,0 +1,123 @@
+{
+	"name": "@cloudflare/tanstack-ai",
+	"version": "0.0.0",
+	"description": "Use TanStack AI with Cloudflare Workers AI and AI Gateway",
+	"keywords": [
+		"ai",
+		"chat",
+		"cloudflare",
+		"gateway",
+		"serverless",
+		"tanstack",
+		"workers"
+	],
+	"bugs": {
+		"url": "https://github.com/cloudflare/ai/issues"
+	},
+	"license": "MIT",
+	"author": "Cloudflare Inc.",
+	"repository": {
+		"type": "git",
+		"url": "git+ssh://git@github.com/cloudflare/ai.git"
+	},
+	"files": [
+		"dist",
+		"README.md"
+	],
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"require": "./dist/index.cjs"
+		},
+		"./adapters/openai": {
+			"types": "./dist/adapters/openai.d.ts",
+			"import": "./dist/adapters/openai.js",
+			"require": "./dist/adapters/openai.cjs"
+		},
+		"./adapters/anthropic": {
+			"types": "./dist/adapters/anthropic.d.ts",
+			"import": "./dist/adapters/anthropic.js",
+			"require": "./dist/adapters/anthropic.cjs"
+		},
+		"./adapters/gemini": {
+			"types": "./dist/adapters/gemini.d.ts",
+			"import": "./dist/adapters/gemini.js",
+			"require": "./dist/adapters/gemini.cjs"
+		},
+		"./adapters/grok": {
+			"types": "./dist/adapters/grok.d.ts",
+			"import": "./dist/adapters/grok.js",
+			"require": "./dist/adapters/grok.cjs"
+		},
+		"./adapters/openrouter": {
+			"types": "./dist/adapters/openrouter.d.ts",
+			"import": "./dist/adapters/openrouter.js",
+			"require": "./dist/adapters/openrouter.cjs"
+		},
+		"./adapters/workers-ai": {
+			"types": "./dist/adapters/workers-ai.d.ts",
+			"import": "./dist/adapters/workers-ai.js",
+			"require": "./dist/adapters/workers-ai.cjs"
+		},
+		"./adapters/workers-ai-image": {
+			"types": "./dist/adapters/workers-ai-image.d.ts",
+			"import": "./dist/adapters/workers-ai-image.js",
+			"require": "./dist/adapters/workers-ai-image.cjs"
+		},
+		"./adapters/workers-ai-transcription": {
+			"types": "./dist/adapters/workers-ai-transcription.d.ts",
+			"import": "./dist/adapters/workers-ai-transcription.js",
+			"require": "./dist/adapters/workers-ai-transcription.cjs"
+		},
+		"./adapters/workers-ai-tts": {
+			"types": "./dist/adapters/workers-ai-tts.d.ts",
+			"import": "./dist/adapters/workers-ai-tts.js",
+			"require": "./dist/adapters/workers-ai-tts.cjs"
+		},
+		"./adapters/workers-ai-summarize": {
+			"types": "./dist/adapters/workers-ai-summarize.d.ts",
+			"import": "./dist/adapters/workers-ai-summarize.js",
+			"require": "./dist/adapters/workers-ai-summarize.cjs"
+		}
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"build": "rm -rf dist && tsup --config tsup.config.ts",
+		"format": "biome format --write",
+		"type-check": "tsc --noEmit",
+		"test": "vitest",
+		"test:ci": "vitest --watch=false",
+		"test:e2e": "vitest --config vitest.e2e.config.ts --watch=false",
+		"test:e2e:rest": "vitest --config vitest.e2e.config.ts --watch=false test/e2e/workers-ai-rest.e2e.test.ts",
+		"test:e2e:binding": "vitest --config vitest.e2e.config.ts --watch=false test/e2e/workers-ai-binding.e2e.test.ts"
+	},
+	"dependencies": {
+		"openai": "^6.16.0"
+	},
+	"devDependencies": {
+		"@microsoft/api-extractor": "^7.56.3",
+		"@tanstack/ai": "^0.4.2",
+		"dotenv": "^17.2.3"
+	},
+	"peerDependencies": {
+		"@tanstack/ai": "^0.4.2"
+	},
+	"optionalDependencies": {
+		"@anthropic-ai/sdk": "^0.71.2",
+		"@cloudflare/workers-types": "^4.20260128.0",
+		"@google/genai": "^1.35.0",
+		"@openrouter/sdk": "^0.3.15",
+		"@tanstack/ai-anthropic": "^0.4.2",
+		"@tanstack/ai-gemini": "^0.4.1",
+		"@tanstack/ai-grok": "^0.4.1",
+		"@tanstack/ai-openai": "^0.4.0",
+		"@tanstack/ai-openrouter": "^0.4.2"
+	},
+	"packageManager": "pnpm@10.26.2"
+}

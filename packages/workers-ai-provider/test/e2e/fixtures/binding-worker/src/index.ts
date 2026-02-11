@@ -5,7 +5,17 @@
  * This worker is started by wrangler dev during integration tests.
  */
 import { createWorkersAI, createAISearch } from "../../../../../src/index";
-import { generateText, streamText, stepCountIs, Output, embedMany, generateImage } from "ai";
+import {
+	generateText,
+	streamText,
+	stepCountIs,
+	Output,
+	embedMany,
+	generateImage,
+	experimental_transcribe as transcribe,
+	experimental_generateSpeech as generateSpeech,
+	rerank,
+} from "ai";
 import { z } from "zod/v4";
 
 interface Env {
@@ -237,6 +247,68 @@ export default {
 						text: streamText_,
 						finishReason: await streamResult.finishReason,
 					});
+				}
+
+				// ----- Transcription -----
+				case "/transcription": {
+					const txBody = body as { model?: string; audio?: number[] };
+					const txModel = txBody.model || "@cf/openai/whisper";
+					const audioData = txBody.audio || Array.from(new Uint8Array(16000));
+
+					try {
+						const result = await transcribe({
+							model: workersai.transcription(txModel as any),
+							audio: new Uint8Array(audioData),
+							mediaType: "audio/wav",
+						});
+						return jsonResponse({
+							text: result.text,
+							segments: result.segments,
+							language: result.language,
+							durationInSeconds: result.durationInSeconds,
+						});
+					} catch (err: unknown) {
+						return jsonResponse({ error: (err as Error).message }, 500);
+					}
+				}
+
+				// ----- Speech (TTS) -----
+				case "/speech": {
+					const sBody = body as { text?: string; voice?: string };
+					try {
+						const result = await generateSpeech({
+							model: workersai.speech("@cf/deepgram/aura-1"),
+							text: sBody.text || "Hello, this is a test.",
+							voice: sBody.voice,
+						});
+						return jsonResponse({
+							audioLength: result.audio.uint8Array.length,
+						});
+					} catch (err: unknown) {
+						return jsonResponse({ error: (err as Error).message }, 500);
+					}
+				}
+
+				// ----- Reranking -----
+				case "/rerank": {
+					const rkBody = body as {
+						query?: string;
+						documents?: string[];
+					};
+					try {
+						const result = await rerank({
+							model: workersai.reranking("@cf/baai/bge-reranker-base"),
+							query: rkBody.query || "test query",
+							documents: rkBody.documents || ["doc1", "doc2"],
+						});
+						return jsonResponse({
+							rankingCount: result.ranking.length,
+							topIndex: result.ranking[0]?.originalIndex,
+							topScore: result.ranking[0]?.score,
+						});
+					} catch (err: unknown) {
+						return jsonResponse({ error: (err as Error).message }, 500);
+					}
 				}
 
 				default:

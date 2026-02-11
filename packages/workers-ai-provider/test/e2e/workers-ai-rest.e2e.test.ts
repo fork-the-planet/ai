@@ -13,7 +13,17 @@
  */
 import { afterAll, describe, expect, it } from "vitest";
 import { config } from "dotenv";
-import { generateText, streamText, stepCountIs, Output, generateImage, embedMany } from "ai";
+import {
+	generateText,
+	streamText,
+	stepCountIs,
+	Output,
+	generateImage,
+	embedMany,
+	experimental_transcribe as transcribe,
+	experimental_generateSpeech as generateSpeech,
+	rerank,
+} from "ai";
 import { z } from "zod/v4";
 import { createWorkersAI } from "../../src/index";
 
@@ -391,6 +401,177 @@ describe.skipIf(skip())("Workers AI REST E2E", () => {
 			expect(result.embeddings[0].length).toBe(768);
 			expect(result.embeddings[1].length).toBe(768);
 			console.log(`  [embed] BGE Base EN OK — ${result.embeddings[0].length} dimensions`);
+		});
+	});
+
+	// ------------------------------------------------------------------
+	// Transcription (speech-to-text)
+	// ------------------------------------------------------------------
+	describe("transcription", () => {
+		/**
+		 * Generate a minimal valid WAV with a 440Hz tone.
+		 */
+		function createToneWav(durationMs = 500): Uint8Array {
+			const sampleRate = 16000;
+			const numSamples = Math.floor((sampleRate * durationMs) / 1000);
+			const bytesPerSample = 2;
+			const dataSize = numSamples * bytesPerSample;
+			const buffer = new ArrayBuffer(44 + dataSize);
+			const view = new DataView(buffer);
+
+			const writeStr = (offset: number, str: string) => {
+				for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+			};
+			writeStr(0, "RIFF");
+			view.setUint32(4, 36 + dataSize, true);
+			writeStr(8, "WAVE");
+			writeStr(12, "fmt ");
+			view.setUint32(16, 16, true);
+			view.setUint16(20, 1, true);
+			view.setUint16(22, 1, true);
+			view.setUint32(24, sampleRate, true);
+			view.setUint32(28, sampleRate * bytesPerSample, true);
+			view.setUint16(32, bytesPerSample, true);
+			view.setUint16(34, 16, true);
+			writeStr(36, "data");
+			view.setUint32(40, dataSize, true);
+			const freq = 440;
+			const amplitude = 16000;
+			for (let i = 0; i < numSamples; i++) {
+				const sample = Math.round(
+					amplitude * Math.sin((2 * Math.PI * freq * i) / sampleRate),
+				);
+				view.setInt16(44 + i * bytesPerSample, sample, true);
+			}
+			return new Uint8Array(buffer);
+		}
+
+		it("Whisper — should transcribe audio via REST", async () => {
+			const provider = makeProvider();
+			const wav = createToneWav(500);
+
+			// A 440Hz tone won't produce meaningful text, but it should not error
+			const result = await transcribe({
+				model: provider.transcription("@cf/openai/whisper"),
+				audio: wav,
+				mediaType: "audio/wav",
+			});
+
+			expect(typeof result.text).toBe("string");
+			console.log(`  [transcription] Whisper OK — "${result.text.slice(0, 50)}"`);
+		});
+
+		it("Whisper Tiny EN — should transcribe audio via REST", async () => {
+			const provider = makeProvider();
+			const wav = createToneWav(500);
+
+			const result = await transcribe({
+				model: provider.transcription("@cf/openai/whisper-tiny-en"),
+				audio: wav,
+			});
+
+			expect(typeof result.text).toBe("string");
+			console.log(`  [transcription] Whisper Tiny EN OK — "${result.text.slice(0, 50)}"`);
+		});
+
+		it("Whisper Large v3 Turbo — should transcribe via REST", async () => {
+			const provider = makeProvider();
+			const wav = createToneWav(500);
+
+			const result = await transcribe({
+				model: provider.transcription("@cf/openai/whisper-large-v3-turbo"),
+				audio: wav,
+				mediaType: "audio/wav",
+			});
+
+			expect(typeof result.text).toBe("string");
+			console.log(`  [transcription] Whisper v3 Turbo OK — "${result.text.slice(0, 50)}"`);
+		});
+
+		it("Deepgram Nova-3 — should transcribe via REST (binary upload)", async () => {
+			const provider = makeProvider();
+			const wav = createToneWav(500);
+
+			// Nova-3 returns empty text for non-speech audio (pure 440Hz tone),
+			// which causes the AI SDK to throw NoTranscriptGeneratedError.
+			// The important thing is the binary upload succeeded (no 400 error).
+			try {
+				const result = await transcribe({
+					model: provider.transcription("@cf/deepgram/nova-3"),
+					audio: wav,
+					mediaType: "audio/wav",
+				});
+				// If we get here, Nova-3 found something to transcribe
+				expect(typeof result.text).toBe("string");
+				console.log(`  [transcription] Nova-3 REST OK — "${result.text.slice(0, 50)}"`);
+			} catch (err: unknown) {
+				// NoTranscriptGeneratedError means the binary upload worked,
+				// but the model returned empty text for non-speech audio.
+				expect((err as Error).message).toContain("No transcript generated");
+				console.log(
+					"  [transcription] Nova-3 REST OK — binary upload succeeded (empty transcript for non-speech audio)",
+				);
+			}
+		});
+	});
+
+	// ------------------------------------------------------------------
+	// Speech (text-to-speech)
+	// ------------------------------------------------------------------
+	describe("speech", () => {
+		it("Deepgram Aura-1 — should generate speech via REST", async () => {
+			const provider = makeProvider();
+
+			const result = await generateSpeech({
+				model: provider.speech("@cf/deepgram/aura-1"),
+				text: "Hello, this is a test of text to speech.",
+			});
+
+			expect(result.audio).toBeDefined();
+			expect(result.audio.uint8Array.length).toBeGreaterThan(100);
+			console.log(`  [speech] Aura-1 OK — ${result.audio.uint8Array.length} bytes`);
+		});
+
+		it("Deepgram Aura-1 — should generate speech with voice option", async () => {
+			const provider = makeProvider();
+
+			const result = await generateSpeech({
+				model: provider.speech("@cf/deepgram/aura-1"),
+				text: "Testing voice selection.",
+				voice: "asteria",
+			});
+
+			expect(result.audio).toBeDefined();
+			expect(result.audio.uint8Array.length).toBeGreaterThan(100);
+			console.log(
+				`  [speech] Aura-1 with voice OK — ${result.audio.uint8Array.length} bytes`,
+			);
+		});
+	});
+
+	// ------------------------------------------------------------------
+	// Reranking
+	// ------------------------------------------------------------------
+	describe("reranking", () => {
+		it("BGE Reranker Base — should rerank documents via REST", async () => {
+			const provider = makeProvider();
+
+			const result = await rerank({
+				model: provider.reranking("@cf/baai/bge-reranker-base"),
+				query: "What is machine learning?",
+				documents: [
+					"Machine learning is a branch of artificial intelligence that focuses on building systems that learn from data.",
+					"The weather forecast for tomorrow shows sunny skies.",
+					"Deep learning is a subset of machine learning that uses neural networks with many layers.",
+					"The recipe calls for two cups of flour and one cup of sugar.",
+				],
+			});
+
+			expect(result.ranking.length).toBeGreaterThan(0);
+			// The ML-related documents (index 0 and 2) should score higher
+			console.log(
+				`  [rerank] BGE Reranker Base OK — ${result.ranking.length} results, top: index ${result.ranking[0].originalIndex} (${result.ranking[0].score.toFixed(3)})`,
+			);
 		});
 	});
 

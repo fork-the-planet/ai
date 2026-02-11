@@ -1,5 +1,5 @@
 {
-	"name": "workers-ai-playground",
+	"name": "workers-ai-provider-playground",
 	"main": "src/server/index.ts",
 	"compatibility_date": "2025-09-27",
 	"ai": { "binding": "AI" },

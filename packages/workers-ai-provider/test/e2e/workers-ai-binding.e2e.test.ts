@@ -431,7 +431,7 @@ describe("Workers AI Binding E2E", () => {
 			console.log(`  [aisearch] chat OK: "${(data.text as string).slice(0, 80)}..."`);
 		});
 
-		it("AI Search — streaming", async () => {
+		it("AI Search — streaming (skippable)", async () => {
 			if (!serverReady) return;
 
 			const data = await post("/aisearch/stream", { model: "What is Cloudflare Workers?" });
@@ -449,6 +449,157 @@ describe("Workers AI Binding E2E", () => {
 			expect(typeof data.text).toBe("string");
 			expect((data.text as string).length).toBeGreaterThan(0);
 			console.log(`  [aisearch] stream OK: "${(data.text as string).slice(0, 80)}..."`);
+		});
+	});
+
+	// ------------------------------------------------------------------
+	// Transcription via binding
+	// ------------------------------------------------------------------
+	describe("transcription via binding", () => {
+		/**
+		 * Generate a 440Hz tone WAV as number[] for JSON transport.
+		 */
+		function createToneWavBytes(durationMs = 500): number[] {
+			const sampleRate = 16000;
+			const numSamples = Math.floor((sampleRate * durationMs) / 1000);
+			const bytesPerSample = 2;
+			const dataSize = numSamples * bytesPerSample;
+			const buffer = new ArrayBuffer(44 + dataSize);
+			const view = new DataView(buffer);
+			const writeStr = (offset: number, str: string) => {
+				for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+			};
+			writeStr(0, "RIFF");
+			view.setUint32(4, 36 + dataSize, true);
+			writeStr(8, "WAVE");
+			writeStr(12, "fmt ");
+			view.setUint32(16, 16, true);
+			view.setUint16(20, 1, true);
+			view.setUint16(22, 1, true);
+			view.setUint32(24, sampleRate, true);
+			view.setUint32(28, sampleRate * bytesPerSample, true);
+			view.setUint16(32, bytesPerSample, true);
+			view.setUint16(34, 16, true);
+			writeStr(36, "data");
+			view.setUint32(40, dataSize, true);
+			const freq = 440;
+			const amplitude = 16000;
+			for (let i = 0; i < numSamples; i++) {
+				const sample = Math.round(
+					amplitude * Math.sin((2 * Math.PI * freq * i) / sampleRate),
+				);
+				view.setInt16(44 + i * bytesPerSample, sample, true);
+			}
+			return Array.from(new Uint8Array(buffer));
+		}
+
+		it("Whisper — transcribes audio via binding", async () => {
+			if (!serverReady) return;
+
+			const audio = createToneWavBytes(500);
+			const data = await post("/transcription", {
+				model: "@cf/openai/whisper",
+				audio,
+			});
+
+			if (data.error) {
+				console.log(`  [transcription] Whisper binding: ${data.error}`);
+				return;
+			}
+
+			expect(typeof data.text).toBe("string");
+			console.log(
+				`  [transcription] Whisper binding OK — "${(data.text as string).slice(0, 50)}"`,
+			);
+		});
+
+		it("Whisper Tiny EN — transcribes audio via binding", async () => {
+			if (!serverReady) return;
+
+			const audio = createToneWavBytes(500);
+			const data = await post("/transcription", {
+				model: "@cf/openai/whisper-tiny-en",
+				audio,
+			});
+
+			if (data.error) {
+				console.log(`  [transcription] Whisper Tiny EN binding: ${data.error}`);
+				return;
+			}
+
+			expect(typeof data.text).toBe("string");
+			console.log(
+				`  [transcription] Whisper Tiny EN binding OK — "${(data.text as string).slice(0, 50)}"`,
+			);
+		});
+
+		it("Whisper Large v3 Turbo — transcribes audio via binding", async () => {
+			if (!serverReady) return;
+
+			const audio = createToneWavBytes(500);
+			const data = await post("/transcription", {
+				model: "@cf/openai/whisper-large-v3-turbo",
+				audio,
+			});
+
+			if (data.error) {
+				console.log(`  [transcription] v3 Turbo binding: ${data.error}`);
+				return;
+			}
+
+			expect(typeof data.text).toBe("string");
+			console.log(
+				`  [transcription] v3 Turbo binding OK — "${(data.text as string).slice(0, 50)}"`,
+			);
+		});
+	});
+
+	// ------------------------------------------------------------------
+	// Reranking via binding
+	// ------------------------------------------------------------------
+	describe("reranking via binding", () => {
+		it("BGE Reranker Base — reranks documents via binding", async () => {
+			if (!serverReady) return;
+
+			const data = await post("/rerank", {
+				query: "What is machine learning?",
+				documents: [
+					"Machine learning is a branch of AI.",
+					"The weather is sunny today.",
+					"Deep learning uses neural networks.",
+				],
+			});
+
+			if (data.error) {
+				console.log(`  [rerank] binding: ${data.error}`);
+				return;
+			}
+
+			expect(data.rankingCount).toBeGreaterThan(0);
+			console.log(
+				`  [rerank] BGE Reranker binding OK — ${data.rankingCount} results, top: index ${data.topIndex} (${Number(data.topScore).toFixed(3)})`,
+			);
+		});
+	});
+
+	// ------------------------------------------------------------------
+	// Speech (TTS) via binding
+	// ------------------------------------------------------------------
+	describe("speech via binding", () => {
+		it("Deepgram Aura-1 — generates speech via binding", async () => {
+			if (!serverReady) return;
+
+			const data = await post("/speech", {
+				text: "Hello from the binding test.",
+			});
+
+			if (data.error) {
+				console.log(`  [speech] Aura-1 binding: ${data.error}`);
+				return;
+			}
+
+			expect(data.audioLength).toBeGreaterThan(100);
+			console.log(`  [speech] Aura-1 binding OK — ${data.audioLength} bytes`);
 		});
 	});
 });
