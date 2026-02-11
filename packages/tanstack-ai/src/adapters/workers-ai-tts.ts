@@ -41,8 +41,7 @@ export class WorkersAiTTSAdapter extends BaseTTSAdapter<WorkersAiTTSModel> {
 	async generateSpeech(options: TTSOptions): Promise<TTSResult> {
 		const { text, voice, format, speed, modelOptions } = options;
 
-		// Workers AI TTS models accept { prompt, lang? }
-		// Deepgram aura-1 uses "prompt" for the text input
+		// Workers AI TTS models (Deepgram aura-1) accept { text, lang? }
 		const extra: Record<string, unknown> = { ...modelOptions };
 		if (voice) extra.voice = voice;
 		if (speed != null) extra.speed = speed;

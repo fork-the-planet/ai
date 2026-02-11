@@ -197,6 +197,7 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 		let hasEmittedStepStarted = false;
 		let accumulatedReasoning = "";
 		const stepId = generateId("workers-ai-step");
+		let hasReceivedFinishReason = false;
 		const toolCallsInProgress = new Map<
 			number,
 			{ id: string; name: string; arguments: string; started: boolean }
@@ -342,6 +343,8 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 
 				// Finish
 				if (choice.finish_reason) {
+					hasReceivedFinishReason = true;
+
 					// End tool calls
 					if (choice.finish_reason === "tool_calls" || toolCallsInProgress.size > 0) {
 						for (const [, toolCall] of toolCallsInProgress) {
@@ -397,6 +400,49 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 						finishReason: computedFinishReason,
 					} satisfies StreamChunk;
 				}
+			}
+
+			// Premature stream termination: the stream ended without a finish_reason.
+			// This can happen when Workers AI truncates a response or the connection drops.
+			// Emit proper closing events so the consumer doesn't hang.
+			if (hasEmittedRunStarted && !hasReceivedFinishReason) {
+				// Close any open tool calls
+				for (const [, toolCall] of toolCallsInProgress) {
+					if (toolCall.started) {
+						let parsedInput: unknown = {};
+						try {
+							parsedInput = toolCall.arguments ? JSON.parse(toolCall.arguments) : {};
+						} catch {
+							parsedInput = {};
+						}
+						yield {
+							type: "TOOL_CALL_END",
+							toolCallId: toolCall.id,
+							toolName: toolCall.name,
+							model: model ?? this.model,
+							timestamp,
+							input: parsedInput,
+						} satisfies StreamChunk;
+					}
+				}
+
+				// Close text message if open
+				if (hasEmittedTextMessageStart) {
+					yield {
+						type: "TEXT_MESSAGE_END",
+						messageId,
+						model: model ?? this.model,
+						timestamp,
+					} satisfies StreamChunk;
+				}
+
+				yield {
+					type: "RUN_FINISHED",
+					runId,
+					model: model ?? this.model,
+					timestamp,
+					finishReason: "stop",
+				} satisfies StreamChunk;
 			}
 		} catch (error) {
 			const message = error instanceof Error ? error.message : String(error);

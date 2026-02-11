@@ -540,6 +540,73 @@ describe("WorkersAiTextAdapter error handling", () => {
 		expect(runError).toBeDefined();
 		expect(runFinished).toBeUndefined();
 	});
+
+	it("should handle premature stream termination (no finish_reason)", async () => {
+		// Simulate a stream that ends abruptly without a finish_reason chunk.
+		// This can happen when Workers AI truncates a response or the connection drops.
+		const binding = createStreamingBinding([
+			'data: {"response":"Hello"}\n\n',
+			'data: {"response":" world"}\n\n',
+			// No finish_reason chunk — stream just ends
+		]);
+		const adapter = new WorkersAiTextAdapter(MODEL, { binding });
+
+		const chunks = await collectChunks(
+			adapter.chatStream({
+				model: MODEL,
+				messages: [{ role: "user", content: "Hi" }],
+			} as any),
+		);
+
+		// Should still emit all required lifecycle events
+		const runStarted = chunks.find((c: any) => c.type === "RUN_STARTED");
+		const textContent = chunks.filter((c: any) => c.type === "TEXT_MESSAGE_CONTENT");
+		const textEnd = chunks.find((c: any) => c.type === "TEXT_MESSAGE_END");
+		const runFinished = chunks.find((c: any) => c.type === "RUN_FINISHED");
+
+		expect(runStarted).toBeDefined();
+		expect(textContent).toHaveLength(2);
+		expect(textContent[1].content).toBe("Hello world");
+
+		// Should emit TEXT_MESSAGE_END and RUN_FINISHED despite no finish_reason
+		expect(textEnd).toBeDefined();
+		expect(runFinished).toBeDefined();
+		expect(runFinished.finishReason).toBe("stop");
+	});
+
+	it("should handle premature stream termination with OpenAI-format stream", async () => {
+		// OpenAI-format stream that ends without a finish_reason (e.g. Kimi K2.5 truncation)
+		const encoder = new TextEncoder();
+		const stream = new ReadableStream({
+			start(controller) {
+				controller.enqueue(
+					encoder.encode(
+						'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Hi"},"finish_reason":null}]}\n\n',
+					),
+				);
+				// Stream ends without a finish_reason chunk
+				controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+				controller.close();
+			},
+		});
+		const binding = {
+			run: vi.fn().mockResolvedValue(stream),
+			gateway: () => ({ run: () => Promise.resolve(new Response("ok")) }),
+		};
+		const adapter = new WorkersAiTextAdapter(MODEL, { binding });
+
+		const chunks = await collectChunks(
+			adapter.chatStream({
+				model: MODEL,
+				messages: [{ role: "user", content: "Hi" }],
+			} as any),
+		);
+
+		const runFinished = chunks.find((c: any) => c.type === "RUN_FINISHED");
+		// Should still get a RUN_FINISHED via the premature termination handler
+		expect(runFinished).toBeDefined();
+		expect(runFinished.finishReason).toBe("stop");
+	});
 });
 
 // ---------------------------------------------------------------------------

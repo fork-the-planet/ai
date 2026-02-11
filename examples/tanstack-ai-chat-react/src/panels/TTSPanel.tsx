@@ -40,18 +40,16 @@ export function TTSPanel({ provider }: { provider: ProviderDef }) {
 				body: JSON.stringify({ text }),
 			});
 
-			const data: TTSResult = await res.json();
-
 			if (!res.ok) {
-				setError((data as { error?: string }).error || "TTS failed");
+				const errData = (await res.json()) as { error?: string };
+				setError(errData.error || "TTS failed");
 				return;
 			}
 
-			// TanStack AI generateSpeech returns { audio: { b64Data: string, mimeType: string } }
-			const result = data;
-			if (result.audio) {
-				const mime = result.contentType || "audio/mp3";
-				const url = `data:${mime};base64,${result.audio}`;
+			const data: TTSResult = await res.json();
+			if (data.audio) {
+				const mime = data.contentType || "audio/mp3";
+				const url = `data:${mime};base64,${data.audio}`;
 				setAudioUrl(url);
 			} else {
 				setError("No audio was returned");

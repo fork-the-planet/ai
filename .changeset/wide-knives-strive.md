@@ -32,8 +32,14 @@ Route requests through Cloudflare AI Gateway for caching, rate limiting, and uni
 - Config detection helpers (`isDirectBindingConfig`, `isDirectCredentialsConfig`, `isGatewayConfig`) using structural typing to discriminate `env.AI` from `env.AI.gateway(id)`.
 - Shared binary utilities for normalizing Workers AI responses (Uint8Array, ArrayBuffer, ReadableStream, JSON wrapper) to base64.
 
+### Robustness
+
+- Premature stream termination detection — if Workers AI truncates a response or the connection drops (no `finish_reason`), the adapter emits proper closing events so consumers don't hang.
+- Graceful non-streaming fallback — if a model returns a complete response despite `stream: true`, the binding shim wraps it into a valid response.
+- Deepgram Nova-3 transcription uses raw binary audio via REST (not JSON), automatically detected by model name.
+
 ### Testing
 
-- Comprehensive unit tests (183 tests) covering all adapters, config modes, stream transformation, message building, tool calling, reasoning events, and public API surface.
-- E2E integration tests against real Workers AI APIs (both binding and REST paths) across 12 models, validating chat, multi-turn, tool calling, tool round-trips, structured output, and reasoning.
+- Comprehensive unit tests (186 tests) covering all adapters, config modes, stream transformation, message building, tool calling, reasoning events, premature termination, and public API surface.
+- E2E integration tests against real Workers AI APIs (both binding and REST paths) across 12 chat models + 4 transcription models + image/TTS/summarize, validating chat, multi-turn, tool calling, tool round-trips, structured output, reasoning, and all non-chat capabilities.
 - Tree-shakeable package exports with per-adapter entry points for ESM and CJS.

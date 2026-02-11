@@ -514,6 +514,37 @@ describe("createWorkersAiBindingFetch", () => {
 		expect(binding.run).not.toHaveBeenCalled();
 	});
 
+	it("should handle non-streaming fallback (model ignores stream: true)", async () => {
+		// Some models return a complete response even when stream: true is requested.
+		// The binding shim should gracefully wrap it as an OpenAI Chat Completion.
+		const binding = mockBinding(
+			vi.fn().mockResolvedValue({ response: "I don't stream, sorry!" }),
+		);
+
+		const fetcher = createWorkersAiBindingFetch(binding);
+
+		const response = await fetcher("https://api.openai.com/v1/chat/completions", {
+			method: "POST",
+			body: JSON.stringify({
+				model: "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+				messages: [{ role: "user", content: "Hi" }],
+				stream: true,
+			}),
+		});
+
+		// Should get a valid JSON response (not SSE), since the model didn't stream
+		expect(response.headers.get("Content-Type")).toBe("application/json");
+
+		const json = (await response.json()) as {
+			choices: Array<{
+				message: { content: string; role: string };
+				finish_reason: string;
+			}>;
+		};
+		expect(json.choices[0]!.message.content).toBe("I don't stream, sorry!");
+		expect(json.choices[0]!.finish_reason).toBe("stop");
+	});
+
 	it("should pass response_format to binding for structured output", async () => {
 		const binding = mockBinding(vi.fn().mockResolvedValue({ response: '{"name":"test"}' }));
 

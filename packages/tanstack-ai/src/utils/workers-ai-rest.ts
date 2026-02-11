@@ -46,3 +46,43 @@ export async function workersAiRestFetch(
 
 	return response;
 }
+
+/**
+ * Make a binary REST API call to Workers AI.
+ *
+ * Some models (e.g. `@cf/deepgram/nova-3`) require raw binary audio with an
+ * appropriate `Content-Type` header instead of JSON. This function sends the
+ * audio bytes directly as the request body.
+ *
+ * @param config  Credentials config with accountId and apiKey
+ * @param model   Workers AI model name
+ * @param audioBytes  Raw audio bytes
+ * @param contentType  MIME type of the audio (e.g. "audio/wav")
+ * @param options Optional settings
+ * @returns The raw Response object
+ */
+export async function workersAiRestFetchBinary(
+	config: WorkersAiDirectCredentialsConfig,
+	model: string,
+	audioBytes: Uint8Array,
+	contentType: string,
+	options?: { label?: string; signal?: AbortSignal },
+): Promise<Response> {
+	const response = await fetch(`${WORKERS_AI_REST_BASE}/${config.accountId}/ai/run/${model}`, {
+		method: "POST",
+		headers: {
+			Authorization: `Bearer ${config.apiKey}`,
+			"Content-Type": contentType,
+		},
+		body: audioBytes,
+		signal: options?.signal,
+	});
+
+	if (!response.ok) {
+		const errorText = await response.text();
+		const label = options?.label ?? "Workers AI";
+		throw new Error(`${label} request failed (${response.status}): ${errorText}`);
+	}
+
+	return response;
+}

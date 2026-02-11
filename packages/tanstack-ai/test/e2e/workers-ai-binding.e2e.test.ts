@@ -567,4 +567,182 @@ describe("Workers AI Binding E2E", () => {
 			});
 		}
 	});
+
+	// ==================================================================
+	// Non-chat capabilities via binding
+	// ==================================================================
+
+	// ------------------------------------------------------------------
+	// TTS via binding
+	// ------------------------------------------------------------------
+
+	describe("TTS via binding", () => {
+		it("Deepgram Aura-1 — generates audio", async () => {
+			if (!serverReady) return;
+
+			const data = await post("/tts", {
+				model: "@cf/deepgram/aura-1",
+				text: "Hello, this is a test of text to speech via the binding.",
+			});
+
+			if (data.error) {
+				console.log(`  ✗ TTS binding: ${data.error}`);
+				return;
+			}
+
+			expect(data.audio).toBeTruthy();
+			expect(typeof data.audio).toBe("string");
+			expect((data.audio as string).length).toBeGreaterThan(100);
+			console.log(
+				`  ✓ Deepgram Aura-1 binding: TTS OK — ${(data.audio as string).length} chars base64`,
+			);
+		});
+
+		it("Deepgram Aura-1 — generates audio with voice option", async () => {
+			if (!serverReady) return;
+
+			const data = await post("/tts", {
+				model: "@cf/deepgram/aura-1",
+				text: "Testing voice parameter.",
+				voice: "asteria",
+			});
+
+			if (data.error) {
+				console.log(`  ✗ TTS binding (voice): ${data.error}`);
+				return;
+			}
+
+			expect(data.audio).toBeTruthy();
+			expect((data.audio as string).length).toBeGreaterThan(100);
+			console.log(`  ✓ Deepgram Aura-1 binding: TTS with voice OK`);
+		});
+	});
+
+	// ------------------------------------------------------------------
+	// Transcription via binding
+	// ------------------------------------------------------------------
+
+	const TRANSCRIPTION_MODELS_BINDING = [
+		{ id: "@cf/openai/whisper", label: "Whisper" },
+		{ id: "@cf/openai/whisper-tiny-en", label: "Whisper Tiny EN" },
+		{ id: "@cf/openai/whisper-large-v3-turbo", label: "Whisper Large v3 Turbo" },
+		{ id: "@cf/deepgram/nova-3", label: "Deepgram Nova-3" },
+	];
+
+	describe("Transcription via binding", () => {
+		/**
+		 * Generate a minimal valid WAV with a 440Hz tone as number[].
+		 * Deepgram Nova-3 rejects pure silence, so we generate a real tone.
+		 */
+		function createToneWavBytes(durationMs = 500): number[] {
+			const sampleRate = 16000;
+			const numSamples = Math.floor((sampleRate * durationMs) / 1000);
+			const bytesPerSample = 2;
+			const dataSize = numSamples * bytesPerSample;
+			const buffer = new ArrayBuffer(44 + dataSize);
+			const view = new DataView(buffer);
+
+			const writeStr = (offset: number, str: string) => {
+				for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+			};
+			writeStr(0, "RIFF");
+			view.setUint32(4, 36 + dataSize, true);
+			writeStr(8, "WAVE");
+			writeStr(12, "fmt ");
+			view.setUint32(16, 16, true);
+			view.setUint16(20, 1, true); // PCM
+			view.setUint16(22, 1, true); // mono
+			view.setUint32(24, sampleRate, true);
+			view.setUint32(28, sampleRate * bytesPerSample, true);
+			view.setUint16(32, bytesPerSample, true);
+			view.setUint16(34, 16, true);
+			writeStr(36, "data");
+			view.setUint32(40, dataSize, true);
+
+			// 440Hz sine tone at ~50% amplitude
+			const freq = 440;
+			const amplitude = 16000;
+			for (let i = 0; i < numSamples; i++) {
+				const sample = Math.round(
+					amplitude * Math.sin((2 * Math.PI * freq * i) / sampleRate),
+				);
+				view.setInt16(44 + i * bytesPerSample, sample, true);
+			}
+
+			return Array.from(new Uint8Array(buffer));
+		}
+
+		for (const model of TRANSCRIPTION_MODELS_BINDING) {
+			it(`${model.label} — transcribes audio via binding`, async () => {
+				if (!serverReady) return;
+
+				const audio = createToneWavBytes(500);
+				const data = await post("/transcription", {
+					model: model.id,
+					audio,
+				});
+
+				if (data.error) {
+					console.log(`  ✗ ${model.label} transcription binding: ${data.error}`);
+					return;
+				}
+
+				expect(data.model).toBe(model.id);
+				expect(typeof data.text).toBe("string");
+				console.log(
+					`  ✓ ${model.label} binding: transcription OK — "${(data.text as string).slice(0, 80)}"`,
+				);
+			});
+		}
+	});
+
+	// ------------------------------------------------------------------
+	// Image generation via binding
+	// ------------------------------------------------------------------
+
+	describe("Image generation via binding", () => {
+		it("Stable Diffusion XL — generates image", async () => {
+			if (!serverReady) return;
+
+			const data = await post("/image", {
+				model: "@cf/stabilityai/stable-diffusion-xl-base-1.0",
+				prompt: "a simple red circle on a white background",
+			});
+
+			if (data.error) {
+				console.log(`  ✗ Image binding: ${data.error}`);
+				return;
+			}
+
+			expect(data.imageCount).toBe(1);
+			expect(data.imageSize).toBeGreaterThan(1000);
+			console.log(`  ✓ SDXL binding: image OK — ${data.imageSize} chars base64`);
+		});
+	});
+
+	// ------------------------------------------------------------------
+	// Summarization via binding
+	// ------------------------------------------------------------------
+
+	describe("Summarization via binding", () => {
+		it("BART-large-CNN — summarizes text", async () => {
+			if (!serverReady) return;
+
+			const data = await post("/summarize", {
+				text: "Artificial intelligence (AI) is intelligence demonstrated by machines, as opposed to the natural intelligence displayed by animals including humans. AI research has been defined as the field of study of intelligent agents, which refers to any system that perceives its environment and takes actions that maximize its chance of achieving its goals.",
+			});
+
+			if (data.error) {
+				console.log(`  ✗ Summarize binding: ${data.error}`);
+				return;
+			}
+
+			expect(data.summary).toBeTruthy();
+			expect(typeof data.summary).toBe("string");
+			expect((data.summary as string).length).toBeGreaterThan(10);
+			console.log(
+				`  ✓ BART binding: summarize OK — "${(data.summary as string).slice(0, 80)}"`,
+			);
+		});
+	});
 });

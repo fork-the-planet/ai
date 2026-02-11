@@ -349,6 +349,11 @@ export function createWorkersAiBindingFetch(binding: WorkersAiBinding): typeof f
 			});
 		}
 
+		// Graceful degradation: some models return a complete (non-streaming)
+		// response even when `stream: true` is requested. Fall through to the
+		// non-streaming wrapper which produces a valid OpenAI Chat Completion
+		// response that the SDK can consume.
+
 		// Non-streaming: Workers AI returns { response: "text", tool_calls?: [...] }
 		// Wrap into OpenAI Chat Completion format.
 		const responseObj =

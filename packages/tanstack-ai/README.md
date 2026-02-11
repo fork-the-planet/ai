@@ -1,13 +1,13 @@
 # @cloudflare/tanstack-ai
 
-Use [TanStack AI](https://tanstack.com/ai) with Cloudflare Workers AI and AI Gateway. Supports chat with Workers AI, plus chat routing through AI Gateway for OpenAI, Anthropic, Gemini, Grok, and OpenRouter.
+Use [TanStack AI](https://tanstack.com/ai) with Cloudflare Workers AI and AI Gateway. Supports chat, image generation, transcription, text-to-speech, and summarization with Workers AI models, plus routing through AI Gateway for OpenAI, Anthropic, Gemini, Grok, and OpenRouter.
 
 ## Features
 
-- **Workers AI**: Chat via `env.AI` binding or REST API
-- **AI Gateway**: Route requests to OpenAI, Anthropic, Gemini, Grok, OpenRouter, and Workers AI through Cloudflare's AI Gateway
-- **Flexible Configuration**: Use bindings (recommended in Workers) or credentials (REST)
-- **Type-Safe**: Full TypeScript support with type inference
+- **Workers AI**: Chat, image generation, transcription (Whisper + Deepgram), TTS, and summarization via `env.AI` binding or REST API
+- **AI Gateway**: Route requests to OpenAI, Anthropic, Gemini, Grok, OpenRouter, and Workers AI through Cloudflare's AI Gateway for caching, rate limiting, and unified billing
+- **Flexible Configuration**: Four config modes — plain binding, plain REST, gateway binding, gateway REST
+- **Type-Safe**: Full TypeScript support with model-specific types and type inference
 
 ## Installation
 
@@ -248,7 +248,7 @@ const openrouter = createOpenRouterChat("openai/gpt-4o", config);
 - `createGeminiImage(model, config)` -- credentials only, no binding support
 - `createGeminiTts(model, config)` -- text-to-speech (experimental), credentials only
 
-> **Note:** Gemini adapters use the Google GenAI SDK's `httpOptions.baseUrl` and `httpOptions.headers` to route through the gateway, rather than the custom fetch approach used by other providers. Binding config is not supported — only credentials.
+> **Note:** Gemini adapters use the Google GenAI SDK's `httpOptions.baseUrl` and `httpOptions.headers` to route through the gateway, rather than the custom fetch approach used by other providers. Binding config is not supported — only credentials. See [googleapis/js-genai#999](https://github.com/googleapis/js-genai/issues/999) for the upstream issue tracking custom `fetch` support.
 
 **Grok:**
 

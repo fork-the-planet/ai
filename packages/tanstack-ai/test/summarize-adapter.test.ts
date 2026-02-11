@@ -108,14 +108,12 @@ describe("WorkersAiSummarizeAdapter", () => {
 		const { WorkersAiSummarizeAdapter } = await import("../src/adapters/workers-ai-summarize");
 
 		const originalFetch = globalThis.fetch;
-		globalThis.fetch = vi
-			.fn()
-			.mockResolvedValue(
-				new Response(JSON.stringify({ result: { summary: "REST summary" } }), {
-					status: 200,
-					headers: { "content-type": "application/json" },
-				}),
-			) as any;
+		globalThis.fetch = vi.fn().mockResolvedValue(
+			new Response(JSON.stringify({ result: { summary: "REST summary" } }), {
+				status: 200,
+				headers: { "content-type": "application/json" },
+			}),
+		) as any;
 
 		try {
 			const adapter = new WorkersAiSummarizeAdapter(
@@ -174,14 +172,12 @@ describe("WorkersAiSummarizeAdapter", () => {
 	// -----------------------------------------------------------------------
 
 	it("summarize via gateway: returns summary on success", async () => {
-		const mockGatewayFetch = vi
-			.fn()
-			.mockResolvedValue(
-				new Response(JSON.stringify({ result: { summary: "Gateway summary" } }), {
-					status: 200,
-					headers: { "content-type": "application/json" },
-				}),
-			);
+		const mockGatewayFetch = vi.fn().mockResolvedValue(
+			new Response(JSON.stringify({ result: { summary: "Gateway summary" } }), {
+				status: 200,
+				headers: { "content-type": "application/json" },
+			}),
+		);
 
 		vi.resetModules();
 		vi.doMock("../src/utils/create-fetcher", async (importOriginal) => {
@@ -212,14 +208,12 @@ describe("WorkersAiSummarizeAdapter", () => {
 
 	it("summarize via gateway: handles top-level summary in response", async () => {
 		// Some gateway responses may have { summary: "..." } instead of { result: { summary: "..." } }
-		const mockGatewayFetch = vi
-			.fn()
-			.mockResolvedValue(
-				new Response(JSON.stringify({ summary: "Top-level summary" }), {
-					status: 200,
-					headers: { "content-type": "application/json" },
-				}),
-			);
+		const mockGatewayFetch = vi.fn().mockResolvedValue(
+			new Response(JSON.stringify({ summary: "Top-level summary" }), {
+				status: 200,
+				headers: { "content-type": "application/json" },
+			}),
+		);
 
 		vi.resetModules();
 		vi.doMock("../src/utils/create-fetcher", async (importOriginal) => {

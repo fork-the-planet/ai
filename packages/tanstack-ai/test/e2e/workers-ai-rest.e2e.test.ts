@@ -27,6 +27,46 @@ vi.mock("@tanstack/ai/adapters", () => ({
 			this.model = model;
 		}
 	},
+	BaseImageAdapter: class {
+		kind = "image";
+		model: string;
+		constructor(_config: unknown, model: string) {
+			this.model = model;
+		}
+		generateId() {
+			return `test-${crypto.randomUUID().slice(0, 8)}`;
+		}
+	},
+	BaseTranscriptionAdapter: class {
+		kind = "transcription";
+		model: string;
+		constructor(_config: unknown, model: string) {
+			this.model = model;
+		}
+		generateId() {
+			return `test-${crypto.randomUUID().slice(0, 8)}`;
+		}
+	},
+	BaseTTSAdapter: class {
+		kind = "tts";
+		model: string;
+		constructor(_config: unknown, model: string) {
+			this.model = model;
+		}
+		generateId() {
+			return `test-${crypto.randomUUID().slice(0, 8)}`;
+		}
+	},
+	BaseSummarizeAdapter: class {
+		kind = "summarize";
+		model: string;
+		constructor(_config: unknown, model: string) {
+			this.model = model;
+		}
+		generateId() {
+			return `test-${crypto.randomUUID().slice(0, 8)}`;
+		}
+	},
 }));
 vi.mock("@tanstack/ai", () => ({}));
 
@@ -698,6 +738,216 @@ describe.skipIf(skip())("Workers AI REST E2E", () => {
 			expect(runError).toBeDefined();
 			expect(runError.error).toBeDefined();
 			expect(typeof runError.error.message).toBe("string");
+		});
+	});
+
+	// ==================================================================
+	// Non-chat capabilities via REST
+	// These use dynamic imports to avoid module initialization issues
+	// with vitest's mock hoisting.
+	// ==================================================================
+
+	// ------------------------------------------------------------------
+	// TTS — test field name across models
+	// ------------------------------------------------------------------
+
+	const TTS_MODELS = [{ id: "@cf/deepgram/aura-1", label: "Deepgram Aura-1" }];
+
+	describe("TTS (per model)", () => {
+		for (const model of TTS_MODELS) {
+			it(`${model.label} — generates audio via REST (text field)`, async () => {
+				const { WorkersAiTTSAdapter } = await import("../../src/adapters/workers-ai-tts");
+				const adapter = new WorkersAiTTSAdapter(
+					{ accountId: ACCOUNT_ID!, apiKey: API_TOKEN! },
+					model.id as any,
+				);
+
+				const result = await adapter.generateSpeech({
+					model: model.id,
+					text: "Hello, this is a test of text to speech.",
+				});
+
+				expect(result).toBeDefined();
+				expect(result.model).toBe(model.id);
+				expect(result.audio).toBeTruthy();
+				expect(typeof result.audio).toBe("string");
+				// Base64 audio should be non-trivial (> 100 chars)
+				expect(result.audio.length).toBeGreaterThan(100);
+				expect(result.format).toBe("mp3");
+				console.log(`  ✓ ${model.label}: TTS OK — ${result.audio.length} chars base64`);
+			});
+
+			it(`${model.label} — TTS with voice option`, async () => {
+				const { WorkersAiTTSAdapter } = await import("../../src/adapters/workers-ai-tts");
+				const adapter = new WorkersAiTTSAdapter(
+					{ accountId: ACCOUNT_ID!, apiKey: API_TOKEN! },
+					model.id as any,
+				);
+
+				const result = await adapter.generateSpeech({
+					model: model.id,
+					text: "Testing voice selection.",
+					voice: "asteria",
+				});
+
+				expect(result).toBeDefined();
+				expect(result.audio).toBeTruthy();
+				expect(result.audio.length).toBeGreaterThan(100);
+				console.log(
+					`  ✓ ${model.label}: TTS with voice OK — ${result.audio.length} chars base64`,
+				);
+			});
+		}
+	});
+
+	// ------------------------------------------------------------------
+	// Image generation
+	// ------------------------------------------------------------------
+
+	const IMAGE_MODELS = [
+		{
+			id: "@cf/stabilityai/stable-diffusion-xl-base-1.0",
+			label: "Stable Diffusion XL",
+		},
+		// NOTE: FLUX.1 Schnell omitted — its NSFW filter has false positives
+		// on simple test prompts ("a red circle on white background"), making
+		// E2E tests flaky.
+	];
+
+	describe("Image generation (per model)", () => {
+		for (const model of IMAGE_MODELS) {
+			it(`${model.label} — generates image via REST`, async () => {
+				const { WorkersAiImageAdapter } =
+					await import("../../src/adapters/workers-ai-image");
+				const adapter = new WorkersAiImageAdapter(
+					{ accountId: ACCOUNT_ID!, apiKey: API_TOKEN! },
+					model.id as any,
+				);
+
+				const result = await adapter.generateImages({
+					model: model.id,
+					prompt: "a simple red circle on a white background",
+				});
+
+				expect(result).toBeDefined();
+				expect(result.model).toBe(model.id);
+				expect(result.images).toHaveLength(1);
+				expect(result.images[0]!.b64Json).toBeTruthy();
+				// Base64 image should be substantial
+				expect(result.images[0]!.b64Json!.length).toBeGreaterThan(1000);
+				console.log(
+					`  ✓ ${model.label}: image OK — ${result.images[0]!.b64Json!.length} chars base64`,
+				);
+			});
+		}
+	});
+
+	// ------------------------------------------------------------------
+	// Transcription
+	// ------------------------------------------------------------------
+
+	const TRANSCRIPTION_MODELS = [
+		{ id: "@cf/openai/whisper", label: "Whisper" },
+		{ id: "@cf/openai/whisper-tiny-en", label: "Whisper Tiny EN" },
+		{ id: "@cf/openai/whisper-large-v3-turbo", label: "Whisper Large v3 Turbo" },
+		{ id: "@cf/deepgram/nova-3", label: "Deepgram Nova-3" },
+	];
+
+	describe("Transcription (per model)", () => {
+		/**
+		 * Generate a minimal valid WAV file with a 440Hz sine tone.
+		 * Deepgram Nova-3 rejects pure silence as "corrupt or unsupported",
+		 * so we generate a real tone that all models can process.
+		 */
+		function createToneWav(durationMs = 500): ArrayBuffer {
+			const sampleRate = 16000;
+			const numSamples = Math.floor((sampleRate * durationMs) / 1000);
+			const bytesPerSample = 2;
+			const dataSize = numSamples * bytesPerSample;
+			const buffer = new ArrayBuffer(44 + dataSize);
+			const view = new DataView(buffer);
+
+			// WAV header
+			const writeStr = (offset: number, str: string) => {
+				for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+			};
+			writeStr(0, "RIFF");
+			view.setUint32(4, 36 + dataSize, true);
+			writeStr(8, "WAVE");
+			writeStr(12, "fmt ");
+			view.setUint32(16, 16, true); // chunk size
+			view.setUint16(20, 1, true); // PCM
+			view.setUint16(22, 1, true); // mono
+			view.setUint32(24, sampleRate, true);
+			view.setUint32(28, sampleRate * bytesPerSample, true);
+			view.setUint16(32, bytesPerSample, true);
+			view.setUint16(34, 16, true); // bits per sample
+			writeStr(36, "data");
+			view.setUint32(40, dataSize, true);
+
+			// Generate 440Hz sine tone (A4 note) at ~50% amplitude
+			const freq = 440;
+			const amplitude = 16000; // ~50% of int16 max
+			for (let i = 0; i < numSamples; i++) {
+				const sample = Math.round(
+					amplitude * Math.sin((2 * Math.PI * freq * i) / sampleRate),
+				);
+				view.setInt16(44 + i * bytesPerSample, sample, true);
+			}
+
+			return buffer;
+		}
+
+		for (const model of TRANSCRIPTION_MODELS) {
+			it(`${model.label} — transcribes audio via REST`, async () => {
+				const { WorkersAiTranscriptionAdapter } =
+					await import("../../src/adapters/workers-ai-transcription");
+				const adapter = new WorkersAiTranscriptionAdapter(
+					{ accountId: ACCOUNT_ID!, apiKey: API_TOKEN! },
+					model.id as any,
+				);
+
+				const wavBuffer = createToneWav(500);
+
+				const result = await adapter.transcribe({
+					model: model.id,
+					audio: wavBuffer,
+				});
+
+				expect(result).toBeDefined();
+				expect(result.model).toBe(model.id);
+				expect(typeof result.text).toBe("string");
+				// Silent audio may return empty text or whitespace, that's OK
+				console.log(`  ✓ ${model.label}: transcription OK — "${result.text.slice(0, 80)}"`);
+			});
+		}
+	});
+
+	// ------------------------------------------------------------------
+	// Summarization
+	// ------------------------------------------------------------------
+
+	describe("Summarization", () => {
+		it("BART-large-CNN — summarizes text via REST", async () => {
+			const { WorkersAiSummarizeAdapter } =
+				await import("../../src/adapters/workers-ai-summarize");
+			const adapter = new WorkersAiSummarizeAdapter(
+				{ accountId: ACCOUNT_ID!, apiKey: API_TOKEN! },
+				"@cf/facebook/bart-large-cnn",
+			);
+
+			const result = await adapter.summarize({
+				model: "@cf/facebook/bart-large-cnn",
+				text: "Artificial intelligence (AI) is intelligence demonstrated by machines, as opposed to the natural intelligence displayed by animals including humans. AI research has been defined as the field of study of intelligent agents, which refers to any system that perceives its environment and takes actions that maximize its chance of achieving its goals. The term artificial intelligence had previously been used to describe machines that mimic and display human cognitive skills that are associated with the human mind, such as learning and problem-solving.",
+			});
+
+			expect(result).toBeDefined();
+			expect(result.model).toBe("@cf/facebook/bart-large-cnn");
+			expect(result.summary).toBeTruthy();
+			expect(result.summary.length).toBeGreaterThan(10);
+			// Summary should be shorter than input
+			expect(result.summary.length).toBeLessThan(500);
+			console.log(`  ✓ BART-large-CNN: summarize OK — "${result.summary.slice(0, 100)}"`);
 		});
 	});
 });

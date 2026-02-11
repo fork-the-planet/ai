@@ -7,6 +7,13 @@
  * This worker is started by wrangler dev during integration tests.
  */
 import { createWorkersAiChat, type WorkersAiTextModel } from "../../../../../src/index";
+import { WorkersAiTTSAdapter } from "../../../../../src/adapters/workers-ai-tts";
+import type { WorkersAiTTSModel } from "../../../../../src/adapters/workers-ai-tts";
+import { WorkersAiImageAdapter } from "../../../../../src/adapters/workers-ai-image";
+import type { WorkersAiImageModel } from "../../../../../src/adapters/workers-ai-image";
+import { WorkersAiTranscriptionAdapter } from "../../../../../src/adapters/workers-ai-transcription";
+import type { WorkersAiTranscriptionModel } from "../../../../../src/adapters/workers-ai-transcription";
+import { WorkersAiSummarizeAdapter } from "../../../../../src/adapters/workers-ai-summarize";
 
 interface Env {
 	AI: Ai;
@@ -268,6 +275,92 @@ export default {
 						},
 					} as any);
 					return jsonResponse({ result });
+				}
+
+				// ----- TTS -----
+				case "/tts": {
+					const ttsBody = body as { model?: string; text?: string; voice?: string };
+					const ttsModel = (ttsBody.model || "@cf/deepgram/aura-1") as WorkersAiTTSModel;
+					const ttsAdapter = new WorkersAiTTSAdapter({ binding: env.AI }, ttsModel);
+					const ttsResult = await ttsAdapter.generateSpeech({
+						model: ttsModel,
+						text: ttsBody.text || "Hello, this is a test.",
+						voice: ttsBody.voice,
+					});
+					return jsonResponse(ttsResult);
+				}
+
+				// ----- Image generation -----
+				case "/image": {
+					const imgBody = body as { model?: string; prompt?: string };
+					const imgModel = (imgBody.model ||
+						"@cf/stabilityai/stable-diffusion-xl-base-1.0") as WorkersAiImageModel;
+					const imgAdapter = new WorkersAiImageAdapter({ binding: env.AI }, imgModel);
+					const imgResult = await imgAdapter.generateImages({
+						model: imgModel,
+						prompt: imgBody.prompt || "a red circle on white background",
+					});
+					// Don't send the full base64 — just metadata + length
+					return jsonResponse({
+						id: imgResult.id,
+						model: imgResult.model,
+						imageCount: imgResult.images.length,
+						imageSize: imgResult.images[0]?.b64Json?.length ?? 0,
+					});
+				}
+
+				// ----- Transcription -----
+				case "/transcription": {
+					const txBody = body as { model?: string; audio?: number[] };
+					const txModel = (txBody.model ||
+						"@cf/openai/whisper") as WorkersAiTranscriptionModel;
+					const txAdapter = new WorkersAiTranscriptionAdapter(
+						{ binding: env.AI },
+						txModel,
+					);
+					// Accept audio as number[] from JSON body, or generate silence
+					const audioData = txBody.audio || Array.from(new Uint8Array(16000)); // 1s silence
+					const txResult = await txAdapter.transcribe({
+						model: txModel,
+						audio: new Uint8Array(audioData).buffer,
+					});
+					return jsonResponse(txResult);
+				}
+
+				// ----- Summarization -----
+				case "/summarize": {
+					const sumBody = body as { text?: string };
+					const sumAdapter = new WorkersAiSummarizeAdapter(
+						{ binding: env.AI },
+						"@cf/facebook/bart-large-cnn",
+					);
+					const sumResult = await sumAdapter.summarize({
+						model: "@cf/facebook/bart-large-cnn",
+						text:
+							sumBody.text ||
+							"Artificial intelligence is the simulation of human intelligence processes by computer systems.",
+					});
+					return jsonResponse(sumResult);
+				}
+
+				// ----- Streaming chat (returns chunks as JSON) -----
+				case "/chat/stream": {
+					const streamBody = body as {
+						model?: string;
+						messages?: Array<{ role: string; content: string }>;
+					};
+					const streamModel = (streamBody.model || model) as WorkersAiTextModel;
+					const streamAdapter = createWorkersAiChat(streamModel, { binding: env.AI });
+					const streamChunks = await collectChunks(
+						streamAdapter.chatStream({
+							model: streamModel,
+							messages: streamBody.messages || [
+								{ role: "user", content: "Say hello." },
+							],
+							temperature: 0,
+						} as any),
+					);
+					return jsonResponse({ chunks: streamChunks });
 				}
 
 				default:

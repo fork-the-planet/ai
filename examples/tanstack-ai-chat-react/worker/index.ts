@@ -481,7 +481,7 @@ export default {
 						stream: true,
 						conversationId: body.data?.conversationId ?? crypto.randomUUID(),
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any -- messages from request body match at runtime
-					messages: body.messages as any,
+						messages: body.messages as any,
 						temperature: 0.6,
 						tools,
 					});
