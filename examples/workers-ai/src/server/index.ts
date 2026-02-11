@@ -1,5 +1,6 @@
 import {
 	streamText,
+	stepCountIs,
 	tool,
 	embedMany,
 	convertToModelMessages,
@@ -59,6 +60,7 @@ export default {
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
 						model: workersai(model as any),
 						messages,
+						stopWhen: stepCountIs(10),
 						tools: {
 							getWeather: tool({
 								description:
