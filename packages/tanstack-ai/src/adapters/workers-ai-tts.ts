@@ -64,7 +64,7 @@ export class WorkersAiTTSAdapter extends BaseTTSAdapter<WorkersAiTTSModel> {
 		options: Record<string, unknown>,
 	): Promise<TTSResult> {
 		const ai = (this.adapterConfig as WorkersAiDirectBindingConfig).binding;
-		const result = await ai.run(this.model, { prompt: text, ...options });
+		const result = await ai.run(this.model, { text, ...options });
 
 		return this.normalizeResult(result, format);
 	}
@@ -78,7 +78,7 @@ export class WorkersAiTTSAdapter extends BaseTTSAdapter<WorkersAiTTSModel> {
 		const response = await workersAiRestFetch(
 			config,
 			this.model,
-			{ prompt: text, ...options },
+			{ text, ...options },
 			{ label: "Workers AI TTS", signal: (options as { signal?: AbortSignal }).signal },
 		);
 
@@ -102,7 +102,7 @@ export class WorkersAiTTSAdapter extends BaseTTSAdapter<WorkersAiTTSModel> {
 			method: "POST",
 			body: JSON.stringify({
 				model: this.model,
-				prompt: text,
+				text,
 				...options,
 			}),
 		});

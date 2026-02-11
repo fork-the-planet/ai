@@ -2,6 +2,21 @@ import { useRef, useState } from "react";
 import { useConfig } from "../config";
 import type { ProviderDef } from "../providers";
 
+interface TTSResult {
+	/** Unique identifier for the generation */
+	id: string;
+	/** Model used for generation */
+	model: string;
+	/** Base64-encoded audio data */
+	audio: string;
+	/** Audio format of the generated audio */
+	format: string;
+	/** Duration of the audio in seconds, if available */
+	duration?: number;
+	/** Content type of the audio (e.g., 'audio/mp3') */
+	contentType?: string;
+}
+
 export function TTSPanel({ provider }: { provider: ProviderDef }) {
 	const [text, setText] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
@@ -25,7 +40,7 @@ export function TTSPanel({ provider }: { provider: ProviderDef }) {
 				body: JSON.stringify({ text }),
 			});
 
-			const data = await res.json();
+			const data: TTSResult = await res.json();
 
 			if (!res.ok) {
 				setError((data as { error?: string }).error || "TTS failed");
@@ -33,10 +48,10 @@ export function TTSPanel({ provider }: { provider: ProviderDef }) {
 			}
 
 			// TanStack AI generateSpeech returns { audio: { b64Data: string, mimeType: string } }
-			const result = data as { audio?: { b64Data?: string; mimeType?: string } };
-			if (result.audio?.b64Data) {
-				const mime = result.audio.mimeType || "audio/mp3";
-				const url = `data:${mime};base64,${result.audio.b64Data}`;
+			const result = data;
+			if (result.audio) {
+				const mime = result.contentType || "audio/mp3";
+				const url = `data:${mime};base64,${result.audio}`;
 				setAudioUrl(url);
 			} else {
 				setError("No audio was returned");
