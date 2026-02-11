@@ -156,7 +156,7 @@ describe("WorkersAiTTSAdapter", () => {
 
 			// Verify body sent correctly
 			const body = JSON.parse(call[1].body);
-			expect(body.prompt).toBe("Hello world");
+			expect(body.text).toBe("Hello world");
 		} finally {
 			globalThis.fetch = originalFetch;
 		}
@@ -275,7 +275,7 @@ describe("WorkersAiTTSAdapter", () => {
 		});
 
 		const callArgs = mockBinding.run.mock.calls[0]![1] as Record<string, unknown>;
-		expect(callArgs.prompt).toBe("Hello");
+		expect(callArgs.text).toBe("Hello");
 		expect(callArgs.voice).toBe("asteria");
 		expect(callArgs.speed).toBe(1.5);
 	});

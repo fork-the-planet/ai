@@ -108,7 +108,7 @@ describe("Workers AI gateway URL verification", () => {
 		const body = JSON.parse((init as any).body as string);
 		expect(body.provider).toBe("workers-ai");
 		expect(body.endpoint).toBe("@cf/deepgram/aura-1");
-		expect(body.query.prompt).toBe("Hello world");
+		expect(body.query.text).toBe("Hello world");
 	});
 
 	it("summarize adapter sends model name in body and hits gateway URL", async () => {
