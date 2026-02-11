@@ -112,6 +112,7 @@ export function createRun(config: CreateRunConfig): AiRun {
 			prefix: _prefix,
 			extraHeaders: _extraHeaders,
 			returnRawResponse,
+			signal, // AbortSignal — not serializable as a query parameter
 			...passthroughOptions
 		} = options || {};
 
@@ -151,6 +152,7 @@ export function createRun(config: CreateRunConfig): AiRun {
 			body,
 			headers,
 			method: "POST",
+			signal: signal as AbortSignal | undefined,
 		});
 
 		// Check for HTTP errors before processing
@@ -182,6 +184,54 @@ export function createRun(config: CreateRunConfig): AiRun {
 		}>();
 		return data.result;
 	};
+}
+
+/**
+ * Make a binary REST API call to Workers AI.
+ *
+ * Some models (e.g. `@cf/deepgram/nova-3`) require raw audio bytes
+ * with an appropriate `Content-Type` header instead of JSON.
+ *
+ * @param config  Credentials config
+ * @param model   Workers AI model name
+ * @param audioBytes  Raw audio bytes
+ * @param contentType  MIME type (e.g. "audio/wav")
+ * @param signal  Optional AbortSignal
+ * @returns The parsed JSON response body
+ */
+export async function createRunBinary(
+	config: CreateRunConfig,
+	model: string,
+	audioBytes: Uint8Array,
+	contentType: string,
+	signal?: AbortSignal,
+): Promise<Record<string, unknown>> {
+	const url = `https://api.cloudflare.com/client/v4/accounts/${config.accountId}/ai/run/${model}`;
+
+	const response = await fetch(url, {
+		method: "POST",
+		headers: {
+			Authorization: `Bearer ${config.apiKey}`,
+			"Content-Type": contentType,
+		},
+		body: audioBytes,
+		signal,
+	});
+
+	if (!response.ok) {
+		let errorBody: string;
+		try {
+			errorBody = await response.text();
+		} catch {
+			errorBody = "<unable to read response body>";
+		}
+		throw new Error(
+			`Workers AI API error (${response.status} ${response.statusText}): ${errorBody}`,
+		);
+	}
+
+	const data = await response.json<{ result?: Record<string, unknown> }>();
+	return (data.result ?? data) as Record<string, unknown>;
 }
 
 // ---------------------------------------------------------------------------

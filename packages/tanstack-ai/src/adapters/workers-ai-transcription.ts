@@ -350,7 +350,7 @@ async function normalizeAudioToBytes(audio: string | File | Blob | ArrayBuffer):
  * (e.g., Deepgram Nova-3).
  *
  * - `File` / `Blob`: use the `.type` property (e.g., "audio/wav")
- * - `ArrayBuffer` / `string`: sniff magic bytes, default to "audio/wav"
+ * - `ArrayBuffer` / `string`: defaults to "audio/wav"
  */
 function detectAudioContentType(audio: string | File | Blob | ArrayBuffer): string {
 	// File and Blob carry their own MIME type

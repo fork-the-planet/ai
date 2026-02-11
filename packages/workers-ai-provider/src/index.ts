@@ -9,10 +9,19 @@ import { WorkersAIChatLanguageModel } from "./workersai-chat-language-model";
 import type { WorkersAIChatSettings } from "./workersai-chat-settings";
 import { WorkersAIImageModel } from "./workersai-image-model";
 import type { WorkersAIImageSettings } from "./workersai-image-settings";
+import { WorkersAITranscriptionModel } from "./workersai-transcription-model";
+import type { WorkersAITranscriptionSettings } from "./workersai-transcription-settings";
+import { WorkersAISpeechModel } from "./workersai-speech-model";
+import type { WorkersAISpeechSettings } from "./workersai-speech-settings";
+import { WorkersAIRerankingModel } from "./workersai-reranking-model";
+import type { WorkersAIRerankingSettings } from "./workersai-reranking-settings";
 import type {
 	EmbeddingModels,
 	ImageGenerationModels,
 	TextGenerationModels,
+	TranscriptionModels,
+	SpeechModels,
+	RerankingModels,
 } from "./workersai-models";
 
 // Re-export deprecated AutoRAG aliases
@@ -22,6 +31,14 @@ export type { AutoRAGChatSettings } from "./autorag-chat-settings";
 // Export new AI Search types
 export { AISearchChatLanguageModel } from "./aisearch-chat-language-model";
 export type { AISearchChatSettings } from "./aisearch-chat-settings";
+
+// Export transcription and speech types
+export { WorkersAITranscriptionModel } from "./workersai-transcription-model";
+export type { WorkersAITranscriptionSettings } from "./workersai-transcription-settings";
+export { WorkersAISpeechModel } from "./workersai-speech-model";
+export type { WorkersAISpeechSettings } from "./workersai-speech-settings";
+export { WorkersAIRerankingModel } from "./workersai-reranking-model";
+export type { WorkersAIRerankingSettings } from "./workersai-reranking-settings";
 
 // ---------------------------------------------------------------------------
 // Workers AI
@@ -91,6 +108,36 @@ export interface WorkersAI {
 		modelId: ImageGenerationModels,
 		settings?: WorkersAIImageSettings,
 	): WorkersAIImageModel;
+
+	/**
+	 * Creates a model for speech-to-text transcription.
+	 **/
+	transcription(
+		modelId: TranscriptionModels,
+		settings?: WorkersAITranscriptionSettings,
+	): WorkersAITranscriptionModel;
+	transcriptionModel(
+		modelId: TranscriptionModels,
+		settings?: WorkersAITranscriptionSettings,
+	): WorkersAITranscriptionModel;
+
+	/**
+	 * Creates a model for text-to-speech synthesis.
+	 **/
+	speech(modelId: SpeechModels, settings?: WorkersAISpeechSettings): WorkersAISpeechModel;
+	speechModel(modelId: SpeechModels, settings?: WorkersAISpeechSettings): WorkersAISpeechModel;
+
+	/**
+	 * Creates a model for document reranking.
+	 **/
+	reranking(
+		modelId: RerankingModels,
+		settings?: WorkersAIRerankingSettings,
+	): WorkersAIRerankingModel;
+	rerankingModel(
+		modelId: RerankingModels,
+		settings?: WorkersAIRerankingSettings,
+	): WorkersAIRerankingModel;
 }
 
 /**
@@ -140,6 +187,38 @@ export function createWorkersAI(options: WorkersAISettings): WorkersAI {
 			provider: "workersai.embedding",
 		});
 
+	const createTranscriptionModel = (
+		modelId: TranscriptionModels,
+		settings: WorkersAITranscriptionSettings = {},
+	) =>
+		new WorkersAITranscriptionModel(modelId, settings, {
+			binding,
+			gateway: options.gateway,
+			provider: "workersai.transcription",
+			isBinding,
+			credentials:
+				!isBinding && "accountId" in options
+					? { accountId: options.accountId, apiKey: options.apiKey }
+					: undefined,
+		});
+
+	const createSpeechModel = (modelId: SpeechModels, settings: WorkersAISpeechSettings = {}) =>
+		new WorkersAISpeechModel(modelId, settings, {
+			binding,
+			gateway: options.gateway,
+			provider: "workersai.speech",
+		});
+
+	const createRerankingModel = (
+		modelId: RerankingModels,
+		settings: WorkersAIRerankingSettings = {},
+	) =>
+		new WorkersAIRerankingModel(modelId, settings, {
+			binding,
+			gateway: options.gateway,
+			provider: "workersai.reranking",
+		});
+
 	const provider = (modelId: TextGenerationModels, settings?: WorkersAIChatSettings) => {
 		if (new.target) {
 			throw new Error("The WorkersAI model function cannot be called with the new keyword.");
@@ -153,6 +232,12 @@ export function createWorkersAI(options: WorkersAISettings): WorkersAI {
 	provider.textEmbeddingModel = createEmbeddingModel;
 	provider.image = createImageModel;
 	provider.imageModel = createImageModel;
+	provider.transcription = createTranscriptionModel;
+	provider.transcriptionModel = createTranscriptionModel;
+	provider.speech = createSpeechModel;
+	provider.speechModel = createSpeechModel;
+	provider.reranking = createRerankingModel;
+	provider.rerankingModel = createRerankingModel;
 
 	return provider;
 }

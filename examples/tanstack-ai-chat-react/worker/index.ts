@@ -388,7 +388,7 @@ const tools = [
 		name: "web_scrape",
 		description:
 			"Fetch and extract text content from a webpage URL. Only works with public HTTP/HTTPS URLs.",
-		inputSchema: z.object({ url: z.string().url() }),
+		inputSchema: z.object({ url: z.string().describe("The URL to scrape") }),
 	}).server(async (args) => {
 		try {
 			const parsed = new URL(args.url);
