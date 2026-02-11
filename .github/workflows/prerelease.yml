@@ -30,5 +30,6 @@ jobs:
               run: |
                   pnpm nx build workers-ai-provider
                   pnpm nx build ai-gateway-provider
+                  pnpm nx build @cloudflare/tanstack-ai
 
             - run: pnpm dlx pkg-pr-new publish './packages/*' --bin
