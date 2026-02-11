@@ -9,6 +9,8 @@ export const chatModels: ModelOption[] = [
 	{ id: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", label: "Llama 3.3 70B" },
 	{ id: "@cf/meta/llama-3.1-8b-instruct-fast", label: "Llama 3.1 8B Fast" },
 	{ id: "@cf/qwen/qwen3-30b-a3b-fp8", label: "Qwen3 30B" },
+	{ id: "@cf/openai/gpt-oss-120b", label: "GPT-OSS 120B" },
+	{ id: "@cf/openai/gpt-oss-20b", label: "GPT-OSS 20B" },
 ];
 
 export const imageModels: ModelOption[] = [

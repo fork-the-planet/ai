@@ -1,5 +1,5 @@
 {
-	"name": "tanstack-ai-chat",
+	"name": "@cloudflare/tanstack-ai-example",
 	"version": "0.0.0",
 	"private": true,
 	"type": "module",

@@ -1535,7 +1535,7 @@ importers:
         specifier: ^4.64.0
         version: 4.64.0(@cloudflare/workers-types@4.20260210.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
-  examples/tanstack-ai-chat-react:
+  examples/tanstack-ai:
     dependencies:
       '@cloudflare/tanstack-ai':
         specifier: workspace:*

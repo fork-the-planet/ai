@@ -1,5 +1,5 @@
 {
-	"name": "workers-ai-example",
+	"name": "@cloudflare/workers-ai-provider-example",
 	"private": true,
 	"type": "module",
 	"scripts": {
