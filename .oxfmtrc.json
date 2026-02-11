@@ -1,0 +1,11 @@
+{
+	"printWidth": 100,
+	"tabWidth": 4,
+	"useTabs": true,
+	"ignorePatterns": [
+		"**/worker-configuration.d.ts",
+		"types/workerd.d.ts",
+		"**/wrangler.json",
+		"**/wrangler.jsonc"
+	]
+}

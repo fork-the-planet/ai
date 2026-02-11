@@ -1,154 +1,235 @@
-# ⛅️ ✨ workers-ai-provider ✨ ⛅️
+# workers-ai-provider
 
-A custom provider that enables [Workers AI](https://ai.cloudflare.com/)'s models for the [Vercel AI SDK](https://sdk.vercel.ai/).
+[Workers AI](https://developers.cloudflare.com/workers-ai/) provider for the [AI SDK](https://sdk.vercel.ai/). Use Cloudflare's models for chat, tool calling, structured output, embeddings, image generation, and [AI Search](https://developers.cloudflare.com/ai-search/).
 
-## Install
+## Quick Start
+
+```jsonc
+// wrangler.jsonc
+{
+	"ai": { "binding": "AI" },
+}
+```
+
+```ts
+import { createWorkersAI } from "workers-ai-provider";
+import { streamText } from "ai";
+
+export default {
+	async fetch(req: Request, env: { AI: Ai }) {
+		const workersai = createWorkersAI({ binding: env.AI });
+
+		const result = streamText({
+			model: workersai("@cf/meta/llama-4-scout-17b-16e-instruct"),
+			messages: [{ role: "user", content: "Write a haiku about Cloudflare" }],
+		});
+
+		return result.toTextStreamResponse();
+	},
+};
+```
 
 ```bash
-npm install workers-ai-provider
+npm install workers-ai-provider ai
 ```
 
-## Usage
+## Configuration
 
-First, setup an AI binding in `wrangler.toml` in your Workers project:
+### Workers binding (recommended)
 
-```toml
-# ...
-[ai]
-binding = "AI"
-# ...
-```
-
-### Using Workers AI
-
-Then in your Worker, import the factory function and create a new AI provider:
+Inside a Cloudflare Worker, pass the `env.AI` binding directly. No API keys needed.
 
 ```ts
-import { createWorkersAI } from "workers-ai-provider";
-import { streamText } from "ai";
-
-type Env = {
-  AI: Ai;
-};
-
-export default {
-  async fetch(req: Request, env: Env) {
-    const workersai = createWorkersAI({ binding: env.AI });
-    // Use the AI provider to interact with the Vercel AI SDK
-    // Here, we generate a chat stream based on a prompt
-    const text = await streamText({
-      model: workersai("@cf/meta/llama-2-7b-chat-int8"),
-      messages: [
-        {
-          role: "user",
-          content: "Write an essay about hello world",
-        },
-      ],
-    });
-
-    return text.toTextStreamResponse({
-      headers: {
-        // add these headers to ensure that the
-        // response is chunked and streamed
-        "Content-Type": "text/x-unknown",
-        "content-encoding": "identity",
-        "transfer-encoding": "chunked",
-      },
-    });
-  },
-};
+const workersai = createWorkersAI({ binding: env.AI });
 ```
 
-You can also use your Cloudflare credentials to create the provider, for example if you want to use Cloudflare AI outside of the Worker environment. For example, here is how you can use Cloudflare AI in a Node script:
+### REST API
 
-```js
+Outside of Workers (Node.js, Bun, etc.), use your Cloudflare credentials:
+
+```ts
 const workersai = createWorkersAI({
-  accountId: process.env.CLOUDFLARE_ACCOUNT_ID,
-  apiKey: process.env.CLOUDFLARE_API_KEY
-});
-
-const text = await streamText({
-  model: workersai("@cf/meta/llama-2-7b-chat-int8"),
-  messages: [
-    {
-      role: "user",
-      content: "Write an essay about hello world",
-    },
-  ],
+	accountId: process.env.CLOUDFLARE_ACCOUNT_ID,
+	apiKey: process.env.CLOUDFLARE_API_TOKEN,
 });
 ```
 
-### Using generateText for Non-Streaming Responses
+### AI Gateway
 
-If you prefer to get a complete text response rather than a stream, you can use the `generateText` function:
+Route requests through [AI Gateway](https://developers.cloudflare.com/ai-gateway/) for caching, rate limiting, and observability:
 
 ```ts
-import { createWorkersAI } from "workers-ai-provider";
+const workersai = createWorkersAI({
+	binding: env.AI,
+	gateway: { id: "my-gateway" },
+});
+```
+
+## Models
+
+Browse the full catalog at [developers.cloudflare.com/workers-ai/models](https://developers.cloudflare.com/workers-ai/models/).
+
+Some good defaults:
+
+| Task       | Model                                      | Notes                       |
+| ---------- | ------------------------------------------ | --------------------------- |
+| Chat       | `@cf/meta/llama-4-scout-17b-16e-instruct`  | Fast, strong tool calling   |
+| Chat       | `@cf/meta/llama-3.3-70b-instruct-fp8-fast` | Largest Llama, best quality |
+| Reasoning  | `@cf/qwen/qwq-32b`                         | Emits `reasoning_content`   |
+| Embeddings | `@cf/baai/bge-base-en-v1.5`                | 768-dim, English            |
+| Images     | `@cf/black-forest-labs/flux-1-schnell`     | Fast image generation       |
+
+## Text Generation
+
+```ts
 import { generateText } from "ai";
 
-type Env = {
-  AI: Ai;
-};
-
-export default {
-  async fetch(req: Request, env: Env) {
-    const workersai = createWorkersAI({ binding: env.AI });
-    
-    const { text } = await generateText({
-      model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
-      prompt: "Write a short poem about clouds",
-    });
-
-    return new Response(JSON.stringify({ generatedText: text }), {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  },
-};
+const { text } = await generateText({
+	model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
+	prompt: "Explain Workers AI in one paragraph",
+});
 ```
 
-### Using AutoRAG
-
-The provider now supports [Cloudflare's AutoRAG](https://developers.cloudflare.com/autorag/), allowing you to prompt your AutoRAG models directly from the Vercel AI SDK. Here's how to use it in your Worker:
+Streaming:
 
 ```ts
-import { createAutoRAG } from "workers-ai-provider";
 import { streamText } from "ai";
 
-type Env = {
-  AI: Ai;
-};
+const result = streamText({
+	model: workersai("@cf/meta/llama-4-scout-17b-16e-instruct"),
+	messages: [{ role: "user", content: "Write a short story" }],
+});
 
-export default {
-  async fetch(req: Request, env: Env) {
-    const autorag = createAutoRAG({ binding: env.AI.autorag('my-rag-name') });
-
-    const text = await streamText({
-      model: autorag("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
-      messages: [
-        {
-          role: "user",
-          content: "How to setup AI Gateway?",
-        },
-      ],
-    });
-
-    return text.toTextStreamResponse({
-      headers: {
-        // add these headers to ensure that the
-        // response is chunked and streamed
-        "Content-Type": "text/x-unknown",
-        "content-encoding": "identity",
-        "transfer-encoding": "chunked",
-      },
-    });
-  },
-};
+for await (const chunk of result.textStream) {
+	process.stdout.write(chunk);
+}
 ```
 
-For more info, refer to the documentation of the [Vercel AI SDK](https://sdk.vercel.ai/).
+## Tool Calling
 
-### Credits
+```ts
+import { generateText, stepCountIs } from "ai";
+import { z } from "zod";
 
-Based on work by [Dhravya Shah](https://twitter.com/DhravyaShah) and the Workers AI team at Cloudflare.
+const { text } = await generateText({
+	model: workersai("@cf/meta/llama-4-scout-17b-16e-instruct"),
+	prompt: "What's the weather in London?",
+	tools: {
+		getWeather: {
+			description: "Get the current weather for a city",
+			inputSchema: z.object({ city: z.string() }),
+			execute: async ({ city }) => ({ city, temperature: 18, condition: "Cloudy" }),
+		},
+	},
+	stopWhen: stepCountIs(2),
+});
+```
+
+## Structured Output
+
+```ts
+import { generateText, Output } from "ai";
+import { z } from "zod";
+
+const { output } = await generateText({
+	model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
+	prompt: "Recipe for spaghetti bolognese",
+	output: Output.object({
+		schema: z.object({
+			name: z.string(),
+			ingredients: z.array(z.object({ name: z.string(), amount: z.string() })),
+			steps: z.array(z.string()),
+		}),
+	}),
+});
+```
+
+## Embeddings
+
+```ts
+import { embedMany } from "ai";
+
+const { embeddings } = await embedMany({
+	model: workersai.textEmbedding("@cf/baai/bge-base-en-v1.5"),
+	values: ["sunny day at the beach", "rainy afternoon in the city"],
+});
+```
+
+## Image Generation
+
+```ts
+import { generateImage } from "ai";
+
+const { images } = await generateImage({
+	model: workersai.image("@cf/black-forest-labs/flux-1-schnell"),
+	prompt: "A mountain landscape at sunset",
+	size: "1024x1024",
+});
+
+// images[0].uint8Array contains the PNG bytes
+```
+
+## AI Search
+
+[AI Search](https://developers.cloudflare.com/ai-search/) is Cloudflare's managed RAG service. Connect your data and query it with natural language.
+
+```jsonc
+// wrangler.jsonc
+{
+	"ai_search": [{ "binding": "AI_SEARCH", "name": "my-search-index" }],
+}
+```
+
+```ts
+import { createAISearch } from "workers-ai-provider";
+import { generateText } from "ai";
+
+const aisearch = createAISearch({ binding: env.AI_SEARCH });
+
+const { text } = await generateText({
+	model: aisearch(),
+	messages: [{ role: "user", content: "How do I setup AI Gateway?" }],
+});
+```
+
+Streaming works the same way -- use `streamText` instead of `generateText`.
+
+> `createAutoRAG` still works but is deprecated. Use `createAISearch` instead.
+
+## API Reference
+
+### `createWorkersAI(options)`
+
+| Option      | Type             | Description                                                                  |
+| ----------- | ---------------- | ---------------------------------------------------------------------------- |
+| `binding`   | `Ai`             | Workers AI binding (`env.AI`). Use this OR credentials.                      |
+| `accountId` | `string`         | Cloudflare account ID. Required with `apiKey`.                               |
+| `apiKey`    | `string`         | Cloudflare API token. Required with `accountId`.                             |
+| `gateway`   | `GatewayOptions` | Optional [AI Gateway](https://developers.cloudflare.com/ai-gateway/) config. |
+
+Returns a provider with model factories for each AI SDK function:
+
+```ts
+// For generateText / streamText:
+workersai(modelId);
+workersai.chat(modelId);
+
+// For embedMany / embed:
+workersai.textEmbedding(modelId);
+
+// For generateImage:
+workersai.image(modelId);
+```
+
+### `createAISearch(options)`
+
+| Option    | Type      | Description                          |
+| --------- | --------- | ------------------------------------ |
+| `binding` | `AutoRAG` | AI Search binding (`env.AI_SEARCH`). |
+
+Returns a callable provider:
+
+```ts
+aisearch(); // AI Search model (shorthand)
+aisearch.chat(); // AI Search model
+```

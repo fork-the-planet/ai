@@ -1,6 +1,8 @@
 {
 	"name": "@cloudflare/agents-mcp-client-example",
 	"private": true,
+	"keywords": [],
+	"author": "",
 	"type": "module",
 	"scripts": {
 		"start": "vite dev",
@@ -8,20 +10,18 @@
 		"deploy": "npx wrangler deploy --var HOST:$(./get-subdomain.sh)",
 		"type-check": "tsc --noEmit"
 	},
-	"keywords": [],
-	"author": "",
 	"dependencies": {
-		"agents": "^0.3.6",
+		"agents": "^0.4.0",
 		"nanoid": "^5.1.6",
 		"react": "^19.2.4",
 		"react-dom": "^19.2.4"
 	},
 	"devDependencies": {
-		"@cloudflare/vite-plugin": "^1.22.0",
-		"@cloudflare/workers-types": "^4.20260128.0",
-		"@types/react": "^19.2.10",
+		"@cloudflare/vite-plugin": "^1.24.0",
+		"@cloudflare/workers-types": "^4.20260210.0",
+		"@types/react": "^19.2.13",
 		"@types/react-dom": "^19.2.3",
-		"@vitejs/plugin-react": "^5.1.2",
+		"@vitejs/plugin-react": "^5.1.4",
 		"vite": "^7.3.1"
 	}
 }

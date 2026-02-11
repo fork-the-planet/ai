@@ -1,5 +1,5 @@
 import type { Schedule } from "agents";
-import { generateObject, type LanguageModel } from "ai";
+import { generateText, Output, type LanguageModel } from "ai";
 import z from "zod";
 
 export async function extractActionType(
@@ -7,12 +7,8 @@ export async function extractActionType(
 	query: string,
 	schedules: Schedule[],
 ) {
-	const { object } = await generateObject({
+	const { output: object } = await generateText({
 		model,
-		schema: z.object({
-			action: z.string(),
-			message: z.string().optional(),
-		}),
 		prompt: `
 			You are an intelligent scheduled alarms manager. Based on the user's prompt, decide whether to:
 			  - "add" a new scheduled alarm,
@@ -38,6 +34,12 @@ export async function extractActionType(
 			- To do nothing:
 			  { "action": "none", "message": "[explanation]" }
       `,
+		output: Output.object({
+			schema: z.object({
+				action: z.string(),
+				message: z.string().optional(),
+			}),
+		}),
 	});
 
 	return object;

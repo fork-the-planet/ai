@@ -13,8 +13,8 @@ Before you begin, ensure you have:
 ## Develop locally
 
 1. Get your credentials from the Descope Console:
-   - [Project ID](https://app.descope.com/settings/project)
-   - [Management Key](https://app.descope.com/settings/company/managementkeys)
+    - [Project ID](https://app.descope.com/settings/project)
+    - [Management Key](https://app.descope.com/settings/company/managementkeys)
 
 2. Create a `.dev.vars` file in your project root (this file is gitignored):
 

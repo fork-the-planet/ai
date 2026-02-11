@@ -129,7 +129,7 @@ async function main(): Promise<void> {
 		});
 	});
 
-	execSync(`biome format --write ${projectPath}`);
+	execSync(`oxfmt --write ${projectPath}`);
 
 	outro(`You're all set! To start your worker:
 

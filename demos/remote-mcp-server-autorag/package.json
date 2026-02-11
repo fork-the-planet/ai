@@ -5,20 +5,22 @@
 	"scripts": {
 		"deploy": "wrangler deploy",
 		"dev": "wrangler dev",
-		"format": "biome format --write",
-		"lint:fix": "biome lint --fix",
+		"format": "oxfmt --write .",
+		"lint:fix": "oxlint --fix",
 		"start": "wrangler dev",
 		"cf-typegen": "wrangler types"
 	},
 	"dependencies": {
 		"@cloudflare/workers-oauth-provider": "^0.2.2",
-		"agents": "^0.3.6",
-		"hono": "^4.11.7",
+		"agents": "^0.4.0",
+		"hono": "^4.11.9",
 		"zod": "^4.3.6"
 	},
 	"devDependencies": {
 		"marked": "^17.0.1",
+		"oxfmt": "^0.31.0",
+		"oxlint": "^1.46.0",
 		"typescript": "5.9.3",
-		"wrangler": "^4.61.0"
+		"wrangler": "^4.64.0"
 	}
 }

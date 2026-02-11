@@ -1,26 +1,24 @@
 {
 	"name": "workers-ai-provider",
+	"version": "3.0.5",
 	"description": "Workers AI Provider for the vercel AI SDK",
-	"type": "module",
-	"version": "3.0.4",
-	"main": "dist/index.js",
-	"types": "dist/index.d.ts",
-	"repository": {
-		"type": "git",
-		"url": "git://github.com/cloudflare/ai.git"
-	},
+	"keywords": [
+		"ai",
+		"chat",
+		"cloudflare",
+		"provider",
+		"sdk",
+		"serverless",
+		"vercel",
+		"workers"
+	],
 	"bugs": {
 		"url": "https://github.com/cloudflare/ai/issues"
 	},
-	"authors": "Cloudflare Inc.",
 	"license": "MIT",
-	"scripts": {
-		"build": "rm -rf dist && tsup src/index.ts --dts --sourcemap --format esm --target es2020",
-		"prepare": "pnpm build",
-		"format": "biome format --write",
-		"test:ci": "vitest --watch=false",
-		"test": "vitest",
-		"type-check": "tsc --noEmit"
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/cloudflare/ai.git"
 	},
 	"files": [
 		"dist",
@@ -28,27 +26,29 @@
 		"README.md",
 		"package.json"
 	],
-	"keywords": [
-		"workers",
-		"cloudflare",
-		"ai",
-		"vercel",
-		"sdk",
-		"provider",
-		"chat",
-		"serverless"
-	],
-	"peerDependencies": {
-		"@ai-sdk/provider": "^3.0.0",
-		"@ai-sdk/provider-utils": "^4.0.0",
-		"ai": "^6.0.0",
-		"zod": "^3.25.0 || ^4.0.0"
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "rm -rf dist && tsup src/index.ts --dts --sourcemap --format esm --target es2020",
+		"prepare": "pnpm build",
+		"format": "oxfmt --write .",
+		"test:ci": "vitest --watch=false",
+		"test": "vitest",
+		"test:e2e": "vitest --config vitest.e2e.config.ts --watch=false",
+		"test:e2e:rest": "vitest --config vitest.e2e.config.ts --watch=false test/e2e/workers-ai-rest.e2e.test.ts",
+		"test:e2e:binding": "vitest --config vitest.e2e.config.ts --watch=false test/e2e/workers-ai-binding.e2e.test.ts",
+		"type-check": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@ai-sdk/provider": "^3.0.5",
-		"@ai-sdk/provider-utils": "^4.0.10",
-		"@cloudflare/workers-types": "^4.20260128.0",
-		"ai": "^6.0.59",
+		"@ai-sdk/provider": "^3.0.8",
+		"@cloudflare/workers-types": "^4.20260210.0",
+		"ai": "^6.0.78",
 		"zod": "^4.3.6"
-	}
+	},
+	"peerDependencies": {
+		"@ai-sdk/provider": "^3.0.0",
+		"ai": "^6.0.0"
+	},
+	"authors": "Cloudflare Inc."
 }

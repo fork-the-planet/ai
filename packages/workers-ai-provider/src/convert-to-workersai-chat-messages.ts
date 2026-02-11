@@ -24,31 +24,30 @@ export function convertToWorkersAIChatMessages(prompt: LanguageModelV3Prompt): {
 			}
 
 			case "user": {
-				messages.push({
-					content: content
-						.map((part) => {
-							switch (part.type) {
-								case "text": {
-									return part.text;
-								}
-								case "file": {
-									// Extract image from this part
-									if (part.data instanceof Uint8Array) {
-										// Store the image data directly as Uint8Array
-										// For Llama 3.2 Vision model, which needs array of integers
-										images.push({
-											image: part.data,
-											mediaType: part.mediaType,
-											providerOptions: part.providerOptions,
-										});
-									}
-									return ""; // No text for the image part
-								}
-							}
+				const textParts: string[] = [];
 
-							return undefined;
-						})
-						.join("\n"),
+				for (const part of content) {
+					switch (part.type) {
+						case "text": {
+							textParts.push(part.text);
+							break;
+						}
+						case "file": {
+							if (part.data instanceof Uint8Array) {
+								images.push({
+									image: part.data,
+									mediaType: part.mediaType,
+									providerOptions: part.providerOptions,
+								});
+							}
+							// Don't push empty strings for image parts
+							break;
+						}
+					}
+				}
+
+				messages.push({
+					content: textParts.join("\n"),
 					role: "user",
 				});
 				break;
@@ -70,12 +69,14 @@ export function convertToWorkersAIChatMessages(prompt: LanguageModelV3Prompt): {
 						}
 
 						case "reasoning": {
+							// Reasoning is passed through to text for the message conversion,
+							// since Workers AI doesn't have a separate reasoning field in messages
 							text += part.text;
 							break;
 						}
 
 						case "file": {
-							// Handle file parts in assistant messages (V3)
+							// File parts in assistant messages - no action needed
 							break;
 						}
 
@@ -92,7 +93,7 @@ export function convertToWorkersAIChatMessages(prompt: LanguageModelV3Prompt): {
 						}
 
 						case "tool-result": {
-							// Handle tool results in assistant messages (V3)
+							// Tool results in assistant messages - no action needed
 							break;
 						}
 
@@ -112,8 +113,8 @@ export function convertToWorkersAIChatMessages(prompt: LanguageModelV3Prompt): {
 						toolCalls.length > 0
 							? toolCalls.map(({ function: { name, arguments: args }, id }) => ({
 									function: { arguments: args, name },
-									id: id, // Preserve original ID instead of regenerating
-									type: "function",
+									id,
+									type: "function" as const,
 								}))
 							: undefined,
 				});
@@ -127,7 +128,7 @@ export function convertToWorkersAIChatMessages(prompt: LanguageModelV3Prompt): {
 						messages.push({
 							content: JSON.stringify(toolResponse.output),
 							name: toolResponse.toolName,
-							tool_call_id: toolResponse.toolCallId, // Use original ID to match tool call
+							tool_call_id: toolResponse.toolCallId,
 							role: "tool",
 						});
 					}

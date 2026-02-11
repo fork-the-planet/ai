@@ -1,4 +1,4 @@
-import { generateObject } from "ai";
+import { generateText, Output } from "ai";
 import { createWorkersAI } from "workers-ai-provider";
 import z from "zod";
 
@@ -17,15 +17,17 @@ const workersai = createWorkersAI({
 
 console.log("Generating structured output for a sourdough recipe...");
 
-const { object } = await generateObject({
+const { output: object } = await generateText({
 	// @ts-expect-error - this is a valid model, we need to fix this
 	model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
 	prompt: "Please give me a recipe for sourdough bread.",
-	schema: z.object({
-		recipe: z.object({
-			ingredients: z.array(z.object({ amount: z.string(), name: z.string() })),
-			name: z.string(),
-			steps: z.array(z.string()),
+	output: Output.object({
+		schema: z.object({
+			recipe: z.object({
+				ingredients: z.array(z.object({ amount: z.string(), name: z.string() })),
+				name: z.string(),
+				steps: z.array(z.string()),
+			}),
 		}),
 	}),
 });

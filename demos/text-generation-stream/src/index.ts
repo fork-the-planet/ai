@@ -17,13 +17,7 @@ app.post("/", async (c) => {
 		prompt,
 	});
 
-	return result.toUIMessageStreamResponse({
-		headers: {
-			"Content-Type": "text/x-unknown",
-			"content-encoding": "identity",
-			"transfer-encoding": "chunked",
-		},
-	});
+	return result.toUIMessageStreamResponse();
 });
 
 export default {

@@ -1,4 +1,4 @@
-import { generateObject } from "ai";
+import { generateText, Output } from "ai";
 import { HttpResponse, http } from "msw";
 import { setupServer } from "msw/node";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
@@ -62,15 +62,16 @@ describe("REST API - Structured Output Tests", () => {
 			apiKey: TEST_API_KEY,
 		});
 
-		const { object } = await generateObject({
+		const result = await generateText({
 			model: workersai(TEST_MODEL),
 			prompt: "Give me a Spaghetti Bolognese recipe",
-			schema: recipeSchema,
+			output: Output.object({ schema: recipeSchema }),
 		});
 
-		expect(object.recipe.name).toBe("Spaghetti Bolognese");
-		expect(object.recipe.ingredients.length).toBeGreaterThan(0);
-		expect(object.recipe.steps.length).toBeGreaterThan(0);
+		const object = result.output;
+		expect(object?.recipe.name).toBe("Spaghetti Bolognese");
+		expect(object?.recipe.ingredients.length).toBeGreaterThan(0);
+		expect(object?.recipe.steps.length).toBeGreaterThan(0);
 	});
 });
 
@@ -104,14 +105,15 @@ describe("Binding - Structured Output Tests", () => {
 			},
 		});
 
-		const { object } = await generateObject({
+		const result = await generateText({
 			model: workersai(TEST_MODEL),
 			prompt: "Give me a Spaghetti Bolognese recipe",
-			schema: recipeSchema,
+			output: Output.object({ schema: recipeSchema }),
 		});
 
-		expect(object.recipe.name).toBe("Spaghetti Bolognese");
-		expect(object.recipe.ingredients.length).toBeGreaterThan(0);
-		expect(object.recipe.steps.length).toBeGreaterThan(0);
+		const object = result.output;
+		expect(object?.recipe.name).toBe("Spaghetti Bolognese");
+		expect(object?.recipe.ingredients.length).toBeGreaterThan(0);
+		expect(object?.recipe.steps.length).toBeGreaterThan(0);
 	});
 });

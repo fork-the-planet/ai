@@ -3,9 +3,9 @@ import { generateId } from "ai";
 import { convertToWorkersAIChatMessages } from "./convert-to-workersai-chat-messages";
 import { mapWorkersAIFinishReason } from "./map-workersai-finish-reason";
 import { mapWorkersAIUsage } from "./map-workersai-usage";
-import { getMappedStream } from "./streaming";
+import { getMappedStream, prependStreamStart } from "./streaming";
 import {
-	lastMessageWasUser,
+	normalizeMessagesForBinding,
 	prepareToolsAndToolChoice,
 	processText,
 	processToolCalls,
@@ -17,15 +17,15 @@ type WorkersAIChatConfig = {
 	provider: string;
 	binding: Ai;
 	gateway?: GatewayOptions;
+	/** True when using a real Workers AI binding (not the REST shim). */
+	isBinding: boolean;
 };
 
 export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 	readonly specificationVersion = "v3";
 	readonly defaultObjectGenerationMode = "json";
 
-	readonly supportedUrls: Record<string, RegExp[]> | PromiseLike<Record<string, RegExp[]>> = {
-		// Empty
-	};
+	readonly supportedUrls: Record<string, RegExp[]> | PromiseLike<Record<string, RegExp[]>> = {};
 
 	readonly modelId: TextGenerationModels;
 	readonly settings: WorkersAIChatSettings;
@@ -62,27 +62,17 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 		const warnings: SharedV3Warning[] = [];
 
 		if (frequencyPenalty != null) {
-			warnings.push({
-				feature: "frequencyPenalty",
-				type: "unsupported",
-			});
+			warnings.push({ feature: "frequencyPenalty", type: "unsupported" });
 		}
 
 		if (presencePenalty != null) {
-			warnings.push({
-				feature: "presencePenalty",
-				type: "unsupported",
-			});
+			warnings.push({ feature: "presencePenalty", type: "unsupported" });
 		}
 
 		const baseArgs = {
-			// standardized settings:
 			max_tokens: maxOutputTokens,
-			// model id:
 			model: this.modelId,
 			random_seed: seed,
-
-			// model specific settings:
 			safe_prompt: this.settings.safePrompt,
 			temperature,
 			top_p: topP,
@@ -93,6 +83,9 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 				return {
 					args: {
 						...baseArgs,
+						response_format: undefined as
+							| { type: string; json_schema?: unknown }
+							| undefined,
 						...prepareToolsAndToolChoice(tools, toolChoice),
 					},
 					warnings,
@@ -104,8 +97,9 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 					args: {
 						...baseArgs,
 						response_format: {
-							json_schema: responseFormat?.type === "json" && responseFormat.schema,
 							type: "json_schema",
+							json_schema:
+								responseFormat?.type === "json" ? responseFormat.schema : undefined,
 						},
 						tools: undefined,
 					},
@@ -120,73 +114,85 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 		}
 	}
 
-	async doGenerate(
-		options: Parameters<LanguageModelV3["doGenerate"]>[0],
-	): Promise<Awaited<ReturnType<LanguageModelV3["doGenerate"]>>> {
-		const { args, warnings } = this.getArgs(options);
-
-		const { gateway, safePrompt, ...passthroughOptions } = this.settings;
-
-		// Extract image from messages if present
-		const { messages, images } = convertToWorkersAIChatMessages(options.prompt);
-
-		// TODO: support for multiple images
-		if (images.length !== 0 && images.length !== 1) {
+	/**
+	 * Build the inputs object for `binding.run()`, shared by doGenerate and doStream.
+	 */
+	private buildRunInputs(
+		args: ReturnType<typeof this.getArgs>["args"],
+		messages: ReturnType<typeof convertToWorkersAIChatMessages>["messages"],
+		images: ReturnType<typeof convertToWorkersAIChatMessages>["images"],
+		options?: { stream?: boolean },
+	) {
+		if (images.length > 1) {
 			throw new Error("Multiple images are not yet supported as input");
 		}
 
 		const imagePart = images[0];
 
-		const output = await this.config.binding.run(
-			args.model,
-			{
-				max_tokens: args.max_tokens,
-				messages: messages,
-				temperature: args.temperature,
-				tools: args.tools,
-				top_p: args.top_p,
-				// Convert Uint8Array to Array of integers for Llama 3.2 Vision model
-				// TODO: maybe use the base64 string version?
-				...(imagePart ? { image: Array.from(imagePart.image) } : {}),
-				// @ts-expect-error response_format not yet added to types
-				response_format: args.response_format,
-			},
-			{
-				gateway: this.config.gateway ?? gateway,
-				...passthroughOptions,
-			},
-		);
-
-		if (output instanceof ReadableStream) {
-			throw new Error("This shouldn't happen");
-		}
-
-		const reasoningContent = (output as any)?.choices?.[0]?.message?.reasoning_content;
+		// Only normalize messages for the binding path (REST API doesn't need it)
+		const finalMessages = this.config.isBinding
+			? normalizeMessagesForBinding(messages)
+			: messages;
 
 		return {
-			finishReason: mapWorkersAIFinishReason(output),
-			// TODO: rawCall and rawResponse- not sure
-			// rawCall: { rawPrompt: messages, rawSettings: args },
-			// rawResponse: { body: output },
-			// maybe this?
-			// providerMetadata: {
-			// 	prompt: messages,
-			// 	settings: args,
-			// 	response: output,
-			// },
+			max_tokens: args.max_tokens,
+			messages: finalMessages,
+			temperature: args.temperature,
+			tools: args.tools,
+			top_p: args.top_p,
+			...(imagePart ? { image: Array.from(imagePart.image) } : {}),
+			// Only include response_format when actually set
+			...(args.response_format ? { response_format: args.response_format } : {}),
+			...(options?.stream ? { stream: true } : {}),
+		};
+	}
+
+	/**
+	 * Get passthrough options for binding.run() from settings.
+	 */
+	private getRunOptions() {
+		const { gateway, safePrompt: _safePrompt, ...passthroughOptions } = this.settings;
+		return {
+			gateway: this.config.gateway ?? gateway,
+			...passthroughOptions,
+		};
+	}
+
+	async doGenerate(
+		options: Parameters<LanguageModelV3["doGenerate"]>[0],
+	): Promise<Awaited<ReturnType<LanguageModelV3["doGenerate"]>>> {
+		const { args, warnings } = this.getArgs(options);
+		const { messages, images } = convertToWorkersAIChatMessages(options.prompt);
+
+		const inputs = this.buildRunInputs(args, messages, images);
+		const runOptions = this.getRunOptions();
+
+		const output = await this.config.binding.run(args.model, inputs, runOptions);
+
+		if (output instanceof ReadableStream) {
+			throw new Error(
+				"Unexpected streaming response from non-streaming request. Check that `stream: true` was not passed.",
+			);
+		}
+
+		const outputRecord = output as Record<string, unknown>;
+		const choices = outputRecord.choices as
+			| Array<{ message?: { reasoning_content?: string } }>
+			| undefined;
+		const reasoningContent = choices?.[0]?.message?.reasoning_content;
+
+		return {
+			finishReason: mapWorkersAIFinishReason(outputRecord),
 			content: [
 				...(reasoningContent
 					? [{ type: "reasoning" as const, text: reasoningContent }]
 					: []),
 				{
 					type: "text",
-					text: processText(output) ?? "",
+					text: processText(outputRecord) ?? "",
 				},
-				...processToolCalls(output),
+				...processToolCalls(outputRecord),
 			],
-
-			// @ts-expect-error: Missing types
-			reasoningText: reasoningContent,
 			usage: mapWorkersAIUsage(output),
 			warnings,
 		};
@@ -196,149 +202,70 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 		options: Parameters<LanguageModelV3["doStream"]>[0],
 	): Promise<Awaited<ReturnType<LanguageModelV3["doStream"]>>> {
 		const { args, warnings } = this.getArgs(options);
-
-		// Extract image from messages if present
 		const { messages, images } = convertToWorkersAIChatMessages(options.prompt);
 
-		// [1] When the latest message is not a tool response, we use the regular generate function
-		// and simulate it as a streamed response in order to satisfy the AI SDK's interface for
-		// doStream...
-		if (args.tools?.length && lastMessageWasUser(messages)) {
-			const response = await this.doGenerate(options);
+		const inputs = this.buildRunInputs(args, messages, images, { stream: true });
+		const runOptions = this.getRunOptions();
 
-			if (response instanceof ReadableStream) {
-				throw new Error("This shouldn't happen");
-			}
+		const response = await this.config.binding.run(args.model, inputs, runOptions);
 
-			// Track start/delta/end IDs per v5 streaming protocol
-			let textId: string | null = null;
-			let reasoningId: string | null = null;
-
+		// If the binding returned a stream, pipe it through the SSE mapper
+		if (response instanceof ReadableStream) {
 			return {
-				// rawCall: { rawPrompt: messages, rawSettings: args },
-				stream: new ReadableStream<LanguageModelV3StreamPart>({
-					async start(controller) {
-						// Emit the stream-start part with warnings
-						controller.enqueue({
-							type: "stream-start",
-							warnings: warnings as SharedV3Warning[],
-						});
-
-						for (const contentPart of response.content) {
-							if (contentPart.type === "text") {
-								if (!textId) {
-									textId = generateId();
-									controller.enqueue({ type: "text-start", id: textId });
-								}
-								controller.enqueue({
-									delta: contentPart.text,
-									type: "text-delta",
-									id: textId,
-								});
-							}
-							if (contentPart.type === "tool-call") {
-								controller.enqueue(contentPart);
-							}
-							if (contentPart.type === "reasoning") {
-								if (!reasoningId) {
-									reasoningId = generateId();
-									controller.enqueue({
-										type: "reasoning-start",
-										id: reasoningId,
-									});
-								}
-								controller.enqueue({
-									type: "reasoning-delta",
-									delta: contentPart.text,
-									id: generateId(),
-								});
-							}
-						}
-						if (reasoningId) {
-							controller.enqueue({ type: "reasoning-end", id: reasoningId });
-							reasoningId = null;
-						}
-						if (textId) {
-							controller.enqueue({ type: "text-end", id: textId });
-							textId = null;
-						}
-						controller.enqueue({
-							finishReason: mapWorkersAIFinishReason(response),
-							type: "finish",
-							usage: response.usage,
-						});
-						controller.close();
-					},
-				}),
+				stream: prependStreamStart(getMappedStream(response), warnings),
 			};
 		}
 
-		// [2] ...otherwise, we just proceed as normal and stream the response directly from the remote model.
-		const { gateway, ...passthroughOptions } = this.settings;
+		// Graceful degradation: some models return a non-streaming response even
+		// when stream:true is requested. Wrap the complete response as a stream.
+		const outputRecord = response as Record<string, unknown>;
+		const choices = outputRecord.choices as
+			| Array<{ message?: { reasoning_content?: string } }>
+			| undefined;
+		const reasoningContent = choices?.[0]?.message?.reasoning_content;
 
-		// TODO: support for multiple images
-		if (images.length !== 0 && images.length !== 1) {
-			throw new Error("Multiple images are not yet supported as input");
-		}
-
-		const imagePart = images[0];
-
-		const response = await this.config.binding.run(
-			args.model,
-			{
-				max_tokens: args.max_tokens,
-				messages: messages,
-				stream: true,
-				temperature: args.temperature,
-				tools: args.tools,
-				top_p: args.top_p,
-				// Convert Uint8Array to Array of integers for Llama 3.2 Vision model
-				// TODO: maybe use the base64 string version?
-				...(imagePart ? { image: Array.from(imagePart.image) } : {}),
-				// @ts-expect-error response_format not yet added to types
-				response_format: args.response_format,
-			},
-			{
-				gateway: this.config.gateway ?? gateway,
-				...passthroughOptions,
-			},
-		);
-
-		if (!(response instanceof ReadableStream)) {
-			throw new Error("This shouldn't happen");
-		}
-
-		// Create a new stream that first emits the stream-start part with warnings,
-		// then pipes through the rest of the response stream
-		const stream = new ReadableStream<LanguageModelV3StreamPart>({
-			start(controller) {
-				// Emit the stream-start part with warnings
-				controller.enqueue({
-					type: "stream-start",
-					warnings: warnings as SharedV3Warning[],
-				});
-
-				// Pipe the rest of the response stream
-				const reader = getMappedStream(new Response(response)).getReader();
-
-				function push() {
-					reader.read().then(({ done, value }) => {
-						if (done) {
-							controller.close();
-							return;
-						}
-						controller.enqueue(value);
-						push();
-					});
-				}
-				push();
-			},
-		});
+		let textId: string | null = null;
+		let reasoningId: string | null = null;
 
 		return {
-			stream,
-			// TODO: not sure about rawCalls
-			// rawCall: { rawPrompt: messages, rawSettings: args },
+			stream: new ReadableStream<LanguageModelV3StreamPart>({
+				start(controller) {
+					controller.enqueue({
+						type: "stream-start",
+						warnings: warnings as SharedV3Warning[],
+					});
+
+					if (reasoningContent) {
+						reasoningId = generateId();
+						controller.enqueue({ type: "reasoning-start", id: reasoningId });
+						controller.enqueue({
+							type: "reasoning-delta",
+							id: reasoningId,
+							delta: reasoningContent,
+						});
+						controller.enqueue({ type: "reasoning-end", id: reasoningId });
+					}
+
+					const text = processText(outputRecord);
+					if (text) {
+						textId = generateId();
+						controller.enqueue({ type: "text-start", id: textId });
+						controller.enqueue({ type: "text-delta", id: textId, delta: text });
+						controller.enqueue({ type: "text-end", id: textId });
+					}
+
+					for (const toolCall of processToolCalls(outputRecord)) {
+						controller.enqueue(toolCall);
+					}
+
+					controller.enqueue({
+						type: "finish",
+						finishReason: mapWorkersAIFinishReason(outputRecord),
+						usage: mapWorkersAIUsage(response),
+					});
+					controller.close();
+				},
+			}),
 		};
 	}
 }

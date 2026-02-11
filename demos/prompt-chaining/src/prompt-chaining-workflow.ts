@@ -1,5 +1,5 @@
 import { WorkflowEntrypoint, type WorkflowEvent, type WorkflowStep } from "cloudflare:workers";
-import { generateObject } from "ai";
+import { generateText, Output } from "ai";
 import { createWorkersAI } from "workers-ai-provider";
 import z from "zod";
 
@@ -29,10 +29,10 @@ export class PromptChainingWorkflow extends WorkflowEntrypoint<Env, PromptChaini
 		// Step 1: Generate the outline for the technical documentation.
 		const outlineObj = await step.do("generate outline", async () => {
 			const outlinePrompt = `${prompt}\n\nPlease generate a detailed outline for the technical documentation.`;
-			const { object } = await generateObject({
+			const { output: object } = await generateText({
 				model: model,
-				schema: outlineSchema,
 				prompt: outlinePrompt,
+				output: Output.object({ schema: outlineSchema }),
 			});
 			return object;
 		});
@@ -42,10 +42,10 @@ export class PromptChainingWorkflow extends WorkflowEntrypoint<Env, PromptChaini
 			const criteriaPrompt = `Please evaluate the following technical documentation outline against our criteria:\n\n${JSON.stringify(
 				outlineObj,
 			)}\n\nReturn a JSON object with a boolean field "meetsCriteria" that is true if the outline meets the criteria, or false otherwise.`;
-			const { object } = await generateObject({
+			const { output: object } = await generateText({
 				model: model,
-				schema: criteriaSchema,
 				prompt: criteriaPrompt,
+				output: Output.object({ schema: criteriaSchema }),
 			});
 			return object;
 		});
@@ -59,10 +59,10 @@ export class PromptChainingWorkflow extends WorkflowEntrypoint<Env, PromptChaini
 			const documentationPrompt = `Using the following approved outline for technical documentation:\n\n${JSON.stringify(
 				outlineObj,
 			)}\n\nPlease generate the full technical documentation in a detailed and organised manner.`;
-			const { object } = await generateObject({
+			const { output: object } = await generateText({
 				model: model,
-				schema: documentationSchema,
 				prompt: documentationPrompt,
+				output: Output.object({ schema: documentationSchema }),
 			});
 			return object;
 		});

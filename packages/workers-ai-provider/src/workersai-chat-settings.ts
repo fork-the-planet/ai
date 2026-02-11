@@ -1,5 +1,3 @@
-import type { StringLike } from "./utils";
-
 export type WorkersAIChatSettings = {
 	/**
 	 * Whether to inject a safety prompt before all conversations.
@@ -11,9 +9,10 @@ export type WorkersAIChatSettings = {
 	 * Optionally set Cloudflare AI Gateway options.
 	 */
 	gateway?: GatewayOptions;
-} & {
+
 	/**
 	 * Passthrough settings that are provided directly to the run function.
+	 * Use this for any provider-specific options not covered by the typed fields.
 	 */
-	[key: string]: StringLike;
+	[key: string]: unknown;
 };

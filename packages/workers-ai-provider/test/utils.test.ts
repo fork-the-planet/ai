@@ -1,5 +1,109 @@
 import { describe, expect, it } from "vitest";
-import { processPartialToolCalls, processToolCalls } from "../src/utils";
+import {
+	processPartialToolCalls,
+	processToolCalls,
+	processText,
+	sanitizeToolCallId,
+	normalizeMessagesForBinding,
+	prepareToolsAndToolChoice,
+} from "../src/utils";
+
+// ---------------------------------------------------------------------------
+// sanitizeToolCallId
+// ---------------------------------------------------------------------------
+
+describe("sanitizeToolCallId", () => {
+	it("should strip non-alphanumeric characters and truncate to 9 chars", () => {
+		expect(sanitizeToolCallId("chatcmpl-tool-875d3ec6179676ae")).toBe("chatcmplt");
+	});
+
+	it("should pad short IDs with zeros", () => {
+		expect(sanitizeToolCallId("abc")).toBe("abc000000");
+	});
+
+	it("should pass through already-valid 9-char alphanumeric IDs", () => {
+		expect(sanitizeToolCallId("abcdef123")).toBe("abcdef123");
+	});
+
+	it("should handle empty string", () => {
+		expect(sanitizeToolCallId("")).toBe("000000000");
+	});
+
+	it("should handle IDs with only special characters", () => {
+		expect(sanitizeToolCallId("---!!!---")).toBe("000000000");
+	});
+
+	it("should handle mixed content", () => {
+		expect(sanitizeToolCallId("call_abc_123")).toBe("callabc12");
+	});
+});
+
+// ---------------------------------------------------------------------------
+// normalizeMessagesForBinding
+// ---------------------------------------------------------------------------
+
+describe("normalizeMessagesForBinding", () => {
+	it("should pass through normal messages unchanged", () => {
+		const messages = [
+			{ role: "system" as const, content: "You are helpful" },
+			{ role: "user" as const, content: "Hello" },
+		];
+		const result = normalizeMessagesForBinding(messages);
+		expect(result).toEqual(messages);
+	});
+
+	it("should sanitize tool_call_id on tool messages", () => {
+		const messages = [
+			{
+				role: "tool" as const,
+				name: "get_weather",
+				content: '{"temp": 72}',
+				tool_call_id: "chatcmpl-tool-875d3ec6179676ae",
+			},
+		];
+		const result = normalizeMessagesForBinding(messages);
+		expect(result[0]).toHaveProperty("tool_call_id", "chatcmplt");
+	});
+
+	it("should sanitize tool_calls[].id on assistant messages", () => {
+		const messages = [
+			{
+				role: "assistant" as const,
+				content: "",
+				tool_calls: [
+					{
+						id: "chatcmpl-tool-abc123def456",
+						type: "function" as const,
+						function: { name: "calc", arguments: "{}" },
+					},
+				],
+			},
+		];
+		const result = normalizeMessagesForBinding(messages);
+		const assistant = result[0] as {
+			tool_calls?: Array<{ id: string }>;
+		};
+		expect(assistant.tool_calls?.[0].id).toBe("chatcmplt");
+	});
+
+	it("should not mutate the original messages array", () => {
+		const original = [
+			{
+				role: "tool" as const,
+				name: "fn",
+				content: "result",
+				tool_call_id: "chatcmpl-tool-abc",
+			},
+		];
+		const originalId = original[0].tool_call_id;
+		normalizeMessagesForBinding(original);
+		expect(original[0].tool_call_id).toBe(originalId);
+	});
+});
+
+// ---------------------------------------------------------------------------
+// processPartialToolCalls
+// ---------------------------------------------------------------------------
 
 describe("processPartialToolCalls", () => {
 	it("should merge partial tool calls by index", () => {
@@ -58,6 +162,10 @@ describe("processPartialToolCalls", () => {
 		expect(call2?.input).toBe('{"b":"value2"}');
 	});
 });
+
+// ---------------------------------------------------------------------------
+// processToolCalls
+// ---------------------------------------------------------------------------
 
 describe("processToolCalls", () => {
 	it("should process OpenAI format tool calls", () => {
@@ -147,8 +255,152 @@ describe("processToolCalls", () => {
 		const result = processToolCalls(output);
 		expect(result[0].input).toBe("{}");
 	});
+
+	it("should extract tool calls from OpenAI choices format", () => {
+		const output = {
+			choices: [
+				{
+					message: {
+						tool_calls: [
+							{
+								id: "call_abc",
+								type: "function",
+								function: {
+									name: "get_weather",
+									arguments: '{"city": "London"}',
+								},
+							},
+						],
+					},
+				},
+			],
+		};
+
+		const result = processToolCalls(output);
+		expect(result).toHaveLength(1);
+		expect(result[0].toolName).toBe("get_weather");
+		expect(result[0].toolCallId).toBe("call_abc");
+		expect(result[0].input).toBe('{"city": "London"}');
+	});
 });
 
+// ---------------------------------------------------------------------------
+// prepareToolsAndToolChoice
+// ---------------------------------------------------------------------------
+
 describe("prepareToolsAndToolChoice", () => {
-	it.todo("should send the right format");
+	const sampleTools: Parameters<typeof prepareToolsAndToolChoice>[0] = [
+		{
+			type: "function",
+			name: "get_weather",
+			description: "Get weather info",
+			inputSchema: {
+				type: "object",
+				properties: { city: { type: "string" } },
+			},
+		},
+		{
+			type: "function",
+			name: "calculator",
+			description: "Calculate math",
+			inputSchema: {
+				type: "object",
+				properties: { expression: { type: "string" } },
+			},
+		},
+	];
+
+	it("should return undefined tools and tool_choice when tools is null", () => {
+		const result = prepareToolsAndToolChoice(undefined, undefined);
+		expect(result.tools).toBeUndefined();
+		expect(result.tool_choice).toBeUndefined();
+	});
+
+	it("should map tools to function format", () => {
+		const result = prepareToolsAndToolChoice(sampleTools, undefined);
+		expect(result.tools).toHaveLength(2);
+		expect(result.tools![0]).toEqual({
+			type: "function",
+			function: {
+				name: "get_weather",
+				description: "Get weather info",
+				parameters: {
+					type: "object",
+					properties: { city: { type: "string" } },
+				},
+			},
+		});
+		expect(result.tool_choice).toBeUndefined();
+	});
+
+	it("should handle 'auto' tool choice", () => {
+		const result = prepareToolsAndToolChoice(sampleTools, { type: "auto" });
+		expect(result.tool_choice).toBe("auto");
+		expect(result.tools).toHaveLength(2);
+	});
+
+	it("should handle 'none' tool choice", () => {
+		const result = prepareToolsAndToolChoice(sampleTools, { type: "none" });
+		expect(result.tool_choice).toBe("none");
+		expect(result.tools).toHaveLength(2);
+	});
+
+	it("should handle 'required' tool choice by mapping to 'any'", () => {
+		const result = prepareToolsAndToolChoice(sampleTools, { type: "required" });
+		expect(result.tool_choice).toBe("any");
+		expect(result.tools).toHaveLength(2);
+	});
+
+	it("should handle 'tool' tool choice by filtering and using 'any'", () => {
+		const result = prepareToolsAndToolChoice(sampleTools, {
+			type: "tool",
+			toolName: "calculator",
+		});
+		expect(result.tool_choice).toBe("any");
+		expect(result.tools).toHaveLength(1);
+		expect(result.tools![0].function.name).toBe("calculator");
+	});
+});
+
+// ---------------------------------------------------------------------------
+// processText
+// ---------------------------------------------------------------------------
+
+describe("processText", () => {
+	it("should extract text from native format", () => {
+		expect(processText({ response: "Hello world" })).toBe("Hello world");
+	});
+
+	it("should extract text from OpenAI format", () => {
+		expect(
+			processText({
+				choices: [{ message: { content: "Hello from choices" } }],
+			}),
+		).toBe("Hello from choices");
+	});
+
+	it("should stringify object responses (structured output quirk)", () => {
+		expect(processText({ response: { key: "value" } })).toBe('{"key":"value"}');
+	});
+
+	it("should handle numeric responses (quirk #9)", () => {
+		expect(processText({ response: 42 })).toBe("42");
+	});
+
+	it("should return undefined for null response", () => {
+		expect(processText({ response: null })).toBeUndefined();
+	});
+
+	it("should return undefined for response with no recognized fields", () => {
+		expect(processText({ other: "field" })).toBeUndefined();
+	});
+
+	it("should prefer OpenAI format over native format", () => {
+		expect(
+			processText({
+				choices: [{ message: { content: "From choices" } }],
+				response: "From native",
+			}),
+		).toBe("From choices");
+	});
 });

@@ -5,15 +5,15 @@ import { defineConfig } from "vite";
 
 // https://vite.dev/config/
 export default defineConfig({
-    root: "./src/client",
-    build: {
-        emptyOutDir: true,
-        outDir: resolve(__dirname, "dist"),
-    },
-    plugins: [
-        react(),
-        cloudflare({
-            configPath: resolve(__dirname, "wrangler.jsonc"),
-        }),
-    ],
+	root: "./src/client",
+	build: {
+		emptyOutDir: true,
+		outDir: resolve(__dirname, "dist"),
+	},
+	plugins: [
+		react(),
+		cloudflare({
+			configPath: resolve(__dirname, "wrangler.jsonc"),
+		}),
+	],
 });

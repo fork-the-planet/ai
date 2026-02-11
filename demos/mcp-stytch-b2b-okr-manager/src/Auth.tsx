@@ -26,7 +26,6 @@ import { NavLink, useLocation } from "react-router-dom";
  * If the user is not logged in, the user is redirected to the login page and the
  * current URL is stored in localStorage to enable return after authentication.
  */
-// eslint-disable-next-line react-refresh/only-export-components
 export const withLoginRequired = <P extends object>(Component: React.ComponentType<P>) => {
 	const WrappedComponent: React.FC<P> = (props) => {
 		const { member } = useStytchMember();

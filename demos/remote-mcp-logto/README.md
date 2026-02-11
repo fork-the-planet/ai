@@ -25,10 +25,13 @@ Before getting started, you need to create an account on [Logto Cloud](https://c
 ### Set up a KV namespace
 
 1. Create the KV namespace:
+
 ```
 npx wrangler kv namespace create "OAUTH_KV"
 ```
+
 2. Update the Wrangler file with the KV ID:
+
 ```
 "kv_namespaces": [
   {
@@ -126,7 +129,7 @@ Replace the content with the following configuration:
 }
 ```
 
-This configuration uses `npx` to run [the `mcp-remote` package](https://www.npmjs.com/package/mcp-remote) to access your Remote MCP Server by passing the URL in the `args`.  
+This configuration uses `npx` to run [the `mcp-remote` package](https://www.npmjs.com/package/mcp-remote) to access your Remote MCP Server by passing the URL in the `args`.
 
 Once you restart Claude Desktop, a browser window will open showing your OAuth login page. Complete the authentication flow to grant Claude access to your MCP server. After you grant access, the tools will become available for you to use.
 

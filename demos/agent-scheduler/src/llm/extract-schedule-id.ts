@@ -1,5 +1,5 @@
 import type { Schedule } from "agents";
-import { generateObject, type LanguageModel } from "ai";
+import { generateText, Output, type LanguageModel } from "ai";
 import z from "zod";
 
 export async function extractScheduleId(
@@ -7,11 +7,8 @@ export async function extractScheduleId(
 	query: string,
 	schedules: Schedule[],
 ) {
-	const { object } = await generateObject({
+	const { output: object } = await generateText({
 		model,
-		schema: z.object({
-			scheduleId: z.string().optional(),
-		}),
 		prompt: `
 			You are an intelligent schedule manager. The user requested cancelling a schedule.
 			Try to figure out which schedule ID from the list below is the best match.
@@ -28,6 +25,11 @@ export async function extractScheduleId(
 			- if not:
 			{ "scheduleId": undefined }
         `,
+		output: Output.object({
+			schema: z.object({
+				scheduleId: z.string().optional(),
+			}),
+		}),
 	});
 
 	return object.scheduleId;

@@ -24,9 +24,7 @@ describe("Structured Outputs Integration Tests", () => {
 			const schema = z.object({
 				recipe: z.object({
 					name: z.string(),
-					ingredients: z.array(
-						z.object({ name: z.string(), amount: z.string() })
-					),
+					ingredients: z.array(z.object({ name: z.string(), amount: z.string() })),
 					steps: z.array(z.string()),
 				}),
 			});
@@ -60,6 +58,6 @@ describe("Structured Outputs Integration Tests", () => {
 			const successRate = results.filter(Boolean).length / results.length;
 			expect(successRate).toBeGreaterThanOrEqual(PASSING_THRESHOLD);
 		},
-		{ timeout: 500000 }
+		{ timeout: 500000 },
 	);
 });

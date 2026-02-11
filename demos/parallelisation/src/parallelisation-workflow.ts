@@ -1,5 +1,5 @@
 import { WorkflowEntrypoint, type WorkflowEvent, type WorkflowStep } from "cloudflare:workers";
-import { generateObject } from "ai";
+import { generateText, Output } from "ai";
 import { createWorkersAI } from "workers-ai-provider";
 import z from "zod";
 
@@ -37,10 +37,10 @@ export class ParallelisationWorkflow extends WorkflowEntrypoint<
 		// Run the three small LLM calls concurrently.
 		const angleOutputs = await step.do("parallel angle calls", async () => {
 			const calls = anglePrompts.map(async (anglePrompt) => {
-				const { object } = await generateObject({
+				const { output: object } = await generateText({
 					model: smallModel,
-					schema: angleSchema,
 					prompt: anglePrompt,
+					output: Output.object({ schema: angleSchema }),
 				});
 
 				return object.angleOutput;
@@ -58,10 +58,10 @@ export class ParallelisationWorkflow extends WorkflowEntrypoint<
 				\n\nBased on these responses, please synthesise a comprehensive final result.
 				Return your answer as a JSON object in the format { "finalResult": "Your comprehensive result here." }`;
 
-			const { object } = await generateObject({
+			const { output: object } = await generateText({
 				model: bigModel,
-				schema: finalOutputSchema,
 				prompt: aggregatorPrompt,
+				output: Output.object({ schema: finalOutputSchema }),
 			});
 			return object;
 		});

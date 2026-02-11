@@ -1,23 +1,22 @@
 {
-  "name": "todos-api",
-  "version": "0.0.1",
-  "private": true,
-  "scripts": {
-    "deploy": "wrangler deploy",
-    "dev": "wrangler dev",
-    "start": "wrangler dev",
-    "cf-typegen": "wrangler types",
-    "type-check": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@faker-js/faker": "^10.2.0",
-    "hono": "^4.11.7",
-    "jose": "^6.1.3"
-  },
-  "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260128.0",
-    "prettier": "^3.8.1",
-    "typescript": "5.9.3",
-    "wrangler": "^4.61.0"
-  }
+	"name": "todos-api",
+	"version": "0.0.1",
+	"private": true,
+	"scripts": {
+		"deploy": "wrangler deploy",
+		"dev": "wrangler dev",
+		"start": "wrangler dev",
+		"cf-typegen": "wrangler types",
+		"type-check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@faker-js/faker": "^10.3.0",
+		"hono": "^4.11.9",
+		"jose": "^6.1.3"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20260210.0",
+		"typescript": "5.9.3",
+		"wrangler": "^4.64.0"
+	}
 }

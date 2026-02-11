@@ -37,6 +37,7 @@ public and should be securely set elsewhere.
 #### Set up a KV namespace
 
 Create a KV namespace for OAuth state storage:
+
 ```sh
 $ npx wrangler kv namespace create OAUTH_KV
 ```

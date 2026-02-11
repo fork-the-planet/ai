@@ -1,9 +1,17 @@
 import type { LanguageModelV3FinishReason } from "@ai-sdk/provider";
 
-export function mapWorkersAIFinishReason(finishReasonOrResponse: any): LanguageModelV3FinishReason {
+/**
+ * Map a Workers AI finish reason to the AI SDK unified finish reason.
+ *
+ * Accepts either:
+ * - A raw finish reason string (e.g., "stop", "tool_calls")
+ * - A full response object with finish_reason in various locations
+ */
+export function mapWorkersAIFinishReason(
+	finishReasonOrResponse: string | null | undefined | Record<string, unknown>,
+): LanguageModelV3FinishReason {
 	let finishReason: string | null | undefined;
 
-	// If it's a string/null/undefined, use it directly (original behavior)
 	if (
 		typeof finishReasonOrResponse === "string" ||
 		finishReasonOrResponse === null ||
@@ -13,17 +21,18 @@ export function mapWorkersAIFinishReason(finishReasonOrResponse: any): LanguageM
 	} else if (typeof finishReasonOrResponse === "object" && finishReasonOrResponse !== null) {
 		const response = finishReasonOrResponse;
 
-		if (
-			"choices" in response &&
-			Array.isArray(response.choices) &&
-			response.choices.length > 0
-		) {
-			finishReason = response.choices[0].finish_reason;
+		// OpenAI format: { choices: [{ finish_reason: "stop" }] }
+		const choices = response.choices as Array<{ finish_reason?: string }> | undefined;
+		if (Array.isArray(choices) && choices.length > 0) {
+			finishReason = choices[0].finish_reason;
 		} else if ("finish_reason" in response) {
-			finishReason = response.finish_reason;
+			finishReason = response.finish_reason as string;
 		} else {
 			finishReason = undefined;
 		}
+	} else {
+		// Numbers, booleans, etc. -- default to stop
+		finishReason = undefined;
 	}
 
 	const raw = finishReason ?? "stop";
@@ -42,7 +51,6 @@ export function mapWorkersAIFinishReason(finishReasonOrResponse: any): LanguageM
 		case "unknown":
 			return { unified: "other", raw };
 		default:
-			// Default to `stop` for backwards compatibility
 			return { unified: "stop", raw };
 	}
 }

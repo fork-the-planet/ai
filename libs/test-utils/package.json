@@ -2,7 +2,7 @@
 	"name": "test-utils",
 	"private": true,
 	"scripts": {
-		"format": "biome format --write",
+		"format": "oxfmt --write .",
 		"test": "vitest",
 		"test:ci": "vitest --watch=false",
 		"type-check": "tsc --noEmit"
