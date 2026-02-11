@@ -194,6 +194,9 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 		let hasEmittedRunStarted = false;
 		let hasEmittedTextMessageStart = false;
 		let accumulatedContent = "";
+		let hasEmittedStepStarted = false;
+		let accumulatedReasoning = "";
+		const stepId = generateId("workers-ai-step");
 		const toolCallsInProgress = new Map<
 			number,
 			{ id: string; name: string; arguments: string; started: boolean }
@@ -226,6 +229,40 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 				}
 
 				const delta = choice.delta;
+
+				// Reasoning content (used by models like QwQ, DeepSeek R1, Kimi K2.5)
+				// The OpenAI SDK doesn't type this field, but models send it as an extension.
+				const reasoningContent = (delta as Record<string, unknown>).reasoning_content as
+					| string
+					| undefined;
+				if (reasoningContent) {
+					// RUN_STARTED is already guaranteed by the guard above
+					if (!hasEmittedStepStarted) {
+						hasEmittedStepStarted = true;
+						yield {
+							type: "STEP_STARTED",
+							stepId,
+							stepType: "thinking",
+							model: chunk.model || model || this.model,
+							timestamp,
+						} satisfies StreamChunk;
+					}
+					accumulatedReasoning += reasoningContent;
+					// TODO: TanStack AI's StreamProcessor currently treats STEP_FINISHED as an
+					// incremental reasoning event (with `delta` + accumulated `content`), so we
+					// emit one per token. If TanStack AI adds a dedicated STEP_CONTENT event
+					// type, this should be updated to emit STEP_CONTENT per token and a single
+					// STEP_FINISHED when reasoning ends (i.e. when the first non-reasoning
+					// content or finish_reason arrives).
+					yield {
+						type: "STEP_FINISHED",
+						stepId,
+						delta: reasoningContent,
+						content: accumulatedReasoning,
+						model: chunk.model || model || this.model,
+						timestamp,
+					} satisfies StreamChunk;
+				}
 
 				// Text content
 				if (delta.content) {

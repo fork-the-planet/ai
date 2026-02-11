@@ -4,16 +4,41 @@ import {
 	createGeminiChat,
 	createGeminiImage,
 	createGeminiSummarize,
+	createGeminiTts,
 	createGrokChat,
 	createGrokImage,
+	createGrokSummarize,
 	createOpenAiChat,
 	createOpenAiImage,
 	createOpenAiSummarize,
+	createOpenAiTranscription,
+	createOpenAiTts,
+	createOpenRouterChat,
+	createOpenRouterImage,
+	createOpenRouterSummarize,
 	createWorkersAiChat,
+	createWorkersAiImage,
+	createWorkersAiSummarize,
+	createWorkersAiTranscription,
+	createWorkersAiTts,
 	type WorkersAiTextModel,
 } from "@cloudflare/tanstack-ai";
-import type { AnyImageAdapter, AnySummarizeAdapter, AnyTextAdapter } from "@tanstack/ai";
-import { chat, generateImage, summarize, toHttpResponse, toolDefinition } from "@tanstack/ai";
+import type {
+	AnyImageAdapter,
+	AnySummarizeAdapter,
+	AnyTextAdapter,
+	AnyTranscriptionAdapter,
+	AnyTTSAdapter,
+} from "@tanstack/ai";
+import {
+	chat,
+	generateImage,
+	generateSpeech,
+	generateTranscription,
+	summarize,
+	toHttpResponse,
+	toolDefinition,
+} from "@tanstack/ai";
 import { env } from "cloudflare:workers";
 import { z } from "zod";
 
@@ -32,6 +57,7 @@ interface ProviderKeys {
 	anthropic?: string;
 	gemini?: string;
 	grok?: string;
+	openrouter?: string;
 }
 
 interface RequestCredentials {
@@ -53,28 +79,26 @@ function extractCredentials(request: Request): RequestCredentials {
 
 	return {
 		useBinding,
-		// In binding mode, gatewayId can come alone (for env.AI.gateway(id))
 		cloudflare:
 			!useBinding && accountId && gatewayId && apiToken
 				? { accountId, gatewayId, apiToken }
 				: null,
-		// Gateway ID is available separately for binding mode
 		gatewayId: gatewayId || undefined,
 		providerKeys: {
 			openai: request.headers.get("X-OpenAI-Api-Key") || undefined,
 			anthropic: request.headers.get("X-Anthropic-Api-Key") || undefined,
 			gemini: request.headers.get("X-Gemini-Api-Key") || undefined,
 			grok: request.headers.get("X-Grok-Api-Key") || undefined,
+			openrouter: request.headers.get("X-OpenRouter-Api-Key") || undefined,
 		},
 		workersAiModel: request.headers.get("X-Workers-AI-Model") || undefined,
 	};
 }
 
-/**
- * Build AI Gateway REST credentials config.
- * Prefers user-provided headers, falls back to environment variables.
- * Optionally injects the provider API key.
- */
+// ---------------------------------------------------------------------------
+// Config builders
+// ---------------------------------------------------------------------------
+
 function gwRestConfig(creds: RequestCredentials, providerApiKey?: string) {
 	const base = creds.cloudflare
 		? {
@@ -87,15 +111,9 @@ function gwRestConfig(creds: RequestCredentials, providerApiKey?: string) {
 				accountId: env.CLOUDFLARE_ACCOUNT_ID,
 				cfApiKey: env.CLOUDFLARE_API_TOKEN,
 			};
-
 	return providerApiKey ? { ...base, apiKey: providerApiKey } : base;
 }
 
-/**
- * Build AI Gateway binding config using env.AI.gateway().
- * Uses the user-provided gateway ID or falls back to the env var.
- * Optionally injects the provider API key.
- */
 function resolveGatewayId(creds: RequestCredentials): string {
 	return creds.gatewayId || env.CLOUDFLARE_AI_GATEWAY_ID || "default";
 }
@@ -105,150 +123,232 @@ function gwBindingConfig(creds: RequestCredentials, providerApiKey?: string) {
 	return providerApiKey ? { ...base, apiKey: providerApiKey } : base;
 }
 
+/** Workers AI direct config (binding or REST, no gateway) */
+function workersAiConfig(creds: RequestCredentials) {
+	if (creds.useBinding) return { binding: env.AI };
+	if (creds.cloudflare)
+		return { accountId: creds.cloudflare.accountId, apiKey: creds.cloudflare.apiToken };
+	return { binding: env.AI };
+}
+
+/** Workers AI via gateway config */
+function workersAiGatewayConfig(creds: RequestCredentials) {
+	if (creds.useBinding) {
+		return {
+			binding: env.AI.gateway(resolveGatewayId(creds)),
+			apiKey: env.CLOUDFLARE_API_TOKEN,
+		};
+	}
+	if (creds.cloudflare) {
+		return { ...gwRestConfig(creds), apiKey: creds.cloudflare.apiToken };
+	}
+	return { binding: env.AI.gateway(resolveGatewayId(creds)), apiKey: env.CLOUDFLARE_API_TOKEN };
+}
+
 // ---------------------------------------------------------------------------
-// Dynamic adapter factories (credentials-aware)
+// Adapter factories
 // ---------------------------------------------------------------------------
 
-/** Default model per Workers AI route (used when no override header is provided) */
 const DEFAULT_WORKERS_AI_MODELS: Record<string, string> = {
-	"/ai/workers-ai-plain": "@cf/moonshotai/kimi-k2.5",
-	"/ai/workers-ai": "@cf/qwen/qwen3-30b-a3b-fp8",
+	"/ai/workers-ai-plain/chat": "@cf/moonshotai/kimi-k2.5",
+	"/ai/workers-ai/chat": "@cf/qwen/qwen3-30b-a3b-fp8",
 };
 
-function getChatAdapter(path: string, creds: RequestCredentials): AnyTextAdapter | null {
+function getChatAdapter(provider: string, creds: RequestCredentials): AnyTextAdapter | null {
 	const pk = creds.providerKeys;
-	// Allow frontend to override the Workers AI model via header
 	const waiModel = (creds.workersAiModel ||
-		DEFAULT_WORKERS_AI_MODELS[path] ||
+		DEFAULT_WORKERS_AI_MODELS[`/ai/${provider}/chat`] ||
 		"@cf/moonshotai/kimi-k2.5") as WorkersAiTextModel;
 
-	if (creds.useBinding) {
-		// Binding mode: use env.AI / env.AI.gateway() directly
-		switch (path) {
-			case "/ai/openai":
-				return createOpenAiChat("gpt-5.2", gwBindingConfig(creds, pk.openai));
-			case "/ai/anthropic":
-				return createAnthropicChat("claude-opus-4-6", gwBindingConfig(creds, pk.anthropic));
-			case "/ai/gemini":
-				// Gemini SDK can't use binding (no fetch override) — fall back to REST via env vars
-				return createGeminiChat("gemini-3-flash-preview", gwRestConfig(creds, pk.gemini));
-			case "/ai/grok":
-				return createGrokChat("grok-4-1-fast-reasoning", gwBindingConfig(creds, pk.grok));
-			case "/ai/workers-ai":
-				return createWorkersAiChat(waiModel, {
-					binding: env.AI.gateway(resolveGatewayId(creds)),
-					apiKey: env.CLOUDFLARE_API_TOKEN,
-				});
-			case "/ai/workers-ai-plain":
-				return createWorkersAiChat(waiModel, { binding: env.AI });
-			default:
-				return null;
-		}
-	}
-
-	// REST mode: use credentials from UI or env vars
-	switch (path) {
-		case "/ai/openai":
-			return createOpenAiChat("gpt-5.2", gwRestConfig(creds, pk.openai));
-		case "/ai/anthropic":
-			return createAnthropicChat("claude-opus-4-6", gwRestConfig(creds, pk.anthropic));
-		case "/ai/gemini":
+	switch (provider) {
+		case "workers-ai-plain":
+			return createWorkersAiChat(waiModel, workersAiConfig(creds));
+		case "workers-ai":
+			return createWorkersAiChat(waiModel, workersAiGatewayConfig(creds));
+		case "openai":
+			return createOpenAiChat(
+				"gpt-5.2",
+				creds.useBinding
+					? gwBindingConfig(creds, pk.openai)
+					: gwRestConfig(creds, pk.openai),
+			);
+		case "anthropic":
+			return createAnthropicChat(
+				"claude-opus-4-6",
+				creds.useBinding
+					? gwBindingConfig(creds, pk.anthropic)
+					: gwRestConfig(creds, pk.anthropic),
+			);
+		case "gemini":
 			return createGeminiChat("gemini-3-flash-preview", gwRestConfig(creds, pk.gemini));
-		case "/ai/grok":
-			return createGrokChat("grok-4-1-fast-reasoning", gwRestConfig(creds, pk.grok));
-		case "/ai/workers-ai":
-			return creds.cloudflare
-				? createWorkersAiChat(waiModel, {
-						...gwRestConfig(creds),
-						apiKey: creds.cloudflare.apiToken,
-					})
-				: createWorkersAiChat(waiModel, {
-						binding: env.AI.gateway(resolveGatewayId(creds)),
-						apiKey: env.CLOUDFLARE_API_TOKEN,
-					});
-		case "/ai/workers-ai-plain":
-			return creds.cloudflare
-				? createWorkersAiChat(waiModel, {
-						accountId: creds.cloudflare.accountId,
-						apiKey: creds.cloudflare.apiToken,
-					})
-				: createWorkersAiChat(waiModel, { binding: env.AI });
+		case "grok":
+			return createGrokChat(
+				"grok-4-1-fast-reasoning",
+				creds.useBinding ? gwBindingConfig(creds, pk.grok) : gwRestConfig(creds, pk.grok),
+			);
+		case "openrouter":
+			return createOpenRouterChat(
+				"openai/gpt-4o",
+				creds.useBinding
+					? gwBindingConfig(creds, pk.openrouter)
+					: gwRestConfig(creds, pk.openrouter),
+			);
 		default:
 			return null;
 	}
 }
 
-function getImageAdapter(path: string, creds: RequestCredentials): AnyImageAdapter | null {
+function getImageAdapter(provider: string, creds: RequestCredentials): AnyImageAdapter | null {
 	const pk = creds.providerKeys;
 
-	if (creds.useBinding) {
-		switch (path) {
-			case "/ai/image/openai":
-				return createOpenAiImage("gpt-image-1", gwBindingConfig(creds, pk.openai));
-			case "/ai/image/gemini":
-				// Gemini SDK can't use binding — fall back to REST via env vars
-				return createGeminiImage(
-					"gemini-3-pro-image-preview",
-					gwRestConfig(creds, pk.gemini),
-				);
-			case "/ai/image/grok":
-				return createGrokImage("grok-2-image-1212", gwBindingConfig(creds, pk.grok));
-			default:
-				return null;
-		}
-	}
-
-	switch (path) {
-		case "/ai/image/openai":
-			return createOpenAiImage("gpt-image-1", gwRestConfig(creds, pk.openai));
-		case "/ai/image/gemini":
+	switch (provider) {
+		case "workers-ai-plain":
+			return createWorkersAiImage(
+				"@cf/stabilityai/stable-diffusion-xl-base-1.0",
+				workersAiConfig(creds),
+			);
+		case "workers-ai":
+			return createWorkersAiImage(
+				"@cf/stabilityai/stable-diffusion-xl-base-1.0",
+				workersAiGatewayConfig(creds),
+			);
+		case "openai":
+			return createOpenAiImage(
+				"gpt-image-1",
+				creds.useBinding
+					? gwBindingConfig(creds, pk.openai)
+					: gwRestConfig(creds, pk.openai),
+			);
+		case "gemini":
 			return createGeminiImage("gemini-3-pro-image-preview", gwRestConfig(creds, pk.gemini));
-		case "/ai/image/grok":
-			return createGrokImage("grok-2-image-1212", gwRestConfig(creds, pk.grok));
+		case "grok":
+			return createGrokImage(
+				"grok-2-image-1212",
+				creds.useBinding ? gwBindingConfig(creds, pk.grok) : gwRestConfig(creds, pk.grok),
+			);
+		case "openrouter":
+			return createOpenRouterImage(
+				"openai/dall-e-3",
+				creds.useBinding
+					? gwBindingConfig(creds, pk.openrouter)
+					: gwRestConfig(creds, pk.openrouter),
+			);
 		default:
 			return null;
 	}
 }
 
-function getSummarizeAdapter(path: string, creds: RequestCredentials): AnySummarizeAdapter | null {
+function getSummarizeAdapter(
+	provider: string,
+	creds: RequestCredentials,
+): AnySummarizeAdapter | null {
 	const pk = creds.providerKeys;
 
-	if (creds.useBinding) {
-		switch (path) {
-			case "/ai/summarize/openai":
-				return createOpenAiSummarize("gpt-5.2", gwBindingConfig(creds, pk.openai));
-			case "/ai/summarize/anthropic":
-				return createAnthropicSummarize(
-					"claude-opus-4-6",
-					gwBindingConfig(creds, pk.anthropic),
-				);
-			case "/ai/summarize/gemini":
-				// Gemini SDK can't use binding — fall back to REST via env vars
-				return createGeminiSummarize("gemini-2.0-flash", gwRestConfig(creds, pk.gemini));
-			default:
-				return null;
-		}
-	}
-
-	switch (path) {
-		case "/ai/summarize/openai":
-			return createOpenAiSummarize("gpt-5.2", gwRestConfig(creds, pk.openai));
-		case "/ai/summarize/anthropic":
-			return createAnthropicSummarize("claude-opus-4-6", gwRestConfig(creds, pk.anthropic));
-		case "/ai/summarize/gemini":
+	switch (provider) {
+		case "workers-ai-plain":
+			return createWorkersAiSummarize("@cf/facebook/bart-large-cnn", workersAiConfig(creds));
+		case "workers-ai":
+			return createWorkersAiSummarize(
+				"@cf/facebook/bart-large-cnn",
+				workersAiGatewayConfig(creds),
+			);
+		case "openai":
+			return createOpenAiSummarize(
+				"gpt-5.2",
+				creds.useBinding
+					? gwBindingConfig(creds, pk.openai)
+					: gwRestConfig(creds, pk.openai),
+			);
+		case "anthropic":
+			return createAnthropicSummarize(
+				"claude-opus-4-6",
+				creds.useBinding
+					? gwBindingConfig(creds, pk.anthropic)
+					: gwRestConfig(creds, pk.anthropic),
+			);
+		case "gemini":
 			return createGeminiSummarize("gemini-2.0-flash", gwRestConfig(creds, pk.gemini));
+		case "grok":
+			return createGrokSummarize(
+				"grok-4-1-fast-reasoning",
+				creds.useBinding ? gwBindingConfig(creds, pk.grok) : gwRestConfig(creds, pk.grok),
+			);
+		case "openrouter":
+			return createOpenRouterSummarize(
+				"openai/gpt-4o",
+				creds.useBinding
+					? gwBindingConfig(creds, pk.openrouter)
+					: gwRestConfig(creds, pk.openrouter),
+			);
+		default:
+			return null;
+	}
+}
+
+function getTranscriptionAdapter(
+	provider: string,
+	creds: RequestCredentials,
+): AnyTranscriptionAdapter | null {
+	const pk = creds.providerKeys;
+
+	switch (provider) {
+		case "workers-ai-plain":
+			return createWorkersAiTranscription(
+				"@cf/openai/whisper-large-v3-turbo",
+				workersAiConfig(creds),
+			);
+		case "workers-ai":
+			return createWorkersAiTranscription(
+				"@cf/openai/whisper-large-v3-turbo",
+				workersAiGatewayConfig(creds),
+			);
+		case "openai":
+			return createOpenAiTranscription(
+				"whisper-1",
+				creds.useBinding
+					? gwBindingConfig(creds, pk.openai)
+					: gwRestConfig(creds, pk.openai),
+			);
+		default:
+			return null;
+	}
+}
+
+function getTTSAdapter(provider: string, creds: RequestCredentials): AnyTTSAdapter | null {
+	const pk = creds.providerKeys;
+
+	switch (provider) {
+		case "workers-ai-plain":
+			return createWorkersAiTts("@cf/deepgram/aura-1", workersAiConfig(creds));
+		case "workers-ai":
+			return createWorkersAiTts("@cf/deepgram/aura-1", workersAiGatewayConfig(creds));
+		case "openai":
+			return createOpenAiTts(
+				"tts-1",
+				creds.useBinding
+					? gwBindingConfig(creds, pk.openai)
+					: gwRestConfig(creds, pk.openai),
+			);
+		case "gemini":
+			return createGeminiTts("gemini-2.5-flash-preview-tts", gwRestConfig(creds, pk.gemini));
 		default:
 			return null;
 	}
 }
 
 // ---------------------------------------------------------------------------
-// Route lists (for the /ai/models discovery endpoint)
+// Provider capabilities (for the /ai/models discovery endpoint)
 // ---------------------------------------------------------------------------
 
-const CHAT_PATHS = ["openai", "anthropic", "gemini", "grok", "workers-ai", "workers-ai-plain"];
-const IMAGE_PATHS = ["openai", "gemini", "grok"];
-const SUMMARIZE_PATHS = ["openai", "anthropic", "gemini"];
+const PROVIDER_CAPABILITIES: Record<string, string[]> = {
+	"workers-ai-plain": ["chat", "image", "transcription", "tts", "summarize"],
+	"workers-ai": ["chat", "image", "transcription", "tts", "summarize"],
+	openai: ["chat", "image", "transcription", "tts", "summarize"],
+	anthropic: ["chat", "summarize"],
+	gemini: ["chat", "image", "tts", "summarize"],
+	grok: ["chat", "image", "summarize"],
+	openrouter: ["chat", "image", "summarize"],
+};
 
 // ---------------------------------------------------------------------------
 // Tools (for chat)
@@ -291,12 +391,10 @@ const tools = [
 		inputSchema: z.object({ url: z.string().url() }),
 	}).server(async (args) => {
 		try {
-			// Only allow http(s) URLs to prevent SSRF against internal services
 			const parsed = new URL(args.url);
 			if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
 				return { url: args.url, error: "Only http and https URLs are allowed" };
 			}
-			// Block private/internal IPs (cloud metadata, localhost, RFC1918)
 			const hostname = parsed.hostname.toLowerCase();
 			if (
 				hostname === "localhost" ||
@@ -327,6 +425,17 @@ const tools = [
 ];
 
 // ---------------------------------------------------------------------------
+// Route pattern: /ai/{provider}/{capability}
+// ---------------------------------------------------------------------------
+
+function parseRoute(pathname: string): { provider: string; capability: string } | null {
+	// Match /ai/{provider}/{capability}
+	const match = pathname.match(/^\/ai\/([^/]+)\/(.+)$/);
+	if (match) return { provider: match[1]!, capability: match[2]! };
+	return null;
+}
+
+// ---------------------------------------------------------------------------
 // Worker fetch handler
 // ---------------------------------------------------------------------------
 
@@ -335,12 +444,8 @@ export default {
 		const url = new URL(request.url);
 
 		// Discovery endpoint
-		if (url.pathname === "/ai/models") {
-			return Response.json({
-				chat: CHAT_PATHS,
-				image: IMAGE_PATHS,
-				summarize: SUMMARIZE_PATHS,
-			});
+		if (url.pathname === "/ai/providers") {
+			return Response.json(PROVIDER_CAPABILITIES);
 		}
 
 		if (request.method !== "POST") {
@@ -350,81 +455,121 @@ export default {
 			return new Response(null, { status: 404 });
 		}
 
+		const route = parseRoute(url.pathname);
+		if (!route) return new Response(null, { status: 404 });
+
 		const creds = extractCredentials(request);
+		const { provider, capability } = route;
 
-		// --- Chat ---
-		const chatAdapter = getChatAdapter(url.pathname, creds);
-		if (chatAdapter) {
-			try {
-				const body = (await request.json()) as {
-					messages: unknown[];
-					data: { conversationId?: string };
-				};
+		try {
+			switch (capability) {
+				// --- Chat ---
+				case "chat": {
+					const adapter = getChatAdapter(provider, creds);
+					if (!adapter)
+						return Response.json(
+							{ error: `Chat not supported for ${provider}` },
+							{ status: 404 },
+						);
 
-				const response = chat({
-					adapter: chatAdapter,
-					stream: true,
-					conversationId: body.data?.conversationId ?? crypto.randomUUID(),
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					const body = (await request.json()) as {
+						messages: unknown[];
+						data: { conversationId?: string };
+					};
+					const response = chat({
+						adapter,
+						stream: true,
+						conversationId: body.data?.conversationId ?? crypto.randomUUID(),
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any -- messages from request body match at runtime
 					messages: body.messages as any,
-					temperature: 0.6,
-					tools,
-				});
-
-				return toHttpResponse(response);
-			} catch (error) {
-				return Response.json(
-					{ error: error instanceof Error ? error.message : String(error) },
-					{ status: 500 },
-				);
-			}
-		}
-
-		// --- Image generation ---
-		const imageAdapter = getImageAdapter(url.pathname, creds);
-		if (imageAdapter) {
-			try {
-				const { prompt } = (await request.json()) as { prompt: string };
-				if (!prompt?.trim()) {
-					return Response.json({ error: "prompt is required" }, { status: 400 });
+						temperature: 0.6,
+						tools,
+					});
+					return toHttpResponse(response);
 				}
 
-				const result = await generateImage({ adapter: imageAdapter, prompt });
-				return Response.json(result);
-			} catch (error) {
-				return Response.json(
-					{
-						error: error instanceof Error ? error.message : String(error),
-					},
-					{ status: 500 },
-				);
-			}
-		}
+				// --- Image ---
+				case "image": {
+					const adapter = getImageAdapter(provider, creds);
+					if (!adapter)
+						return Response.json(
+							{ error: `Image not supported for ${provider}` },
+							{ status: 404 },
+						);
 
-		// --- Summarization ---
-		const summarizeAdapter = getSummarizeAdapter(url.pathname, creds);
-		if (summarizeAdapter) {
-			try {
-				const { text } = (await request.json()) as { text: string };
-				if (!text?.trim()) {
-					return Response.json({ error: "text is required" }, { status: 400 });
+					const { prompt } = (await request.json()) as { prompt: string };
+					if (!prompt?.trim())
+						return Response.json({ error: "prompt is required" }, { status: 400 });
+
+					const result = await generateImage({ adapter, prompt });
+					return Response.json(result);
 				}
 
-				const result = await summarize({
-					adapter: summarizeAdapter,
-					text,
-				});
-				return Response.json(result);
-			} catch (error) {
-				return Response.json(
-					{
-						error: error instanceof Error ? error.message : String(error),
-					},
-					{ status: 500 },
-				);
-			}
-		}
+				// --- Summarize ---
+				case "summarize": {
+					const adapter = getSummarizeAdapter(provider, creds);
+					if (!adapter)
+						return Response.json(
+							{ error: `Summarize not supported for ${provider}` },
+							{ status: 404 },
+						);
 
-		return new Response(null, { status: 404 });
+					const { text } = (await request.json()) as { text: string };
+					if (!text?.trim())
+						return Response.json({ error: "text is required" }, { status: 400 });
+
+					const result = await summarize({ adapter, text });
+					return Response.json(result);
+				}
+
+				// --- Transcription ---
+				case "transcription": {
+					const adapter = getTranscriptionAdapter(provider, creds);
+					if (!adapter)
+						return Response.json(
+							{ error: `Transcription not supported for ${provider}` },
+							{ status: 404 },
+						);
+
+					const { audio } = (await request.json()) as { audio: string };
+					if (!audio)
+						return Response.json(
+							{ error: "audio (base64) is required" },
+							{ status: 400 },
+						);
+
+					const result = await generateTranscription({ adapter, audio });
+					return Response.json(result);
+				}
+
+				// --- TTS ---
+				case "tts": {
+					const adapter = getTTSAdapter(provider, creds);
+					if (!adapter)
+						return Response.json(
+							{ error: `TTS not supported for ${provider}` },
+							{ status: 404 },
+						);
+
+					const { text } = (await request.json()) as { text: string };
+					if (!text?.trim())
+						return Response.json({ error: "text is required" }, { status: 400 });
+
+					const result = await generateSpeech({ adapter, text });
+					return Response.json(result);
+				}
+
+				default:
+					return Response.json(
+						{ error: `Unknown capability: ${capability}` },
+						{ status: 404 },
+					);
+			}
+		} catch (error) {
+			return Response.json(
+				{ error: error instanceof Error ? error.message : String(error) },
+				{ status: 500 },
+			);
+		}
 	},
 } satisfies ExportedHandler<Env>;

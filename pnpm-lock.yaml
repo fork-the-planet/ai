@@ -1740,6 +1740,9 @@ importers:
       '@google/genai':
         specifier: ^1.35.0
         version: 1.40.0(@modelcontextprotocol/sdk@1.26.0(@cfworker/json-schema@4.1.1)(zod@4.3.6))(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      '@openrouter/sdk':
+        specifier: ^0.3.15
+        version: 0.3.15
       '@tanstack/ai-anthropic':
         specifier: ^0.4.2
         version: 0.4.2(@tanstack/ai@0.4.2)(zod@4.3.6)
@@ -1752,6 +1755,9 @@ importers:
       '@tanstack/ai-openai':
         specifier: ^0.4.0
         version: 0.4.0(@tanstack/ai@0.4.2)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.3.6)
+      '@tanstack/ai-openrouter':
+        specifier: ^0.4.2
+        version: 0.4.2(@tanstack/ai@0.4.2)
 
   packages/workers-ai-provider:
     devDependencies:
@@ -3288,6 +3294,9 @@ packages:
       ai: ^6.0.0
       zod: ^3.25.0 || ^4.0.0
 
+  '@openrouter/sdk@0.3.15':
+    resolution: {integrity: sha512-tmiMQGu6L1fHD9NpIABN9LALEZitqM27CFebSVyJTQDcxCcR3m1F6v1O1MnOlLmedCFU+/BojniRGFAXo1F3Bw==}
+
   '@opentelemetry/api@1.9.0':
     resolution: {integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==}
     engines: {node: '>=8.0.0'}
@@ -3852,6 +3861,11 @@ packages:
     peerDependencies:
       '@tanstack/ai': ^0.4.0
       zod: ^4.0.0
+
+  '@tanstack/ai-openrouter@0.4.2':
+    resolution: {integrity: sha512-SZQdZmnfP1riQpDrwKtDK73WAFGwxn9+tJCdwD1uXJfrm2iSkD7XaLd8KGPavEmCDdX9sar9B7tcM9RN0ei5uQ==}
+    peerDependencies:
+      '@tanstack/ai': 0.4.2
 
   '@tanstack/ai-react@0.5.2':
     resolution: {integrity: sha512-R2fpIIBgHKHk6Bp3doDY35zqebTZYWoMeu7dW5qF/yqBMRhx2TIUjuulQ7fNeGpSbEEDHnCCDitWwPBqbHinZQ==}
@@ -8536,6 +8550,11 @@ snapshots:
       zod: 4.3.6
     optional: true
 
+  '@openrouter/sdk@0.3.15':
+    dependencies:
+      zod: 4.3.6
+    optional: true
+
   '@opentelemetry/api@1.9.0': {}
 
   '@oxfmt/binding-android-arm-eabi@0.31.0':
@@ -8972,6 +8991,12 @@ snapshots:
       zod: 4.3.6
     transitivePeerDependencies:
       - ws
+    optional: true
+
+  '@tanstack/ai-openrouter@0.4.2(@tanstack/ai@0.4.2)':
+    dependencies:
+      '@openrouter/sdk': 0.3.15
+      '@tanstack/ai': 0.4.2
     optional: true
 
   '@tanstack/ai-react@0.5.2(@tanstack/ai@0.4.2)(@types/react@19.2.13)(react@19.2.4)':

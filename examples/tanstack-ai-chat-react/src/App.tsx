@@ -1,73 +1,10 @@
 import { useState } from "react";
-import { ChatTab } from "./ChatTab";
-import { ImageTab } from "./ImageTab";
-import { SummarizeTab } from "./SummarizeTab";
+import { ProviderView } from "./ProviderView";
 import { ConfigProvider, useConfig } from "./config";
-
-const TABS = {
-	chat: {
-		label: "Chat",
-		icon: (
-			<svg
-				className="w-4 h-4"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-				strokeWidth={2}
-			>
-				<title>Chat</title>
-				<path
-					strokeLinecap="round"
-					strokeLinejoin="round"
-					d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-				/>
-			</svg>
-		),
-	},
-	images: {
-		label: "Images",
-		icon: (
-			<svg
-				className="w-4 h-4"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-				strokeWidth={2}
-			>
-				<title>Images</title>
-				<path
-					strokeLinecap="round"
-					strokeLinejoin="round"
-					d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"
-				/>
-			</svg>
-		),
-	},
-	summarize: {
-		label: "Summarize",
-		icon: (
-			<svg
-				className="w-4 h-4"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-				strokeWidth={2}
-			>
-				<title>Summarize</title>
-				<path
-					strokeLinecap="round"
-					strokeLinejoin="round"
-					d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
-				/>
-			</svg>
-		),
-	},
-} as const;
-
-type TabId = keyof typeof TABS;
+import { PROVIDERS } from "./providers";
 
 function AppContent() {
-	const [activeTab, setActiveTab] = useState<TabId>("chat");
+	const [activeProviderId, setActiveProviderId] = useState(PROVIDERS[0]!.id);
 	const [showSettings, setShowSettings] = useState(false);
 	const {
 		config,
@@ -80,9 +17,11 @@ function AppContent() {
 	} = useConfig();
 	const isConfigured = config.useBinding || isCloudflareConfigured || hasAnyProviderKey;
 
+	const activeProvider = PROVIDERS.find((p) => p.id === activeProviderId) ?? PROVIDERS[0]!;
+
 	return (
 		<div className="size-full flex flex-col bg-gray-50">
-			<div className="max-w-3xl w-full mx-auto flex flex-col h-full">
+			<div className="max-w-4xl w-full mx-auto flex flex-col h-full">
 				{/* Header */}
 				<header className="px-4 sm:px-6 pt-4 sm:pt-6 pb-0 bg-white">
 					<div className="flex items-center justify-between mb-4">
@@ -206,7 +145,7 @@ function AppContent() {
 									BYOK. Otherwise, enter keys for the providers you want to test.
 									Keys are stored in your browser only.
 								</p>
-								<div className="grid grid-cols-2 gap-2.5">
+								<div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
 									{[
 										{
 											key: "openai" as const,
@@ -227,6 +166,11 @@ function AppContent() {
 											key: "grok" as const,
 											label: "Grok",
 											placeholder: "xai-...",
+										},
+										{
+											key: "openrouter" as const,
+											label: "OpenRouter",
+											placeholder: "sk-or-...",
 										},
 									].map(({ key, label, placeholder }) => (
 										<div key={key}>
@@ -334,31 +278,31 @@ function AppContent() {
 						</div>
 					)}
 
-					{/* Tab bar */}
-					<div className="flex border-b border-gray-200 -mb-px">
-						{Object.entries(TABS).map(([id, tab]) => (
+					{/* Provider tabs */}
+					<div className="flex overflow-x-auto -mb-px scrollbar-hide">
+						{PROVIDERS.map((p) => (
 							<button
-								key={id}
+								key={p.id}
 								type="button"
-								onClick={() => setActiveTab(id as TabId)}
-								className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-all ${
-									id === activeTab
+								onClick={() => setActiveProviderId(p.id)}
+								className={`flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium border-b-2 transition-all whitespace-nowrap ${
+									p.id === activeProviderId
 										? "border-gray-900 text-gray-900"
 										: "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
 								}`}
 							>
-								{tab.icon}
-								{tab.label}
+								<div
+									className={`w-2 h-2 rounded-full bg-gradient-to-br ${p.color}`}
+								/>
+								{p.label}
 							</button>
 						))}
 					</div>
 				</header>
 
-				{/* Tab content */}
+				{/* Provider content */}
 				<div className="flex-1 flex flex-col overflow-hidden">
-					{activeTab === "chat" && <ChatTab />}
-					{activeTab === "images" && <ImageTab />}
-					{activeTab === "summarize" && <SummarizeTab />}
+					<ProviderView key={activeProviderId} provider={activeProvider} />
 				</div>
 			</div>
 		</div>

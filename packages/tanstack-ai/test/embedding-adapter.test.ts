@@ -11,9 +11,10 @@ describe("WorkersAiEmbeddingAdapter", () => {
 			run: vi.fn().mockResolvedValue({ shape: [2, 768], data: [[0.1], [0.2]] }),
 			gateway: () => ({ run: () => Promise.resolve(new Response("ok")) }),
 		};
-		const adapter = new WorkersAiEmbeddingAdapter("@cf/baai/bge-base-en-v1.5" as any, {
-			binding: mockBinding,
-		});
+		const adapter = new WorkersAiEmbeddingAdapter(
+			{ binding: mockBinding },
+			"@cf/baai/bge-base-en-v1.5" as any,
+		);
 
 		const result = await adapter.embed(["hello", "world"]);
 
@@ -36,9 +37,10 @@ describe("WorkersAiEmbeddingAdapter", () => {
 				),
 			),
 		};
-		const adapter = new WorkersAiEmbeddingAdapter("@cf/baai/bge-base-en-v1.5" as any, {
-			binding: mockGatewayBinding,
-		});
+		const adapter = new WorkersAiEmbeddingAdapter(
+			{ binding: mockGatewayBinding },
+			"@cf/baai/bge-base-en-v1.5" as any,
+		);
 
 		const result = await adapter.embed(["hello", "world"]);
 
@@ -58,10 +60,10 @@ describe("WorkersAiEmbeddingAdapter", () => {
 			.mockResolvedValue(new Response("Unauthorized", { status: 401 })) as any;
 
 		try {
-			const adapter = new WorkersAiEmbeddingAdapter("@cf/baai/bge-base-en-v1.5" as any, {
-				accountId: "abc",
-				apiKey: "bad-key",
-			});
+			const adapter = new WorkersAiEmbeddingAdapter(
+				{ accountId: "abc", apiKey: "bad-key" },
+				"@cf/baai/bge-base-en-v1.5" as any,
+			);
 
 			await expect(adapter.embed(["hello"])).rejects.toThrow(
 				/Workers AI embedding request failed \(401\)/,

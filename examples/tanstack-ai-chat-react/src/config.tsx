@@ -16,6 +16,7 @@ export interface ProviderKeys {
 	anthropic: string;
 	gemini: string;
 	grok: string;
+	openrouter: string;
 }
 
 export interface DemoConfig {
@@ -44,7 +45,13 @@ interface ConfigContextValue {
 const STORAGE_KEY = "cf-tanstack-ai-config-v2";
 
 const EMPTY_CLOUDFLARE: CloudflareConfig = { accountId: "", gatewayId: "", apiToken: "" };
-const EMPTY_PROVIDER_KEYS: ProviderKeys = { openai: "", anthropic: "", gemini: "", grok: "" };
+const EMPTY_PROVIDER_KEYS: ProviderKeys = {
+	openai: "",
+	anthropic: "",
+	gemini: "",
+	grok: "",
+	openrouter: "",
+};
 const EMPTY_CONFIG: DemoConfig = {
 	cloudflare: EMPTY_CLOUDFLARE,
 	providerKeys: EMPTY_PROVIDER_KEYS,
@@ -68,6 +75,7 @@ function loadConfig(): DemoConfig {
 					anthropic: parsed.providerKeys?.anthropic ?? "",
 					gemini: parsed.providerKeys?.gemini ?? "",
 					grok: parsed.providerKeys?.grok ?? "",
+					openrouter: parsed.providerKeys?.openrouter ?? "",
 				},
 				useBinding: parsed.useBinding ?? true,
 			};
@@ -137,7 +145,8 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
 		pk.openai.trim() ||
 		pk.anthropic.trim() ||
 		pk.gemini.trim() ||
-		pk.grok.trim()
+		pk.grok.trim() ||
+		pk.openrouter.trim()
 	);
 
 	const headers = useMemo((): Record<string, string> => {
@@ -157,6 +166,7 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
 		if (pk.anthropic.trim()) h["X-Anthropic-Api-Key"] = pk.anthropic.trim();
 		if (pk.gemini.trim()) h["X-Gemini-Api-Key"] = pk.gemini.trim();
 		if (pk.grok.trim()) h["X-Grok-Api-Key"] = pk.grok.trim();
+		if (pk.openrouter.trim()) h["X-OpenRouter-Api-Key"] = pk.openrouter.trim();
 		return h;
 	}, [
 		config.useBinding,
@@ -167,6 +177,7 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
 		pk.anthropic,
 		pk.gemini,
 		pk.grok,
+		pk.openrouter,
 	]);
 
 	const value = useMemo<ConfigContextValue>(

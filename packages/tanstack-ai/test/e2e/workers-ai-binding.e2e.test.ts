@@ -28,18 +28,22 @@ const BASE = `http://localhost:${PORT}`;
 
 // Models to test — same set as REST e2e tests for apples-to-apples comparison
 const MODELS = [
-	{ id: "@cf/meta/llama-4-scout-17b-16e-instruct", label: "Llama 4 Scout 17B" },
-	{ id: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", label: "Llama 3.3 70B" },
-	{ id: "@cf/meta/llama-3.1-8b-instruct-fast", label: "Llama 3.1 8B Fast" },
-	{ id: "@cf/openai/gpt-oss-120b", label: "GPT-OSS 120B" },
-	{ id: "@cf/openai/gpt-oss-20b", label: "GPT-OSS 20B" },
-	{ id: "@cf/qwen/qwen3-30b-a3b-fp8", label: "Qwen3 30B" },
-	{ id: "@cf/qwen/qwq-32b", label: "QwQ 32B (reasoning)" },
-	{ id: "@cf/google/gemma-3-12b-it", label: "Gemma 3 12B" },
-	{ id: "@cf/mistralai/mistral-small-3.1-24b-instruct", label: "Mistral Small 3.1" },
-	{ id: "@cf/deepseek/deepseek-r1-distill-qwen-32b", label: "DeepSeek R1 32B" },
-	{ id: "@cf/ibm/granite-4.0-h-micro", label: "Granite 4.0 Micro" },
-	{ id: "@cf/moonshotai/kimi-k2.5", label: "Kimi K2.5" },
+	{ id: "@cf/meta/llama-4-scout-17b-16e-instruct", label: "Llama 4 Scout 17B", reasoning: false },
+	{ id: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", label: "Llama 3.3 70B", reasoning: false },
+	{ id: "@cf/meta/llama-3.1-8b-instruct-fast", label: "Llama 3.1 8B Fast", reasoning: false },
+	{ id: "@cf/openai/gpt-oss-120b", label: "GPT-OSS 120B", reasoning: false },
+	{ id: "@cf/openai/gpt-oss-20b", label: "GPT-OSS 20B", reasoning: false },
+	{ id: "@cf/qwen/qwen3-30b-a3b-fp8", label: "Qwen3 30B", reasoning: false },
+	{ id: "@cf/qwen/qwq-32b", label: "QwQ 32B (reasoning)", reasoning: true },
+	{ id: "@cf/google/gemma-3-12b-it", label: "Gemma 3 12B", reasoning: false },
+	{
+		id: "@cf/mistralai/mistral-small-3.1-24b-instruct",
+		label: "Mistral Small 3.1",
+		reasoning: false,
+	},
+	{ id: "@cf/deepseek/deepseek-r1-distill-qwen-32b", label: "DeepSeek R1 32B", reasoning: true },
+	{ id: "@cf/ibm/granite-4.0-h-micro", label: "Granite 4.0 Micro", reasoning: false },
+	{ id: "@cf/moonshotai/kimi-k2.5", label: "Kimi K2.5", reasoning: true },
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -56,6 +60,7 @@ const results: Record<
 		toolCall: Status;
 		toolRoundTrip: Status;
 		structuredOutput: Status;
+		reasoning: Status;
 		notes: string[];
 	}
 > = {};
@@ -68,6 +73,7 @@ function getResult(label: string) {
 			toolCall: "fail",
 			toolRoundTrip: "fail",
 			structuredOutput: "fail",
+			reasoning: "fail",
 			notes: [],
 		};
 	}
@@ -87,7 +93,7 @@ function printSummaryTable() {
 	const pad = (s: string, n: number) => s + " ".repeat(Math.max(0, n - s.length));
 	const maxLabel = Math.max(...labels.map((l) => l.length), 5);
 
-	const header = `${pad("Model", maxLabel)} | Chat | Turn | Tool | T-RT | JSON | Notes`;
+	const header = `${pad("Model", maxLabel)} | Chat | Turn | Tool | T-RT | JSON | Think | Notes`;
 	const sep = "-".repeat(header.length + 10);
 
 	console.log("\n" + sep);
@@ -100,13 +106,13 @@ function printSummaryTable() {
 		const r = results[label]!;
 		const notes = r.notes.length > 0 ? r.notes.join("; ") : "";
 		console.log(
-			`${pad(label, maxLabel)} | ${statusIcon(r.chat)} | ${statusIcon(r.multiTurn)} | ${statusIcon(r.toolCall)} | ${statusIcon(r.toolRoundTrip)} | ${statusIcon(r.structuredOutput)} | ${notes}`,
+			`${pad(label, maxLabel)} | ${statusIcon(r.chat)} | ${statusIcon(r.multiTurn)} | ${statusIcon(r.toolCall)} | ${statusIcon(r.toolRoundTrip)} | ${statusIcon(r.structuredOutput)} | ${statusIcon(r.reasoning)} | ${notes}`,
 		);
 	}
 
 	console.log(sep);
-	console.log("  OK = works correctly    ~ = partial/quirky    X = broken/error");
-	console.log("  T-RT = tool round-trip (call tool → provide result → model responds)");
+	console.log("  OK = works correctly    ~ = partial/quirky    X = broken/error    - = N/A");
+	console.log("  T-RT = tool round-trip    Think = reasoning (STEP_STARTED/STEP_FINISHED)");
 	console.log(sep);
 }
 
@@ -407,6 +413,115 @@ describe("Workers AI Binding E2E", () => {
 				} else {
 					r.toolRoundTrip = "fail";
 					r.notes.push("t-rt: step2 no finish");
+				}
+			});
+		}
+	});
+
+	// ------------------------------------------------------------------
+	// Reasoning models: STEP_STARTED / STEP_FINISHED events
+	// ------------------------------------------------------------------
+
+	const REASONING_MODELS = MODELS.filter((m) => m.reasoning);
+
+	describe("reasoning (reasoning models only)", () => {
+		for (const model of REASONING_MODELS) {
+			it(`${model.label} — emits STEP_STARTED/STEP_FINISHED for reasoning`, async () => {
+				if (!serverReady) return;
+
+				const r = getResult(model.label);
+
+				const data = await post("/chat/stream", {
+					model: model.id,
+					messages: [
+						{
+							role: "user",
+							content: "What is 15 * 37? Think step by step before answering.",
+						},
+					],
+				});
+
+				if (data.error) {
+					r.reasoning = "fail";
+					r.notes.push(`reasoning: ${(data.error as string).slice(0, 40)}`);
+					return;
+				}
+
+				const chunks = data.chunks as any[];
+				if (!chunks || chunks.length === 0) {
+					r.reasoning = "fail";
+					r.notes.push("reasoning: no chunks");
+					return;
+				}
+
+				const runError = findChunk(chunks, "RUN_ERROR");
+				if (runError) {
+					r.reasoning = "fail";
+					r.notes.push(`reasoning: ${runError.error?.message?.slice(0, 40)}`);
+					return;
+				}
+
+				const stepStarted = findChunk(chunks, "STEP_STARTED");
+				const stepFinished = filterChunks(chunks, "STEP_FINISHED");
+
+				if (stepStarted && stepFinished.length > 0) {
+					// Verify STEP_STARTED has correct fields
+					if (stepStarted.stepType !== "thinking") {
+						r.reasoning = "warn";
+						r.notes.push(`reasoning: stepType=${stepStarted.stepType}`);
+						return;
+					}
+
+					// Verify accumulated content is non-empty
+					const lastStep = stepFinished[stepFinished.length - 1];
+					if (lastStep.content && lastStep.content.length > 0) {
+						r.reasoning = "ok";
+						console.log(
+							`  ✓ ${model.label}: reasoning OK — ${stepFinished.length} step events, ${lastStep.content.length} chars`,
+						);
+					} else {
+						r.reasoning = "warn";
+						r.notes.push("reasoning: empty content");
+					}
+				} else {
+					r.reasoning = "warn";
+					r.notes.push(
+						`reasoning: STEP_STARTED=${!!stepStarted}, STEP_FINISHED=${stepFinished.length}`,
+					);
+				}
+			});
+		}
+
+		// Non-reasoning models should NOT emit step events
+		const NON_REASONING_MODELS = MODELS.filter((m) => !m.reasoning);
+		for (const model of NON_REASONING_MODELS) {
+			it(`${model.label} — does NOT emit reasoning events`, async () => {
+				if (!serverReady) return;
+
+				const r = getResult(model.label);
+
+				// Mark as N/A by default for non-reasoning models
+				r.reasoning = "ok";
+
+				const data = await post("/chat/stream", {
+					model: model.id,
+					messages: [{ role: "user", content: "Say hello in one sentence." }],
+				});
+
+				if (data.error) {
+					// Don't mark reasoning as failed for non-reasoning models — the
+					// chat test already captures this. Just skip.
+					return;
+				}
+
+				const chunks = data.chunks as any[];
+				if (!chunks) return;
+
+				const stepStarted = findChunk(chunks, "STEP_STARTED");
+				if (stepStarted) {
+					// Unexpected — this model emitted reasoning events
+					r.reasoning = "warn";
+					r.notes.push("reasoning: unexpected STEP events");
 				}
 			});
 		}

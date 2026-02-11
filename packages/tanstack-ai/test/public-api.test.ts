@@ -6,10 +6,56 @@ import { describe, expect, it, vi } from "vitest";
 // These mocks are intentionally scoped to this file only.
 // ---------------------------------------------------------------------------
 
-vi.mock("@tanstack/ai/adapters", () => ({
-	BaseTextAdapter: class {},
+vi.mock("@tanstack/ai/adapters", () => {
+	class MockAdapter {
+		kind: string;
+		model: string;
+		config: object;
+		constructor(config: object, model: string) {
+			this.kind = "";
+			this.config = config;
+			this.model = model;
+		}
+		generateId() {
+			return "test-id";
+		}
+	}
+	return {
+		BaseTextAdapter: class extends MockAdapter {
+			constructor(c: any, m: any) {
+				super(c, m);
+				this.kind = "text";
+			}
+		},
+		BaseImageAdapter: class extends MockAdapter {
+			constructor(c: any, m: any) {
+				super(c, m);
+				this.kind = "image";
+			}
+		},
+		BaseTranscriptionAdapter: class extends MockAdapter {
+			constructor(c: any, m: any) {
+				super(c, m);
+				this.kind = "transcription";
+			}
+		},
+		BaseTTSAdapter: class extends MockAdapter {
+			constructor(c: any, m: any) {
+				super(c, m);
+				this.kind = "tts";
+			}
+		},
+		BaseSummarizeAdapter: class extends MockAdapter {
+			constructor(c: any, m: any) {
+				super(c, m);
+				this.kind = "summarize";
+			}
+		},
+	};
+});
+vi.mock("@tanstack/ai", () => ({
+	// Type-only imports don't need values, but we include empty stubs for safety
 }));
-vi.mock("@tanstack/ai", () => ({}));
 vi.mock("@tanstack/ai-openai", () => ({
 	OpenAITextAdapter: class {},
 	OpenAISummarizeAdapter: class {},
@@ -32,9 +78,11 @@ vi.mock("@tanstack/ai-gemini", () => ({
 	GeminiTextAdapter: class {},
 	GeminiSummarizeAdapter: class {},
 	GeminiImageAdapter: class {},
+	GeminiTTSAdapter: class {},
 	GeminiTextModels: ["gemini-2.5-flash"],
 	GeminiImageModels: ["imagen-4.0-generate-001"],
 	GeminiSummarizeModels: ["gemini-2.0-flash"],
+	GeminiTTSModels: ["gemini-2.5-flash-preview-tts"],
 }));
 vi.mock("@tanstack/ai-grok", () => ({
 	GrokTextAdapter: class {},
@@ -42,6 +90,16 @@ vi.mock("@tanstack/ai-grok", () => ({
 	GrokSummarizeAdapter: class {},
 	GROK_CHAT_MODELS: ["grok-3"],
 	GROK_IMAGE_MODELS: ["grok-2-image-1212"],
+}));
+vi.mock("@tanstack/ai-openrouter", () => ({
+	OpenRouterTextAdapter: class {},
+	OpenRouterImageAdapter: class {},
+	OpenRouterSummarizeAdapter: class {},
+}));
+vi.mock("@openrouter/sdk", () => ({
+	HTTPClient: class {
+		constructor() {}
+	},
 }));
 vi.mock("openai", () => ({ default: class {} }));
 vi.mock("@anthropic-ai/sdk", () => ({ default: class {} }));
@@ -53,17 +111,26 @@ describe("public API exports", () => {
 
 		// Workers AI factory functions
 		expect(typeof exports.createWorkersAiChat).toBe("function");
+		expect(typeof exports.createWorkersAiImage).toBe("function");
+		expect(typeof exports.createWorkersAiTranscription).toBe("function");
+		expect(typeof exports.createWorkersAiTts).toBe("function");
+		expect(typeof exports.createWorkersAiSummarize).toBe("function");
 
-		// Embedding and image adapters are held back until TanStack AI adds base adapters
+		// Embedding adapter is held back until TanStack AI adds BaseEmbeddingAdapter
 		expect((exports as any).createWorkersAiEmbedding).toBeUndefined();
-		expect((exports as any).createWorkersAiImage).toBeUndefined();
 
 		// Third-party factory functions
 		expect(typeof exports.createOpenAiChat).toBe("function");
 		expect(typeof exports.createAnthropicChat).toBe("function");
 		expect(typeof exports.createGeminiChat).toBe("function");
+		expect(typeof exports.createGeminiTts).toBe("function");
 		expect(typeof exports.createGrokChat).toBe("function");
 		expect(typeof exports.createGrokSummarize).toBe("function");
+
+		// OpenRouter factory functions
+		expect(typeof exports.createOpenRouterChat).toBe("function");
+		expect(typeof exports.createOpenRouterImage).toBe("function");
+		expect(typeof exports.createOpenRouterSummarize).toBe("function");
 	});
 
 	it("should export config types (verified via factory functions)", async () => {
@@ -99,6 +166,7 @@ describe("public API exports", () => {
 		expect(exports.GeminiTextModels).toBeDefined();
 		expect(exports.GeminiImageModels).toBeDefined();
 		expect(exports.GeminiSummarizeModels).toBeDefined();
+		expect(exports.GeminiTTSModels).toBeDefined();
 
 		// Grok
 		expect(exports.GROK_CHAT_MODELS).toBeDefined();

@@ -7,16 +7,19 @@ export {
 	createGeminiChat,
 	createGeminiImage,
 	createGeminiSummarize,
+	createGeminiTts,
 } from "./adapters/gemini";
 export type { GeminiGatewayConfig } from "./adapters/gemini";
 export {
 	GeminiTextModels,
 	GeminiImageModels,
 	GeminiSummarizeModels,
+	GeminiTTSModels,
 	type GeminiChatModel,
 	type GeminiTextModel,
 	type GeminiImageModel,
 	type GeminiSummarizeModel,
+	type GeminiTTSModel,
 } from "./adapters/gemini";
 
 export { createGrokChat, createGrokImage, createGrokSummarize } from "./adapters/grok";
@@ -51,14 +54,35 @@ export {
 	type OpenAIVideoModel,
 } from "./adapters/openai";
 
+export {
+	createOpenRouterChat,
+	createOpenRouterImage,
+	createOpenRouterSummarize,
+} from "./adapters/openrouter";
+export type {
+	OpenRouterGatewayConfig,
+	OpenRouterChatModel,
+	OpenRouterImageModel,
+	OpenRouterSummarizeModel,
+} from "./adapters/openrouter";
+
 export { createWorkersAiChat } from "./adapters/workers-ai";
 export type { WorkersAiTextModel } from "./adapters/workers-ai";
 
-// TODO: Workers AI image generation adapter is implemented in workers-ai-image.ts.
-// Needs rewrite to extend BaseImageAdapter (now available in @tanstack/ai 0.4.2).
+export { createWorkersAiImage } from "./adapters/workers-ai-image";
+export type { WorkersAiImageModel } from "./adapters/workers-ai-image";
+
+export { createWorkersAiTranscription } from "./adapters/workers-ai-transcription";
+export type { WorkersAiTranscriptionModel } from "./adapters/workers-ai-transcription";
+
+export { createWorkersAiTts } from "./adapters/workers-ai-tts";
+export type { WorkersAiTTSModel } from "./adapters/workers-ai-tts";
+
+export { createWorkersAiSummarize } from "./adapters/workers-ai-summarize";
+export type { WorkersAiSummarizeModel } from "./adapters/workers-ai-summarize";
+
+// TODO: Workers AI embedding adapter is implemented in workers-ai-embedding.ts.
+// Waiting on TanStack AI to add BaseEmbeddingAdapter / embed() / embedMany().
 
 // Config types
-export type {
-	AiGatewayAdapterConfig,
-	WorkersAiAdapterConfig,
-} from "./utils/create-fetcher";
+export type { AiGatewayAdapterConfig, WorkersAiAdapterConfig } from "./utils/create-fetcher";

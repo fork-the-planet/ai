@@ -93,6 +93,13 @@ export interface WorkersAiDirectCredentialsConfig {
  * - Plain REST: `{ accountId, apiKey }`
  * - AI Gateway binding: `{ binding: env.AI.gateway(id) }`
  * - AI Gateway REST: `{ accountId, gatewayId, ... }`
+ *
+ * The third union member intersects `AiGatewayAdapterConfig` with `{ apiKey?: string }`.
+ * For the gateway binding variant, `AiGatewayBindingConfig` already includes `apiKey?`,
+ * so the intersection is redundant there. For the gateway credentials variant, this
+ * `apiKey` represents the Workers AI token (used in the `Authorization` header to the
+ * upstream provider), distinct from `cfApiKey` (used in the `cf-aig-authorization`
+ * header for authenticated gateways).
  */
 export type WorkersAiAdapterConfig =
 	| WorkersAiDirectBindingConfig

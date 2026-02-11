@@ -543,6 +543,181 @@ describe("WorkersAiTextAdapter error handling", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Reasoning (STEP_STARTED / STEP_FINISHED)
+// ---------------------------------------------------------------------------
+
+describe("WorkersAiTextAdapter reasoning events", () => {
+	/**
+	 * Helper: creates a binding that returns an OpenAI-format SSE stream
+	 * (as emitted by models like QwQ, DeepSeek R1, Kimi K2.5 through the
+	 * Workers AI binding). These models include `reasoning_content` on deltas.
+	 */
+	function createReasoningBinding(chunks: string[]) {
+		const encoder = new TextEncoder();
+		const stream = new ReadableStream({
+			start(controller) {
+				for (const chunk of chunks) {
+					controller.enqueue(encoder.encode(chunk));
+				}
+				controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+				controller.close();
+			},
+		});
+		return {
+			run: vi.fn().mockResolvedValue(stream),
+			gateway: () => ({ run: () => Promise.resolve(new Response("ok")) }),
+		};
+	}
+
+	it("should emit STEP_STARTED and STEP_FINISHED for reasoning_content", async () => {
+		const binding = createReasoningBinding([
+			'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Let me think"},"finish_reason":null}],"model":"@cf/qwen/qwq-32b"}\n\n',
+			'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":" about this"},"finish_reason":null}],"model":"@cf/qwen/qwq-32b"}\n\n',
+			'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Hello!"},"finish_reason":null}],"model":"@cf/qwen/qwq-32b"}\n\n',
+			'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"model":"@cf/qwen/qwq-32b"}\n\n',
+		]);
+		const adapter = new WorkersAiTextAdapter("@cf/qwen/qwq-32b" as WorkersAiTextModel, {
+			binding,
+		});
+
+		const chunks = await collectChunks(
+			adapter.chatStream({
+				model: "@cf/qwen/qwq-32b" as WorkersAiTextModel,
+				messages: [{ role: "user", content: "Think about this" }],
+			} as any),
+		);
+
+		// Should have STEP_STARTED
+		const stepStarted = chunks.find((c: any) => c.type === "STEP_STARTED");
+		expect(stepStarted).toBeDefined();
+		expect(stepStarted.stepType).toBe("thinking");
+		expect(stepStarted.stepId).toMatch(/^workers-ai-step-/);
+
+		// Should have STEP_FINISHED events with incremental reasoning
+		const stepFinished = chunks.filter((c: any) => c.type === "STEP_FINISHED");
+		expect(stepFinished).toHaveLength(2);
+
+		// First reasoning token
+		expect(stepFinished[0].delta).toBe("Let me think");
+		expect(stepFinished[0].content).toBe("Let me think");
+
+		// Second reasoning token — accumulated
+		expect(stepFinished[1].delta).toBe(" about this");
+		expect(stepFinished[1].content).toBe("Let me think about this");
+
+		// All step events share the same stepId
+		expect(stepFinished[0].stepId).toBe(stepStarted.stepId);
+		expect(stepFinished[1].stepId).toBe(stepStarted.stepId);
+	});
+
+	it("should emit STEP_STARTED only once for multiple reasoning tokens", async () => {
+		const binding = createReasoningBinding([
+			'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"A"},"finish_reason":null}],"model":"@cf/qwen/qwq-32b"}\n\n',
+			'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"B"},"finish_reason":null}],"model":"@cf/qwen/qwq-32b"}\n\n',
+			'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"C"},"finish_reason":null}],"model":"@cf/qwen/qwq-32b"}\n\n',
+			'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Result"},"finish_reason":null}],"model":"@cf/qwen/qwq-32b"}\n\n',
+			'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"model":"@cf/qwen/qwq-32b"}\n\n',
+		]);
+		const adapter = new WorkersAiTextAdapter("@cf/qwen/qwq-32b" as WorkersAiTextModel, {
+			binding,
+		});
+
+		const chunks = await collectChunks(
+			adapter.chatStream({
+				model: "@cf/qwen/qwq-32b" as WorkersAiTextModel,
+				messages: [{ role: "user", content: "Think" }],
+			} as any),
+		);
+
+		const stepStarted = chunks.filter((c: any) => c.type === "STEP_STARTED");
+		expect(stepStarted).toHaveLength(1);
+
+		const stepFinished = chunks.filter((c: any) => c.type === "STEP_FINISHED");
+		expect(stepFinished).toHaveLength(3);
+		expect(stepFinished[2].content).toBe("ABC");
+	});
+
+	it("should emit reasoning events before text content events", async () => {
+		const binding = createReasoningBinding([
+			'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"thinking..."},"finish_reason":null}],"model":"@cf/qwen/qwq-32b"}\n\n',
+			'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"answer"},"finish_reason":null}],"model":"@cf/qwen/qwq-32b"}\n\n',
+			'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"model":"@cf/qwen/qwq-32b"}\n\n',
+		]);
+		const adapter = new WorkersAiTextAdapter("@cf/qwen/qwq-32b" as WorkersAiTextModel, {
+			binding,
+		});
+
+		const chunks = await collectChunks(
+			adapter.chatStream({
+				model: "@cf/qwen/qwq-32b" as WorkersAiTextModel,
+				messages: [{ role: "user", content: "Think" }],
+			} as any),
+		);
+
+		const types = chunks.map((c: any) => c.type);
+
+		// Verify ordering: RUN_STARTED → STEP_STARTED → STEP_FINISHED → TEXT_MESSAGE_START → TEXT_MESSAGE_CONTENT → TEXT_MESSAGE_END → RUN_FINISHED
+		const stepStartedIdx = types.indexOf("STEP_STARTED");
+		const stepFinishedIdx = types.indexOf("STEP_FINISHED");
+		const textStartIdx = types.indexOf("TEXT_MESSAGE_START");
+		const textContentIdx = types.indexOf("TEXT_MESSAGE_CONTENT");
+
+		expect(stepStartedIdx).toBeLessThan(stepFinishedIdx);
+		expect(stepFinishedIdx).toBeLessThan(textStartIdx);
+		expect(textStartIdx).toBeLessThan(textContentIdx);
+	});
+
+	it("should handle reasoning-only response (no text content)", async () => {
+		const binding = createReasoningBinding([
+			'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"deep thought"},"finish_reason":null}],"model":"@cf/qwen/qwq-32b"}\n\n',
+			'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"model":"@cf/qwen/qwq-32b"}\n\n',
+		]);
+		const adapter = new WorkersAiTextAdapter("@cf/qwen/qwq-32b" as WorkersAiTextModel, {
+			binding,
+		});
+
+		const chunks = await collectChunks(
+			adapter.chatStream({
+				model: "@cf/qwen/qwq-32b" as WorkersAiTextModel,
+				messages: [{ role: "user", content: "Think silently" }],
+			} as any),
+		);
+
+		// Should have reasoning events
+		expect(chunks.find((c: any) => c.type === "STEP_STARTED")).toBeDefined();
+		expect(chunks.find((c: any) => c.type === "STEP_FINISHED")).toBeDefined();
+
+		// Should NOT have text message events
+		expect(chunks.find((c: any) => c.type === "TEXT_MESSAGE_START")).toBeUndefined();
+		expect(chunks.find((c: any) => c.type === "TEXT_MESSAGE_CONTENT")).toBeUndefined();
+		expect(chunks.find((c: any) => c.type === "TEXT_MESSAGE_END")).toBeUndefined();
+
+		// Should still finish the run
+		const runFinished = chunks.find((c: any) => c.type === "RUN_FINISHED");
+		expect(runFinished).toBeDefined();
+		expect(runFinished.finishReason).toBe("stop");
+	});
+
+	it("should not emit reasoning events for non-reasoning models", async () => {
+		const binding = createStreamingBinding(['data: {"response":"Just a normal answer"}\n\n']);
+		const adapter = new WorkersAiTextAdapter(MODEL, { binding });
+
+		const chunks = await collectChunks(
+			adapter.chatStream({
+				model: MODEL,
+				messages: [{ role: "user", content: "Hi" }],
+			} as any),
+		);
+
+		expect(chunks.find((c: any) => c.type === "STEP_STARTED")).toBeUndefined();
+		expect(chunks.find((c: any) => c.type === "STEP_FINISHED")).toBeUndefined();
+
+		// Regular text events should still work
+		expect(chunks.find((c: any) => c.type === "TEXT_MESSAGE_CONTENT")).toBeDefined();
+	});
+});
+
+// ---------------------------------------------------------------------------
 // Config modes (constructor behavior)
 // ---------------------------------------------------------------------------
 

@@ -1,17 +1,17 @@
-// TODO: Rewrite to extend BaseImageAdapter (now exported from @tanstack/ai 0.4.2)
-// and export from index.ts. This adapter is implemented and tested, but held back
-// from the public API pending a rewrite to the standard interface.
-
+import { BaseImageAdapter } from "@tanstack/ai/adapters";
+import type { ImageGenerationOptions, ImageGenerationResult } from "@tanstack/ai";
 import type { AiModels, BaseAiTextToImage } from "@cloudflare/workers-types";
 import {
 	type WorkersAiAdapterConfig,
 	type WorkersAiDirectBindingConfig,
-	type WorkersAiDirectCredentialsConfig,
 	type AiGatewayAdapterConfig,
 	createGatewayFetch,
 	isDirectBindingConfig,
 	isDirectCredentialsConfig,
 } from "../utils/create-fetcher";
+import { workersAiRestFetch } from "../utils/workers-ai-rest";
+import { binaryToBase64, uint8ArrayToBase64 } from "../utils/binary";
+import type { WorkersAiDirectCredentialsConfig } from "../utils/create-fetcher";
 
 // ---------------------------------------------------------------------------
 // Model type derived from @cloudflare/workers-types
@@ -23,111 +23,82 @@ export type WorkersAiImageModel = {
 
 // ---------------------------------------------------------------------------
 // WorkersAiImageAdapter: image generation via Workers AI
+// Extends BaseImageAdapter so it works with TanStack AI's generateImage()
 // ---------------------------------------------------------------------------
 
-export interface WorkersAiImageResult {
-	/** Base64-encoded image data */
-	image: string;
-}
-
-export class WorkersAiImageAdapter {
+export class WorkersAiImageAdapter extends BaseImageAdapter<WorkersAiImageModel> {
 	readonly name = "workers-ai-image" as const;
-	private model: WorkersAiImageModel;
-	private config: WorkersAiAdapterConfig;
+	private adapterConfig: WorkersAiAdapterConfig;
 
-	constructor(model: WorkersAiImageModel, config: WorkersAiAdapterConfig) {
-		this.model = model;
-		this.config = config;
+	constructor(config: WorkersAiAdapterConfig, model: WorkersAiImageModel) {
+		super({}, model);
+		this.adapterConfig = config;
 	}
 
-	async generate(
-		prompt: string,
-		options?: Record<string, unknown>,
-	): Promise<WorkersAiImageResult> {
-		if (isDirectBindingConfig(this.config)) {
-			return this.generateViaBinding(prompt, options);
+	async generateImages(options: ImageGenerationOptions): Promise<ImageGenerationResult> {
+		const { prompt, size, modelOptions } = options;
+		const extra: Record<string, unknown> = { ...modelOptions };
+
+		// Note: Workers AI Stable Diffusion models only generate a single image
+		// per request — there is no multi-image parameter. `numberOfImages` from
+		// the TanStack AI options is intentionally not forwarded. Use
+		// `modelOptions.num_steps` to control the number of diffusion steps.
+
+		if (size) {
+			const [w, h] = size.split("x");
+			if (w) extra.width = Number(w);
+			if (h) extra.height = Number(h);
 		}
 
-		if (isDirectCredentialsConfig(this.config)) {
-			return this.generateViaRest(prompt, options);
+		if (isDirectBindingConfig(this.adapterConfig)) {
+			return this.generateViaBinding(prompt, extra);
+		}
+
+		if (isDirectCredentialsConfig(this.adapterConfig)) {
+			return this.generateViaRest(prompt, extra);
 		}
 
 		// Gateway mode
-		return this.generateViaGateway(prompt, options);
+		return this.generateViaGateway(prompt, extra);
 	}
 
 	private async generateViaBinding(
 		prompt: string,
-		options?: Record<string, unknown>,
-	): Promise<WorkersAiImageResult> {
-		const ai = (this.config as WorkersAiDirectBindingConfig).binding;
+		options: Record<string, unknown>,
+	): Promise<ImageGenerationResult> {
+		const ai = (this.adapterConfig as WorkersAiDirectBindingConfig).binding;
 		const result = await ai.run(this.model, { prompt, ...options });
 
-		// Workers AI image models return raw binary (Uint8Array) or a ReadableStream
-		if (result instanceof ReadableStream) {
-			const reader = result.getReader();
-			const chunks: Uint8Array[] = [];
-			while (true) {
-				const { done, value } = await reader.read();
-				if (done) break;
-				chunks.push(value);
-			}
-			const combined = new Uint8Array(chunks.reduce((acc, c) => acc + c.length, 0));
-			let offset = 0;
-			for (const chunk of chunks) {
-				combined.set(chunk, offset);
-				offset += chunk.length;
-			}
-			return { image: uint8ArrayToBase64(combined) };
-		}
-
-		if (result instanceof Uint8Array || result instanceof ArrayBuffer) {
-			const bytes = result instanceof ArrayBuffer ? new Uint8Array(result) : result;
-			return { image: uint8ArrayToBase64(bytes) };
-		}
-
-		// Some models may return { image: "base64..." }
-		if (typeof result === "object" && result !== null && "image" in result) {
-			return { image: (result as { image: string }).image };
-		}
-
-		throw new Error("Unexpected response format from Workers AI image model");
+		const b64 = await binaryToBase64(result, "image");
+		return this.wrapResult(b64);
 	}
 
 	private async generateViaRest(
 		prompt: string,
-		options?: Record<string, unknown>,
-	): Promise<WorkersAiImageResult> {
-		const config = this.config as WorkersAiDirectCredentialsConfig;
-		const response = await fetch(
-			`https://api.cloudflare.com/client/v4/accounts/${config.accountId}/ai/run/${this.model}`,
-			{
-				method: "POST",
-				headers: {
-					Authorization: `Bearer ${config.apiKey}`,
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ prompt, ...options }),
-			},
+		options: Record<string, unknown>,
+	): Promise<ImageGenerationResult> {
+		const config = this.adapterConfig as WorkersAiDirectCredentialsConfig;
+		const response = await workersAiRestFetch(
+			config,
+			this.model,
+			{ prompt, ...options },
+			{ label: "Workers AI image", signal: (options as { signal?: AbortSignal }).signal },
 		);
 
-		if (!response.ok) {
-			const errorText = await response.text();
-			throw new Error(`Workers AI image request failed (${response.status}): ${errorText}`);
-		}
-
-		// Workers AI REST returns the raw image bytes
 		const buffer = await response.arrayBuffer();
-		return { image: uint8ArrayToBase64(new Uint8Array(buffer)) };
+		return this.wrapResult(uint8ArrayToBase64(new Uint8Array(buffer)));
 	}
 
 	private async generateViaGateway(
 		prompt: string,
-		options?: Record<string, unknown>,
-	): Promise<WorkersAiImageResult> {
-		const gatewayConfig = this.config as AiGatewayAdapterConfig;
+		options: Record<string, unknown>,
+	): Promise<ImageGenerationResult> {
+		const gatewayConfig = this.adapterConfig as AiGatewayAdapterConfig;
 		const gatewayFetch = createGatewayFetch("workers-ai", gatewayConfig);
 
+		// The URL here is a placeholder — createGatewayFetch for "workers-ai" extracts
+		// the model from the body, sets it as the endpoint, and routes through the gateway.
+		// The actual URL path is not used.
 		const response = await gatewayFetch("https://api.cloudflare.com/v1/images/generations", {
 			method: "POST",
 			body: JSON.stringify({
@@ -145,7 +116,16 @@ export class WorkersAiImageAdapter {
 		}
 
 		const buffer = await response.arrayBuffer();
-		return { image: uint8ArrayToBase64(new Uint8Array(buffer)) };
+		return this.wrapResult(uint8ArrayToBase64(new Uint8Array(buffer)));
+	}
+
+	/** Wrap a base64 image string into the standard ImageGenerationResult. */
+	private wrapResult(b64: string): ImageGenerationResult {
+		return {
+			id: this.generateId(),
+			model: this.model,
+			images: [{ b64Json: b64 }],
+		};
 	}
 }
 
@@ -153,18 +133,25 @@ export class WorkersAiImageAdapter {
 // Factory function
 // ---------------------------------------------------------------------------
 
+/**
+ * Creates a Workers AI image generation adapter.
+ *
+ * Works with TanStack AI's `generateImage()` activity function:
+ * ```ts
+ * import { generateImage } from "@tanstack/ai";
+ * import { createWorkersAiImage } from "@cloudflare/tanstack-ai";
+ *
+ * const adapter = createWorkersAiImage(
+ *   "@cf/stabilityai/stable-diffusion-xl-base-1.0",
+ *   { binding: env.AI },
+ * );
+ *
+ * const result = await generateImage({ adapter, prompt: "a cat in space" });
+ * ```
+ *
+ * Note: Factory takes `(model, config)` for ergonomics — the class constructor
+ * uses `(config, model)` to match TanStack AI's upstream convention.
+ */
 export function createWorkersAiImage(model: WorkersAiImageModel, config: WorkersAiAdapterConfig) {
-	return new WorkersAiImageAdapter(model, config);
-}
-
-// ---------------------------------------------------------------------------
-// Utilities
-// ---------------------------------------------------------------------------
-
-function uint8ArrayToBase64(bytes: Uint8Array): string {
-	let binary = "";
-	for (let i = 0; i < bytes.length; i++) {
-		binary += String.fromCharCode(bytes[i]!);
-	}
-	return btoa(binary);
+	return new WorkersAiImageAdapter(config, model);
 }

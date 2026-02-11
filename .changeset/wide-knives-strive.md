@@ -2,4 +2,38 @@
 "@cloudflare/tanstack-ai": minor
 ---
 
-Add @cloudflare/tanstack-ai package for using TanStack AI with Cloudflare Workers AI and AI Gateway. Supports chat via Workers AI (binding and REST), plus routing through AI Gateway for OpenAI, Anthropic, Gemini, Grok, and Workers AI.
+Add `@cloudflare/tanstack-ai` — adapters for using TanStack AI with Cloudflare Workers AI and AI Gateway.
+
+### Workers AI adapters
+
+All Workers AI adapters support four configuration modes: plain binding (`env.AI`), plain REST (account ID + API key), AI Gateway binding (`env.AI.gateway(id)`), and AI Gateway REST (account ID + gateway ID).
+
+- **Chat** (`createWorkersAiChat`) — Streaming chat completions via the OpenAI-compatible API. Includes tool calling with full round-trip support, structured output via `json_schema`, and reasoning text streaming (`STEP_STARTED`/`STEP_FINISHED` AG-UI events) for models like QwQ, DeepSeek R1, and Kimi K2.5. A custom fetch shim translates OpenAI SDK calls to `env.AI.run()` for binding mode, with a stream transformer that handles both Workers AI native format and OpenAI-compatible format.
+- **Image generation** (`createWorkersAiImage`) — Stable Diffusion and other text-to-image models.
+- **Transcription** (`createWorkersAiTranscription`) — Speech-to-text via Whisper and Deepgram Nova-3.
+- **Text-to-speech** (`createWorkersAiTts`) — Audio generation via Deepgram Aura-1.
+- **Summarization** (`createWorkersAiSummarize`) — Text summarization via BART-large-CNN.
+- **Embeddings** (`createWorkersAiEmbedding`) — Text embeddings (implemented but not yet exported, pending TanStack AI's `BaseEmbeddingAdapter`).
+
+### AI Gateway adapters (third-party providers)
+
+Route requests through Cloudflare AI Gateway for caching, rate limiting, and unified billing. Each adapter injects a custom `fetch` (or `httpOptions` for Gemini) that handles both binding and credential-based gateway configurations.
+
+- **OpenAI** — Chat, summarize, image, transcription, TTS, video (`createOpenAi*`)
+- **Anthropic** — Chat, summarize (`createAnthropic*`)
+- **Gemini** — Chat, summarize, image, TTS (`createGemini*`). Credentials-only (Google GenAI SDK lacks custom fetch support).
+- **Grok** — Chat, summarize, image (`createGrok*`)
+- **OpenRouter** — Chat, summarize, image (`createOpenRouter*`). Accepts any model string.
+
+### Utilities
+
+- `createGatewayFetch` — Shared fetch factory that routes requests through AI Gateway (binding or REST), with support for cache control headers (`skipCache`, `cacheTtl`, `customCacheKey`, `metadata`).
+- `createWorkersAiBindingFetch` — Fetch shim that makes `env.AI` look like an OpenAI endpoint, including stream transformation and tool call ID sanitization for the binding's strict `[a-zA-Z0-9]{9}` validation.
+- Config detection helpers (`isDirectBindingConfig`, `isDirectCredentialsConfig`, `isGatewayConfig`) using structural typing to discriminate `env.AI` from `env.AI.gateway(id)`.
+- Shared binary utilities for normalizing Workers AI responses (Uint8Array, ArrayBuffer, ReadableStream, JSON wrapper) to base64.
+
+### Testing
+
+- Comprehensive unit tests (183 tests) covering all adapters, config modes, stream transformation, message building, tool calling, reasoning events, and public API surface.
+- E2E integration tests against real Workers AI APIs (both binding and REST paths) across 12 models, validating chat, multi-turn, tool calling, tool round-trips, structured output, and reasoning.
+- Tree-shakeable package exports with per-adapter entry points for ESM and CJS.

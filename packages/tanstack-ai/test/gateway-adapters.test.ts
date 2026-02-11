@@ -2,6 +2,7 @@ import { describe, expect, it, vi, beforeEach, type Mock } from "vitest";
 import type {
 	AiGatewayBindingConfig,
 	AiGatewayCredentialsConfig,
+	AiGatewayConfig,
 } from "../src/utils/create-fetcher";
 
 // ---------------------------------------------------------------------------
@@ -28,6 +29,7 @@ vi.mock("@tanstack/ai-anthropic", () => ({
 const mockGeminiTextCtor = vi.fn();
 const mockGeminiImageCtor = vi.fn();
 const mockGeminiSummarizeCtor = vi.fn();
+const mockGeminiTTSCtor = vi.fn();
 
 vi.mock("@tanstack/ai-gemini", () => ({
 	GeminiTextAdapter: class {
@@ -45,9 +47,15 @@ vi.mock("@tanstack/ai-gemini", () => ({
 			mockGeminiSummarizeCtor(...args);
 		}
 	},
+	GeminiTTSAdapter: class {
+		constructor(...args: unknown[]) {
+			mockGeminiTTSCtor(...args);
+		}
+	},
 	GeminiTextModels: ["gemini-2.5-flash"],
 	GeminiImageModels: ["imagen-4.0-generate-001"],
 	GeminiSummarizeModels: ["gemini-2.0-flash"],
+	GeminiTTSModels: ["gemini-2.5-flash-preview-tts"],
 }));
 
 const mockGrokTextCtor = vi.fn();
@@ -120,6 +128,37 @@ vi.mock("@tanstack/ai-openai", () => ({
 }));
 
 vi.mock("@tanstack/ai", () => ({}));
+const mockOpenRouterTextCtor = vi.fn();
+const mockOpenRouterImageCtor = vi.fn();
+const mockOpenRouterSummarizeCtor = vi.fn();
+
+vi.mock("@tanstack/ai-openrouter", () => ({
+	OpenRouterTextAdapter: class {
+		constructor(...args: unknown[]) {
+			mockOpenRouterTextCtor(...args);
+		}
+	},
+	OpenRouterImageAdapter: class {
+		constructor(...args: unknown[]) {
+			mockOpenRouterImageCtor(...args);
+		}
+	},
+	OpenRouterSummarizeAdapter: class {
+		constructor(...args: unknown[]) {
+			mockOpenRouterSummarizeCtor(...args);
+		}
+	},
+}));
+
+vi.mock("@openrouter/sdk", () => ({
+	HTTPClient: class {
+		fetcher: unknown;
+		constructor(opts: { fetcher?: unknown }) {
+			this.fetcher = opts?.fetcher;
+		}
+	},
+}));
+
 vi.mock("openai", () => ({ default: class {} }));
 vi.mock("@anthropic-ai/sdk", () => ({ default: class {} }));
 vi.mock("@google/genai", () => ({ GoogleGenAI: class {} }));
@@ -235,12 +274,30 @@ describe("Gemini gateway adapters", () => {
 		});
 	});
 
-	it("createGeminiChat omits cf-aig-authorization header when no cfApiKey", async () => {
+	it("createGeminiChat omits headers when no cfApiKey or cache options", async () => {
 		const { createGeminiChat } = await import("../src/adapters/gemini");
 		createGeminiChat("gemini-2.5-flash" as any, credentialsConfig);
 
 		const [config] = mockGeminiTextCtor.mock.calls[0]!;
 		expect(config.httpOptions.headers).toBeUndefined();
+	});
+
+	it("createGeminiChat passes cache headers via httpOptions.headers", async () => {
+		const { createGeminiChat } = await import("../src/adapters/gemini");
+		const configWithCache: AiGatewayCredentialsConfig & AiGatewayConfig = {
+			...credentialsConfig,
+			skipCache: true,
+			cacheTtl: 300,
+			customCacheKey: "my-key",
+			metadata: { env: "test" },
+		};
+		createGeminiChat("gemini-2.5-flash" as any, configWithCache);
+
+		const [config] = mockGeminiTextCtor.mock.calls[0]!;
+		expect(config.httpOptions.headers["cf-aig-skip-cache"]).toBe("true");
+		expect(config.httpOptions.headers["cf-aig-cache-ttl"]).toBe("300");
+		expect(config.httpOptions.headers["cf-aig-cache-key"]).toBe("my-key");
+		expect(config.httpOptions.headers["cf-aig-metadata"]).toBe(JSON.stringify({ env: "test" }));
 	});
 
 	it("createGeminiImage with credentials config", async () => {
@@ -257,6 +314,44 @@ describe("Gemini gateway adapters", () => {
 
 		assertGeminiConfig(mockGeminiSummarizeCtor, "test-api-key");
 		expect(mockGeminiSummarizeCtor.mock.calls[0]![1]).toBe("gemini-2.0-flash");
+	});
+
+	it("createGeminiTts with credentials config", async () => {
+		const { createGeminiTts } = await import("../src/adapters/gemini");
+		createGeminiTts("gemini-2.5-flash-preview-tts" as any, credentialsConfig);
+
+		assertGeminiConfig(mockGeminiTTSCtor, "test-api-key");
+		expect(mockGeminiTTSCtor.mock.calls[0]![1]).toBe("gemini-2.5-flash-preview-tts");
+	});
+
+	it("createGeminiChat throws on binding config (runtime guard)", async () => {
+		const { createGeminiChat } = await import("../src/adapters/gemini");
+		const bindingStyleConfig = {
+			binding: { run: async () => new Response("ok") },
+		};
+		expect(() =>
+			createGeminiChat("gemini-2.5-flash" as any, bindingStyleConfig as any),
+		).toThrow(/Gemini adapters do not support binding config/);
+	});
+
+	it("createGeminiImage throws on binding config (runtime guard)", async () => {
+		const { createGeminiImage } = await import("../src/adapters/gemini");
+		const bindingStyleConfig = {
+			binding: { run: async () => new Response("ok") },
+		};
+		expect(() =>
+			createGeminiImage("imagen-4.0-generate-001" as any, bindingStyleConfig as any),
+		).toThrow(/Gemini adapters do not support binding config/);
+	});
+
+	it("createGeminiTts throws on binding config (runtime guard)", async () => {
+		const { createGeminiTts } = await import("../src/adapters/gemini");
+		const bindingStyleConfig = {
+			binding: { run: async () => new Response("ok") },
+		};
+		expect(() =>
+			createGeminiTts("gemini-2.5-flash-preview-tts" as any, bindingStyleConfig as any),
+		).toThrow(/googleapis\/js-genai/);
 	});
 
 	it("createGeminiChat defaults apiKey to 'unused'", async () => {
@@ -385,6 +480,59 @@ describe("OpenAI gateway adapters", () => {
 		createOpenAiChat("gpt-4o" as any, noKeyConfig as any);
 
 		const [config] = mockOpenAITextCtor.mock.calls[0]!;
+		expect(config.apiKey).toBe("unused");
+	});
+});
+
+describe("OpenRouter gateway adapters", () => {
+	beforeEach(() => vi.clearAllMocks());
+
+	it("createOpenRouterChat with credentials config", async () => {
+		const { createOpenRouterChat } = await import("../src/adapters/openrouter");
+		createOpenRouterChat("openai/gpt-4o", credentialsConfig);
+
+		expect(mockOpenRouterTextCtor).toHaveBeenCalledOnce();
+		const [config] = mockOpenRouterTextCtor.mock.calls[0]!;
+		expect(config.apiKey).toBe("test-api-key");
+		expect(config.httpClient).toBeDefined();
+		expect(mockOpenRouterTextCtor.mock.calls[0]![1]).toBe("openai/gpt-4o");
+	});
+
+	it("createOpenRouterChat with binding config", async () => {
+		const { createOpenRouterChat } = await import("../src/adapters/openrouter");
+		createOpenRouterChat("openai/gpt-4o", bindingConfig);
+
+		expect(mockOpenRouterTextCtor).toHaveBeenCalledOnce();
+		const [config] = mockOpenRouterTextCtor.mock.calls[0]!;
+		expect(config.apiKey).toBe("binding-api-key");
+		expect(config.httpClient).toBeDefined();
+	});
+
+	it("createOpenRouterImage with credentials config", async () => {
+		const { createOpenRouterImage } = await import("../src/adapters/openrouter");
+		createOpenRouterImage("openai/dall-e-3", credentialsConfig);
+
+		expect(mockOpenRouterImageCtor).toHaveBeenCalledOnce();
+		const [config] = mockOpenRouterImageCtor.mock.calls[0]!;
+		expect(config.apiKey).toBe("test-api-key");
+		expect(config.httpClient).toBeDefined();
+		expect(mockOpenRouterImageCtor.mock.calls[0]![1]).toBe("openai/dall-e-3");
+	});
+
+	it("createOpenRouterSummarize with credentials config", async () => {
+		const { createOpenRouterSummarize } = await import("../src/adapters/openrouter");
+		createOpenRouterSummarize("openai/gpt-4o", credentialsConfig);
+
+		expect(mockOpenRouterSummarizeCtor).toHaveBeenCalledOnce();
+		expect(mockOpenRouterSummarizeCtor.mock.calls[0]![1]).toBe("openai/gpt-4o");
+	});
+
+	it("createOpenRouterChat defaults apiKey to 'unused'", async () => {
+		const { createOpenRouterChat } = await import("../src/adapters/openrouter");
+		const noKeyConfig = { ...credentialsConfig, apiKey: undefined };
+		createOpenRouterChat("openai/gpt-4o", noKeyConfig as any);
+
+		const [config] = mockOpenRouterTextCtor.mock.calls[0]!;
 		expect(config.apiKey).toBe("unused");
 	});
 });

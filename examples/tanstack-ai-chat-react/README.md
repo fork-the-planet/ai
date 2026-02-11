@@ -6,30 +6,30 @@ Multi-provider AI demo showcasing [`@cloudflare/tanstack-ai`](../../packages/tan
 
 ### Chat
 
-| Provider | Model | Config Mode |
-| --- | --- | --- |
-| **Llama 4 Scout** | `@cf/meta/llama-4-scout-17b-16e-instruct` | Workers AI direct |
-| **Qwen3 30B** | `@cf/qwen/qwen3-30b-a3b-fp8` | Workers AI via AI Gateway |
-| **GPT-5.2** | `gpt-5.2` | OpenAI via AI Gateway |
-| **Claude Sonnet 4.5** | `claude-sonnet-4-5` | Anthropic via AI Gateway |
-| **Gemini 2.5 Flash** | `gemini-2.5-flash` | Gemini via AI Gateway |
-| **Grok 4** | `grok-4-1-fast-reasoning` | Grok via AI Gateway |
+| Provider              | Model                                     | Config Mode               |
+| --------------------- | ----------------------------------------- | ------------------------- |
+| **Llama 4 Scout**     | `@cf/meta/llama-4-scout-17b-16e-instruct` | Workers AI direct         |
+| **Qwen3 30B**         | `@cf/qwen/qwen3-30b-a3b-fp8`              | Workers AI via AI Gateway |
+| **GPT-5.2**           | `gpt-5.2`                                 | OpenAI via AI Gateway     |
+| **Claude Sonnet 4.5** | `claude-sonnet-4-5`                       | Anthropic via AI Gateway  |
+| **Gemini 2.5 Flash**  | `gemini-2.5-flash`                        | Gemini via AI Gateway     |
+| **Grok 4**            | `grok-4-1-fast-reasoning`                 | Grok via AI Gateway       |
 
 ### Image Generation
 
-| Provider | Model |
-| --- | --- |
-| **OpenAI** | `gpt-image-1` |
+| Provider   | Model                     |
+| ---------- | ------------------------- |
+| **OpenAI** | `gpt-image-1`             |
 | **Gemini** | `imagen-4.0-generate-001` |
-| **Grok** | `grok-2-image-1212` |
+| **Grok**   | `grok-2-image-1212`       |
 
 ### Summarization
 
-| Provider | Model |
-| --- | --- |
-| **OpenAI** | `gpt-5.2` |
+| Provider      | Model               |
+| ------------- | ------------------- |
+| **OpenAI**    | `gpt-5.2`           |
 | **Anthropic** | `claude-sonnet-4-5` |
-| **Gemini** | `gemini-2.0-flash` |
+| **Gemini**    | `gemini-2.0-flash`  |
 
 ## Setup
 

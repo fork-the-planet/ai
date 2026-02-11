@@ -12,6 +12,7 @@ import {
 	isDirectBindingConfig,
 	isDirectCredentialsConfig,
 } from "../utils/create-fetcher";
+import { workersAiRestFetch } from "../utils/workers-ai-rest";
 
 // ---------------------------------------------------------------------------
 // Model type derived from @cloudflare/workers-types
@@ -34,7 +35,7 @@ export class WorkersAiEmbeddingAdapter {
 	private model: WorkersAiEmbeddingModel;
 	private config: WorkersAiAdapterConfig;
 
-	constructor(model: WorkersAiEmbeddingModel, config: WorkersAiAdapterConfig) {
+	constructor(config: WorkersAiAdapterConfig, model: WorkersAiEmbeddingModel) {
 		this.model = model;
 		this.config = config;
 	}
@@ -63,24 +64,14 @@ export class WorkersAiEmbeddingAdapter {
 
 	private async embedViaRest(texts: string[]): Promise<WorkersAiEmbeddingResult> {
 		const config = this.config as WorkersAiDirectCredentialsConfig;
-		const response = await fetch(
-			`https://api.cloudflare.com/client/v4/accounts/${config.accountId}/ai/run/${this.model}`,
+		const response = await workersAiRestFetch(
+			config,
+			this.model,
+			{ text: texts },
 			{
-				method: "POST",
-				headers: {
-					Authorization: `Bearer ${config.apiKey}`,
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ text: texts }),
+				label: "Workers AI embedding",
 			},
 		);
-
-		if (!response.ok) {
-			const errorText = await response.text();
-			throw new Error(
-				`Workers AI embedding request failed (${response.status}): ${errorText}`,
-			);
-		}
 
 		const json = (await response.json()) as {
 			result: { shape: number[]; data: number[][] };
@@ -92,8 +83,9 @@ export class WorkersAiEmbeddingAdapter {
 		const gatewayConfig = this.config as AiGatewayAdapterConfig;
 		const gatewayFetch = createGatewayFetch("workers-ai", gatewayConfig);
 
-		// Workers AI expects { text: [...] }, and createGatewayFetch for workers-ai
-		// sets endpoint = query.model and strips model from the query.
+		// The URL here is a placeholder — createGatewayFetch for "workers-ai" extracts
+		// the model from the body, sets it as the endpoint, and routes through the gateway.
+		// The actual URL path is not used.
 		const response = await gatewayFetch("https://api.cloudflare.com/v1/embeddings", {
 			method: "POST",
 			body: JSON.stringify({
@@ -116,9 +108,15 @@ export class WorkersAiEmbeddingAdapter {
 // Factory function
 // ---------------------------------------------------------------------------
 
+/**
+ * Creates a Workers AI embedding adapter.
+ *
+ * Note: Factory takes `(model, config)` for ergonomics — the class constructor
+ * uses `(config, model)` to match TanStack AI's upstream convention.
+ */
 export function createWorkersAiEmbedding(
 	model: WorkersAiEmbeddingModel,
 	config: WorkersAiAdapterConfig,
 ) {
-	return new WorkersAiEmbeddingAdapter(model, config);
+	return new WorkersAiEmbeddingAdapter(config, model);
 }
