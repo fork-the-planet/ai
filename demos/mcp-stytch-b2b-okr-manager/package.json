@@ -16,7 +16,7 @@
 	"dependencies": {
 		"@stytch/react": "^19.18.1",
 		"@stytch/vanilla-js": "^5.45.0",
-		"agents": "^0.4.0",
+		"agents": "^0.4.1",
 		"commander": "^14.0.3",
 		"hono": "^4.11.9",
 		"lucide-react": "^0.563.0",
@@ -27,13 +27,13 @@
 		"zod": "^4.3.6"
 	},
 	"devDependencies": {
-		"@cloudflare/vite-plugin": "^1.24.0",
-		"@types/react": "^19.2.13",
+		"@cloudflare/vite-plugin": "^1.25.0",
+		"@types/react": "^19.2.14",
 		"@types/react-dom": "^19.2.3",
 		"@vitejs/plugin-react": "^5.1.4",
-		"oxlint": "^1.46.0",
+		"oxlint": "^1.47.0",
 		"typescript": "5.9.3",
 		"vite": "^7.3.1",
-		"wrangler": "^4.64.0"
+		"wrangler": "^4.65.0"
 	}
 }
