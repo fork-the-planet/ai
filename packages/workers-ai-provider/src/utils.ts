@@ -173,10 +173,42 @@ export function createRun(config: CreateRunConfig): AiRun {
 		}
 
 		if ((inputs as AiTextGenerationInput).stream === true) {
-			if (response.body) {
+			const contentType = response.headers.get("content-type") || "";
+			if (contentType.includes("event-stream") && response.body) {
 				return response.body;
 			}
-			throw new Error("No readable body available for streaming.");
+			if (response.body && !contentType.includes("json")) {
+				// Unknown content type — assume it's a stream
+				return response.body;
+			}
+
+			// Some models (e.g. GPT-OSS) don't support streaming via the /ai/run/
+			// endpoint and return a JSON response with empty result instead of SSE.
+			// Retry without streaming so doStream's graceful degradation path can
+			// wrap the complete response as a synthetic stream.
+			const retryResponse = await fetch(url, {
+				body: JSON.stringify({ ...(inputs as Record<string, unknown>), stream: false }),
+				headers,
+				method: "POST",
+				signal: signal as AbortSignal | undefined,
+			});
+
+			if (!retryResponse.ok) {
+				let errorBody: string;
+				try {
+					errorBody = await retryResponse.text();
+				} catch {
+					errorBody = "<unable to read response body>";
+				}
+				throw new Error(
+					`Workers AI API error (${retryResponse.status} ${retryResponse.statusText}): ${errorBody}`,
+				);
+			}
+
+			const retryData = await retryResponse.json<{
+				result: AiModels[Name]["postProcessedOutputs"];
+			}>();
+			return retryData.result;
 		}
 
 		const data = await response.json<{

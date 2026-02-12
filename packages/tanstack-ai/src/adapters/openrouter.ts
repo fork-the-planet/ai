@@ -24,7 +24,10 @@ function buildOpenRouterConfig(config: OpenRouterGatewayConfig): OpenRouterConfi
 	});
 	return {
 		apiKey: config.apiKey ?? "unused",
-		httpClient,
+		// Cast needed: the installed @openrouter/sdk version may differ from the
+		// version @tanstack/ai-openrouter was built against. The HTTPClient interface
+		// is structurally compatible but TypeScript sees them as separate declarations.
+		httpClient: httpClient as unknown as OpenRouterConfig["httpClient"],
 	};
 }
 
@@ -62,7 +65,7 @@ function buildOpenRouterSummarizeConfig(
 	});
 	return {
 		apiKey: config.apiKey ?? "unused",
-		httpClient,
+		httpClient: httpClient as unknown as OpenRouterSummarizeConfig["httpClient"],
 	};
 }
 

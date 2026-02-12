@@ -176,7 +176,7 @@ export default {
 					const imageProvider = createWorkersAI({ binding: env.AI });
 					const imageResult = await generateImage({
 						model: imageProvider.image(imageModel as any),
-						prompt: "A red circle on a white background",
+						prompt: "A cute cartoon cat sitting on a grassy hill under a blue sky",
 						size: "256x256",
 					});
 
@@ -257,7 +257,7 @@ export default {
 
 					try {
 						const result = await transcribe({
-							model: workersai.transcription(txModel as any),
+							model: provider.transcription(txModel as any),
 							audio: new Uint8Array(audioData),
 							mediaType: "audio/wav",
 						});
@@ -274,10 +274,11 @@ export default {
 
 				// ----- Speech (TTS) -----
 				case "/speech": {
-					const sBody = body as { text?: string; voice?: string };
+					const sBody = body as { model?: string; text?: string; voice?: string };
+					const speechModel = sBody.model || "@cf/deepgram/aura-1";
 					try {
 						const result = await generateSpeech({
-							model: workersai.speech("@cf/deepgram/aura-1"),
+							model: provider.speech(speechModel as any),
 							text: sBody.text || "Hello, this is a test.",
 							voice: sBody.voice,
 						});
@@ -297,7 +298,7 @@ export default {
 					};
 					try {
 						const result = await rerank({
-							model: workersai.reranking("@cf/baai/bge-reranker-base"),
+							model: provider.reranking("@cf/baai/bge-reranker-base"),
 							query: rkBody.query || "test query",
 							documents: rkBody.documents || ["doc1", "doc2"],
 						});

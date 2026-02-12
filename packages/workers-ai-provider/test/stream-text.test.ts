@@ -1193,6 +1193,123 @@ describe("REST API - Finish Reason Handling", () => {
 	});
 });
 
+describe("REST API - Streaming Fallback", () => {
+	const fallbackServer = setupServer();
+	beforeAll(() => fallbackServer.listen());
+	afterEach(() => fallbackServer.resetHandlers());
+	afterAll(() => fallbackServer.close());
+
+	it("should retry without streaming when REST returns JSON instead of SSE", async () => {
+		let callCount = 0;
+		fallbackServer.use(
+			http.post(
+				`https://api.cloudflare.com/client/v4/accounts/${TEST_ACCOUNT_ID}/ai/run/${TEST_MODEL}`,
+				async ({ request }) => {
+					callCount++;
+					const body = (await request.json()) as Record<string, unknown>;
+
+					if (body.stream === true) {
+						// First call: model doesn't support streaming, returns empty JSON
+						return new Response(
+							JSON.stringify({ result: {}, success: true, errors: [], messages: [] }),
+							{ headers: { "Content-Type": "application/json" } },
+						);
+					}
+
+					// Second call: non-streaming retry returns real content
+					return new Response(
+						JSON.stringify({
+							result: { response: "Hello from non-streaming fallback!" },
+						}),
+						{ headers: { "Content-Type": "application/json" } },
+					);
+				},
+			),
+		);
+
+		const workersai = createWorkersAI({
+			accountId: TEST_ACCOUNT_ID,
+			apiKey: TEST_API_KEY,
+		});
+
+		const result = streamText({
+			model: workersai(TEST_MODEL),
+			prompt: "Hello",
+		});
+
+		let text = "";
+		for await (const chunk of result.textStream) {
+			text += chunk;
+		}
+
+		expect(text).toBe("Hello from non-streaming fallback!");
+		expect(callCount).toBe(2); // First call streams (fails), second retries non-streaming
+	});
+});
+
+describe("Incremental Tool Call Streaming", () => {
+	it("should emit tool-input-start and tool-input-delta events incrementally", async () => {
+		const workersai = createWorkersAI({
+			binding: {
+				run: async (_model: string, inputs: Record<string, unknown>) => {
+					if (inputs.stream) {
+						// Simulate incremental tool call streaming
+						return mockStream([
+							{
+								tool_calls: [
+									{
+										id: "call1",
+										type: "function",
+										index: 0,
+										function: { name: "get_weather", arguments: '{"loc' },
+									},
+								],
+							},
+							{ tool_calls: [{ index: 0, function: { arguments: 'ation": "' } }] },
+							{ tool_calls: [{ index: 0, function: { arguments: 'London"}' } }] },
+							{ finish_reason: "tool_calls" },
+							"[DONE]",
+						]);
+					}
+					return { response: "" };
+				},
+			} as any,
+		});
+
+		const result = streamText({
+			model: workersai(TEST_MODEL),
+			prompt: "Weather?",
+			tools: {
+				get_weather: {
+					description: "Get weather",
+					inputSchema: z.object({
+						location: z.string(),
+					}),
+				},
+			},
+		});
+
+		const parts: any[] = [];
+		for await (const chunk of result.fullStream) {
+			parts.push(chunk);
+		}
+
+		// Should have a tool-call at the end (assembled from incremental events)
+		const toolCall = parts.find((p) => p.type === "tool-call");
+		expect(toolCall).toBeDefined();
+		expect(toolCall.toolName).toBe("get_weather");
+		expect(toolCall.toolCallId).toBe("call1");
+
+		// The AI SDK assembles and parses the full arguments from incremental events
+		const args = toolCall.args ?? toolCall.input;
+		if (typeof args === "string") {
+			expect(JSON.parse(args)).toEqual({ location: "London" });
+		} else {
+			expect(args).toEqual({ location: "London" });
+		}
+	});
+});
+
 describe("Streaming Error Handling", () => {
 	it("should handle malformed SSE events gracefully", async () => {
 		const workersai = createWorkersAI({

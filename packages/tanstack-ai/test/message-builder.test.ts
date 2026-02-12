@@ -142,8 +142,12 @@ describe("message building (via chatStream)", () => {
 			binding,
 		);
 
-		// Should concatenate only text parts
-		expect(messages[0].content).toBe("Part 1 Part 2");
+		// Should preserve image parts as multi-modal content array
+		expect(messages[0].content).toEqual([
+			{ type: "text", text: "Part 1" },
+			{ type: "image_url", image_url: { url: "http://..." } },
+			{ type: "text", text: " Part 2" },
+		]);
 	});
 
 	it("should handle content parts with missing content field", async () => {

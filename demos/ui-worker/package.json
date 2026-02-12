@@ -16,8 +16,8 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@ai-sdk/openai": "^3.0.26",
-		"@ai-sdk/react": "^3.0.80",
+		"@ai-sdk/openai": "^3.0.27",
+		"@ai-sdk/react": "^3.0.84",
 		"@mantine/charts": "^8.3.14",
 		"@mantine/code-highlight": "^8.3.14",
 		"@mantine/core": "^8.3.14",
@@ -26,7 +26,7 @@
 		"@mantine/hooks": "^8.3.14",
 		"@mantine/modals": "^8.3.14",
 		"@mantine/notifications": "^8.3.14",
-		"ai": "^6.0.78",
+		"ai": "^6.0.82",
 		"hono": "^4.11.9",
 		"react": "^19.2.4",
 		"react-dom": "^19.2.4",
@@ -34,19 +34,19 @@
 		"zod": "^4.3.6"
 	},
 	"devDependencies": {
-		"@cloudflare/vite-plugin": "^1.24.0",
-		"@cloudflare/vitest-pool-workers": "^0.12.11",
-		"@types/react": "^19.2.13",
+		"@cloudflare/vite-plugin": "^1.25.0",
+		"@cloudflare/vitest-pool-workers": "^0.12.12",
+		"@types/react": "^19.2.14",
 		"@types/react-dom": "^19.2.3",
 		"@vitejs/plugin-react": "^5.1.4",
-		"oxfmt": "^0.31.0",
-		"oxlint": "^1.46.0",
+		"oxfmt": "^0.32.0",
+		"oxlint": "^1.47.0",
 		"postcss": "^8.5.6",
 		"postcss-preset-mantine": "^1.18.0",
 		"postcss-simple-vars": "^7.0.1",
 		"typescript": "5.9.3",
 		"vite": "^7.3.1",
 		"vitest": "~3.2.4",
-		"wrangler": "^4.64.0"
+		"wrangler": "^4.65.0"
 	}
 }

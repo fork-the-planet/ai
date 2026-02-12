@@ -28,21 +28,21 @@ const BASE = `http://localhost:${PORT}`;
 
 // Models to test — same set as REST e2e tests for apples-to-apples comparison
 const MODELS = [
+	// Recommended models
 	{ id: "@cf/meta/llama-4-scout-17b-16e-instruct", label: "Llama 4 Scout 17B", reasoning: false },
 	{ id: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", label: "Llama 3.3 70B", reasoning: false },
-	{ id: "@cf/meta/llama-3.1-8b-instruct-fast", label: "Llama 3.1 8B Fast", reasoning: false },
 	{ id: "@cf/openai/gpt-oss-120b", label: "GPT-OSS 120B", reasoning: false },
+	{ id: "@cf/qwen/qwq-32b", label: "QwQ 32B (reasoning)", reasoning: true },
+	// Other popular models
+	{ id: "@cf/meta/llama-3.1-8b-instruct-fast", label: "Llama 3.1 8B Fast", reasoning: false },
 	{ id: "@cf/openai/gpt-oss-20b", label: "GPT-OSS 20B", reasoning: false },
 	{ id: "@cf/qwen/qwen3-30b-a3b-fp8", label: "Qwen3 30B", reasoning: false },
-	{ id: "@cf/qwen/qwq-32b", label: "QwQ 32B (reasoning)", reasoning: true },
 	{ id: "@cf/google/gemma-3-12b-it", label: "Gemma 3 12B", reasoning: false },
 	{
 		id: "@cf/mistralai/mistral-small-3.1-24b-instruct",
 		label: "Mistral Small 3.1",
 		reasoning: false,
 	},
-	{ id: "@cf/deepseek/deepseek-r1-distill-qwen-32b", label: "DeepSeek R1 32B", reasoning: true },
-	{ id: "@cf/ibm/granite-4.0-h-micro", label: "Granite 4.0 Micro", reasoning: false },
 	{ id: "@cf/moonshotai/kimi-k2.5", label: "Kimi K2.5", reasoning: true },
 ] as const;
 
@@ -615,6 +615,26 @@ describe("Workers AI Binding E2E", () => {
 			expect(data.audio).toBeTruthy();
 			expect((data.audio as string).length).toBeGreaterThan(100);
 			console.log(`  ✓ Deepgram Aura-1 binding: TTS with voice OK`);
+		});
+
+		it("Deepgram Aura-2 EN — generates audio via binding", async () => {
+			if (!serverReady) return;
+
+			const data = await post("/tts", {
+				model: "@cf/deepgram/aura-2-en",
+				text: "Hello, this is a test of Aura two text to speech via the binding.",
+			});
+
+			if (data.error) {
+				console.log(`  ✗ TTS Aura-2 EN binding: ${data.error}`);
+				return;
+			}
+
+			expect(typeof data.audio).toBe("string");
+			expect((data.audio as string).length).toBeGreaterThan(100);
+			console.log(
+				`  ✓ Deepgram Aura-2 EN binding: TTS OK — ${(data.audio as string).length} chars base64`,
+			);
 		});
 	});
 

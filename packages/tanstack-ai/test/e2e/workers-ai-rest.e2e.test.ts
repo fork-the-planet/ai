@@ -185,21 +185,21 @@ function printSummaryTable() {
 // ---------------------------------------------------------------------------
 
 const MODELS = [
+	// Recommended models
 	{ id: "@cf/meta/llama-4-scout-17b-16e-instruct", label: "Llama 4 Scout 17B", reasoning: false },
 	{ id: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", label: "Llama 3.3 70B", reasoning: false },
-	{ id: "@cf/meta/llama-3.1-8b-instruct-fast", label: "Llama 3.1 8B Fast", reasoning: false },
 	{ id: "@cf/openai/gpt-oss-120b", label: "GPT-OSS 120B", reasoning: false },
+	{ id: "@cf/qwen/qwq-32b", label: "QwQ 32B (reasoning)", reasoning: true },
+	// Other popular models
+	{ id: "@cf/meta/llama-3.1-8b-instruct-fast", label: "Llama 3.1 8B Fast", reasoning: false },
 	{ id: "@cf/openai/gpt-oss-20b", label: "GPT-OSS 20B", reasoning: false },
 	{ id: "@cf/qwen/qwen3-30b-a3b-fp8", label: "Qwen3 30B", reasoning: false },
-	{ id: "@cf/qwen/qwq-32b", label: "QwQ 32B (reasoning)", reasoning: true },
 	{ id: "@cf/google/gemma-3-12b-it", label: "Gemma 3 12B", reasoning: false },
 	{
 		id: "@cf/mistralai/mistral-small-3.1-24b-instruct",
 		label: "Mistral Small 3.1",
 		reasoning: false,
 	},
-	{ id: "@cf/deepseek/deepseek-r1-distill-qwen-32b", label: "DeepSeek R1 32B", reasoning: true },
-	{ id: "@cf/ibm/granite-4.0-h-micro", label: "Granite 4.0 Micro", reasoning: false },
 	{ id: "@cf/moonshotai/kimi-k2.5", label: "Kimi K2.5", reasoning: true },
 ];
 
@@ -751,7 +751,10 @@ describe.skipIf(skip())("Workers AI REST E2E", () => {
 	// TTS — test field name across models
 	// ------------------------------------------------------------------
 
-	const TTS_MODELS = [{ id: "@cf/deepgram/aura-1", label: "Deepgram Aura-1" }];
+	const TTS_MODELS = [
+		{ id: "@cf/deepgram/aura-1", label: "Deepgram Aura-1" },
+		{ id: "@cf/deepgram/aura-2-en", label: "Deepgram Aura-2 EN" },
+	];
 
 	describe("TTS (per model)", () => {
 		for (const model of TTS_MODELS) {

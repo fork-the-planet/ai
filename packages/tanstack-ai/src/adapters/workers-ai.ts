@@ -77,6 +77,48 @@ function extractTextContent(
 		.join("");
 }
 
+/**
+ * Build OpenAI-compatible user message content, preserving image parts.
+ *
+ * If the content has only text parts, returns a plain string.
+ * If it includes image parts, returns an array of content parts in
+ * OpenAI's multi-modal format (text + image_url).
+ */
+function buildUserContent(
+	content: string | null | Array<{ type: string; content?: string; image_url?: unknown }>,
+): string | OpenAI.Chat.ChatCompletionContentPart[] {
+	if (content === null) return "";
+	if (typeof content === "string") return content;
+
+	const hasImages = content.some((p) => p.type === "image_url" || p.type === "image");
+	if (!hasImages) {
+		// No images — return plain text for simpler messages
+		return content
+			.filter((p) => p.type === "text")
+			.map((p) => p.content || "")
+			.join("");
+	}
+
+	// Multi-modal: build array of text + image_url parts
+	const parts: OpenAI.Chat.ChatCompletionContentPart[] = [];
+	for (const part of content) {
+		if (part.type === "text" && part.content) {
+			parts.push({ type: "text", text: part.content });
+		} else if (part.type === "image_url" && part.content) {
+			parts.push({
+				type: "image_url",
+				image_url: { url: part.content },
+			});
+		} else if (part.type === "image_url" && part.image_url) {
+			parts.push({
+				type: "image_url",
+				image_url: part.image_url as OpenAI.Chat.ChatCompletionContentPartImage.ImageURL,
+			});
+		}
+	}
+	return parts;
+}
+
 function buildOpenAIMessages(
 	systemPrompts: string[] | undefined,
 	messages: MessageLike[],
@@ -96,7 +138,7 @@ function buildOpenAIMessages(
 		if (message.role === "user") {
 			openAIMessages.push({
 				role: "user",
-				content: extractTextContent(message.content),
+				content: buildUserContent(message.content),
 			});
 		} else if (message.role === "assistant") {
 			const assistantMessage: OpenAI.Chat.ChatCompletionAssistantMessageParam = {
@@ -204,14 +246,111 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 		>();
 
 		try {
-			const stream = await this.client.chat.completions.create({
-				model: model ?? this.model,
-				messages: openAIMessages,
-				tools: openAITools,
-				temperature,
-				stream: true,
-				stream_options: { include_usage: true },
-			});
+			let stream: AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>;
+			try {
+				stream = await this.client.chat.completions.create({
+					model: model ?? this.model,
+					messages: openAIMessages,
+					tools: openAITools,
+					temperature,
+					stream: true,
+					stream_options: { include_usage: true },
+				});
+			} catch (streamError: unknown) {
+				// Some models (e.g. GPT-OSS) don't support streaming via the REST API.
+				// Fall back to a non-streaming call and yield the result as a single chunk.
+				console.warn(
+					"[tanstack-ai] Streaming failed, falling back to non-streaming:",
+					streamError instanceof Error ? streamError.message : streamError,
+				);
+				const nonStreamResult = await this.client.chat.completions.create({
+					model: model ?? this.model,
+					messages: openAIMessages,
+					tools: openAITools,
+					temperature,
+				});
+
+				yield {
+					type: "RUN_STARTED",
+					runId,
+					model: nonStreamResult.model || model || this.model,
+					timestamp,
+				} satisfies StreamChunk;
+
+				const msg = nonStreamResult.choices[0]?.message;
+				if (msg?.content) {
+					yield {
+						type: "TEXT_MESSAGE_START",
+						messageId,
+						model: nonStreamResult.model || model || this.model,
+						timestamp,
+						role: "assistant",
+					} satisfies StreamChunk;
+					yield {
+						type: "TEXT_MESSAGE_CONTENT",
+						messageId,
+						model: nonStreamResult.model || model || this.model,
+						timestamp,
+						delta: msg.content,
+						content: msg.content,
+					} satisfies StreamChunk;
+					yield {
+						type: "TEXT_MESSAGE_END",
+						messageId,
+						model: nonStreamResult.model || model || this.model,
+						timestamp,
+					} satisfies StreamChunk;
+				}
+
+				if (msg?.tool_calls) {
+					for (const tc of msg.tool_calls) {
+						if (tc.type !== "function") continue;
+						const fn = tc.function;
+						let parsedInput: unknown = {};
+						try {
+							parsedInput = fn.arguments ? JSON.parse(fn.arguments) : {};
+						} catch {
+							parsedInput = {};
+						}
+						yield {
+							type: "TOOL_CALL_START",
+							toolCallId: tc.id,
+							toolName: fn.name,
+							model: nonStreamResult.model || model || this.model,
+							timestamp,
+							index: 0,
+						} satisfies StreamChunk;
+						yield {
+							type: "TOOL_CALL_END",
+							toolCallId: tc.id,
+							toolName: fn.name,
+							model: nonStreamResult.model || model || this.model,
+							timestamp,
+							input: parsedInput,
+						} satisfies StreamChunk;
+					}
+				}
+
+				const finishReason = nonStreamResult.choices[0]?.finish_reason;
+				yield {
+					type: "RUN_FINISHED",
+					runId,
+					model: nonStreamResult.model || model || this.model,
+					timestamp,
+					usage: nonStreamResult.usage
+						? {
+								promptTokens: nonStreamResult.usage.prompt_tokens,
+								completionTokens: nonStreamResult.usage.completion_tokens,
+								totalTokens: nonStreamResult.usage.total_tokens,
+							}
+						: undefined,
+					finishReason:
+						finishReason === "tool_calls" || finishReason === "function_call"
+							? "tool_calls"
+							: ((finishReason as "stop" | "length" | "content_filter") ?? "stop"),
+				} satisfies StreamChunk;
+				return;
+			}
 
 			for await (const chunk of stream) {
 				if (!chunk.choices || chunk.choices.length === 0) continue;
@@ -406,6 +545,10 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 			// This can happen when Workers AI truncates a response or the connection drops.
 			// Emit proper closing events so the consumer doesn't hang.
 			if (hasEmittedRunStarted && !hasReceivedFinishReason) {
+				console.warn(
+					"[tanstack-ai] Stream ended without finish_reason — possible truncation or connection drop",
+				);
+
 				// Close any open tool calls
 				for (const [, toolCall] of toolCallsInProgress) {
 					if (toolCall.started) {

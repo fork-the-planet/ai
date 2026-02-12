@@ -21,6 +21,7 @@ export const imageModels: ModelOption[] = [
 
 export const embeddingModels: ModelOption[] = [
 	{ id: "@cf/baai/bge-base-en-v1.5", label: "BGE Base EN (768d)" },
+	{ id: "@cf/google/embeddinggemma-300m", label: "EmbeddingGemma 300M (multilingual)" },
 	{ id: "@cf/baai/bge-large-en-v1.5", label: "BGE Large EN (1024d)" },
 	{ id: "@cf/baai/bge-small-en-v1.5", label: "BGE Small EN (384d)" },
 ];
@@ -32,7 +33,10 @@ export const transcriptionModels: ModelOption[] = [
 	{ id: "@cf/deepgram/nova-3", label: "Deepgram Nova-3" },
 ];
 
-export const ttsModels: ModelOption[] = [{ id: "@cf/deepgram/aura-1", label: "Deepgram Aura-1" }];
+export const ttsModels: ModelOption[] = [
+	{ id: "@cf/deepgram/aura-2-en", label: "Deepgram Aura-2 EN" },
+	{ id: "@cf/deepgram/aura-1", label: "Deepgram Aura-1" },
+];
 
 export const rerankingModels: ModelOption[] = [
 	{ id: "@cf/baai/bge-reranker-base", label: "BGE Reranker Base" },

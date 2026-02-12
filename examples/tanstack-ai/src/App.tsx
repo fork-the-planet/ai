@@ -1,3 +1,9 @@
+/**
+ * TanStack AI example app — interactive demo of @cloudflare/tanstack-ai
+ * across multiple providers (Workers AI, OpenAI, Anthropic, Gemini, Grok,
+ * OpenRouter). Each provider card shows its supported capabilities.
+ * The worker backend is in worker/index.ts.
+ */
 import { useState } from "react";
 import { ProviderView } from "./ProviderView";
 import { ConfigProvider, useConfig } from "./config";
