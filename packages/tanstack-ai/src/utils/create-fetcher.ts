@@ -581,7 +581,7 @@ function transformWorkersAiStream(
 						}
 					} catch (e) {
 						// Log malformed SSE events for debugging; don't break the stream.
-						console.warn("[workers-ai stream] failed to parse SSE event:", data, e);
+						console.warn("[tanstack-ai] failed to parse SSE event:", data, e);
 					}
 				}
 			},

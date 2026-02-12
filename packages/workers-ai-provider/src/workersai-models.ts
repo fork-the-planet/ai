@@ -32,7 +32,11 @@ export type TranscriptionModels =
  * Includes models from `@cloudflare/workers-types` plus Deepgram partner
  * models that may not be in the typed interface yet.
  */
-export type SpeechModels = value2key<AiModels, BaseAiTextToSpeech> | "@cf/deepgram/aura-1";
+export type SpeechModels =
+	| value2key<AiModels, BaseAiTextToSpeech>
+	| "@cf/deepgram/aura-1"
+	| "@cf/deepgram/aura-2-en"
+	| "@cf/deepgram/aura-2-es";
 
 /**
  * Workers AI models that support reranking.

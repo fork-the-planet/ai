@@ -23,7 +23,10 @@ import { binaryToBase64, uint8ArrayToBase64 } from "../utils/binary";
  * behind what's deployed. We use a string union here that matches the known
  * models including Deepgram partner models.
  */
-export type WorkersAiTTSModel = "@cf/deepgram/aura-1";
+export type WorkersAiTTSModel =
+	| "@cf/deepgram/aura-1"
+	| "@cf/deepgram/aura-2-en"
+	| "@cf/deepgram/aura-2-es";
 
 // ---------------------------------------------------------------------------
 // WorkersAiTTSAdapter

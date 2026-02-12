@@ -16,15 +16,15 @@ export interface ProviderDef {
 }
 
 const WORKERS_AI_CHAT_MODELS = [
-	{ id: "@cf/moonshotai/kimi-k2.5", label: "Kimi K2.5" },
-	{ id: "@cf/qwen/qwen3-30b-a3b-fp8", label: "Qwen3 30B" },
-	{ id: "@cf/openai/gpt-oss-120b", label: "GPT-OSS 120B" },
-	{ id: "@cf/openai/gpt-oss-20b", label: "GPT-OSS 20B" },
 	{ id: "@cf/meta/llama-4-scout-17b-16e-instruct", label: "Llama 4 Scout 17B" },
 	{ id: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", label: "Llama 3.3 70B" },
+	{ id: "@cf/openai/gpt-oss-120b", label: "GPT-OSS 120B" },
+	{ id: "@cf/qwen/qwq-32b", label: "QwQ 32B" },
+	{ id: "@cf/moonshotai/kimi-k2.5", label: "Kimi K2.5" },
+	{ id: "@cf/qwen/qwen3-30b-a3b-fp8", label: "Qwen3 30B" },
+	{ id: "@cf/openai/gpt-oss-20b", label: "GPT-OSS 20B" },
 	{ id: "@cf/google/gemma-3-12b-it", label: "Gemma 3 12B" },
 	{ id: "@cf/mistralai/mistral-small-3.1-24b-instruct", label: "Mistral Small 3.1" },
-	{ id: "@cf/qwen/qwq-32b", label: "QwQ 32B" },
 ];
 
 export const PROVIDERS: ProviderDef[] = [

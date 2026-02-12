@@ -1,3 +1,8 @@
+/**
+ * Workers AI example app — interactive demo of all workers-ai-provider
+ * capabilities. Each tab exercises a different AI SDK function against
+ * Workers AI models. The worker backend is in src/server/index.ts.
+ */
 import { useState } from "react";
 import { ConfigProvider, useConfig } from "./config";
 import { Chat } from "./components/Chat";

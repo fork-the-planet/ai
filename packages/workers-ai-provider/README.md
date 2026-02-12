@@ -1,6 +1,6 @@
 # workers-ai-provider
 
-[Workers AI](https://developers.cloudflare.com/workers-ai/) provider for the [AI SDK](https://sdk.vercel.ai/). Use Cloudflare's models for chat, tool calling, structured output, embeddings, image generation, and [AI Search](https://developers.cloudflare.com/ai-search/).
+[Workers AI](https://developers.cloudflare.com/workers-ai/) provider for the [AI SDK](https://sdk.vercel.ai/). Run Cloudflare's models for chat, embeddings, image generation, transcription, text-to-speech, reranking, and [AI Search](https://developers.cloudflare.com/ai-search/) — all from a single provider.
 
 ## Quick Start
 
@@ -71,13 +71,19 @@ Browse the full catalog at [developers.cloudflare.com/workers-ai/models](https:/
 
 Some good defaults:
 
-| Task       | Model                                      | Notes                       |
-| ---------- | ------------------------------------------ | --------------------------- |
-| Chat       | `@cf/meta/llama-4-scout-17b-16e-instruct`  | Fast, strong tool calling   |
-| Chat       | `@cf/meta/llama-3.3-70b-instruct-fp8-fast` | Largest Llama, best quality |
-| Reasoning  | `@cf/qwen/qwq-32b`                         | Emits `reasoning_content`   |
-| Embeddings | `@cf/baai/bge-base-en-v1.5`                | 768-dim, English            |
-| Images     | `@cf/black-forest-labs/flux-1-schnell`     | Fast image generation       |
+| Task           | Model                                      | Notes                            |
+| -------------- | ------------------------------------------ | -------------------------------- |
+| Chat           | `@cf/meta/llama-4-scout-17b-16e-instruct`  | Fast, strong tool calling        |
+| Chat           | `@cf/meta/llama-3.3-70b-instruct-fp8-fast` | Largest Llama, best quality      |
+| Chat           | `@cf/openai/gpt-oss-120b`                  | OpenAI open-weights, high reason |
+| Reasoning      | `@cf/qwen/qwq-32b`                         | Emits `reasoning_content`        |
+| Embeddings     | `@cf/baai/bge-base-en-v1.5`                | 768-dim, English                 |
+| Embeddings     | `@cf/google/embeddinggemma-300m`           | 100+ languages, by Google        |
+| Images         | `@cf/black-forest-labs/flux-1-schnell`     | Fast image generation            |
+| Transcription  | `@cf/openai/whisper-large-v3-turbo`        | Best accuracy, multilingual      |
+| Transcription  | `@cf/deepgram/nova-3`                      | Fast, high accuracy              |
+| Text-to-Speech | `@cf/deepgram/aura-2-en`                   | Context-aware, natural pacing    |
+| Reranking      | `@cf/baai/bge-reranker-base`               | Fast document reranking          |
 
 ## Text Generation
 
@@ -169,6 +175,80 @@ const { images } = await generateImage({
 // images[0].uint8Array contains the PNG bytes
 ```
 
+## Transcription (Speech-to-Text)
+
+Transcribe audio using Whisper or Deepgram Nova-3 models.
+
+```ts
+import { transcribe } from "ai";
+import { readFile } from "node:fs/promises";
+
+const { text, segments } = await transcribe({
+	model: workersai.transcription("@cf/openai/whisper-large-v3-turbo"),
+	audio: await readFile("./audio.mp3"),
+	mediaType: "audio/mpeg",
+});
+```
+
+With language hints (Whisper only):
+
+```ts
+const { text } = await transcribe({
+	model: workersai.transcription("@cf/openai/whisper-large-v3-turbo", {
+		language: "fr",
+	}),
+	audio: audioBuffer,
+	mediaType: "audio/wav",
+});
+```
+
+Deepgram Nova-3 is also supported and detects language automatically:
+
+```ts
+const { text } = await transcribe({
+	model: workersai.transcription("@cf/deepgram/nova-3"),
+	audio: audioBuffer,
+	mediaType: "audio/wav",
+});
+```
+
+## Text-to-Speech
+
+Generate spoken audio from text using Deepgram Aura-2.
+
+```ts
+import { speech } from "ai";
+
+const { audio } = await speech({
+	model: workersai.speech("@cf/deepgram/aura-2-en"),
+	text: "Hello from Cloudflare Workers AI!",
+	voice: "asteria",
+});
+
+// audio is a Uint8Array of MP3 bytes
+```
+
+## Reranking
+
+Reorder documents by relevance to a query — useful for RAG pipelines.
+
+```ts
+import { rerank } from "ai";
+
+const { results } = await rerank({
+	model: workersai.reranking("@cf/baai/bge-reranker-base"),
+	query: "What is Cloudflare Workers?",
+	documents: [
+		"Cloudflare Workers lets you run JavaScript at the edge.",
+		"A cookie is a small piece of data stored in the browser.",
+		"Workers AI runs inference on Cloudflare's global network.",
+	],
+	topN: 2,
+});
+
+// results is sorted by relevance score
+```
+
 ## AI Search
 
 [AI Search](https://developers.cloudflare.com/ai-search/) is Cloudflare's managed RAG service. Connect your data and query it with natural language.
@@ -192,7 +272,7 @@ const { text } = await generateText({
 });
 ```
 
-Streaming works the same way -- use `streamText` instead of `generateText`.
+Streaming works the same way — use `streamText` instead of `generateText`.
 
 > `createAutoRAG` still works but is deprecated. Use `createAISearch` instead.
 
@@ -207,18 +287,27 @@ Streaming works the same way -- use `streamText` instead of `generateText`.
 | `apiKey`    | `string`         | Cloudflare API token. Required with `accountId`.                             |
 | `gateway`   | `GatewayOptions` | Optional [AI Gateway](https://developers.cloudflare.com/ai-gateway/) config. |
 
-Returns a provider with model factories for each AI SDK function:
+Returns a provider with model factories:
 
 ```ts
-// For generateText / streamText:
+// Chat — for generateText / streamText
 workersai(modelId);
 workersai.chat(modelId);
 
-// For embedMany / embed:
+// Embeddings — for embedMany / embed
 workersai.textEmbedding(modelId);
 
-// For generateImage:
+// Images — for generateImage
 workersai.image(modelId);
+
+// Transcription — for transcribe
+workersai.transcription(modelId, settings?);
+
+// Text-to-Speech — for speech
+workersai.speech(modelId);
+
+// Reranking — for rerank
+workersai.reranking(modelId);
 ```
 
 ### `createAISearch(options)`

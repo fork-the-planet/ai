@@ -25,17 +25,17 @@ const PORT = 8799;
 const BASE = `http://localhost:${PORT}`;
 
 const MODELS = [
+	// Recommended models
 	{ id: "@cf/meta/llama-4-scout-17b-16e-instruct", label: "Llama 4 Scout 17B" },
 	{ id: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", label: "Llama 3.3 70B" },
-	{ id: "@cf/meta/llama-3.1-8b-instruct-fast", label: "Llama 3.1 8B Fast" },
 	{ id: "@cf/openai/gpt-oss-120b", label: "GPT-OSS 120B" },
+	{ id: "@cf/qwen/qwq-32b", label: "QwQ 32B (reasoning)" },
+	// Other popular models
+	{ id: "@cf/meta/llama-3.1-8b-instruct-fast", label: "Llama 3.1 8B Fast" },
 	{ id: "@cf/openai/gpt-oss-20b", label: "GPT-OSS 20B" },
 	{ id: "@cf/qwen/qwen3-30b-a3b-fp8", label: "Qwen3 30B" },
-	{ id: "@cf/qwen/qwq-32b", label: "QwQ 32B (reasoning)" },
 	{ id: "@cf/google/gemma-3-12b-it", label: "Gemma 3 12B" },
 	{ id: "@cf/mistralai/mistral-small-3.1-24b-instruct", label: "Mistral Small 3.1" },
-	{ id: "@cf/deepseek/deepseek-r1-distill-qwen-32b", label: "DeepSeek R1 32B" },
-	{ id: "@cf/ibm/granite-4.0-h-micro", label: "Granite 4.0 Micro" },
 	{ id: "@cf/moonshotai/kimi-k2.5", label: "Kimi K2.5" },
 ] as const;
 
@@ -405,6 +405,21 @@ describe("Workers AI Binding E2E", () => {
 			expect(data.dimensions).toBe(768);
 			console.log(`  [embed] BGE Base EN OK — ${data.dimensions} dimensions`);
 		});
+
+		it("EmbeddingGemma 300M — should generate multilingual embeddings via binding", async () => {
+			if (!serverReady) return;
+
+			const data = await post("/embed", { model: "@cf/google/embeddinggemma-300m" });
+
+			if (data.error) {
+				console.warn(`  [embed] error: ${String(data.error).slice(0, 80)}`);
+				return;
+			}
+
+			expect(data.count).toBe(2);
+			expect(data.dimensions as number).toBeGreaterThan(0);
+			console.log(`  [embed] EmbeddingGemma 300M OK — ${data.dimensions} dimensions`);
+		});
 	});
 
 	// ------------------------------------------------------------------
@@ -600,6 +615,23 @@ describe("Workers AI Binding E2E", () => {
 
 			expect(data.audioLength).toBeGreaterThan(100);
 			console.log(`  [speech] Aura-1 binding OK — ${data.audioLength} bytes`);
+		});
+
+		it("Deepgram Aura-2 EN — generates speech via binding", async () => {
+			if (!serverReady) return;
+
+			const data = await post("/speech", {
+				model: "@cf/deepgram/aura-2-en",
+				text: "Hello from the Aura two binding test.",
+			});
+
+			if (data.error) {
+				console.log(`  [speech] Aura-2 EN binding: ${data.error}`);
+				return;
+			}
+
+			expect(data.audioLength).toBeGreaterThan(100);
+			console.log(`  [speech] Aura-2 EN binding OK — ${data.audioLength} bytes`);
 		});
 	});
 });

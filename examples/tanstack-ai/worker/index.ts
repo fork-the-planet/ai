@@ -1,3 +1,22 @@
+/**
+ * TanStack AI example worker — demonstrates chat, image generation,
+ * transcription, text-to-speech, and summarization across multiple
+ * AI providers (Workers AI, OpenAI, Anthropic, Gemini, Grok, OpenRouter).
+ *
+ * Routes: POST /ai/{provider}/{capability}
+ *   - /ai/workers-ai-plain/chat    — Workers AI via env.AI binding
+ *   - /ai/workers-ai/chat          — Workers AI via AI Gateway
+ *   - /ai/openai/chat              — OpenAI via AI Gateway
+ *   - /ai/anthropic/chat           — Anthropic via AI Gateway
+ *   - /ai/gemini/chat              — Gemini via AI Gateway
+ *   - /ai/grok/chat                — Grok via AI Gateway
+ *   - /ai/openrouter/chat          — OpenRouter via AI Gateway
+ *   Replace "chat" with: image, summarize, transcription, tts
+ *
+ * Discovery: GET /ai/providers — returns capabilities per provider
+ *
+ * For a minimal Workers AI-only example, see the examples/workers-ai directory.
+ */
 import {
 	createAnthropicChat,
 	createAnthropicSummarize,
@@ -319,9 +338,9 @@ function getTTSAdapter(provider: string, creds: RequestCredentials): AnyTTSAdapt
 
 	switch (provider) {
 		case "workers-ai-plain":
-			return createWorkersAiTts("@cf/deepgram/aura-1", workersAiConfig(creds));
+			return createWorkersAiTts("@cf/deepgram/aura-2-en", workersAiConfig(creds));
 		case "workers-ai":
-			return createWorkersAiTts("@cf/deepgram/aura-1", workersAiGatewayConfig(creds));
+			return createWorkersAiTts("@cf/deepgram/aura-2-en", workersAiGatewayConfig(creds));
 		case "openai":
 			return createOpenAiTts(
 				"tts-1",

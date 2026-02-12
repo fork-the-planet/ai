@@ -6,7 +6,6 @@ import type {
 import { generateId } from "ai";
 import { mapWorkersAIFinishReason } from "./map-workersai-finish-reason";
 import { mapWorkersAIUsage } from "./map-workersai-usage";
-import { processPartialToolCalls } from "./utils";
 
 /**
  * Prepend a stream-start event to an existing LanguageModelV3 stream.
@@ -85,12 +84,17 @@ export function getMappedStream(
 		},
 		raw: { totalTokens: 0 },
 	};
-	const partialToolCalls: Record<string, unknown>[] = [];
 	let textId: string | null = null;
 	let reasoningId: string | null = null;
 	let finishReason: LanguageModelV3FinishReason | null = null;
 	let receivedDone = false;
 	let receivedAnyData = false;
+
+	// Track tool call streaming state per index.
+	// When we see the first chunk for a tool call index, we emit tool-input-start.
+	// Subsequent argument deltas emit tool-input-delta.
+	// All open tool calls are closed with tool-input-end in flush().
+	const activeToolCalls = new Map<number, { id: string; toolName: string; args: string }>();
 
 	// Step 1: Decode bytes into SSE lines
 	const sseStream = rawStream.pipeThrough(new SSEDecoder());
@@ -109,20 +113,12 @@ export function getMappedStream(
 				try {
 					chunk = JSON.parse(data);
 				} catch {
-					return; // skip malformed
+					console.warn("[workers-ai-provider] failed to parse SSE event:", data);
+					return;
 				}
 
 				if (chunk.usage) {
 					usage = mapWorkersAIUsage(chunk as Parameters<typeof mapWorkersAIUsage>[0]);
-				}
-
-				// Collect partial tool calls
-				if (Array.isArray(chunk.tool_calls)) {
-					for (const tc of chunk.tool_calls) {
-						if (!isNullFinalizationChunk(tc)) {
-							partialToolCalls.push(tc);
-						}
-					}
 				}
 
 				// Extract finish_reason
@@ -156,6 +152,11 @@ export function getMappedStream(
 							delta: responseText,
 						});
 					}
+				}
+
+				// --- Native format: top-level `tool_calls` ---
+				if (Array.isArray(chunk.tool_calls)) {
+					emitToolCallDeltas(chunk.tool_calls as Record<string, unknown>[], controller);
 				}
 
 				// --- OpenAI format: choices[0].delta ---
@@ -195,25 +196,27 @@ export function getMappedStream(
 						| Record<string, unknown>[]
 						| undefined;
 					if (Array.isArray(deltaToolCalls)) {
-						for (const tc of deltaToolCalls) {
-							if (!isNullFinalizationChunk(tc)) {
-								partialToolCalls.push(tc);
-							}
-						}
+						emitToolCallDeltas(deltaToolCalls, controller);
 					}
 				}
 			},
 
 			flush(controller) {
-				// Emit accumulated tool calls
-				if (partialToolCalls.length > 0) {
-					const toolCalls = processPartialToolCalls(partialToolCalls);
-					for (const toolCall of toolCalls) {
-						controller.enqueue(toolCall);
-					}
+				// Close all open tool call inputs and emit complete tool-call events
+				for (const [, tc] of activeToolCalls) {
+					controller.enqueue({ type: "tool-input-end", id: tc.id });
+					// Emit the complete tool-call event — the AI SDK expects both
+					// incremental tool-input-* events AND a final tool-call event,
+					// matching how @ai-sdk/openai-compatible works.
+					controller.enqueue({
+						type: "tool-call",
+						toolCallId: tc.id,
+						toolName: tc.toolName,
+						input: tc.args,
+					});
 				}
 
-				// Close open blocks
+				// Close open text/reasoning blocks
 				if (reasoningId) {
 					controller.enqueue({ type: "reasoning-end", id: reasoningId });
 				}
@@ -238,6 +241,69 @@ export function getMappedStream(
 			},
 		}),
 	);
+
+	/**
+	 * Emit incremental tool call events from streaming chunks.
+	 *
+	 * Workers AI streams tool calls as:
+	 *   Chunk A: { id, type, index, function: { name } }                — start
+	 *   Chunk B: { index, function: { arguments: "partial..." } }       — args delta
+	 *   Chunk C: { index, function: { arguments: "rest..." } }          — args delta
+	 *   Chunk D: { id: null, type: null, function: { name: null } }     — finalize (skip)
+	 *
+	 * We emit tool-input-start on first sight, tool-input-delta for each
+	 * argument chunk, and tool-input-end in flush().
+	 */
+	function emitToolCallDeltas(
+		toolCalls: Record<string, unknown>[],
+		controller: TransformStreamDefaultController<LanguageModelV3StreamPart>,
+	) {
+		for (const tc of toolCalls) {
+			if (isNullFinalizationChunk(tc)) continue;
+
+			const tcIndex = (tc.index as number) ?? 0;
+			const fn = tc.function as Record<string, unknown> | undefined;
+			const tcName = (fn?.name ?? tc.name ?? null) as string | null;
+			const tcArgs = (fn?.arguments ?? tc.arguments ?? null) as string | null;
+			const tcId = tc.id as string | null;
+
+			if (!activeToolCalls.has(tcIndex)) {
+				// First chunk for this tool call — emit tool-input-start
+				const id = tcId || generateId();
+				const toolName = tcName || "";
+				activeToolCalls.set(tcIndex, { id, toolName, args: "" });
+
+				controller.enqueue({
+					type: "tool-input-start",
+					id,
+					toolName,
+				});
+
+				// If arguments arrived in the same chunk as the start, emit them
+				if (tcArgs != null && tcArgs !== "") {
+					const delta = typeof tcArgs === "string" ? tcArgs : JSON.stringify(tcArgs);
+					activeToolCalls.get(tcIndex)!.args += delta;
+					controller.enqueue({
+						type: "tool-input-delta",
+						id,
+						delta,
+					});
+				}
+			} else {
+				// Subsequent chunks — emit argument deltas
+				const active = activeToolCalls.get(tcIndex)!;
+				if (tcArgs != null && tcArgs !== "") {
+					const delta = typeof tcArgs === "string" ? tcArgs : JSON.stringify(tcArgs);
+					active.args += delta;
+					controller.enqueue({
+						type: "tool-input-delta",
+						id: active.id,
+						delta,
+					});
+				}
+			}
+		}
+	}
 }
 
 /**

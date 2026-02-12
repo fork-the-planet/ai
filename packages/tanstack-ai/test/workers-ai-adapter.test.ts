@@ -277,7 +277,6 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 						role: "user",
 						content: [
 							{ type: "text", content: "Hello " },
-							{ type: "image", content: "base64..." },
 							{ type: "text", content: "world" },
 						],
 					},
@@ -286,8 +285,35 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 		);
 
 		const [, inputs] = binding.run.mock.calls[0]!;
-		// Should extract only text parts and join them
+		// Text-only multi-part content should be joined into a plain string
 		expect(inputs.messages[0].content).toBe("Hello world");
+	});
+
+	it("should preserve image parts in multi-part content", async () => {
+		const binding = createStreamingBinding(['data: {"response":"ok"}\n\n']);
+		const adapter = new WorkersAiTextAdapter(MODEL, { binding });
+
+		await collectChunks(
+			adapter.chatStream({
+				model: MODEL,
+				messages: [
+					{
+						role: "user",
+						content: [
+							{ type: "text", content: "Describe this: " },
+							{ type: "image_url", content: "data:image/png;base64,abc123" },
+						],
+					},
+				],
+			} as any),
+		);
+
+		const [, inputs] = binding.run.mock.calls[0]!;
+		// Should preserve image parts as OpenAI multi-modal content array
+		expect(inputs.messages[0].content).toEqual([
+			{ type: "text", text: "Describe this: " },
+			{ type: "image_url", image_url: { url: "data:image/png;base64,abc123" } },
+		]);
 	});
 
 	it("should handle null content", async () => {
@@ -781,6 +807,55 @@ describe("WorkersAiTextAdapter reasoning events", () => {
 
 		// Regular text events should still work
 		expect(chunks.find((c: any) => c.type === "TEXT_MESSAGE_CONTENT")).toBeDefined();
+	});
+});
+
+// ---------------------------------------------------------------------------
+// Premature stream termination
+// ---------------------------------------------------------------------------
+
+describe("WorkersAiTextAdapter premature termination", () => {
+	it("should emit RUN_FINISHED with warning when stream ends without finish_reason", async () => {
+		const binding = createStreamingBinding(['data: {"response":"ok"}\n\n']);
+		const adapter = new WorkersAiTextAdapter(MODEL, { binding });
+
+		// Override the OpenAI client to simulate a stream that ends without finish_reason
+		const mockStream = (async function* () {
+			yield {
+				id: "chatcmpl-1",
+				object: "chat.completion.chunk",
+				choices: [{ index: 0, delta: { content: "partial" }, finish_reason: null }],
+				model: MODEL,
+			};
+			// Stream ends here — no chunk with finish_reason
+		})();
+		(adapter as any).client = {
+			chat: {
+				completions: {
+					create: vi.fn().mockResolvedValue(mockStream),
+				},
+			},
+		};
+
+		const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+		const chunks = await collectChunks(
+			adapter.chatStream({
+				model: MODEL,
+				messages: [{ role: "user", content: "Hi" }],
+			} as any),
+		);
+
+		// Should still emit RUN_FINISHED so consumers don't hang
+		const runFinished = chunks.find((c: any) => c.type === "RUN_FINISHED");
+		expect(runFinished).toBeDefined();
+
+		// Should have logged a warning about premature termination
+		expect(warnSpy).toHaveBeenCalledWith(
+			expect.stringContaining("Stream ended without finish_reason"),
+		);
+
+		warnSpy.mockRestore();
 	});
 });
 

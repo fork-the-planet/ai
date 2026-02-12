@@ -53,17 +53,17 @@ function makeProvider() {
 // ---------------------------------------------------------------------------
 
 const MODELS = [
+	// Recommended models
 	{ id: "@cf/meta/llama-4-scout-17b-16e-instruct", label: "Llama 4 Scout 17B" },
 	{ id: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", label: "Llama 3.3 70B" },
-	{ id: "@cf/meta/llama-3.1-8b-instruct-fast", label: "Llama 3.1 8B Fast" },
 	{ id: "@cf/openai/gpt-oss-120b", label: "GPT-OSS 120B" },
+	{ id: "@cf/qwen/qwq-32b", label: "QwQ 32B (reasoning)" },
+	// Other popular models
+	{ id: "@cf/meta/llama-3.1-8b-instruct-fast", label: "Llama 3.1 8B Fast" },
 	{ id: "@cf/openai/gpt-oss-20b", label: "GPT-OSS 20B" },
 	{ id: "@cf/qwen/qwen3-30b-a3b-fp8", label: "Qwen3 30B" },
-	{ id: "@cf/qwen/qwq-32b", label: "QwQ 32B (reasoning)" },
 	{ id: "@cf/google/gemma-3-12b-it", label: "Gemma 3 12B" },
 	{ id: "@cf/mistralai/mistral-small-3.1-24b-instruct", label: "Mistral Small 3.1" },
-	{ id: "@cf/deepseek/deepseek-r1-distill-qwen-32b", label: "DeepSeek R1 32B" },
-	{ id: "@cf/ibm/granite-4.0-h-micro", label: "Granite 4.0 Micro" },
 	{ id: "@cf/moonshotai/kimi-k2.5", label: "Kimi K2.5" },
 ] as const;
 
@@ -373,7 +373,7 @@ describe.skipIf(skip())("Workers AI REST E2E", () => {
 
 			const result = await generateImage({
 				model: provider.image("@cf/black-forest-labs/flux-1-schnell"),
-				prompt: "A red circle on a white background",
+				prompt: "A cute cartoon cat sitting on a grassy hill under a blue sky",
 				size: "256x256",
 			});
 
@@ -401,6 +401,22 @@ describe.skipIf(skip())("Workers AI REST E2E", () => {
 			expect(result.embeddings[0].length).toBe(768);
 			expect(result.embeddings[1].length).toBe(768);
 			console.log(`  [embed] BGE Base EN OK — ${result.embeddings[0].length} dimensions`);
+		});
+
+		it("EmbeddingGemma 300M — should generate multilingual embeddings", async () => {
+			const provider = makeProvider();
+
+			const result = await embedMany({
+				model: provider.textEmbedding("@cf/google/embeddinggemma-300m"),
+				values: ["Hello world", "Bonjour le monde"],
+			});
+
+			expect(result.embeddings).toHaveLength(2);
+			expect(result.embeddings[0].length).toBeGreaterThan(0);
+			expect(result.embeddings[1].length).toBeGreaterThan(0);
+			console.log(
+				`  [embed] EmbeddingGemma 300M OK — ${result.embeddings[0].length} dimensions`,
+			);
 		});
 	});
 
@@ -545,6 +561,35 @@ describe.skipIf(skip())("Workers AI REST E2E", () => {
 			expect(result.audio.uint8Array.length).toBeGreaterThan(100);
 			console.log(
 				`  [speech] Aura-1 with voice OK — ${result.audio.uint8Array.length} bytes`,
+			);
+		});
+
+		it("Deepgram Aura-2 EN — should generate speech via REST", async () => {
+			const provider = makeProvider();
+
+			const result = await generateSpeech({
+				model: provider.speech("@cf/deepgram/aura-2-en"),
+				text: "Hello, this is a test of Aura two text to speech.",
+			});
+
+			expect(result.audio).toBeDefined();
+			expect(result.audio.uint8Array.length).toBeGreaterThan(100);
+			console.log(`  [speech] Aura-2 EN OK — ${result.audio.uint8Array.length} bytes`);
+		});
+
+		it("Deepgram Aura-2 EN — should generate speech with voice option", async () => {
+			const provider = makeProvider();
+
+			const result = await generateSpeech({
+				model: provider.speech("@cf/deepgram/aura-2-en"),
+				text: "Testing voice selection on Aura two.",
+				voice: "asteria",
+			});
+
+			expect(result.audio).toBeDefined();
+			expect(result.audio.uint8Array.length).toBeGreaterThan(100);
+			console.log(
+				`  [speech] Aura-2 EN with voice OK — ${result.audio.uint8Array.length} bytes`,
 			);
 		});
 	});

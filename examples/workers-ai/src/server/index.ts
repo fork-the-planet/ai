@@ -1,3 +1,19 @@
+/**
+ * Workers AI example worker — demonstrates all workers-ai-provider
+ * capabilities with the Vercel AI SDK: chat (streaming + tool calling),
+ * image generation, embeddings, transcription, text-to-speech, and reranking.
+ *
+ * Routes: POST /api/{capability}
+ *   - /api/chat        — streaming chat with tool calling
+ *   - /api/image       — image generation (Flux, Stable Diffusion)
+ *   - /api/embed       — text embeddings with similarity matrix
+ *   - /api/transcribe  — speech-to-text (Whisper, Deepgram Nova-3)
+ *   - /api/speech      — text-to-speech (Deepgram Aura-2)
+ *   - /api/rerank      — document reranking for RAG
+ *
+ * Supports both binding mode (env.AI) and REST mode (account ID + API key)
+ * via request headers — see createProvider() below.
+ */
 import {
 	streamText,
 	stepCountIs,
@@ -189,7 +205,7 @@ export default {
 						voice?: string;
 					};
 
-					const model = body.model || "@cf/deepgram/aura-1";
+					const model = body.model || "@cf/deepgram/aura-2-en";
 
 					const result = await generateSpeech({
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
