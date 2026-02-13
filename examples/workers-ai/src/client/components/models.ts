@@ -4,8 +4,9 @@ export interface ModelOption {
 }
 
 export const chatModels: ModelOption[] = [
+	{ id: "@cf/zai-org/glm-4.7-flash", label: "GLM 4.7 Flash" },
 	{ id: "@cf/meta/llama-4-scout-17b-16e-instruct", label: "Llama 4 Scout 17B" },
-	{ id: "@cf/moonshotai/kimi-k2.5", label: "Kimi K2.5" },
+	// { id: "@cf/moonshotai/kimi-k2.5", label: "Kimi K2.5" },
 	{ id: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", label: "Llama 3.3 70B" },
 	{ id: "@cf/meta/llama-3.1-8b-instruct-fast", label: "Llama 3.1 8B Fast" },
 	{ id: "@cf/qwen/qwen3-30b-a3b-fp8", label: "Qwen3 30B" },
