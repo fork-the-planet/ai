@@ -163,7 +163,9 @@ export function getMappedStream(
 				if (choices?.[0]?.delta) {
 					const delta = choices[0].delta;
 
-					const reasoningDelta = delta.reasoning_content as string | undefined;
+					const reasoningDelta = (delta.reasoning_content ?? delta.reasoning) as
+					| string
+					| undefined;
 					if (reasoningDelta && reasoningDelta.length > 0) {
 						if (!reasoningId) {
 							reasoningId = generateId();
