@@ -377,7 +377,9 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 
 				// Reasoning content (used by models like QwQ, DeepSeek R1, Kimi K2.5)
 				// The OpenAI SDK doesn't type this field, but models send it as an extension.
-				const reasoningContent = (delta as Record<string, unknown>).reasoning_content as
+				const reasoningContent = ((delta as Record<string, unknown>)
+						.reasoning_content ??
+						(delta as Record<string, unknown>).reasoning) as
 					| string
 					| undefined;
 				if (reasoningContent) {

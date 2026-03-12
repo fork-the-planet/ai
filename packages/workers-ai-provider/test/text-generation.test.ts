@@ -335,4 +335,53 @@ describe("Binding - Text Generation Tests", () => {
 		expect(result.reasoningText).toBe("Okay, the user is asking");
 		expect(result.text).toBe("A **cow** is a domesticated, herbivorous mammal");
 	});
+
+	it("should handle reasoning field (without _content suffix)", async () => {
+		const workersai = createWorkersAI({
+			binding: {
+				run: async (_modelName: string, _inputs: any, _options?: any) => {
+					return {
+						id: "chatcmpl-r3",
+						object: "chat.completion",
+						created: 1751560708,
+						model: TEST_MODEL,
+						choices: [
+							{
+								index: 0,
+								message: {
+									role: "assistant",
+									reasoning: "Let me think step by step",
+									content: "The answer is 42",
+									tool_calls: [],
+								},
+								logprobs: null,
+								finish_reason: "stop",
+								stop_reason: null,
+							},
+						],
+						usage: {
+							prompt_tokens: 1,
+							completion_tokens: 2,
+							total_tokens: 3,
+						},
+					};
+				},
+			},
+		});
+
+		const model = workersai(TEST_MODEL);
+
+		const result = await generateText({
+			model: model,
+			messages: [
+				{
+					role: "user",
+					content: "what is the meaning of life?",
+				},
+			],
+		});
+
+		expect(result.reasoningText).toBe("Let me think step by step");
+		expect(result.text).toBe("The answer is 42");
+	});
 });

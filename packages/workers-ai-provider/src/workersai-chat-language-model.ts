@@ -183,9 +183,12 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 
 		const outputRecord = output as Record<string, unknown>;
 		const choices = outputRecord.choices as
-			| Array<{ message?: { reasoning_content?: string } }>
+			| Array<{
+					message?: { reasoning_content?: string; reasoning?: string };
+			  }>
 			| undefined;
-		const reasoningContent = choices?.[0]?.message?.reasoning_content;
+		const reasoningContent =
+			choices?.[0]?.message?.reasoning_content ?? choices?.[0]?.message?.reasoning;
 
 		return {
 			finishReason: mapWorkersAIFinishReason(outputRecord),
@@ -230,9 +233,12 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 		// when stream:true is requested. Wrap the complete response as a stream.
 		const outputRecord = response as Record<string, unknown>;
 		const choices = outputRecord.choices as
-			| Array<{ message?: { reasoning_content?: string } }>
+			| Array<{
+					message?: { reasoning_content?: string; reasoning?: string };
+			  }>
 			| undefined;
-		const reasoningContent = choices?.[0]?.message?.reasoning_content;
+		const reasoningContent =
+			choices?.[0]?.message?.reasoning_content ?? choices?.[0]?.message?.reasoning;
 
 		let textId: string | null = null;
 		let reasoningId: string | null = null;

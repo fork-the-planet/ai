@@ -703,6 +703,38 @@ describe("WorkersAiTextAdapter reasoning events", () => {
 		expect(stepFinished[1].stepId).toBe(stepStarted.stepId);
 	});
 
+	it("should emit STEP_STARTED and STEP_FINISHED for reasoning field (without _content suffix)", async () => {
+		const binding = createReasoningBinding([
+			'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning":"Let me think"},"finish_reason":null}],"model":"@cf/qwen/qwq-32b"}\n\n',
+			'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning":" about this"},"finish_reason":null}],"model":"@cf/qwen/qwq-32b"}\n\n',
+			'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Hello!"},"finish_reason":null}],"model":"@cf/qwen/qwq-32b"}\n\n',
+			'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"model":"@cf/qwen/qwq-32b"}\n\n',
+		]);
+		const adapter = new WorkersAiTextAdapter("@cf/qwen/qwq-32b" as WorkersAiTextModel, {
+			binding,
+		});
+
+		const chunks = await collectChunks(
+			adapter.chatStream({
+				model: "@cf/qwen/qwq-32b" as WorkersAiTextModel,
+				messages: [{ role: "user", content: "Think about this" }],
+			} as any),
+		);
+
+		// Should have STEP_STARTED
+		const stepStarted = chunks.find((c: any) => c.type === "STEP_STARTED");
+		expect(stepStarted).toBeDefined();
+		expect(stepStarted.stepType).toBe("thinking");
+
+		// Should have STEP_FINISHED events with incremental reasoning
+		const stepFinished = chunks.filter((c: any) => c.type === "STEP_FINISHED");
+		expect(stepFinished).toHaveLength(2);
+		expect(stepFinished[0].delta).toBe("Let me think");
+		expect(stepFinished[0].content).toBe("Let me think");
+		expect(stepFinished[1].delta).toBe(" about this");
+		expect(stepFinished[1].content).toBe("Let me think about this");
+	});
+
 	it("should emit STEP_STARTED only once for multiple reasoning tokens", async () => {
 		const binding = createReasoningBinding([
 			'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"A"},"finish_reason":null}],"model":"@cf/qwen/qwq-32b"}\n\n',
