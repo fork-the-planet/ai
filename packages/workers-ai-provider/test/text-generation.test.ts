@@ -73,6 +73,64 @@ describe("REST API - Text Generation Tests", () => {
 		expect(capturedOptions).toHaveProperty("aNumber", "1");
 	});
 
+	it("should send x-session-affinity header when sessionAffinity is set", async () => {
+		let capturedHeaders: Record<string, string> = {};
+
+		const workersai = createWorkersAI({
+			accountId: TEST_ACCOUNT_ID,
+			apiKey: TEST_API_KEY,
+		});
+
+		server.use(
+			http.post(
+				`https://api.cloudflare.com/client/v4/accounts/${TEST_ACCOUNT_ID}/ai/run/${TEST_MODEL}`,
+				async ({ request }) => {
+					capturedHeaders = Object.fromEntries(request.headers.entries());
+					return HttpResponse.json({ result: { response: "Hello" } });
+				},
+			),
+		);
+
+		const model = workersai(TEST_MODEL, {
+			sessionAffinity: "session-123",
+		});
+
+		const result = await generateText({
+			model: model,
+			prompt: "Write a greeting",
+		});
+
+		expect(result.text).toBe("Hello");
+		expect(capturedHeaders["x-session-affinity"]).toBe("session-123");
+	});
+
+	it("should not send x-session-affinity header when sessionAffinity is not set", async () => {
+		let capturedHeaders: Record<string, string> = {};
+
+		const workersai = createWorkersAI({
+			accountId: TEST_ACCOUNT_ID,
+			apiKey: TEST_API_KEY,
+		});
+
+		server.use(
+			http.post(
+				`https://api.cloudflare.com/client/v4/accounts/${TEST_ACCOUNT_ID}/ai/run/${TEST_MODEL}`,
+				async ({ request }) => {
+					capturedHeaders = Object.fromEntries(request.headers.entries());
+					return HttpResponse.json({ result: { response: "Hello" } });
+				},
+			),
+		);
+
+		const result = await generateText({
+			model: workersai(TEST_MODEL),
+			prompt: "Write a greeting",
+		});
+
+		expect(result.text).toBe("Hello");
+		expect(capturedHeaders["x-session-affinity"]).toBeUndefined();
+	});
+
 	it("should throw if passthrough option cannot be coerced into a string", async () => {
 		const workersai = createWorkersAI({
 			accountId: TEST_ACCOUNT_ID,
@@ -224,6 +282,53 @@ describe("Binding - Text Generation Tests", () => {
 		expect(capturedOptions).toHaveProperty("aString", "a");
 		expect(capturedOptions).toHaveProperty("aBool", true);
 		expect(capturedOptions).toHaveProperty("aNumber", 1);
+	});
+
+	it("should pass extraHeaders with x-session-affinity when sessionAffinity is set", async () => {
+		let capturedOptions: any = null;
+
+		const workersai = createWorkersAI({
+			binding: {
+				run: async (_modelName: string, _inputs: any, options?: any) => {
+					capturedOptions = options;
+					return { response: "Hello" };
+				},
+			},
+		});
+
+		const model = workersai(TEST_MODEL, {
+			sessionAffinity: "session-456",
+		});
+
+		const result = await generateText({
+			model: model,
+			prompt: "Write a greeting",
+		});
+
+		expect(result.text).toBe("Hello");
+		expect(capturedOptions).toHaveProperty("extraHeaders");
+		expect(capturedOptions.extraHeaders).toEqual({ "x-session-affinity": "session-456" });
+	});
+
+	it("should not pass extraHeaders when sessionAffinity is not set", async () => {
+		let capturedOptions: any = null;
+
+		const workersai = createWorkersAI({
+			binding: {
+				run: async (_modelName: string, _inputs: any, options?: any) => {
+					capturedOptions = options;
+					return { response: "Hello" };
+				},
+			},
+		});
+
+		const result = await generateText({
+			model: workersai(TEST_MODEL),
+			prompt: "Write a greeting",
+		});
+
+		expect(result.text).toBe("Hello");
+		expect(capturedOptions).not.toHaveProperty("extraHeaders");
 	});
 
 	it("should pass tool_choice to binding.run()", async () => {
