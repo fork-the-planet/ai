@@ -33,11 +33,18 @@ export type WorkersAiTextModel =
 function buildWorkersAiClient(config: WorkersAiAdapterConfig): OpenAI {
 	validateWorkersAiConfig(config);
 
+	const sessionHeaders: Record<string, string> | undefined = config.sessionAffinity
+		? { "x-session-affinity": config.sessionAffinity }
+		: undefined;
+
 	if (isDirectBindingConfig(config)) {
 		// Plain binding mode: shim translates OpenAI fetch calls to env.AI.run()
 		return new OpenAI({
 			apiKey: "unused",
-			fetch: createWorkersAiBindingFetch(config.binding),
+			fetch: createWorkersAiBindingFetch(
+				config.binding,
+				sessionHeaders ? { extraHeaders: sessionHeaders } : undefined,
+			),
 		});
 	}
 
@@ -46,13 +53,14 @@ function buildWorkersAiClient(config: WorkersAiAdapterConfig): OpenAI {
 		return new OpenAI({
 			baseURL: `https://api.cloudflare.com/client/v4/accounts/${config.accountId}/ai/v1`,
 			apiKey: config.apiKey,
+			defaultHeaders: sessionHeaders,
 		});
 	}
 
 	// Gateway mode (existing): use createGatewayFetch
 	const gatewayConfig = config as AiGatewayAdapterConfig;
 	return new OpenAI({
-		fetch: createGatewayFetch("workers-ai", gatewayConfig),
+		fetch: createGatewayFetch("workers-ai", gatewayConfig, sessionHeaders),
 		apiKey: gatewayConfig.apiKey ?? "unused",
 	});
 }
@@ -377,11 +385,8 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 
 				// Reasoning content (used by models like QwQ, DeepSeek R1, Kimi K2.5)
 				// The OpenAI SDK doesn't type this field, but models send it as an extension.
-				const reasoningContent = ((delta as Record<string, unknown>)
-						.reasoning_content ??
-						(delta as Record<string, unknown>).reasoning) as
-					| string
-					| undefined;
+				const reasoningContent = ((delta as Record<string, unknown>).reasoning_content ??
+					(delta as Record<string, unknown>).reasoning) as string | undefined;
 				if (reasoningContent) {
 					// RUN_STARTED is already guaranteed by the guard above
 					if (!hasEmittedStepStarted) {

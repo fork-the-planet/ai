@@ -951,4 +951,41 @@ describe("WorkersAiTextAdapter config modes", () => {
 		const adapter = new WorkersAiTextAdapter("@cf/my-org/custom-model-v1", { binding });
 		expect(adapter).toBeDefined();
 	});
+
+	it("should pass sessionAffinity as extraHeaders to binding.run()", async () => {
+		const binding = createStreamingBinding(['data: {"response":"ok"}\n\n']);
+		const adapter = new WorkersAiTextAdapter(MODEL, {
+			binding,
+			sessionAffinity: "my-session-id",
+		});
+
+		await collectChunks(
+			adapter.chatStream({
+				model: MODEL,
+				messages: [{ role: "user", content: "Hi" }],
+			} as any),
+		);
+
+		expect(binding.run).toHaveBeenCalledOnce();
+		const [, , options] = binding.run.mock.calls[0]!;
+		expect(options).toEqual({
+			extraHeaders: { "x-session-affinity": "my-session-id" },
+		});
+	});
+
+	it("should not pass extraHeaders when sessionAffinity is not set", async () => {
+		const binding = createStreamingBinding(['data: {"response":"ok"}\n\n']);
+		const adapter = new WorkersAiTextAdapter(MODEL, { binding });
+
+		await collectChunks(
+			adapter.chatStream({
+				model: MODEL,
+				messages: [{ role: "user", content: "Hi" }],
+			} as any),
+		);
+
+		expect(binding.run).toHaveBeenCalledOnce();
+		const [, , options] = binding.run.mock.calls[0]!;
+		expect(options).toBeUndefined();
+	});
 });

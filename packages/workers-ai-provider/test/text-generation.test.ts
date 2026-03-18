@@ -104,6 +104,39 @@ describe("REST API - Text Generation Tests", () => {
 		expect(capturedHeaders["x-session-affinity"]).toBe("session-123");
 	});
 
+	it("should merge sessionAffinity with user-provided extraHeaders", async () => {
+		let capturedHeaders: Record<string, string> = {};
+
+		const workersai = createWorkersAI({
+			accountId: TEST_ACCOUNT_ID,
+			apiKey: TEST_API_KEY,
+		});
+
+		server.use(
+			http.post(
+				`https://api.cloudflare.com/client/v4/accounts/${TEST_ACCOUNT_ID}/ai/run/${TEST_MODEL}`,
+				async ({ request }) => {
+					capturedHeaders = Object.fromEntries(request.headers.entries());
+					return HttpResponse.json({ result: { response: "Hello" } });
+				},
+			),
+		);
+
+		const model = workersai(TEST_MODEL, {
+			sessionAffinity: "session-123",
+			extraHeaders: { "x-custom-trace": "trace-abc" },
+		});
+
+		const result = await generateText({
+			model: model,
+			prompt: "Write a greeting",
+		});
+
+		expect(result.text).toBe("Hello");
+		expect(capturedHeaders["x-session-affinity"]).toBe("session-123");
+		expect(capturedHeaders["x-custom-trace"]).toBe("trace-abc");
+	});
+
 	it("should not send x-session-affinity header when sessionAffinity is not set", async () => {
 		let capturedHeaders: Record<string, string> = {};
 
@@ -308,6 +341,35 @@ describe("Binding - Text Generation Tests", () => {
 		expect(result.text).toBe("Hello");
 		expect(capturedOptions).toHaveProperty("extraHeaders");
 		expect(capturedOptions.extraHeaders).toEqual({ "x-session-affinity": "session-456" });
+	});
+
+	it("should merge sessionAffinity with user-provided extraHeaders", async () => {
+		let capturedOptions: any = null;
+
+		const workersai = createWorkersAI({
+			binding: {
+				run: async (_modelName: string, _inputs: any, options?: any) => {
+					capturedOptions = options;
+					return { response: "Hello" };
+				},
+			},
+		});
+
+		const model = workersai(TEST_MODEL, {
+			sessionAffinity: "session-456",
+			extraHeaders: { "x-custom-trace": "trace-xyz" },
+		});
+
+		const result = await generateText({
+			model: model,
+			prompt: "Write a greeting",
+		});
+
+		expect(result.text).toBe("Hello");
+		expect(capturedOptions.extraHeaders).toEqual({
+			"x-custom-trace": "trace-xyz",
+			"x-session-affinity": "session-456",
+		});
 	});
 
 	it("should not pass extraHeaders when sessionAffinity is not set", async () => {
