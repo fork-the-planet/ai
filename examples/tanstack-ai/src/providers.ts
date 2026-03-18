@@ -21,7 +21,7 @@ const WORKERS_AI_CHAT_MODELS = [
 	{ id: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", label: "Llama 3.3 70B" },
 	{ id: "@cf/openai/gpt-oss-120b", label: "GPT-OSS 120B" },
 	{ id: "@cf/qwen/qwq-32b", label: "QwQ 32B" },
-	// { id: "@cf/moonshotai/kimi-k2.5", label: "Kimi K2.5" },
+	{ id: "@cf/moonshotai/kimi-k2.5", label: "Kimi K2.5" },
 	{ id: "@cf/qwen/qwen3-30b-a3b-fp8", label: "Qwen3 30B" },
 	{ id: "@cf/openai/gpt-oss-20b", label: "GPT-OSS 20B" },
 	{ id: "@cf/google/gemma-3-12b-it", label: "Gemma 3 12B" },

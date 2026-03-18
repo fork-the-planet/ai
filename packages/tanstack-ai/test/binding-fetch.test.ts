@@ -292,15 +292,13 @@ describe("createWorkersAiBindingFetch", () => {
 		const messages = inputs.messages as Array<Record<string, unknown>>;
 		// content: null should become content: ""
 		expect(messages[1]!.content).toBe("");
-		// tool_call_id should be sanitized to 9 alphanumeric chars
-		expect(messages[2]!.tool_call_id).toBe("callabc00");
-		// assistant's tool_calls[].id should also be sanitized
-		expect((messages[1]!.tool_calls as Array<Record<string, unknown>>)[0]!.id).toBe(
-			"callabc00",
-		);
+		// tool_call_id should be passed through as-is
+		expect(messages[2]!.tool_call_id).toBe("call_abc");
+		// assistant's tool_calls[].id should also be passed through as-is
+		expect((messages[1]!.tool_calls as Array<Record<string, unknown>>)[0]!.id).toBe("call_abc");
 	});
 
-	it("should sanitize tool_call_id with dashes (like binding-generated IDs)", async () => {
+	it("should pass through tool_call_id with dashes unchanged", async () => {
 		const binding = mockBinding(vi.fn().mockResolvedValue({ response: "ok" }));
 		const fetcher = createWorkersAiBindingFetch(binding);
 
@@ -332,15 +330,12 @@ describe("createWorkersAiBindingFetch", () => {
 
 		const [, inputs] = binding.run.mock.calls[0]!;
 		const messages = inputs.messages as Array<Record<string, unknown>>;
-		// "chatcmpl-tool-875d3ec6179676ae" → strip dashes → "chatcmpltool875d3ec6179676ae" → first 9 chars
 		expect(messages[1]!.tool_calls).toBeDefined();
 		const assistantToolId = (messages[1]!.tool_calls as Array<Record<string, unknown>>)[0]!.id;
 		const toolMsgId = messages[2]!.tool_call_id;
-		// Both should be sanitized to the same 9-char alphanumeric ID
-		expect(assistantToolId).toBe(toolMsgId);
-		expect(typeof assistantToolId).toBe("string");
-		expect((assistantToolId as string).length).toBe(9);
-		expect(assistantToolId).toMatch(/^[a-zA-Z0-9]{9}$/);
+		// IDs should be passed through unchanged
+		expect(assistantToolId).toBe("chatcmpl-tool-875d3ec6179676ae");
+		expect(toolMsgId).toBe("chatcmpl-tool-875d3ec6179676ae");
 	});
 
 	it("should handle streaming tool calls in nested format (real binding format)", async () => {
@@ -412,9 +407,6 @@ describe("createWorkersAiBindingFetch", () => {
 		expect(text).toContain('"arguments":", \\"b\\": 2}"');
 		// Finish reason should be tool_calls
 		expect(text).toContain('"finish_reason":"tool_calls"');
-		// The sanitized tool call ID should be 9 alphanumeric chars
-		const idMatch = text.match(/"id":"([a-zA-Z0-9]{9})"/);
-		expect(idMatch).not.toBeNull();
 		// Parse all SSE events and verify tool call chunks are well-formed
 		const events = text.split("data: ").filter((e) => e.trim() && e.trim() !== "[DONE]");
 		const toolCallEvents = events
@@ -430,7 +422,7 @@ describe("createWorkersAiBindingFetch", () => {
 		expect(toolCallEvents.length).toBeGreaterThanOrEqual(3);
 		// First tool call chunk should have id, type, and name
 		const firstTc = toolCallEvents[0].choices[0].delta.tool_calls[0];
-		expect(firstTc.id).toMatch(/^[a-zA-Z0-9]{9}$/);
+		expect(firstTc.id).toBe("chatcmpl-tool-abc123");
 		expect(firstTc.type).toBe("function");
 		expect(firstTc.function.name).toBe("calculator");
 	});

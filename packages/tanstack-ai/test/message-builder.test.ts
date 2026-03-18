@@ -261,8 +261,7 @@ describe("message building (via chatStream)", () => {
 		);
 
 		const toolMsg = messages.find((m: any) => m.role === "tool");
-		// tool_call_id is sanitized to 9-char alphanumeric for binding compatibility
-		expect(toolMsg.tool_call_id).toBe("call10000");
+		expect(toolMsg.tool_call_id).toBe("call_1");
 		// Valid JSON string should be passed through as-is
 		expect(toolMsg.content).toBe('{"result":"success"}');
 	});
@@ -367,9 +366,8 @@ describe("message building (via chatStream)", () => {
 		);
 
 		const toolMsg = messages.find((m: any) => m.role === "tool");
-		// When toolCallId is missing, the adapter generates a fallback ID (tool_<uuid>),
-		// which then gets sanitized by the binding shim (strips underscore, truncates to 9 chars).
-		expect(toolMsg.tool_call_id).toMatch(/^tool[a-f0-9]{5}$/);
+		// When toolCallId is missing, the adapter generates a fallback ID (tool_<uuid>)
+		expect(toolMsg.tool_call_id).toMatch(/^tool_[a-f0-9]{8}$/);
 	});
 });
 

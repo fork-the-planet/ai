@@ -210,8 +210,8 @@ function buildOpenAITools(
 // ID generation
 // ---------------------------------------------------------------------------
 
-function generateId(prefix: string): string {
-	return `${prefix}-${crypto.randomUUID()}`;
+function generateId(prefix = "chatcmpl"): string {
+	return `${prefix}-${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -244,14 +244,14 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 		const openAITools = buildOpenAITools(tools);
 
 		const timestamp = Date.now();
-		const runId = generateId("workers-ai");
-		const messageId = generateId("workers-ai");
+		const runId = generateId();
+		const messageId = generateId();
 		let hasEmittedRunStarted = false;
 		let hasEmittedTextMessageStart = false;
 		let accumulatedContent = "";
 		let hasEmittedStepStarted = false;
 		let accumulatedReasoning = "";
-		const stepId = generateId("workers-ai-step");
+		const stepId = generateId();
 		let hasReceivedFinishReason = false;
 		const toolCallsInProgress = new Map<
 			number,
@@ -446,8 +446,11 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 						const index = toolCallDelta.index;
 
 						if (!toolCallsInProgress.has(index)) {
+							// Always generate a unique ID per tool call index.
+							// The backend may send the same ID for multiple tool calls,
+							// so we cannot trust toolCallDelta.id to be unique.
 							toolCallsInProgress.set(index, {
-								id: toolCallDelta.id || "",
+								id: generateId("chatcmpl-tool"),
 								name: toolCallDelta.function?.name || "",
 								arguments: "",
 								started: false,
@@ -456,9 +459,9 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 
 						const toolCall = toolCallsInProgress.get(index)!;
 
-						if (toolCallDelta.id) {
-							toolCall.id = toolCallDelta.id;
-						}
+						// Only update name if provided (ID is already set at creation time
+						// and should not be overwritten by subsequent chunks that may have
+						// duplicate/shared IDs from the backend)
 						if (toolCallDelta.function?.name) {
 							toolCall.name = toolCallDelta.function.name;
 						}

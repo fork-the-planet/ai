@@ -275,10 +275,6 @@ export function createGatewayFetch(
  *
  * The binding has strict schema validation that may differ from the OpenAI API:
  * - `content` must be a string (not null)
- * - `tool_call_id` must match `[a-zA-Z0-9]{9}` pattern
- *
- * This function patches these fields so that the full tool-call round-trip works
- * even though the binding's own generated IDs may not pass its validation.
  */
 function normalizeMessagesForBinding(
 	messages: Record<string, unknown>[],
@@ -291,43 +287,8 @@ function normalizeMessagesForBinding(
 			normalized.content = "";
 		}
 
-		// Normalize tool_call_id on tool messages
-		if (normalized.tool_call_id && typeof normalized.tool_call_id === "string") {
-			normalized.tool_call_id = sanitizeToolCallId(normalized.tool_call_id);
-		}
-
-		// Normalize tool_calls[].id on assistant messages
-		if (Array.isArray(normalized.tool_calls)) {
-			normalized.tool_calls = (normalized.tool_calls as Record<string, unknown>[]).map(
-				(tc) => {
-					if (tc.id && typeof tc.id === "string") {
-						return { ...tc, id: sanitizeToolCallId(tc.id) };
-					}
-					return tc;
-				},
-			);
-		}
-
 		return normalized;
 	});
-}
-
-/**
- * Strip non-alphanumeric characters and ensure the ID is exactly 9 chars,
- * matching Workers AI's `[a-zA-Z0-9]{9}` validation pattern.
- *
- * **Why this exists:** The Workers AI binding validates `tool_call_id` with
- * a strict `[a-zA-Z0-9]{9}` regex, but it *generates* IDs like
- * `chatcmpl-tool-875d3ec6179676ae` (with dashes, >9 chars). Those IDs are
- * then rejected when sent back in a follow-up request. This is a known
- * Workers AI issue — see workers-ai.md (Issue 3). Once the Workers AI team
- * fixes the validation, this function becomes an idempotent no-op for
- * IDs that already match the pattern.
- */
-function sanitizeToolCallId(id: string): string {
-	const alphanumeric = id.replace(/[^a-zA-Z0-9]/g, "");
-	// Pad with zeros if too short, truncate if too long
-	return alphanumeric.slice(0, 9).padEnd(9, "0");
 }
 
 /**
@@ -422,7 +383,7 @@ export function createWorkersAiBindingFetch(
 					arguments: unknown;
 					function?: { name: string; arguments?: unknown };
 				}) => ({
-					id: sanitizeToolCallId(tc.id || crypto.randomUUID()),
+					id: tc.id || crypto.randomUUID(),
 					type: "function",
 					function: {
 						name: tc.function?.name || tc.name || "",
@@ -479,9 +440,9 @@ function transformWorkersAiStream(
 	// like Qwen3, Kimi K2.5 stream OpenAI-compatible SSE through the binding).
 	// In that case, flush() should only emit [DONE] and skip the finish chunk.
 	let isOpenAiFormat = false;
-	// Track which tool call indices we've already emitted an `id` for,
-	// so subsequent argument deltas don't duplicate the id/type/name fields.
-	const emittedToolCallStart = new Set<number>();
+	// Track tool call state per index: store the generated/assigned ID so that
+	// subsequent argument deltas use the same ID (matching the working streaming.ts pattern).
+	const toolCallState = new Map<number, { id: string; name: string }>();
 
 	return source.pipeThrough(
 		new TransformStream<Uint8Array, Uint8Array>({
@@ -505,15 +466,26 @@ function transformWorkersAiStream(
 						// directly through the binding, with `choices[].delta.content` and
 						// optional `reasoning_content`. Detect this and pass through as-is.
 						if (parsed.choices !== undefined) {
-							// Already OpenAI format — pass through with only tool_call_id
-							// sanitization for any tool calls present.
+							// Already OpenAI format — pass through but ensure each tool call
+							// index gets a unique, stable ID across all chunks.
 							isOpenAiFormat = true;
 							const choice = parsed.choices?.[0];
 							if (choice?.delta?.tool_calls) {
 								hasToolCalls = true;
 								for (const tc of choice.delta.tool_calls) {
-									if (tc.id && typeof tc.id === "string") {
-										tc.id = sanitizeToolCallId(tc.id);
+									const tcIndex = tc.index ?? 0;
+									if (!toolCallState.has(tcIndex)) {
+										// First chunk for this index — generate/store unique ID
+										const id = tc.id || `call${streamId}${tcIndex}`;
+										toolCallState.set(tcIndex, {
+											id,
+											name: tc.function?.name || "",
+										});
+										tc.id = id;
+									} else {
+										// Subsequent chunk — reuse stored ID, remove id from delta
+										// (OpenAI format only sends id in first chunk)
+										delete tc.id;
 									}
 								}
 							}
@@ -572,13 +544,11 @@ function transformWorkersAiStream(
 									index: tcIndex,
 								};
 
-								if (!emittedToolCallStart.has(tcIndex)) {
+								if (!toolCallState.has(tcIndex)) {
 									// First chunk for this tool call index — emit id, type, name.
-									// Use sanitizeToolCallId so the ID survives round-trip through
-									// the binding's strict `[a-zA-Z0-9]{9}` validation.
-									emittedToolCallStart.add(tcIndex);
-									const rawId = tcId || `call${streamId}${tcIndex}`;
-									toolCallDelta.id = sanitizeToolCallId(rawId);
+									const id = tcId || `call${streamId}${tcIndex}`;
+									toolCallState.set(tcIndex, { id, name: tcName || "" });
+									toolCallDelta.id = id;
 									toolCallDelta.type = "function";
 									toolCallDelta.function = {
 										name: tcName || "",

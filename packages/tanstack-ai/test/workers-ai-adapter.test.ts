@@ -83,7 +83,7 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 		// RUN_STARTED
 		const runStarted = chunks.find((c: any) => c.type === "RUN_STARTED");
 		expect(runStarted).toBeDefined();
-		expect(runStarted.runId).toMatch(/^workers-ai-/);
+		expect(runStarted.runId).toMatch(/^chatcmpl-/);
 
 		// TEXT_MESSAGE_START
 		const msgStart = chunks.find((c: any) => c.type === "TEXT_MESSAGE_START");
@@ -259,9 +259,8 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 		expect(messages[1].tool_calls).toHaveLength(1);
 		expect(messages[1].tool_calls[0].function.name).toBe("get_weather");
 
-		// tool result — tool_call_id is sanitized to 9-char alphanumeric for binding compatibility
 		expect(messages[2].role).toBe("tool");
-		expect(messages[2].tool_call_id).toBe("call10000");
+		expect(messages[2].tool_call_id).toBe("call_1");
 		expect(messages[2].content).toBe('{"temp":72}');
 	});
 
@@ -684,7 +683,7 @@ describe("WorkersAiTextAdapter reasoning events", () => {
 		const stepStarted = chunks.find((c: any) => c.type === "STEP_STARTED");
 		expect(stepStarted).toBeDefined();
 		expect(stepStarted.stepType).toBe("thinking");
-		expect(stepStarted.stepId).toMatch(/^workers-ai-step-/);
+		expect(stepStarted.stepId).toMatch(/^chatcmpl-/);
 
 		// Should have STEP_FINISHED events with incremental reasoning
 		const stepFinished = chunks.filter((c: any) => c.type === "STEP_FINISHED");
