@@ -3,41 +3,10 @@ import {
 	processPartialToolCalls,
 	processToolCalls,
 	processText,
-	sanitizeToolCallId,
 	normalizeMessagesForBinding,
 	prepareToolsAndToolChoice,
 	createRun,
 } from "../src/utils";
-
-// ---------------------------------------------------------------------------
-// sanitizeToolCallId
-// ---------------------------------------------------------------------------
-
-describe("sanitizeToolCallId", () => {
-	it("should strip non-alphanumeric characters and truncate to 9 chars", () => {
-		expect(sanitizeToolCallId("chatcmpl-tool-875d3ec6179676ae")).toBe("chatcmplt");
-	});
-
-	it("should pad short IDs with zeros", () => {
-		expect(sanitizeToolCallId("abc")).toBe("abc000000");
-	});
-
-	it("should pass through already-valid 9-char alphanumeric IDs", () => {
-		expect(sanitizeToolCallId("abcdef123")).toBe("abcdef123");
-	});
-
-	it("should handle empty string", () => {
-		expect(sanitizeToolCallId("")).toBe("000000000");
-	});
-
-	it("should handle IDs with only special characters", () => {
-		expect(sanitizeToolCallId("---!!!---")).toBe("000000000");
-	});
-
-	it("should handle mixed content", () => {
-		expect(sanitizeToolCallId("call_abc_123")).toBe("callabc12");
-	});
-});
 
 // ---------------------------------------------------------------------------
 // normalizeMessagesForBinding
@@ -53,7 +22,18 @@ describe("normalizeMessagesForBinding", () => {
 		expect(result).toEqual(messages);
 	});
 
-	it("should sanitize tool_call_id on tool messages", () => {
+	it("should convert null content to empty string", () => {
+		const messages = [
+			{
+				role: "assistant" as const,
+				content: null as unknown as string,
+			},
+		];
+		const result = normalizeMessagesForBinding(messages);
+		expect(result[0]).toHaveProperty("content", "");
+	});
+
+	it("should pass through tool_call_id unchanged", () => {
 		const messages = [
 			{
 				role: "tool" as const,
@@ -63,10 +43,10 @@ describe("normalizeMessagesForBinding", () => {
 			},
 		];
 		const result = normalizeMessagesForBinding(messages);
-		expect(result[0]).toHaveProperty("tool_call_id", "chatcmplt");
+		expect(result[0]).toHaveProperty("tool_call_id", "chatcmpl-tool-875d3ec6179676ae");
 	});
 
-	it("should sanitize tool_calls[].id on assistant messages", () => {
+	it("should pass through tool_calls[].id unchanged", () => {
 		const messages = [
 			{
 				role: "assistant" as const,
@@ -84,21 +64,18 @@ describe("normalizeMessagesForBinding", () => {
 		const assistant = result[0] as {
 			tool_calls?: Array<{ id: string }>;
 		};
-		expect(assistant.tool_calls?.[0].id).toBe("chatcmplt");
+		expect(assistant.tool_calls?.[0].id).toBe("chatcmpl-tool-abc123def456");
 	});
 
 	it("should not mutate the original messages array", () => {
 		const original = [
 			{
-				role: "tool" as const,
-				name: "fn",
-				content: "result",
-				tool_call_id: "chatcmpl-tool-abc",
+				role: "assistant" as const,
+				content: null as unknown as string,
 			},
 		];
-		const originalId = original[0].tool_call_id;
 		normalizeMessagesForBinding(original);
-		expect(original[0].tool_call_id).toBe(originalId);
+		expect(original[0].content).toBeNull();
 	});
 });
 
