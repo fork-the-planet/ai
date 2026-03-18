@@ -703,6 +703,38 @@ describe("WorkersAiTextAdapter reasoning events", () => {
 		expect(stepFinished[1].stepId).toBe(stepStarted.stepId);
 	});
 
+	it("should emit STEP_STARTED and STEP_FINISHED for reasoning field (without _content suffix)", async () => {
+		const binding = createReasoningBinding([
+			'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning":"Let me think"},"finish_reason":null}],"model":"@cf/qwen/qwq-32b"}\n\n',
+			'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning":" about this"},"finish_reason":null}],"model":"@cf/qwen/qwq-32b"}\n\n',
+			'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Hello!"},"finish_reason":null}],"model":"@cf/qwen/qwq-32b"}\n\n',
+			'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"model":"@cf/qwen/qwq-32b"}\n\n',
+		]);
+		const adapter = new WorkersAiTextAdapter("@cf/qwen/qwq-32b" as WorkersAiTextModel, {
+			binding,
+		});
+
+		const chunks = await collectChunks(
+			adapter.chatStream({
+				model: "@cf/qwen/qwq-32b" as WorkersAiTextModel,
+				messages: [{ role: "user", content: "Think about this" }],
+			} as any),
+		);
+
+		// Should have STEP_STARTED
+		const stepStarted = chunks.find((c: any) => c.type === "STEP_STARTED");
+		expect(stepStarted).toBeDefined();
+		expect(stepStarted.stepType).toBe("thinking");
+
+		// Should have STEP_FINISHED events with incremental reasoning
+		const stepFinished = chunks.filter((c: any) => c.type === "STEP_FINISHED");
+		expect(stepFinished).toHaveLength(2);
+		expect(stepFinished[0].delta).toBe("Let me think");
+		expect(stepFinished[0].content).toBe("Let me think");
+		expect(stepFinished[1].delta).toBe(" about this");
+		expect(stepFinished[1].content).toBe("Let me think about this");
+	});
+
 	it("should emit STEP_STARTED only once for multiple reasoning tokens", async () => {
 		const binding = createReasoningBinding([
 			'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"A"},"finish_reason":null}],"model":"@cf/qwen/qwq-32b"}\n\n',
@@ -918,5 +950,42 @@ describe("WorkersAiTextAdapter config modes", () => {
 		const binding = createMockBinding({ response: "ok" });
 		const adapter = new WorkersAiTextAdapter("@cf/my-org/custom-model-v1", { binding });
 		expect(adapter).toBeDefined();
+	});
+
+	it("should pass sessionAffinity as extraHeaders to binding.run()", async () => {
+		const binding = createStreamingBinding(['data: {"response":"ok"}\n\n']);
+		const adapter = new WorkersAiTextAdapter(MODEL, {
+			binding,
+			sessionAffinity: "my-session-id",
+		});
+
+		await collectChunks(
+			adapter.chatStream({
+				model: MODEL,
+				messages: [{ role: "user", content: "Hi" }],
+			} as any),
+		);
+
+		expect(binding.run).toHaveBeenCalledOnce();
+		const [, , options] = binding.run.mock.calls[0]!;
+		expect(options).toEqual({
+			extraHeaders: { "x-session-affinity": "my-session-id" },
+		});
+	});
+
+	it("should not pass extraHeaders when sessionAffinity is not set", async () => {
+		const binding = createStreamingBinding(['data: {"response":"ok"}\n\n']);
+		const adapter = new WorkersAiTextAdapter(MODEL, { binding });
+
+		await collectChunks(
+			adapter.chatStream({
+				model: MODEL,
+				messages: [{ role: "user", content: "Hi" }],
+			} as any),
+		);
+
+		expect(binding.run).toHaveBeenCalledOnce();
+		const [, , options] = binding.run.mock.calls[0]!;
+		expect(options).toBeUndefined();
 	});
 });

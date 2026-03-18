@@ -102,6 +102,7 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 								responseFormat?.type === "json" ? responseFormat.schema : undefined,
 						},
 						tools: undefined,
+						tool_choice: undefined,
 					},
 					warnings,
 				};
@@ -139,6 +140,7 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 			messages: finalMessages,
 			temperature: args.temperature,
 			tools: args.tools,
+			...(args.tool_choice ? { tool_choice: args.tool_choice } : {}),
 			top_p: args.top_p,
 			...(imagePart ? { image: Array.from(imagePart.image) } : {}),
 			// Only include response_format when actually set
@@ -151,9 +153,24 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 	 * Get passthrough options for binding.run() from settings.
 	 */
 	private getRunOptions() {
-		const { gateway, safePrompt: _safePrompt, ...passthroughOptions } = this.settings;
+		const {
+			gateway,
+			safePrompt: _safePrompt,
+			sessionAffinity,
+			extraHeaders,
+			...passthroughOptions
+		} = this.settings;
+
+		const mergedHeaders = {
+			...(extraHeaders && typeof extraHeaders === "object"
+				? (extraHeaders as Record<string, string>)
+				: {}),
+			...(sessionAffinity ? { "x-session-affinity": sessionAffinity } : {}),
+		};
+
 		return {
 			gateway: this.config.gateway ?? gateway,
+			...(Object.keys(mergedHeaders).length > 0 ? { extraHeaders: mergedHeaders } : {}),
 			...passthroughOptions,
 		};
 	}
@@ -181,9 +198,12 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 
 		const outputRecord = output as Record<string, unknown>;
 		const choices = outputRecord.choices as
-			| Array<{ message?: { reasoning_content?: string } }>
+			| Array<{
+					message?: { reasoning_content?: string; reasoning?: string };
+			  }>
 			| undefined;
-		const reasoningContent = choices?.[0]?.message?.reasoning_content;
+		const reasoningContent =
+			choices?.[0]?.message?.reasoning_content ?? choices?.[0]?.message?.reasoning;
 
 		return {
 			finishReason: mapWorkersAIFinishReason(outputRecord),
@@ -228,9 +248,12 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 		// when stream:true is requested. Wrap the complete response as a stream.
 		const outputRecord = response as Record<string, unknown>;
 		const choices = outputRecord.choices as
-			| Array<{ message?: { reasoning_content?: string } }>
+			| Array<{
+					message?: { reasoning_content?: string; reasoning?: string };
+			  }>
 			| undefined;
-		const reasoningContent = choices?.[0]?.message?.reasoning_content;
+		const reasoningContent =
+			choices?.[0]?.message?.reasoning_content ?? choices?.[0]?.message?.reasoning;
 
 		let textId: string | null = null;
 		let reasoningId: string | null = null;

@@ -287,7 +287,20 @@ Streaming works the same way — use `streamText` instead of `generateText`.
 | `apiKey`    | `string`         | Cloudflare API token. Required with `accountId`.                             |
 | `gateway`   | `GatewayOptions` | Optional [AI Gateway](https://developers.cloudflare.com/ai-gateway/) config. |
 
-Returns a provider with model factories:
+Returns a provider with model factories. Each factory accepts an optional second argument for per-model settings:
+
+```ts
+workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast", {
+	sessionAffinity: "my-unique-session-id",
+});
+```
+
+| Setting           | Type      | Description                                                                                  |
+| ----------------- | --------- | -------------------------------------------------------------------------------------------- |
+| `safePrompt`      | `boolean` | Inject a safety prompt before all conversations.                                             |
+| `sessionAffinity` | `string`  | Routes requests with the same key to the same backend replica for prefix-cache optimization. |
+
+Model factories:
 
 ```ts
 // Chat — for generateText / streamText

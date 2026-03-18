@@ -545,6 +545,44 @@ describe("createWorkersAiBindingFetch", () => {
 		expect(json.choices[0]!.finish_reason).toBe("stop");
 	});
 
+	it("should forward extraHeaders to binding.run() when configured", async () => {
+		const binding = mockBinding(vi.fn().mockResolvedValue({ response: "ok" }));
+
+		const fetcher = createWorkersAiBindingFetch(binding, {
+			extraHeaders: { "x-session-affinity": "session-123" },
+		});
+
+		await fetcher("https://api.openai.com/v1/chat/completions", {
+			method: "POST",
+			body: JSON.stringify({
+				model: "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+				messages: [{ role: "user", content: "Hi" }],
+			}),
+		});
+
+		expect(binding.run).toHaveBeenCalledOnce();
+		const [, , options] = binding.run.mock.calls[0]!;
+		expect(options).toEqual({ extraHeaders: { "x-session-affinity": "session-123" } });
+	});
+
+	it("should not pass extraHeaders to binding.run() when not configured", async () => {
+		const binding = mockBinding(vi.fn().mockResolvedValue({ response: "ok" }));
+
+		const fetcher = createWorkersAiBindingFetch(binding);
+
+		await fetcher("https://api.openai.com/v1/chat/completions", {
+			method: "POST",
+			body: JSON.stringify({
+				model: "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+				messages: [{ role: "user", content: "Hi" }],
+			}),
+		});
+
+		expect(binding.run).toHaveBeenCalledOnce();
+		const [, , options] = binding.run.mock.calls[0]!;
+		expect(options).toBeUndefined();
+	});
+
 	it("should pass response_format to binding for structured output", async () => {
 		const binding = mockBinding(vi.fn().mockResolvedValue({ response: '{"name":"test"}' }));
 

@@ -327,6 +327,59 @@ describe("REST API - Streaming Text Tests", () => {
 		expect(reasoning).toEqual("Okay, the user is asking");
 		expect(content).toEqual("A **cow is cool");
 	});
+
+	it("should handle reasoning field (without _content suffix) if present", async () => {
+		server.use(
+			http.post(
+				`https://api.cloudflare.com/client/v4/accounts/${TEST_ACCOUNT_ID}/ai/run/${TEST_MODEL}`,
+				async () => {
+					return new Response(
+						[
+							`data: {"id":"chatcmpl-r1","object":"chat.completion.chunk","created":1751570976,"model":"${TEST_MODEL}","choices":[{"index":0,"delta":{"role":"assistant","content":""},"logprobs":null,"finish_reason":null}]}\n\n`,
+							`data: {"id":"chatcmpl-r1","object":"chat.completion.chunk","created":1751570976,"model":"${TEST_MODEL}","choices":[{"index":0,"delta":{"reasoning":"Think"},"logprobs":null,"finish_reason":null}]}\n\n`,
+							`data: {"id":"chatcmpl-r1","object":"chat.completion.chunk","created":1751570976,"model":"${TEST_MODEL}","choices":[{"index":0,"delta":{"reasoning":"ing..."},"logprobs":null,"finish_reason":null}]}\n\n`,
+							`data: {"id":"chatcmpl-r1","object":"chat.completion.chunk","created":1751570976,"model":"${TEST_MODEL}","choices":[{"index":0,"delta":{"content":"Hello"},"logprobs":null,"finish_reason":null}]}\n\n`,
+							`data: {"id":"chatcmpl-r1","object":"chat.completion.chunk","created":1751570976,"model":"${TEST_MODEL}","choices":[{"index":0,"delta":{"content":""},"logprobs":null,"finish_reason":"stop"}]}\n\n`,
+							`data: {"id":"chatcmpl-r1","object":"chat.completion.chunk","created":1751570976,"model":"${TEST_MODEL}","choices":[]}\n\n`,
+							"[DONE]\n\n",
+						].join(""),
+						{
+							headers: {
+								"Content-Type": "text/event-stream",
+								"Transfer-Encoding": "chunked",
+							},
+							status: 200,
+						},
+					);
+				},
+			),
+		);
+
+		const workersai = createWorkersAI({
+			accountId: TEST_ACCOUNT_ID,
+			apiKey: TEST_API_KEY,
+		});
+
+		const result = streamText({
+			model: workersai(TEST_MODEL),
+			messages: [{ role: "user", content: "hello" }],
+		});
+
+		let reasoning = "";
+		let content = "";
+
+		for await (const chunk of result.fullStream) {
+			if (chunk.type === "reasoning-delta") {
+				reasoning += chunk.text;
+			}
+			if (chunk.type === "text-delta") {
+				content += chunk.text;
+			}
+		}
+
+		expect(reasoning).toEqual("Thinking...");
+		expect(content).toEqual("Hello");
+	});
 });
 
 describe("Binding - Streaming Text Tests", () => {
@@ -869,6 +922,101 @@ describe("Binding - Streaming Text Tests", () => {
 
 		expect(reasoning).toEqual("Okay, the user is asking");
 		expect(content).toEqual("\n\nA cow is cool.");
+	});
+
+	it("should handle reasoning field (without _content suffix) if present", async () => {
+		const workersai = createWorkersAI({
+			binding: {
+				run: async () => {
+					return mockStream([
+						{
+							id: "chatcmpl-r2",
+							object: "chat.completion.chunk",
+							created: 1751559514,
+							model: TEST_MODEL,
+							choices: [
+								{
+									index: 0,
+									delta: { reasoning: "Think" },
+									logprobs: null,
+									finish_reason: null,
+								},
+							],
+						},
+						{
+							id: "chatcmpl-r2",
+							object: "chat.completion.chunk",
+							created: 1751559514,
+							model: TEST_MODEL,
+							choices: [
+								{
+									index: 0,
+									delta: { reasoning: "ing..." },
+									logprobs: null,
+									finish_reason: null,
+								},
+							],
+						},
+						{
+							id: "chatcmpl-r2",
+							object: "chat.completion.chunk",
+							created: 1751559514,
+							model: TEST_MODEL,
+							choices: [
+								{
+									index: 0,
+									delta: { content: "Hello" },
+									logprobs: null,
+									finish_reason: null,
+								},
+							],
+						},
+						{
+							id: "chatcmpl-r2",
+							object: "chat.completion.chunk",
+							created: 1751559514,
+							model: TEST_MODEL,
+							choices: [
+								{
+									index: 0,
+									delta: { content: "" },
+									logprobs: null,
+									finish_reason: "stop",
+								},
+							],
+						},
+						{
+							id: "chatcmpl-r2",
+							object: "chat.completion.chunk",
+							created: 1751559514,
+							model: TEST_MODEL,
+							choices: [],
+						},
+						"[DONE]",
+					]);
+				},
+			},
+		});
+
+		const result = streamText({
+			model: workersai(TEST_MODEL),
+			messages: [{ role: "user", content: "hello" }],
+		});
+
+		let reasoning = "";
+		let content = "";
+
+		for await (const chunk of result.fullStream) {
+			if (chunk.type === "reasoning-delta") {
+				reasoning += chunk.text;
+			}
+			if (chunk.type === "text-delta") {
+				content += chunk.text;
+			}
+		}
+
+		expect(reasoning).toEqual("Thinking...");
+		expect(content).toEqual("Hello");
 	});
 });
 
@@ -1577,6 +1725,41 @@ describe("Graceful Degradation", () => {
 
 		expect(text).toBe("The answer is 42.");
 		expect(reasoning).toBe("Let me think about this...");
+	});
+
+	it("should handle non-streaming response with reasoning field (without _content suffix)", async () => {
+		const workersai = createWorkersAI({
+			binding: {
+				run: async () => {
+					return {
+						choices: [
+							{
+								message: {
+									reasoning: "Let me reason about this...",
+									content: "The answer is 7.",
+								},
+								finish_reason: "stop",
+							},
+						],
+					};
+				},
+			},
+		});
+
+		const result = streamText({
+			model: workersai(TEST_MODEL),
+			prompt: "Think carefully",
+		});
+
+		let text = "";
+		let reasoning = "";
+		for await (const chunk of result.fullStream) {
+			if (chunk.type === "text-delta") text += chunk.text;
+			if (chunk.type === "reasoning-delta") reasoning += chunk.text;
+		}
+
+		expect(text).toBe("The answer is 7.");
+		expect(reasoning).toBe("Let me reason about this...");
 	});
 });
 
