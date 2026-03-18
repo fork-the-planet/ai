@@ -110,7 +110,7 @@ export function createRun(config: CreateRunConfig): AiRun {
 		const {
 			gateway: _gateway,
 			prefix: _prefix,
-			extraHeaders: _extraHeaders,
+			extraHeaders,
 			returnRawResponse,
 			signal, // AbortSignal — not serializable as a query parameter
 			...passthroughOptions
@@ -141,9 +141,12 @@ export function createRun(config: CreateRunConfig): AiRun {
 			queryString ? `?${queryString}` : ""
 		}`;
 
-		const headers = {
+		const headers: Record<string, string> = {
 			Authorization: `Bearer ${apiKey}`,
 			"Content-Type": "application/json",
+			...(extraHeaders && typeof extraHeaders === "object"
+				? (extraHeaders as Record<string, string>)
+				: {}),
 		};
 
 		const body = JSON.stringify(inputs);

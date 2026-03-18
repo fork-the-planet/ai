@@ -153,9 +153,24 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 	 * Get passthrough options for binding.run() from settings.
 	 */
 	private getRunOptions() {
-		const { gateway, safePrompt: _safePrompt, ...passthroughOptions } = this.settings;
+		const {
+			gateway,
+			safePrompt: _safePrompt,
+			sessionAffinity,
+			extraHeaders,
+			...passthroughOptions
+		} = this.settings;
+
+		const mergedHeaders = {
+			...(extraHeaders && typeof extraHeaders === "object"
+				? (extraHeaders as Record<string, string>)
+				: {}),
+			...(sessionAffinity ? { "x-session-affinity": sessionAffinity } : {}),
+		};
+
 		return {
 			gateway: this.config.gateway ?? gateway,
+			...(Object.keys(mergedHeaders).length > 0 ? { extraHeaders: mergedHeaders } : {}),
 			...passthroughOptions,
 		};
 	}

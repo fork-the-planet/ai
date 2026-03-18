@@ -105,10 +105,17 @@ export interface WorkersAiDirectCredentialsConfig {
  * upstream provider), distinct from `cfApiKey` (used in the `cf-aig-authorization`
  * header for authenticated gateways).
  */
-export type WorkersAiAdapterConfig =
+export type WorkersAiAdapterConfig = (
 	| WorkersAiDirectBindingConfig
 	| WorkersAiDirectCredentialsConfig
-	| (AiGatewayAdapterConfig & { apiKey?: string });
+	| (AiGatewayAdapterConfig & { apiKey?: string })
+) & {
+	/**
+	 * Session affinity key for prefix-cache optimization.
+	 * Routes requests with the same key to the same backend replica.
+	 */
+	sessionAffinity?: string;
+};
 
 // ---------------------------------------------------------------------------
 // Config detection helpers
@@ -330,7 +337,10 @@ function sanitizeToolCallId(id: string): string {
  * request parameters are extracted from the JSON body, matching Workers AI's
  * `binding.run(model, inputs)` calling convention.
  */
-export function createWorkersAiBindingFetch(binding: WorkersAiBinding): typeof fetch {
+export function createWorkersAiBindingFetch(
+	binding: WorkersAiBinding,
+	options?: { extraHeaders?: Record<string, string> },
+): typeof fetch {
 	return async (_input, init) => {
 		if (!init?.body) {
 			return new Response("No body", { status: 400 });
@@ -359,7 +369,11 @@ export function createWorkersAiBindingFetch(binding: WorkersAiBinding): typeof f
 		if (body.response_format) inputs.response_format = body.response_format;
 		if (stream) inputs.stream = true;
 
-		const result = await binding.run(model, inputs);
+		const result = await binding.run(
+			model,
+			inputs,
+			options?.extraHeaders ? { extraHeaders: options.extraHeaders } : undefined,
+		);
 
 		if (stream && result instanceof ReadableStream) {
 			// Workers AI returns an SSE stream with `data: {"response":"chunk"}` format.
