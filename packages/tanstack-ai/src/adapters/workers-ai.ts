@@ -207,7 +207,7 @@ function buildOpenAITools(
 }
 
 // ---------------------------------------------------------------------------
-// ID generation (matches workers-ai-provider format)
+// ID generation
 // ---------------------------------------------------------------------------
 
 function generateId(prefix = "chatcmpl"): string {

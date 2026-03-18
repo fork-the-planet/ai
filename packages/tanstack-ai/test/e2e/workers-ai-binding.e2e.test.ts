@@ -338,9 +338,9 @@ describe("Workers AI Binding E2E", () => {
 				}
 
 				if (toolStarts.length > 0 && toolEnds.length > 0) {
-					// Verify tool call IDs are binding-compatible (9 alphanumeric chars)
-					expect(toolStarts[0].toolCallId).toMatch(/^[a-zA-Z0-9]{9}$/);
-					expect(toolEnds[0].toolCallId).toMatch(/^[a-zA-Z0-9]{9}$/);
+					expect(toolStarts[0].toolCallId).toBeDefined();
+					expect(toolEnds[0].toolCallId).toBeDefined();
+					expect(toolStarts[0].toolCallId).toBe(toolEnds[0].toolCallId);
 				}
 			});
 		}

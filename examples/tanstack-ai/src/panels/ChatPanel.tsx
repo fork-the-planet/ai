@@ -175,8 +175,6 @@ function ChatView({ provider, workersAiModel }: { provider: ProviderDef; workers
 		}
 	};
 
-	console.log(messages);
-
 	return (
 		<>
 			{error && (
