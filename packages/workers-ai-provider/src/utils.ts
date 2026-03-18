@@ -7,30 +7,10 @@ import type { WorkersAIChatPrompt } from "./workersai-chat-prompt";
 // ---------------------------------------------------------------------------
 
 /**
- * Strip non-alphanumeric characters and ensure the ID is exactly 9 chars,
- * matching Workers AI binding's `[a-zA-Z0-9]{9}` validation pattern.
- *
- * The Workers AI binding validates `tool_call_id` with a strict regex, but
- * generates IDs like `chatcmpl-tool-875d3ec6179676ae` (with dashes, >9 chars).
- * Those IDs are rejected when sent back in a follow-up request.
- *
- * Once Workers AI fixes the validation, this becomes an idempotent no-op for
- * IDs that already match the pattern.
- */
-export function sanitizeToolCallId(id: string): string {
-	const alphanumeric = id.replace(/[^a-zA-Z0-9]/g, "");
-	return alphanumeric.slice(0, 9).padEnd(9, "0");
-}
-
-/**
  * Normalize messages before passing to the Workers AI binding.
  *
  * The binding has strict schema validation that differs from the OpenAI API:
  * - `content` must be a string (not null)
- * - `tool_call_id` must match `[a-zA-Z0-9]{9}` pattern
- *
- * This patches fields so the full tool-call round-trip works even though
- * the binding's own generated IDs may not pass its own validation.
  */
 export function normalizeMessagesForBinding(messages: WorkersAIChatPrompt): WorkersAIChatPrompt {
 	return messages.map((msg) => {
@@ -39,19 +19,6 @@ export function normalizeMessagesForBinding(messages: WorkersAIChatPrompt): Work
 		// content: null → content: ""
 		if (normalized.content === null || normalized.content === undefined) {
 			(normalized as { content: string }).content = "";
-		}
-
-		// Normalize tool_call_id on tool messages
-		if ("tool_call_id" in normalized && typeof normalized.tool_call_id === "string") {
-			normalized.tool_call_id = sanitizeToolCallId(normalized.tool_call_id);
-		}
-
-		// Normalize tool_calls[].id on assistant messages
-		if ("tool_calls" in normalized && Array.isArray(normalized.tool_calls)) {
-			normalized.tool_calls = normalized.tool_calls.map((tc) => ({
-				...tc,
-				id: sanitizeToolCallId(tc.id),
-			}));
 		}
 
 		return normalized;
