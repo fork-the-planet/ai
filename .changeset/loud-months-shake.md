@@ -2,4 +2,4 @@
 "workers-ai-provider": patch
 ---
 
-Support for AI Gateway
+fix: route REST API requests through AI Gateway when the `gateway` option is provided in `createRun()`

@@ -468,6 +468,40 @@ describe("createRun", () => {
 		);
 	});
 
+	it("should not double-prefix run/ when model already starts with run/", async () => {
+		const mockResponse = {
+			ok: true,
+			json: vi.fn().mockResolvedValue({ result: { response: "Hello" } }),
+			headers: new Headers({ "content-type": "application/json" }),
+		};
+		vi.mocked(globalThis.fetch).mockResolvedValue(mockResponse as unknown as Response);
+
+		const run = createRun({ accountId: "test-account", apiKey: "test-key" });
+		await run("run/@cf/meta/llama-3.1-8b-instruct" as any, { prompt: "Hi" });
+
+		expect(globalThis.fetch).toHaveBeenCalledWith(
+			"https://api.cloudflare.com/client/v4/accounts/test-account/ai/run/@cf/meta/llama-3.1-8b-instruct",
+			expect.objectContaining({ method: "POST" }),
+		);
+	});
+
+	it("should not double-prefix run/ in gateway URL when model already starts with run/", async () => {
+		const mockResponse = {
+			ok: true,
+			json: vi.fn().mockResolvedValue({ result: { response: "Hello" } }),
+			headers: new Headers({ "content-type": "application/json" }),
+		};
+		vi.mocked(globalThis.fetch).mockResolvedValue(mockResponse as unknown as Response);
+
+		const run = createRun({ accountId: "test-account", apiKey: "test-key" });
+		await run("run/@cf/meta/llama-3.1-8b-instruct" as any, { prompt: "Hi" }, { gateway: { id: "my-gateway" } });
+
+		expect(globalThis.fetch).toHaveBeenCalledWith(
+			"https://gateway.ai.cloudflare.com/v1/test-account/my-gateway/workers-ai/run/@cf/meta/llama-3.1-8b-instruct",
+			expect.objectContaining({ method: "POST" }),
+		);
+	});
+
 	it("should add cf-aig-skip-cache header when skipCache is true", async () => {
 		const mockResponse = {
 			ok: true,
