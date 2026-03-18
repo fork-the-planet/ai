@@ -2,4 +2,4 @@
 "@cloudflare/tanstack-ai": patch
 ---
 
-Workers AI adapter for Tanstack AI doesn't require API Key
+fix: add `run/` prefix to workers-ai gateway endpoint and make API key optional for gateway bindings

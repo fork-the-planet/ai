@@ -454,7 +454,11 @@ describe("createRun", () => {
 		vi.mocked(globalThis.fetch).mockResolvedValue(mockResponse as unknown as Response);
 
 		const run = createRun({ accountId: "test-account", apiKey: "test-key" });
-		await run("@cf/meta/llama-3.1-8b-instruct" as any, { prompt: "Hi" }, { gateway: { id: "my-gateway" } });
+		await run(
+			"@cf/meta/llama-3.1-8b-instruct" as any,
+			{ prompt: "Hi" },
+			{ gateway: { id: "my-gateway" } },
+		);
 
 		expect(globalThis.fetch).toHaveBeenCalledWith(
 			"https://gateway.ai.cloudflare.com/v1/test-account/my-gateway/workers-ai/run/@cf/meta/llama-3.1-8b-instruct",
@@ -494,7 +498,11 @@ describe("createRun", () => {
 		vi.mocked(globalThis.fetch).mockResolvedValue(mockResponse as unknown as Response);
 
 		const run = createRun({ accountId: "test-account", apiKey: "test-key" });
-		await run("run/@cf/meta/llama-3.1-8b-instruct" as any, { prompt: "Hi" }, { gateway: { id: "my-gateway" } });
+		await run(
+			"run/@cf/meta/llama-3.1-8b-instruct" as any,
+			{ prompt: "Hi" },
+			{ gateway: { id: "my-gateway" } },
+		);
 
 		expect(globalThis.fetch).toHaveBeenCalledWith(
 			"https://gateway.ai.cloudflare.com/v1/test-account/my-gateway/workers-ai/run/@cf/meta/llama-3.1-8b-instruct",
@@ -511,7 +519,11 @@ describe("createRun", () => {
 		vi.mocked(globalThis.fetch).mockResolvedValue(mockResponse as unknown as Response);
 
 		const run = createRun({ accountId: "test-account", apiKey: "test-key" });
-		await run("@cf/meta/llama-3.1-8b-instruct" as any, { prompt: "Hi" }, { gateway: { id: "my-gateway", skipCache: true } });
+		await run(
+			"@cf/meta/llama-3.1-8b-instruct" as any,
+			{ prompt: "Hi" },
+			{ gateway: { id: "my-gateway", skipCache: true } },
+		);
 
 		expect(globalThis.fetch).toHaveBeenCalledWith(
 			expect.any(String),
@@ -532,7 +544,11 @@ describe("createRun", () => {
 		vi.mocked(globalThis.fetch).mockResolvedValue(mockResponse as unknown as Response);
 
 		const run = createRun({ accountId: "test-account", apiKey: "test-key" });
-		await run("@cf/meta/llama-3.1-8b-instruct" as any, { prompt: "Hi" }, { gateway: { id: "my-gateway", cacheTtl: 3600 } });
+		await run(
+			"@cf/meta/llama-3.1-8b-instruct" as any,
+			{ prompt: "Hi" },
+			{ gateway: { id: "my-gateway", cacheTtl: 3600 } },
+		);
 
 		expect(globalThis.fetch).toHaveBeenCalledWith(
 			expect.any(String),
@@ -553,7 +569,11 @@ describe("createRun", () => {
 		vi.mocked(globalThis.fetch).mockResolvedValue(mockResponse as unknown as Response);
 
 		const run = createRun({ accountId: "test-account", apiKey: "test-key" });
-		await run("@cf/meta/llama-3.1-8b-instruct" as any, { prompt: "Hi" }, { gateway: { id: "my-gateway", cacheKey: "my-custom-key" } });
+		await run(
+			"@cf/meta/llama-3.1-8b-instruct" as any,
+			{ prompt: "Hi" },
+			{ gateway: { id: "my-gateway", cacheKey: "my-custom-key" } },
+		);
 
 		expect(globalThis.fetch).toHaveBeenCalledWith(
 			expect.any(String),
@@ -574,7 +594,11 @@ describe("createRun", () => {
 		vi.mocked(globalThis.fetch).mockResolvedValue(mockResponse as unknown as Response);
 
 		const run = createRun({ accountId: "test-account", apiKey: "test-key" });
-		await run("@cf/meta/llama-3.1-8b-instruct" as any, { prompt: "Hi" }, { gateway: { id: "my-gateway", metadata: { user: "test", session: 123 } } });
+		await run(
+			"@cf/meta/llama-3.1-8b-instruct" as any,
+			{ prompt: "Hi" },
+			{ gateway: { id: "my-gateway", metadata: { user: "test", session: 123 } } },
+		);
 
 		expect(globalThis.fetch).toHaveBeenCalledWith(
 			expect.any(String),

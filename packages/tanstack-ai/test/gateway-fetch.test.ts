@@ -359,23 +359,27 @@ describe("createGatewayFetch", () => {
 			expect(request.query.messages).toEqual([]);
 		});
 
-		it("should preserve endpoint when it already starts with run/", async () => {
+		it("should not double-prefix run/ when URL path already contains it", async () => {
 			const config: AiGatewayAdapterConfig = {
 				binding: mockBinding,
 				apiKey: "test-key",
 			};
 			const fetcher = createGatewayFetch("workers-ai", config);
 
-			await fetcher("https://gateway.ai.cloudflare.com/v1/run/@cf/meta/llama-3.3-70b-instruct-fp8-fast", {
-				method: "POST",
-				body: JSON.stringify({
-					model: "run/@cf/meta/llama-3.3-70b-instruct-fp8-fast",
-					messages: [{ role: "user", content: "Hello" }],
-				}),
-			});
+			await fetcher(
+				"https://gateway.ai.cloudflare.com/v1/run/@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+				{
+					method: "POST",
+					body: JSON.stringify({
+						model: "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+						messages: [{ role: "user", content: "Hello" }],
+					}),
+				},
+			);
 
 			const request = mockBinding.run.mock.calls[0]![0];
 			expect(request.endpoint).toBe("run/@cf/meta/llama-3.3-70b-instruct-fp8-fast");
+			expect(request.query.model).toBeUndefined();
 		});
 
 		it("should prepend run/ when endpoint does not start with run/", async () => {
