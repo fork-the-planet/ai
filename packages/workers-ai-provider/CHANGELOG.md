@@ -1,5 +1,11 @@
 # workers-ai-provider
 
+## 3.1.5
+
+### Patch Changes
+
+- [`92f16bf`](https://github.com/cloudflare/ai/commit/92f16bfa2de30b3e77dc0bd920de50168f8e9a79) Thanks [@threepointone](https://github.com/threepointone)! - boop
+
 ## 3.1.4
 
 ### Patch Changes
