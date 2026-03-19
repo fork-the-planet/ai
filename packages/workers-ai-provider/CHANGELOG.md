@@ -1,5 +1,17 @@
 # workers-ai-provider
 
+## 3.1.3
+
+### Patch Changes
+
+- [#429](https://github.com/cloudflare/ai/pull/429) [`ae24f06`](https://github.com/cloudflare/ai/commit/ae24f06fc7d7c949b42be642886612e232956e8b) Thanks [@michaeldwan](https://github.com/michaeldwan)! - Pass tool_choice through to binding.run() so tool selection mode (auto, required, none) is respected when using Workers AI with the binding API
+
+- [#410](https://github.com/cloudflare/ai/pull/410) [`bc2eba3`](https://github.com/cloudflare/ai/commit/bc2eba382613df420d698dc161d8914a745d71b0) Thanks [@vaibhavshn](https://github.com/vaibhavshn)! - fix: route REST API requests through AI Gateway when the `gateway` option is provided in `createRun()`
+
+- [#446](https://github.com/cloudflare/ai/pull/446) [`3c35051`](https://github.com/cloudflare/ai/commit/3c35051ee9e405afff851224877c190c90071840) Thanks [@threepointone](https://github.com/threepointone)! - Remove tool_call_id sanitization that truncated IDs to 9 alphanumeric chars, which caused all tool call IDs to collide after round-trip
+
+- [#444](https://github.com/cloudflare/ai/pull/444) [`b1c742b`](https://github.com/cloudflare/ai/commit/b1c742b461153ca113520fe7c1ef59cb44157e47) Thanks [@mchenco](https://github.com/mchenco)! - Add `sessionAffinity` setting to send `x-session-affinity` header for prefix-cache optimization. Also forward `extraHeaders` in the REST API path instead of discarding them.
+
 ## 3.1.2
 
 ### Patch Changes

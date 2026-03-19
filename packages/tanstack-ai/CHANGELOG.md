@@ -1,5 +1,19 @@
 # @cloudflare/tanstack-ai
 
+## 0.1.3
+
+### Patch Changes
+
+- [#435](https://github.com/cloudflare/ai/pull/435) [`7381171`](https://github.com/cloudflare/ai/commit/738117115f7d35317d1fd39d8096d9cfe082633e) Thanks [@mdhruvil](https://github.com/mdhruvil)! - Fix workers-ai adapter silently dropping image content parts.
+
+- [#424](https://github.com/cloudflare/ai/pull/424) [`b2eeca8`](https://github.com/cloudflare/ai/commit/b2eeca868c07cf4e817134cadb9c24b8aa9bb5a8) Thanks [@vaibhavshn](https://github.com/vaibhavshn)! - Avoid duplicate tool call IDs by generating unique IDs per tool call index instead of trusting backend-provided IDs
+
+- [#411](https://github.com/cloudflare/ai/pull/411) [`af08464`](https://github.com/cloudflare/ai/commit/af08464545fc9b9fdb722c681496947c0ff61455) Thanks [@baldyeagle](https://github.com/baldyeagle)! - Annotate createAnthropicChat to improve client type narrowing
+
+- [#398](https://github.com/cloudflare/ai/pull/398) [`40e53c8`](https://github.com/cloudflare/ai/commit/40e53c851cd0c1cc80d0c44b1146ef564da782bc) Thanks [@vaibhavshn](https://github.com/vaibhavshn)! - fix: add `run/` prefix to workers-ai gateway endpoint and make API key optional for gateway bindings
+
+- [#444](https://github.com/cloudflare/ai/pull/444) [`414b4d5`](https://github.com/cloudflare/ai/commit/414b4d5eb9ecec3e69b39c03fb4532afc1fae015) Thanks [@mchenco](https://github.com/mchenco)! - Add `sessionAffinity` option to `WorkersAiAdapterConfig` for prefix-cache optimization. Routes requests with the same key to the same backend replica via the `x-session-affinity` header. Supported across binding, REST, and gateway modes.
+
 ## 0.1.2
 
 ### Patch Changes
