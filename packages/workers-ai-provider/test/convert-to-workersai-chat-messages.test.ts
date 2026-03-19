@@ -203,7 +203,7 @@ describe("convertToWorkersAIChatMessages", () => {
 	});
 
 	describe("image handling", () => {
-		it("should extract images from user file parts", () => {
+		it("should build content array with image_url for user file parts", () => {
 			const imageData = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
 
 			const prompt = [
@@ -221,16 +221,19 @@ describe("convertToWorkersAIChatMessages", () => {
 				},
 			];
 
-			const { messages, images } = convertToWorkersAIChatMessages(prompt);
+			const { messages } = convertToWorkersAIChatMessages(prompt);
 
 			expect(messages).toHaveLength(1);
-			expect(messages[0].content).toBe("What's in this image?");
-			expect(images).toHaveLength(1);
-			expect(images[0].image).toEqual(imageData);
-			expect(images[0].mediaType).toBe("image/png");
+			const content = messages[0].content;
+			expect(Array.isArray(content)).toBe(true);
+			const parts = content as Array<{ type: string; text?: string; image_url?: { url: string } }>;
+			expect(parts).toHaveLength(2);
+			expect(parts[0]).toEqual({ type: "text", text: "What's in this image?" });
+			expect(parts[1].type).toBe("image_url");
+			expect(parts[1].image_url!.url).toMatch(/^data:image\/png;base64,/);
 		});
 
-		it("should not add empty strings for image parts in user content", () => {
+		it("should combine text parts in content array when images present", () => {
 			const prompt = [
 				{
 					role: "user" as const,
@@ -249,8 +252,11 @@ describe("convertToWorkersAIChatMessages", () => {
 
 			const { messages } = convertToWorkersAIChatMessages(prompt);
 
-			// Should be "First\nSecond", not "First\n\nSecond" (no empty string from image)
-			expect(messages[0].content).toBe("First\nSecond");
+			const content = messages[0].content;
+			expect(Array.isArray(content)).toBe(true);
+			const parts = content as Array<{ type: string; text?: string }>;
+			expect(parts[0]).toEqual({ type: "text", text: "First\nSecond" });
+			expect(parts[1].type).toBe("image_url");
 		});
 
 		it("should handle user message with only an image (no text)", () => {
@@ -268,11 +274,142 @@ describe("convertToWorkersAIChatMessages", () => {
 				},
 			];
 
-			const { messages, images } = convertToWorkersAIChatMessages(prompt);
+			const { messages } = convertToWorkersAIChatMessages(prompt);
 
 			expect(messages).toHaveLength(1);
-			expect(messages[0].content).toBe("");
-			expect(images).toHaveLength(1);
+			const content = messages[0].content;
+			expect(Array.isArray(content)).toBe(true);
+			const parts = content as Array<{ type: string }>;
+			expect(parts).toHaveLength(1);
+			expect(parts[0].type).toBe("image_url");
+		});
+
+		it("should handle base64 string data", () => {
+			const originalBytes = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
+			const base64 = btoa(String.fromCharCode(...originalBytes));
+
+			const prompt = [
+				{
+					role: "user" as const,
+					content: [
+						{ type: "text" as const, text: "Describe this image" },
+						{
+							type: "file" as const,
+							data: base64,
+							mediaType: "image/png",
+							providerOptions: undefined,
+						},
+					],
+				},
+			];
+
+			const { messages } = convertToWorkersAIChatMessages(prompt);
+
+			expect(messages).toHaveLength(1);
+			const content = messages[0].content;
+			expect(Array.isArray(content)).toBe(true);
+			const parts = content as Array<{ type: string; image_url?: { url: string } }>;
+			expect(parts[1].type).toBe("image_url");
+			expect(parts[1].image_url!.url).toMatch(/^data:image\/png;base64,/);
+		});
+
+		it("should handle data URL strings", () => {
+			const originalBytes = new Uint8Array([0xff, 0xd8, 0xff, 0xe0]);
+			const base64 = btoa(String.fromCharCode(...originalBytes));
+			const dataUrl = `data:image/jpeg;base64,${base64}`;
+
+			const prompt = [
+				{
+					role: "user" as const,
+					content: [
+						{ type: "text" as const, text: "What is this?" },
+						{
+							type: "file" as const,
+							data: dataUrl,
+							mediaType: "image/jpeg",
+							providerOptions: undefined,
+						},
+					],
+				},
+			];
+
+			const { messages } = convertToWorkersAIChatMessages(prompt);
+
+			expect(messages).toHaveLength(1);
+			const content = messages[0].content;
+			expect(Array.isArray(content)).toBe(true);
+			const parts = content as Array<{ type: string; image_url?: { url: string } }>;
+			expect(parts[1].type).toBe("image_url");
+			expect(parts[1].image_url!.url).toMatch(/^data:image\/jpeg;base64,/);
+		});
+
+		it("should throw for URL image sources", () => {
+			const prompt = [
+				{
+					role: "user" as const,
+					content: [
+						{
+							type: "file" as const,
+							data: new URL("https://example.com/image.png"),
+							mediaType: "image/png",
+							providerOptions: undefined,
+						},
+					],
+				},
+			];
+
+			expect(() => convertToWorkersAIChatMessages(prompt)).toThrow(
+				"URL image sources are not supported by Workers AI",
+			);
+		});
+
+		it("should use plain string content when no images are present", () => {
+			const prompt = [
+				{
+					role: "user" as const,
+					content: [
+						{ type: "text" as const, text: "Just text, no images" },
+					],
+				},
+			];
+
+			const { messages } = convertToWorkersAIChatMessages(prompt);
+
+			expect(messages[0].content).toBe("Just text, no images");
+			expect(typeof messages[0].content).toBe("string");
+		});
+
+		it("should handle multiple images in a single message", () => {
+			const prompt = [
+				{
+					role: "user" as const,
+					content: [
+						{ type: "text" as const, text: "Compare these images" },
+						{
+							type: "file" as const,
+							data: new Uint8Array([1, 2, 3]),
+							mediaType: "image/png",
+							providerOptions: undefined,
+						},
+						{
+							type: "file" as const,
+							data: new Uint8Array([4, 5, 6]),
+							mediaType: "image/jpeg",
+							providerOptions: undefined,
+						},
+					],
+				},
+			];
+
+			const { messages } = convertToWorkersAIChatMessages(prompt);
+
+			const content = messages[0].content;
+			expect(Array.isArray(content)).toBe(true);
+			const parts = content as Array<{ type: string }>;
+			expect(parts).toHaveLength(3); // 1 text + 2 image_url
+			expect(parts[0].type).toBe("text");
+			expect(parts[1].type).toBe("image_url");
+			expect(parts[2].type).toBe("image_url");
 		});
 	});
 

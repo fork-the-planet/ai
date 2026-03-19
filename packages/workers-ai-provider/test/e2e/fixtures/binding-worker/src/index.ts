@@ -170,6 +170,42 @@ export default {
 					return jsonResponse({ result: result.output });
 				}
 
+				// ----- Vision (image input) -----
+				case "/chat/vision": {
+					const vBody = body as { model?: string; imageBytes?: number[] };
+					const visionModel = vBody.model || "@cf/meta/llama-3.2-11b-vision-instruct";
+					const imageBytes = vBody.imageBytes;
+
+					if (!imageBytes || imageBytes.length === 0) {
+						return jsonResponse({ error: "imageBytes required" }, 400);
+					}
+
+					const result = await generateText({
+						model: provider(visionModel as any),
+						messages: [
+							{
+								role: "user",
+								content: [
+									{
+										type: "text",
+										text: "Describe what you see in this image in one short sentence.",
+									},
+									{
+										type: "image",
+										image: new Uint8Array(imageBytes),
+									},
+								],
+							},
+						],
+					});
+
+					return jsonResponse({
+						text: result.text,
+						finishReason: result.finishReason,
+						usage: result.usage,
+					});
+				}
+
 				// ----- Image generation -----
 				case "/image": {
 					const imageModel = body.model || "@cf/black-forest-labs/flux-1-schnell";
@@ -312,8 +348,8 @@ export default {
 					}
 				}
 
-				default:
-					return jsonResponse({ error: `Unknown path: ${url.pathname}` }, 404);
+			default:
+				return jsonResponse({ error: `Unknown path: ${url.pathname}` }, 404);
 			}
 		} catch (err: unknown) {
 			return jsonResponse(

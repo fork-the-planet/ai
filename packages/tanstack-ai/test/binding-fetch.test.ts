@@ -598,4 +598,34 @@ describe("createWorkersAiBindingFetch", () => {
 			json_schema: { name: "test", schema: {} },
 		});
 	});
+
+	it("should pass content arrays through to binding for vision models", async () => {
+		const binding = mockBinding(vi.fn().mockResolvedValue({ response: "A red square" }));
+
+		const fetcher = createWorkersAiBindingFetch(binding);
+
+		const base64 = btoa("fake-png-bytes");
+
+		await fetcher("https://api.openai.com/v1/chat/completions", {
+			method: "POST",
+			body: JSON.stringify({
+				model: "@cf/meta/llama-4-scout-17b-16e-instruct",
+				messages: [
+					{
+						role: "user",
+						content: [
+							{ type: "text", text: "Describe this" },
+							{ type: "image_url", image_url: { url: `data:image/png;base64,${base64}` } },
+						],
+					},
+				],
+			}),
+		});
+
+		const [, inputs] = binding.run.mock.calls[0]!;
+		expect(inputs.messages[0].content).toEqual([
+			{ type: "text", text: "Describe this" },
+			{ type: "image_url", image_url: { url: `data:image/png;base64,${base64}` } },
+		]);
+	});
 });

@@ -365,6 +365,57 @@ describe.skipIf(skip())("Workers AI REST E2E", () => {
 	});
 
 	// ------------------------------------------------------------------
+	// Vision — image input
+	// ------------------------------------------------------------------
+	describe("vision — image input", () => {
+		const VISION_MODELS = [
+			{ id: "@cf/meta/llama-4-scout-17b-16e-instruct", label: "Llama 4 Scout 17B" },
+			{ id: "@cf/moonshotai/kimi-k2.5", label: "Kimi K2.5" },
+		] as const;
+
+		function createTestPng(): Uint8Array {
+			const base64 =
+				"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
+			return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+		}
+
+		for (const model of VISION_MODELS) {
+			it(`${model.label} — vision via REST`, async () => {
+				const provider = makeProvider();
+				const imageData = createTestPng();
+
+				const result = await generateText({
+					model: provider(model.id as ModelId),
+					messages: [
+						{
+							role: "user",
+							content: [
+								{
+									type: "text",
+									text: "Describe what you see in this image in one short sentence.",
+								},
+								{
+									type: "image",
+									image: imageData,
+								},
+							],
+						},
+					],
+				});
+
+				expect(typeof result.text).toBe("string");
+				expect(result.text.length).toBeGreaterThan(0);
+				// The model should describe what it sees, not say "I don't see an image"
+				expect(result.text.toLowerCase()).not.toContain("don't see an image");
+				expect(result.text.toLowerCase()).not.toContain("no image attached");
+				console.log(
+					`  [vision] ${model.label} OK — "${result.text.slice(0, 100)}"`,
+				);
+			});
+		}
+	});
+
+	// ------------------------------------------------------------------
 	// Image generation
 	// ------------------------------------------------------------------
 	describe("image generation", () => {

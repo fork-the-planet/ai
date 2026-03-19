@@ -145,7 +145,6 @@ describe("message building (via chatStream)", () => {
 			binding,
 		);
 
-		// Should preserve image parts as OpenAI multi-modal content array
 		expect(messages[0].content).toEqual([
 			{ type: "text", text: "Part 1" },
 			{ type: "image_url", image_url: { url: "https://example.com/img.png" } },

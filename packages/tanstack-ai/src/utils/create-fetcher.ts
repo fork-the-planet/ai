@@ -274,7 +274,10 @@ export function createGatewayFetch(
  * Normalize messages before passing to Workers AI binding.
  *
  * The binding has strict schema validation that may differ from the OpenAI API:
- * - `content` must be a string (not null)
+ * - `content` must not be null
+ *
+ * Content arrays (with image_url parts) are passed through as-is since the
+ * Workers AI binding accepts them at runtime for vision-capable models.
  */
 function normalizeMessagesForBinding(
 	messages: Record<string, unknown>[],
