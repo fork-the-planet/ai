@@ -117,33 +117,27 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 
 	/**
 	 * Build the inputs object for `binding.run()`, shared by doGenerate and doStream.
+	 *
+	 * Images are embedded inline in messages as OpenAI-compatible content
+	 * arrays with `image_url` parts. Both the REST API and the binding
+	 * accept this format at runtime.
+	 *
+	 * The binding path additionally normalises null content to empty strings.
 	 */
 	private buildRunInputs(
 		args: ReturnType<typeof this.getArgs>["args"],
 		messages: ReturnType<typeof convertToWorkersAIChatMessages>["messages"],
-		images: ReturnType<typeof convertToWorkersAIChatMessages>["images"],
 		options?: { stream?: boolean },
 	) {
-		if (images.length > 1) {
-			throw new Error("Multiple images are not yet supported as input");
-		}
-
-		const imagePart = images[0];
-
-		// Only normalize messages for the binding path (REST API doesn't need it)
-		const finalMessages = this.config.isBinding
-			? normalizeMessagesForBinding(messages)
-			: messages;
-
 		return {
 			max_tokens: args.max_tokens,
-			messages: finalMessages,
+			messages: this.config.isBinding
+				? normalizeMessagesForBinding(messages)
+				: messages,
 			temperature: args.temperature,
 			tools: args.tools,
 			...(args.tool_choice ? { tool_choice: args.tool_choice } : {}),
 			top_p: args.top_p,
-			...(imagePart ? { image: Array.from(imagePart.image) } : {}),
-			// Only include response_format when actually set
 			...(args.response_format ? { response_format: args.response_format } : {}),
 			...(options?.stream ? { stream: true } : {}),
 		};
@@ -179,14 +173,16 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 		options: Parameters<LanguageModelV3["doGenerate"]>[0],
 	): Promise<Awaited<ReturnType<LanguageModelV3["doGenerate"]>>> {
 		const { args, warnings } = this.getArgs(options);
-		const { messages, images } = convertToWorkersAIChatMessages(options.prompt);
+		const { messages } = convertToWorkersAIChatMessages(options.prompt);
 
-		const inputs = this.buildRunInputs(args, messages, images);
+		const inputs = this.buildRunInputs(args, messages);
 		const runOptions = this.getRunOptions();
 
 		const output = await this.config.binding.run(
 			args.model as keyof AiModels,
-			inputs,
+			// Content arrays for vision are valid at runtime but not in the
+			// binding's strict TypeScript definitions (which expect string content).
+			inputs as AiModels[keyof AiModels]["inputs"],
 			runOptions,
 		);
 
@@ -226,14 +222,14 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 		options: Parameters<LanguageModelV3["doStream"]>[0],
 	): Promise<Awaited<ReturnType<LanguageModelV3["doStream"]>>> {
 		const { args, warnings } = this.getArgs(options);
-		const { messages, images } = convertToWorkersAIChatMessages(options.prompt);
+		const { messages } = convertToWorkersAIChatMessages(options.prompt);
 
-		const inputs = this.buildRunInputs(args, messages, images, { stream: true });
+		const inputs = this.buildRunInputs(args, messages, { stream: true });
 		const runOptions = this.getRunOptions();
 
 		const response = await this.config.binding.run(
 			args.model as keyof AiModels,
-			inputs,
+			inputs as AiModels[keyof AiModels]["inputs"],
 			runOptions,
 		);
 

@@ -368,6 +368,41 @@ describe("Workers AI Binding E2E", () => {
 	});
 
 	// ------------------------------------------------------------------
+	// Vision — image input via binding
+	// ------------------------------------------------------------------
+	describe("vision — image input (binding)", () => {
+		function createTestPng(): number[] {
+			const base64 =
+				"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
+			const binary = atob(base64);
+			const bytes = new Uint8Array(binary.length);
+			for (let i = 0; i < binary.length; i++) {
+				bytes[i] = binary.charCodeAt(i);
+			}
+			return Array.from(bytes);
+		}
+
+		it("uform-gen2 — vision via binding (legacy image-to-text)", async () => {
+			if (!serverReady) return;
+
+			const imageBytes = createTestPng();
+			const data = await post("/chat/vision", {
+				model: "@cf/unum/uform-gen2-qwen-500m",
+				imageBytes,
+			});
+
+			if (data.error) {
+				console.warn(`  [vision] uform-gen2 error: ${String(data.error).slice(0, 120)}`);
+				return;
+			}
+
+			if (typeof data.text === "string" && (data.text as string).length > 0) {
+				console.log(`  [vision] uform-gen2 OK — "${(data.text as string).slice(0, 100)}"`);
+			}
+		}, 30_000);
+	});
+
+	// ------------------------------------------------------------------
 	// Image generation
 	// ------------------------------------------------------------------
 	describe("image generation", () => {

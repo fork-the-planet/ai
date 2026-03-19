@@ -1,20 +1,62 @@
-import type { LanguageModelV3Prompt, SharedV3ProviderOptions } from "@ai-sdk/provider";
-import type { WorkersAIChatPrompt } from "./workersai-chat-prompt";
+import type {
+	LanguageModelV3DataContent,
+	LanguageModelV3Prompt,
+} from "@ai-sdk/provider";
+import type { WorkersAIContentPart, WorkersAIChatPrompt } from "./workersai-chat-prompt";
+
+/**
+ * Normalise any LanguageModelV3DataContent value to a Uint8Array.
+ *
+ * Handles:
+ *   - Uint8Array  → returned as-is
+ *   - string      → decoded from base64 (with or without data-URL prefix)
+ *   - URL         → not supported (Workers AI needs raw bytes, not a reference)
+ */
+function toUint8Array(data: LanguageModelV3DataContent): Uint8Array | null {
+	if (data instanceof Uint8Array) {
+		return data;
+	}
+
+	if (typeof data === "string") {
+		let base64 = data;
+		if (base64.startsWith("data:")) {
+			const commaIndex = base64.indexOf(",");
+			if (commaIndex >= 0) {
+				base64 = base64.slice(commaIndex + 1);
+			}
+		}
+		const binaryString = atob(base64);
+		const bytes = new Uint8Array(binaryString.length);
+		for (let i = 0; i < binaryString.length; i++) {
+			bytes[i] = binaryString.charCodeAt(i);
+		}
+		return bytes;
+	}
+
+	if (data instanceof URL) {
+		throw new Error(
+			"URL image sources are not supported by Workers AI. " +
+				"Provide image data as a Uint8Array or base64 string instead.",
+		);
+	}
+
+	return null;
+}
+
+function uint8ArrayToBase64(bytes: Uint8Array): string {
+	let binary = "";
+	const chunkSize = 8192;
+	for (let i = 0; i < bytes.length; i += chunkSize) {
+		const chunk = bytes.subarray(i, Math.min(i + chunkSize, bytes.length));
+		binary += String.fromCharCode(...chunk);
+	}
+	return btoa(binary);
+}
 
 export function convertToWorkersAIChatMessages(prompt: LanguageModelV3Prompt): {
 	messages: WorkersAIChatPrompt;
-	images: {
-		mediaType: string | undefined;
-		image: Uint8Array;
-		providerOptions: SharedV3ProviderOptions | undefined;
-	}[];
 } {
 	const messages: WorkersAIChatPrompt = [];
-	const images: {
-		mediaType: string | undefined;
-		image: Uint8Array;
-		providerOptions: SharedV3ProviderOptions | undefined;
-	}[] = [];
 
 	for (const { role, content } of prompt) {
 		switch (role) {
@@ -25,6 +67,7 @@ export function convertToWorkersAIChatMessages(prompt: LanguageModelV3Prompt): {
 
 			case "user": {
 				const textParts: string[] = [];
+				const imageParts: { image: Uint8Array; mediaType: string | undefined }[] = [];
 
 				for (const part of content) {
 					switch (part.type) {
@@ -33,23 +76,36 @@ export function convertToWorkersAIChatMessages(prompt: LanguageModelV3Prompt): {
 							break;
 						}
 						case "file": {
-							if (part.data instanceof Uint8Array) {
-								images.push({
-									image: part.data,
+							const imageBytes = toUint8Array(part.data);
+							if (imageBytes) {
+								imageParts.push({
+									image: imageBytes,
 									mediaType: part.mediaType,
-									providerOptions: part.providerOptions,
 								});
 							}
-							// Don't push empty strings for image parts
 							break;
 						}
 					}
 				}
 
-				messages.push({
-					content: textParts.join("\n"),
-					role: "user",
-				});
+				if (imageParts.length > 0) {
+					const contentArray: WorkersAIContentPart[] = [];
+					if (textParts.length > 0) {
+						contentArray.push({ type: "text", text: textParts.join("\n") });
+					}
+					for (const img of imageParts) {
+						const base64 = uint8ArrayToBase64(img.image);
+						const mediaType = img.mediaType || "image/png";
+						contentArray.push({
+							type: "image_url",
+							image_url: { url: `data:${mediaType};base64,${base64}` },
+						});
+					}
+					messages.push({ content: contentArray, role: "user" });
+				} else {
+					messages.push({ content: textParts.join("\n"), role: "user" });
+				}
+
 				break;
 			}
 
@@ -144,5 +200,5 @@ export function convertToWorkersAIChatMessages(prompt: LanguageModelV3Prompt): {
 		}
 	}
 
-	return { images, messages };
+	return { messages };
 }

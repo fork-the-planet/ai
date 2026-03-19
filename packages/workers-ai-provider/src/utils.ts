@@ -10,7 +10,7 @@ import type { WorkersAIChatPrompt } from "./workersai-chat-prompt";
  * Normalize messages before passing to the Workers AI binding.
  *
  * The binding has strict schema validation that differs from the OpenAI API:
- * - `content` must be a string (not null)
+ * - `content` must not be null
  */
 export function normalizeMessagesForBinding(messages: WorkersAIChatPrompt): WorkersAIChatPrompt {
 	return messages.map((msg) => {

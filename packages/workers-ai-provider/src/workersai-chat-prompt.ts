@@ -6,6 +6,10 @@ export type WorkersAIChatMessage =
 	| WorkersAIAssistantMessage
 	| WorkersAIToolMessage;
 
+export type WorkersAIContentPart =
+	| { type: "text"; text: string }
+	| { type: "image_url"; image_url: { url: string } };
+
 export interface WorkersAISystemMessage {
 	role: "system";
 	content: string;
@@ -13,7 +17,7 @@ export interface WorkersAISystemMessage {
 
 export interface WorkersAIUserMessage {
 	role: "user";
-	content: string;
+	content: string | WorkersAIContentPart[];
 }
 
 export interface WorkersAIAssistantMessage {

@@ -111,6 +111,29 @@ for await (const chunk of result.textStream) {
 }
 ```
 
+## Vision (Image Inputs)
+
+Send images to vision-capable models like Llama 4 Scout and Kimi K2.5:
+
+```ts
+import { generateText } from "ai";
+
+const { text } = await generateText({
+	model: workersai("@cf/meta/llama-4-scout-17b-16e-instruct"),
+	messages: [
+		{
+			role: "user",
+			content: [
+				{ type: "text", text: "What's in this image?" },
+				{ type: "image", image: imageUint8Array },
+			],
+		},
+	],
+});
+```
+
+Images can be provided as `Uint8Array`, base64 strings, or data URLs. Multiple images per message are supported. Works with both the binding and REST API configurations.
+
 ## Tool Calling
 
 ```ts

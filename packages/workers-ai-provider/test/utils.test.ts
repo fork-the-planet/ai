@@ -77,6 +77,21 @@ describe("normalizeMessagesForBinding", () => {
 		normalizeMessagesForBinding(original);
 		expect(original[0].content).toBeNull();
 	});
+
+	it("should pass through content arrays unchanged (binding supports them at runtime)", () => {
+		const contentArray = [
+			{ type: "text" as const, text: "Describe this" },
+			{ type: "image_url" as const, image_url: { url: "data:image/png;base64,abc" } },
+		];
+		const messages = [
+			{
+				role: "user" as const,
+				content: contentArray,
+			},
+		];
+		const result = normalizeMessagesForBinding(messages);
+		expect(result[0].content).toEqual(contentArray);
+	});
 });
 
 // ---------------------------------------------------------------------------
