@@ -45,7 +45,7 @@
 		"postcss-preset-mantine": "^1.18.0",
 		"postcss-simple-vars": "^7.0.1",
 		"typescript": "5.9.3",
-		"vite": "^7.3.1",
+		"vite": "^7.3.2",
 		"vitest": "~3.2.4",
 		"wrangler": "^4.67.0"
 	}
