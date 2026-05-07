@@ -1,0 +1,89 @@
+name: Refresh demo dependencies
+
+on:
+    workflow_run:
+        workflows: [Release]
+        types: [completed]
+    workflow_dispatch:
+        inputs:
+            package:
+                description: Demo dependency package to refresh
+                required: true
+                default: workers-ai-provider
+            version:
+                description: Version to use. Leave empty to use latest from npm.
+                required: false
+                default: ""
+
+permissions:
+    contents: write
+    pull-requests: write
+
+jobs:
+    refresh:
+        if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+        runs-on: ubuntu-22.04
+
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  ref: main
+
+            - uses: pnpm/action-setup@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+                  cache: pnpm
+                  registry-url: https://registry.npmjs.org
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile --child-concurrency=10
+
+            - name: Resolve dependency version
+              id: dependency
+              env:
+                  INPUT_PACKAGE: ${{ inputs.package || 'workers-ai-provider' }}
+                  INPUT_VERSION: ${{ inputs.version }}
+              run: |
+                  set -euo pipefail
+
+                  package="$INPUT_PACKAGE"
+                  version="$INPUT_VERSION"
+
+                  if [ -z "$version" ]; then
+                    version="$(npm view "$package" version)"
+                  fi
+
+                  echo "package=$package" >> "$GITHUB_OUTPUT"
+                  echo "version=$version" >> "$GITHUB_OUTPUT"
+                  echo "range=^$version" >> "$GITHUB_OUTPUT"
+
+            - name: Update demo package.json files
+              run: pnpm aicli update-demo-dependency "${{ steps.dependency.outputs.package }}" "${{ steps.dependency.outputs.range }}"
+
+            - name: Regenerate demo package-lock.json files
+              run: |
+                  if git diff --quiet -- demos; then
+                    echo "No demo dependency changes to lock."
+                    exit 0
+                  fi
+
+                  pnpm generate-npm-lockfiles
+
+            - name: Create pull request
+              uses: peter-evans/create-pull-request@v7
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  branch: automation/update-demo-${{ steps.dependency.outputs.package }}
+                  delete-branch: true
+                  commit-message: "chore: update demos to ${{ steps.dependency.outputs.package }} ${{ steps.dependency.outputs.version }}"
+                  title: "chore: update demos to ${{ steps.dependency.outputs.package }} ${{ steps.dependency.outputs.version }}"
+                  body: |
+                      Updates demos to `${{ steps.dependency.outputs.package }}@${{ steps.dependency.outputs.range }}` after the package has been published to npm.
+
+                      This PR was created automatically after a successful release workflow.
+
+                      ## Verification
+
+                      - `pnpm generate-npm-lockfiles`
