@@ -1,5 +1,15 @@
 # workers-ai-provider
 
+## 3.1.13
+
+### Patch Changes
+
+- [#510](https://github.com/cloudflare/ai/pull/510) [`dfd2cb4`](https://github.com/cloudflare/ai/commit/dfd2cb4e6e10e2ec3dc149bbc344b34a63734d07) Thanks [@Specy](https://github.com/Specy)! - Map `inputTokens.cacheRead` and `inputTokens.noCache` from Workers AI's `usage.prompt_tokens_details.cached_tokens` instead of always reporting them as `undefined`. This makes prompt-cache hits visible to consumers that compute pricing or telemetry from `LanguageModelV3Usage` (`generateText`/`streamText` `result.usage`).
+
+    `cached_tokens` is treated as `cacheRead`; `cacheWrite` remains `undefined` because the OpenAI-style usage shape Workers AI returns does not distinguish cache reads from writes.
+
+    Closes [#509](https://github.com/cloudflare/ai/issues/509).
+
 ## 3.1.12
 
 ### Patch Changes
