@@ -37,8 +37,9 @@ export async function generateNpmLockfiles(): Promise<void> {
 
 	await config.save();
 
-	// Restore dependencies with pnpm
-	await $`pnpm install --child-concurrency=10`.verbose();
+	// Restore dependencies with pnpm. This can run after package.json changes,
+	// so allow pnpm-lock.yaml to be updated instead of using CI's frozen default.
+	await $`pnpm install --no-frozen-lockfile --child-concurrency=10`.verbose();
 }
 
 export async function lintNpmLockfiles(): Promise<void> {
