@@ -444,6 +444,46 @@ describe("convertToWorkersAIChatMessages", () => {
 			);
 		});
 
+		it("should throw for non-image file parts", () => {
+			const prompt = [
+				{
+					role: "user" as const,
+					content: [
+						{ type: "text" as const, text: "Summarize this PDF" },
+						{
+							type: "file" as const,
+							data: new Uint8Array([0x25, 0x50, 0x44, 0x46]),
+							mediaType: "application/pdf",
+							providerOptions: undefined,
+						},
+					],
+				},
+			];
+
+			expect(() => convertToWorkersAIChatMessages(prompt)).toThrow(
+				'Workers AI chat only supports image file parts with an image/* mediaType. Received mediaType "application/pdf".',
+			);
+		});
+
+		it("should throw when a file part is missing a media type", () => {
+			const prompt = [
+				{
+					role: "user" as const,
+					content: [
+						{
+							type: "file" as const,
+							data: new Uint8Array([1, 2, 3]),
+							providerOptions: undefined,
+						} as any,
+					],
+				},
+			];
+
+			expect(() => convertToWorkersAIChatMessages(prompt)).toThrow(
+				"Workers AI chat only supports image file parts with an image/* mediaType. Received a file part without a mediaType.",
+			);
+		});
+
 		it("should use plain string content when no images are present", () => {
 			const prompt = [
 				{

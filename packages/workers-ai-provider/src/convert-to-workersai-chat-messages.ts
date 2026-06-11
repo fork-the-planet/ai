@@ -41,6 +41,24 @@ function toUint8Array(data: LanguageModelV3DataContent): Uint8Array | null {
 	return null;
 }
 
+function assertImageMediaType(mediaType: string | undefined): string {
+	if (!mediaType) {
+		throw new Error(
+			"Workers AI chat only supports image file parts with an image/* mediaType. " +
+				"Received a file part without a mediaType.",
+		);
+	}
+
+	if (!mediaType.startsWith("image/")) {
+		throw new Error(
+			"Workers AI chat only supports image file parts with an image/* mediaType. " +
+				`Received mediaType "${mediaType}".`,
+		);
+	}
+
+	return mediaType;
+}
+
 function uint8ArrayToBase64(bytes: Uint8Array): string {
 	let binary = "";
 	const chunkSize = 8192;
@@ -74,11 +92,12 @@ export function convertToWorkersAIChatMessages(prompt: LanguageModelV3Prompt): {
 							break;
 						}
 						case "file": {
+							const mediaType = assertImageMediaType(part.mediaType);
 							const imageBytes = toUint8Array(part.data);
 							if (imageBytes) {
 								imageParts.push({
 									image: imageBytes,
-									mediaType: part.mediaType,
+									mediaType,
 								});
 							}
 							break;
@@ -93,10 +112,9 @@ export function convertToWorkersAIChatMessages(prompt: LanguageModelV3Prompt): {
 					}
 					for (const img of imageParts) {
 						const base64 = uint8ArrayToBase64(img.image);
-						const mediaType = img.mediaType || "image/png";
 						contentArray.push({
 							type: "image_url",
-							image_url: { url: `data:${mediaType};base64,${base64}` },
+							image_url: { url: `data:${img.mediaType};base64,${base64}` },
 						});
 					}
 					messages.push({ content: contentArray, role: "user" });
