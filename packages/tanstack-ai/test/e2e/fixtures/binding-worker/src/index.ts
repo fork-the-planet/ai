@@ -14,6 +14,9 @@ import type { WorkersAiImageModel } from "../../../../../src/adapters/workers-ai
 import { WorkersAiTranscriptionAdapter } from "../../../../../src/adapters/workers-ai-transcription";
 import type { WorkersAiTranscriptionModel } from "../../../../../src/adapters/workers-ai-transcription";
 import { WorkersAiSummarizeAdapter } from "../../../../../src/adapters/workers-ai-summarize";
+import { resolveDebugOption } from "@tanstack/ai/adapter-internals";
+
+const logger = resolveDebugOption(false);
 
 interface Env {
 	AI: Ai;
@@ -286,6 +289,7 @@ export default {
 						model: ttsModel,
 						text: ttsBody.text || "Hello, this is a test.",
 						voice: ttsBody.voice,
+						logger,
 					});
 					return jsonResponse(ttsResult);
 				}
@@ -299,6 +303,7 @@ export default {
 					const imgResult = await imgAdapter.generateImages({
 						model: imgModel,
 						prompt: imgBody.prompt || "a red circle on white background",
+						logger,
 					});
 					// Don't send the full base64 — just metadata + length
 					return jsonResponse({
@@ -323,6 +328,7 @@ export default {
 					const txResult = await txAdapter.transcribe({
 						model: txModel,
 						audio: new Uint8Array(audioData).buffer,
+						logger,
 					});
 					return jsonResponse(txResult);
 				}
@@ -339,6 +345,7 @@ export default {
 						text:
 							sumBody.text ||
 							"Artificial intelligence is the simulation of human intelligence processes by computer systems.",
+						logger,
 					});
 					return jsonResponse(sumResult);
 				}

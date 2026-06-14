@@ -1,4 +1,7 @@
+import { resolveDebugOption } from "@tanstack/ai/adapter-internals";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+
+const logger = resolveDebugOption(false);
 
 /**
  * Integration tests to verify that Workers AI gateway adapters pass the
@@ -50,6 +53,7 @@ describe("Workers AI gateway URL verification", () => {
 		await adapter.generateImages({
 			model: "@cf/stabilityai/stable-diffusion-xl-base-1.0",
 			prompt: "test prompt",
+			logger,
 		});
 
 		expect(mockFetch).toHaveBeenCalledOnce();
@@ -81,6 +85,7 @@ describe("Workers AI gateway URL verification", () => {
 		await adapter.transcribe({
 			model: "@cf/openai/whisper",
 			audio: new ArrayBuffer(10),
+			logger,
 		});
 
 		expect(mockFetch).toHaveBeenCalledOnce();
@@ -99,6 +104,7 @@ describe("Workers AI gateway URL verification", () => {
 		await adapter.generateSpeech({
 			model: "@cf/deepgram/aura-1",
 			text: "Hello world",
+			logger,
 		});
 
 		expect(mockFetch).toHaveBeenCalledOnce();
@@ -129,6 +135,7 @@ describe("Workers AI gateway URL verification", () => {
 		await adapter.summarize({
 			model: "@cf/facebook/bart-large-cnn",
 			text: "A long article...",
+			logger,
 		});
 
 		expect(mockFetch).toHaveBeenCalledOnce();
@@ -165,6 +172,7 @@ describe("Workers AI gateway URL verification", () => {
 		await adapter.summarize({
 			model: "@cf/facebook/bart-large-cnn",
 			text: "Test text",
+			logger,
 		});
 
 		expect(mockFetch).toHaveBeenCalledOnce();
@@ -191,6 +199,7 @@ describe("Workers AI gateway URL verification", () => {
 		await adapter.generateImages({
 			model: "@cf/stabilityai/stable-diffusion-xl-base-1.0",
 			prompt: "test",
+			logger,
 		});
 
 		expect(mockFetch).toHaveBeenCalledOnce();

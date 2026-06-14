@@ -1,4 +1,7 @@
+import { resolveDebugOption } from "@tanstack/ai/adapter-internals";
 import { describe, expect, it, vi } from "vitest";
+
+const logger = resolveDebugOption(false);
 
 // ---------------------------------------------------------------------------
 // WorkersAiImageAdapter
@@ -24,6 +27,7 @@ describe("WorkersAiImageAdapter", () => {
 		const result = await adapter.generateImages({
 			model: "@cf/stabilityai/stable-diffusion-xl-base-1.0",
 			prompt: "a cat",
+			logger,
 		});
 
 		expect(result.images).toHaveLength(1);
@@ -48,6 +52,7 @@ describe("WorkersAiImageAdapter", () => {
 		const result = await adapter.generateImages({
 			model: "@cf/stabilityai/stable-diffusion-xl-base-1.0",
 			prompt: "a cat",
+			logger,
 		});
 
 		expect(result.images).toHaveLength(1);
@@ -78,6 +83,7 @@ describe("WorkersAiImageAdapter", () => {
 		const result = await adapter.generateImages({
 			model: "@cf/stabilityai/stable-diffusion-xl-base-1.0",
 			prompt: "a cat",
+			logger,
 		});
 
 		expect(result.images).toHaveLength(1);
@@ -101,6 +107,7 @@ describe("WorkersAiImageAdapter", () => {
 		const result = await adapter.generateImages({
 			model: "@cf/stabilityai/stable-diffusion-xl-base-1.0",
 			prompt: "a cat",
+			logger,
 		});
 
 		expect(result.images[0]!.b64Json).toBe(b64);
@@ -121,6 +128,7 @@ describe("WorkersAiImageAdapter", () => {
 			adapter.generateImages({
 				model: "@cf/stabilityai/stable-diffusion-xl-base-1.0",
 				prompt: "a cat",
+				logger,
 			}),
 		).rejects.toThrow(/Unexpected binary response format/);
 	});
@@ -146,6 +154,7 @@ describe("WorkersAiImageAdapter", () => {
 			const result = await adapter.generateImages({
 				model: "@cf/stabilityai/stable-diffusion-xl-base-1.0",
 				prompt: "a cat",
+				logger,
 			});
 
 			expect(result.images).toHaveLength(1);
@@ -178,6 +187,7 @@ describe("WorkersAiImageAdapter", () => {
 				adapter.generateImages({
 					model: "@cf/stabilityai/stable-diffusion-xl-base-1.0",
 					prompt: "a cat",
+					logger,
 				}),
 			).rejects.toThrow(/Workers AI image request failed \(404\)/);
 		} finally {
@@ -210,6 +220,7 @@ describe("WorkersAiImageAdapter", () => {
 		const result = await adapter.generateImages({
 			model: "@cf/stabilityai/stable-diffusion-xl-base-1.0",
 			prompt: "a cat",
+			logger,
 		});
 
 		expect(result.images).toHaveLength(1);
@@ -240,6 +251,7 @@ describe("WorkersAiImageAdapter", () => {
 			adapter.generateImages({
 				model: "@cf/stabilityai/stable-diffusion-xl-base-1.0",
 				prompt: "a cat",
+				logger,
 			}),
 		).rejects.toThrow(/Workers AI image gateway request failed \(502\)/);
 
@@ -265,6 +277,7 @@ describe("WorkersAiImageAdapter", () => {
 		const result = await adapter.generateImages({
 			model: "@cf/stabilityai/stable-diffusion-xl-base-1.0",
 			prompt: "a dog",
+			logger,
 		});
 
 		expect(result).toHaveProperty("id");
@@ -316,6 +329,7 @@ describe("WorkersAiImageAdapter", () => {
 			prompt: "a cat",
 			size: "512x512",
 			modelOptions: { num_steps: 4, guidance: 7.5 },
+			logger,
 		});
 
 		const callArgs = mockBinding.run.mock.calls[0]![1] as Record<string, unknown>;

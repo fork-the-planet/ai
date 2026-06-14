@@ -126,7 +126,7 @@ export function convertToWorkersAIChatMessages(prompt: LanguageModelV3Prompt): {
 						case "reasoning": {
 							// Reasoning is accumulated separately and sent as the `reasoning`
 							// field on the message object. This is the field name vLLM expects
-							// on input for reasoning models (kimi-k2.5, glm-4.7-flash).
+							// on input for reasoning models (kimi-k2.7-code, glm-4.7-flash).
 							// Concatenating it into `content` corrupts the conversation history
 							// and causes models to produce empty or garbled responses on the
 							// next turn.

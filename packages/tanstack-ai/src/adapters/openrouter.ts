@@ -1,14 +1,13 @@
 import {
 	OpenRouterTextAdapter,
 	OpenRouterImageAdapter,
-	OpenRouterSummarizeAdapter,
+	createOpenRouterSummarize as createOpenRouterSummarizeAdapter,
 	type OpenRouterConfig,
 	type OpenRouterImageConfig,
-	type OpenRouterSummarizeConfig,
 } from "@tanstack/ai-openrouter";
 import { HTTPClient } from "@openrouter/sdk";
 import { createGatewayFetch, type AiGatewayAdapterConfig } from "../utils/create-fetcher";
-import type { AnyTextAdapter } from "@tanstack/ai";
+import type { AnySummarizeAdapter, AnyTextAdapter } from "@tanstack/ai";
 
 export type OpenRouterGatewayConfig = AiGatewayAdapterConfig;
 
@@ -48,25 +47,6 @@ function buildOpenRouterImageConfig(config: OpenRouterGatewayConfig): OpenRouter
 		apiKey: config.apiKey ?? "unused",
 		httpClient,
 	} as unknown as OpenRouterImageConfig;
-}
-
-/**
- * Build OpenRouter summarize config.
- *
- * `OpenRouterSummarizeConfig` extends `OpenRouterConfig` with optional
- * `temperature` and `maxTokens` fields. Since those are optional, a plain
- * `OpenRouterConfig` is structurally compatible — no cast needed.
- */
-function buildOpenRouterSummarizeConfig(
-	config: OpenRouterGatewayConfig,
-): OpenRouterSummarizeConfig {
-	const httpClient = new HTTPClient({
-		fetcher: createGatewayFetch("openrouter", config),
-	});
-	return {
-		apiKey: config.apiKey ?? "unused",
-		httpClient: httpClient as unknown as OpenRouterSummarizeConfig["httpClient"],
-	};
 }
 
 // ---------------------------------------------------------------------------
@@ -126,7 +106,14 @@ export function createOpenRouterImage(
 export function createOpenRouterSummarize(
 	model: OpenRouterSummarizeModel,
 	config: OpenRouterGatewayConfig,
-) {
-	// Cast needed: we accept any string model while upstream expects a literal union
-	return new OpenRouterSummarizeAdapter(buildOpenRouterSummarizeConfig(config), model as any);
+): AnySummarizeAdapter {
+	const httpClient = new HTTPClient({
+		fetcher: createGatewayFetch("openrouter", config),
+	});
+	// Cast needed: we accept any string model while upstream expects a literal
+	// union, and the installed @openrouter/sdk HTTPClient may differ structurally
+	// from the version @tanstack/ai-openrouter was built against.
+	return createOpenRouterSummarizeAdapter(model as any, config.apiKey ?? "unused", {
+		httpClient: httpClient as any,
+	});
 }

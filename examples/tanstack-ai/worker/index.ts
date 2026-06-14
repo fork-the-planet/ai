@@ -168,7 +168,7 @@ function workersAiGatewayConfig(creds: RequestCredentials) {
 // ---------------------------------------------------------------------------
 
 const DEFAULT_WORKERS_AI_MODELS: Record<string, string> = {
-	"/ai/workers-ai-plain/chat": "@cf/moonshotai/kimi-k2.5",
+	"/ai/workers-ai-plain/chat": "@cf/moonshotai/kimi-k2.7-code",
 	"/ai/workers-ai/chat": "@cf/qwen/qwen3-30b-a3b-fp8",
 };
 
@@ -176,7 +176,7 @@ function getChatAdapter(provider: string, creds: RequestCredentials): AnyTextAda
 	const pk = creds.providerKeys;
 	const waiModel = (creds.workersAiModel ||
 		DEFAULT_WORKERS_AI_MODELS[`/ai/${provider}/chat`] ||
-		"@cf/moonshotai/kimi-k2.5") as WorkersAiTextModel;
+		"@cf/moonshotai/kimi-k2.7-code") as WorkersAiTextModel;
 
 	switch (provider) {
 		case "workers-ai-plain":

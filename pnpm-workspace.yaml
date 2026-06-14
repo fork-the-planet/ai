@@ -1,12 +1,31 @@
 packages:
-    - ./libs/*
-    - ./demos/*
-    - ./demos/remote-mcp-auth0/*
-    - ./examples/*
-    - ./packages/*
-    - ./tools/aicli
-    - "!./demos/remote-mcp-auth0"
-    - "!./demos/remote-mcp-auth0/docs"
-onlyBuiltDependencies:
-    - esbuild
-    - workerd
+  - ./libs/*
+  - ./demos/*
+  - ./demos/remote-mcp-auth0/*
+  - ./examples/*
+  - ./packages/*
+  - ./tools/aicli
+  - "!./demos/remote-mcp-auth0"
+  - "!./demos/remote-mcp-auth0/docs"
+allowBuilds:
+  '@google/genai': true
+  '@mongodb-js/zstd': true
+  '@openrouter/sdk': true
+  '@tailwindcss/oxide': true
+  bufferutil: true
+  core-js-pure: true
+  esbuild: true
+  msw: true
+  node-liblzma: true
+  nx: true
+  protobufjs: true
+  sharp: true
+  utf-8-validate: true
+  workerd: true
+minimumReleaseAgeExclude:
+  - '@ai-sdk/fireworks@2.0.56'
+  - '@cloudflare/workers-types@4.20260613.1'
+  - '@microsoft/api-extractor@7.58.9'
+  - '@rushstack/ts-command-line@5.3.10'
+patchedDependencies:
+  '@ai-sdk/google-vertex': patches/@ai-sdk__google-vertex.patch

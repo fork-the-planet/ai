@@ -1,6 +1,6 @@
 import {
+	createOpenaiSummarize,
 	OpenAIImageAdapter,
-	OpenAISummarizeAdapter,
 	OpenAITextAdapter,
 	OpenAITranscriptionAdapter,
 	OpenAITTSAdapter,
@@ -17,6 +17,7 @@ import {
 	type OpenAIVideoModel,
 } from "@tanstack/ai-openai";
 import { createGatewayFetch, type AiGatewayAdapterConfig } from "../utils/create-fetcher";
+import type { AnySummarizeAdapter } from "@tanstack/ai";
 
 export type OpenAiGatewayConfig = AiGatewayAdapterConfig;
 
@@ -37,7 +38,10 @@ function buildOpenAiConfig(provider: string, config: OpenAiGatewayConfig) {
  * @param model The OpenAI model to use
  * @param config Configuration options
  */
-export function createOpenAiChat(model: OpenAIChatModel, config: OpenAiGatewayConfig) {
+export function createOpenAiChat(
+	model: OpenAIChatModel,
+	config: OpenAiGatewayConfig,
+): OpenAITextAdapter<OpenAIChatModel> {
 	return new OpenAITextAdapter(buildOpenAiConfig("openai", config), model);
 }
 
@@ -46,8 +50,13 @@ export function createOpenAiChat(model: OpenAIChatModel, config: OpenAiGatewayCo
  * @param model The OpenAI model to use
  * @param config Configuration options
  */
-export function createOpenAiSummarize(model: OpenAIChatModel, config: OpenAiGatewayConfig) {
-	return new OpenAISummarizeAdapter(buildOpenAiConfig("openai", config), model);
+export function createOpenAiSummarize(
+	model: OpenAIChatModel,
+	config: OpenAiGatewayConfig,
+): AnySummarizeAdapter {
+	return createOpenaiSummarize(model, config.apiKey ?? "unused", {
+		fetch: createGatewayFetch("openai", config),
+	});
 }
 
 /**

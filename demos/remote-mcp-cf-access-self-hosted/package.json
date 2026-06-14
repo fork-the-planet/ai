@@ -10,13 +10,13 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
-		"agents": "^0.9.0",
-		"jose": "^6.0.11",
-		"zod": "^4.3.6"
+		"agents": "^0.16.0",
+		"jose": "^6.2.3",
+		"zod": "^4.4.3"
 	},
 	"devDependencies": {
-		"@types/node": "^25.5.0",
-		"typescript": "6.0.2",
-		"wrangler": "^4.79.0"
+		"@types/node": "^25.9.3",
+		"typescript": "6.0.3",
+		"wrangler": "^4.100.0"
 	}
 }

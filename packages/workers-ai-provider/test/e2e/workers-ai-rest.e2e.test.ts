@@ -62,7 +62,7 @@ const MODELS = [
 	{ id: "@cf/meta/llama-3.1-8b-instruct-fast", label: "Llama 3.1 8B Fast" },
 	{ id: "@cf/openai/gpt-oss-20b", label: "GPT-OSS 20B" },
 	{ id: "@cf/qwen/qwen3-30b-a3b-fp8", label: "Qwen3 30B" },
-	{ id: "@cf/moonshotai/kimi-k2.5", label: "Kimi K2.5" },
+	{ id: "@cf/moonshotai/kimi-k2.7-code", label: "Kimi K2.7 Code" },
 ] as const;
 
 type ModelId = (typeof MODELS)[number]["id"];
@@ -488,7 +488,7 @@ describe.skipIf(skip())("Workers AI REST E2E", () => {
 	describe("vision — image input", () => {
 		const VISION_MODELS = [
 			{ id: "@cf/meta/llama-4-scout-17b-16e-instruct", label: "Llama 4 Scout 17B" },
-			{ id: "@cf/moonshotai/kimi-k2.5", label: "Kimi K2.5" },
+			{ id: "@cf/moonshotai/kimi-k2.7-code", label: "Kimi K2.7 Code" },
 		] as const;
 
 		function createTestPng(): Uint8Array {

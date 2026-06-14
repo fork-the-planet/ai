@@ -32,7 +32,7 @@ export class WorkersAiImageAdapter extends BaseImageAdapter<WorkersAiImageModel>
 	private adapterConfig: WorkersAiAdapterConfig;
 
 	constructor(config: WorkersAiAdapterConfig, model: WorkersAiImageModel) {
-		super({}, model);
+		super(model);
 		validateWorkersAiConfig(config);
 		this.adapterConfig = config;
 	}

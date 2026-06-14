@@ -1,7 +1,7 @@
 import {
 	GrokTextAdapter,
 	GrokImageAdapter,
-	GrokSummarizeAdapter,
+	createGrokSummarize as createGrokSummarizeAdapter,
 	GROK_CHAT_MODELS,
 	GROK_IMAGE_MODELS,
 	type GrokChatModel,
@@ -9,6 +9,7 @@ import {
 	type GrokSummarizeModel,
 } from "@tanstack/ai-grok";
 import { createGatewayFetch, type AiGatewayAdapterConfig } from "../utils/create-fetcher";
+import type { AnySummarizeAdapter } from "@tanstack/ai";
 
 export type GrokGatewayConfig = AiGatewayAdapterConfig;
 
@@ -19,7 +20,10 @@ export type GrokGatewayConfig = AiGatewayAdapterConfig;
  * Since GrokTextConfig extends the OpenAI SDK's ClientOptions,
  * we can inject the gateway fetch directly — no subclassing needed.
  */
-export function createGrokChat(model: GrokChatModel, config: GrokGatewayConfig) {
+export function createGrokChat(
+	model: GrokChatModel,
+	config: GrokGatewayConfig,
+): GrokTextAdapter<GrokChatModel> {
 	return new GrokTextAdapter(
 		{
 			apiKey: config.apiKey ?? "unused",
@@ -47,14 +51,13 @@ export function createGrokImage(model: GrokImageModel, config: GrokGatewayConfig
  * Creates a Grok summarize adapter which uses Cloudflare AI Gateway.
  * Supports both binding and credential-based configurations.
  */
-export function createGrokSummarize(model: GrokSummarizeModel, config: GrokGatewayConfig) {
-	return new GrokSummarizeAdapter(
-		{
-			apiKey: config.apiKey ?? "unused",
-			fetch: createGatewayFetch("grok", config),
-		},
-		model,
-	);
+export function createGrokSummarize(
+	model: GrokSummarizeModel,
+	config: GrokGatewayConfig,
+): AnySummarizeAdapter {
+	return createGrokSummarizeAdapter(model, config.apiKey ?? "unused", {
+		fetch: createGatewayFetch("grok", config),
+	});
 }
 
 export {

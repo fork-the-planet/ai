@@ -15,7 +15,10 @@ vi.mock("@tanstack/ai/adapters", () => ({
 		}
 	},
 }));
-vi.mock("@tanstack/ai", () => ({}));
+vi.mock("@tanstack/ai", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("@tanstack/ai")>();
+	return { EventType: actual.EventType };
+});
 
 import { WorkersAiTextAdapter } from "../src/adapters/workers-ai";
 import type { WorkersAiTextModel } from "../src/adapters/workers-ai";

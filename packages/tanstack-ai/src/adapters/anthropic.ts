@@ -1,10 +1,11 @@
 import {
 	AnthropicTextAdapter,
-	AnthropicSummarizeAdapter,
+	createAnthropicSummarize as createAnthropicSummarizeAdapter,
 	ANTHROPIC_MODELS,
 	type AnthropicChatModel,
 } from "@tanstack/ai-anthropic";
 import { createGatewayFetch, type AiGatewayAdapterConfig } from "../utils/create-fetcher";
+import type { AnySummarizeAdapter } from "@tanstack/ai";
 
 export type AnthropicGatewayConfig = AiGatewayAdapterConfig & { anthropicVersion?: string };
 
@@ -38,8 +39,12 @@ export function createAnthropicChat(
 export function createAnthropicSummarize(
 	model: AnthropicChatModel,
 	config: AnthropicGatewayConfig,
-) {
-	return new AnthropicSummarizeAdapter(buildAnthropicConfig(config), model);
+): AnySummarizeAdapter {
+	return createAnthropicSummarizeAdapter(model, config.apiKey ?? "unused", {
+		fetch: createGatewayFetch("anthropic", config, {
+			"anthropic-version": config.anthropicVersion ?? "2023-06-01",
+		}),
+	});
 }
 
 export { ANTHROPIC_MODELS, type AnthropicChatModel };

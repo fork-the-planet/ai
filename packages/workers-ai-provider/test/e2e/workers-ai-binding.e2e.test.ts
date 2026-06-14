@@ -34,7 +34,7 @@ const MODELS = [
 	{ id: "@cf/meta/llama-3.1-8b-instruct-fast", label: "Llama 3.1 8B Fast" },
 	{ id: "@cf/openai/gpt-oss-20b", label: "GPT-OSS 20B" },
 	{ id: "@cf/qwen/qwen3-30b-a3b-fp8", label: "Qwen3 30B" },
-	{ id: "@cf/moonshotai/kimi-k2.5", label: "Kimi K2.5" },
+	{ id: "@cf/moonshotai/kimi-k2.7-code", label: "Kimi K2.7 Code" },
 ] as const;
 
 // ---------------------------------------------------------------------------

@@ -1,11 +1,10 @@
 import {
 	GeminiTextAdapter,
 	GeminiImageAdapter,
-	GeminiSummarizeAdapter,
+	createGeminiSummarize as createGeminiSummarizeAdapter,
 	GeminiTTSAdapter,
 	GeminiTextModels,
 	GeminiImageModels,
-	GeminiSummarizeModels,
 	GeminiTTSModels,
 	type GeminiTextModel,
 	type GeminiImageModel,
@@ -14,7 +13,7 @@ import {
 
 /** Derived from GeminiTTSModels since @tanstack/ai-gemini doesn't export a GeminiTTSModel type. */
 export type GeminiTTSModel = (typeof GeminiTTSModels)[number];
-import type { AnyTextAdapter } from "@tanstack/ai";
+import type { AnySummarizeAdapter, AnyTextAdapter } from "@tanstack/ai";
 import type { AiGatewayCredentialsConfig, AiGatewayConfig } from "../utils/create-fetcher";
 
 /**
@@ -120,8 +119,12 @@ export function createGeminiImage(model: GeminiImageModel, config: GeminiGateway
  * @param model The Gemini model to use
  * @param config Configuration options (credentials only)
  */
-export function createGeminiSummarize(model: GeminiSummarizeModel, config: GeminiGatewayConfig) {
-	return new GeminiSummarizeAdapter(buildGeminiGatewayConfig(config), model);
+export function createGeminiSummarize(
+	model: GeminiSummarizeModel,
+	config: GeminiGatewayConfig,
+): AnySummarizeAdapter {
+	const { apiKey, httpOptions } = buildGeminiGatewayConfig(config);
+	return createGeminiSummarizeAdapter(apiKey, model, { httpOptions });
 }
 
 /**
@@ -140,7 +143,6 @@ export function createGeminiTts(model: GeminiTTSModel, config: GeminiGatewayConf
 export {
 	GeminiTextModels,
 	GeminiImageModels,
-	GeminiSummarizeModels,
 	GeminiTTSModels,
 	type GeminiTextModel,
 	type GeminiImageModel,

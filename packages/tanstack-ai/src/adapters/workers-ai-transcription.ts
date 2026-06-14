@@ -44,7 +44,7 @@ export class WorkersAiTranscriptionAdapter extends BaseTranscriptionAdapter<Work
 	private adapterConfig: WorkersAiAdapterConfig;
 
 	constructor(config: WorkersAiAdapterConfig, model: WorkersAiTranscriptionModel) {
-		super({}, model);
+		super(model);
 		validateWorkersAiConfig(config);
 		this.adapterConfig = config;
 	}

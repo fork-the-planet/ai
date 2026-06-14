@@ -18,7 +18,10 @@ vi.mock("@tanstack/ai/adapters", () => ({
 		}
 	},
 }));
-vi.mock("@tanstack/ai", () => ({}));
+vi.mock("@tanstack/ai", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("@tanstack/ai")>();
+	return { EventType: actual.EventType };
+});
 
 import { WorkersAiTextAdapter } from "../src/adapters/workers-ai";
 import type { WorkersAiTextModel } from "../src/adapters/workers-ai";
@@ -201,7 +204,7 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 		]);
 	});
 
-	it("should forward temperature to the binding", async () => {
+	it("should forward temperature from modelOptions to the binding", async () => {
 		const binding = createStreamingBinding(['data: {"response":"ok"}\n\n']);
 		const adapter = new WorkersAiTextAdapter(MODEL, { binding });
 
@@ -209,7 +212,7 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 			adapter.chatStream({
 				model: MODEL,
 				messages: [{ role: "user", content: "Hi" }],
-				temperature: 0.3,
+				modelOptions: { temperature: 0.3 },
 			} as any),
 		);
 
@@ -217,7 +220,7 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 		expect(inputs.temperature).toBe(0.3);
 	});
 
-	it("should forward maxTokens to the binding as max_tokens", async () => {
+	it("should forward max_tokens from modelOptions to the binding", async () => {
 		const binding = createStreamingBinding(['data: {"response":"ok"}\n\n']);
 		const adapter = new WorkersAiTextAdapter(MODEL, { binding });
 
@@ -225,7 +228,7 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 			adapter.chatStream({
 				model: MODEL,
 				messages: [{ role: "user", content: "Hi" }],
-				maxTokens: 256,
+				modelOptions: { max_tokens: 256 },
 			} as any),
 		);
 
@@ -538,7 +541,7 @@ describe("WorkersAiTextAdapter.structuredOutput", () => {
 		expect(userMessages).toHaveLength(2);
 	});
 
-	it("should forward temperature to the binding", async () => {
+	it("should forward temperature from modelOptions to the binding", async () => {
 		const binding = createMockBinding({ response: "{}" });
 		const adapter = new WorkersAiTextAdapter(MODEL, { binding });
 
@@ -547,7 +550,7 @@ describe("WorkersAiTextAdapter.structuredOutput", () => {
 			chatOptions: {
 				model: MODEL,
 				messages: [{ role: "user", content: "Hi" }],
-				temperature: 0,
+				modelOptions: { temperature: 0 },
 			},
 		} as any);
 
@@ -988,10 +991,10 @@ describe("WorkersAiTextAdapter modelOptions passthrough", () => {
 		expect(inputs).not.toHaveProperty("reasoning_effort");
 	});
 
-	it("should prefer top-level temperature over a conflicting modelOptions value", async () => {
-		// If a user accidentally sets `temperature` inside modelOptions while also
-		// passing it at the top level, the TanStack-AI field wins. This prevents
-		// confusing behavior where provider options silently override standard knobs.
+	it("should forward temperature from modelOptions", async () => {
+		// Standard sampling knobs like `temperature` flow through `modelOptions`
+		// (TextOptions no longer exposes them at the top level) and are merged
+		// verbatim into the outbound request body.
 		const binding = createStreamingBinding(['data: {"response":"ok"}\n\n']);
 		const adapter = new WorkersAiTextAdapter(
 			"@cf/zai-org/glm-4.7-flash" as WorkersAiTextModel,
@@ -1002,13 +1005,12 @@ describe("WorkersAiTextAdapter modelOptions passthrough", () => {
 			adapter.chatStream({
 				model: "@cf/zai-org/glm-4.7-flash" as WorkersAiTextModel,
 				messages: [{ role: "user", content: "Hi" }],
-				temperature: 0.1,
 				modelOptions: { temperature: 0.9 } as any,
 			} as any),
 		);
 
 		const [, inputs] = binding.run.mock.calls[0]!;
-		expect(inputs.temperature).toBe(0.1);
+		expect(inputs.temperature).toBe(0.9);
 	});
 
 	it("should forward reasoning_effort from modelOptions in structuredOutput", async () => {
