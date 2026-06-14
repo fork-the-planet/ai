@@ -18,6 +18,7 @@ import type { WorkersAIRerankingSettings } from "./workersai-reranking-settings"
 import type {
 	EmbeddingModels,
 	ImageGenerationModels,
+	KnownTextGenerationModels,
 	TextGenerationModels,
 	TranscriptionModels,
 	SpeechModels,
@@ -41,8 +42,67 @@ export { WorkersAIRerankingModel } from "./workersai-reranking-model";
 export type { WorkersAIRerankingSettings } from "./workersai-reranking-settings";
 
 // ---------------------------------------------------------------------------
+// AI Gateway delegate (route catalog models through AI Gateway)
+//
+// The delegate factory itself is internal — it's wired through
+// `createWorkersAI({ providers })` (see below), so `createWorkersAI` is the
+// single public entry point. The transport types, error classes, registry, and
+// resume helpers are safe to re-export here (no optional `@ai-sdk/*` peer
+// imports). The provider plugins (`openai`, `anthropic`, `google`) stay
+// sub-path-only so those packages remain optional.
+// ---------------------------------------------------------------------------
+
+export {
+	type Billing,
+	createClientFallbackModel,
+	type DelegateCallOptions,
+	type DispatchInfo,
+	type FallbackAttempt,
+	type FallbackLeg,
+	type FallbackOptions,
+	GatewayDelegateError,
+	type GatewayErrorCode,
+	type GatewayErrorContext,
+	GATEWAY_PROVIDERS,
+	type GatewayProviderInfo,
+	type ParsedSlug,
+	type ProviderPlugin,
+	type ResumableStreamOptions,
+	type ResumeExpiredPolicy,
+	type Transport,
+	type WireFormat,
+	WorkersAIFallbackError,
+	WorkersAIGatewayError,
+	createResumableStream,
+	detectProviderByUrl,
+	findProviderBySlug,
+	parseSlug,
+	selectTransport,
+	wireableProviders,
+} from "./gateway-delegate";
+export {
+	createGatewayFetch,
+	createGatewayProvider,
+	type GatewayFetchConfig,
+} from "./gateway-provider";
+
+import {
+	createGatewayDelegate,
+	type DelegateCallOptions,
+	type GatewayDelegate,
+	type ProviderPlugin,
+	type ResumeExpiredPolicy,
+} from "./gateway-delegate";
+
+// ---------------------------------------------------------------------------
 // Workers AI
 // ---------------------------------------------------------------------------
+
+/**
+ * The account-wide AI Gateway used for catalog routing when no `gateway` is
+ * configured. Every Cloudflare account has a `"default"` gateway.
+ */
+const DEFAULT_GATEWAY_ID = "default";
 
 export type WorkersAISettings = (
 	| {
@@ -77,19 +137,72 @@ export type WorkersAISettings = (
 	  }
 ) & {
 	/**
-	 * Optionally specify a gateway.
+	 * Optionally specify a gateway. For third-party catalog routing (see
+	 * `providers`) this defaults to the account's `"default"` gateway when unset.
 	 */
 	gateway?: GatewayOptions;
+
+	/**
+	 * Provider plugins that enable routing third-party catalog models
+	 * (e.g. `"openai/gpt-5-mini"`) through AI Gateway. Supply them from the
+	 * sub-path modules, e.g. `import { openai } from "workers-ai-provider/openai"`.
+	 *
+	 * When set, calling the provider with a `"<provider>/<model>"` slug (anything
+	 * that is not a `@cf/...` Workers AI model id) is automatically dispatched
+	 * through the {@link createGatewayDelegate | gateway delegate}. Leaving this
+	 * unset preserves the exact prior behavior — only Workers AI models are built.
+	 *
+	 * @experimental The gateway delegate is an experimental surface.
+	 */
+	providers?: ProviderPlugin[];
+
+	/**
+	 * Default resume behavior for gateway-routed catalog models. Defaults to
+	 * `true`. Overridable per call. Only relevant when `providers` is set.
+	 */
+	resume?: boolean;
+
+	/**
+	 * Default resume-expiry policy for gateway-routed catalog models (run path).
+	 * Defaults to `"error"`. Only relevant when `providers` is set.
+	 */
+	onResumeExpired?: ResumeExpiredPolicy;
 };
 
+/**
+ * True when a literal model id is a `"<provider>/<model>"` AI Gateway catalog
+ * slug rather than a `@cf/...` Workers AI id. Bare `string` (a non-literal,
+ * e.g. a variable) resolves to `false` so the common path keeps chat settings.
+ */
+type IsCatalogSlug<M extends string> = string extends M
+	? false
+	: M extends `@${string}`
+		? false
+		: M extends `${string}/${string}`
+			? true
+			: false;
+
+/**
+ * Picks the per-model settings type from the (captured) literal model id:
+ * `DelegateCallOptions` for catalog slugs, `WorkersAIChatSettings` otherwise.
+ * This is what lets `workersai("openai/gpt-5", { … })` autocomplete delegate
+ * options while `workersai("@cf/…", { … })` autocompletes chat settings.
+ */
+type ModelSettings<M extends string> =
+	IsCatalogSlug<M> extends true ? DelegateCallOptions : WorkersAIChatSettings;
+
 export interface WorkersAI {
-	(modelId: TextGenerationModels, settings?: WorkersAIChatSettings): WorkersAIChatLanguageModel;
+	<M extends string>(
+		modelId: M | KnownTextGenerationModels,
+		settings?: ModelSettings<M>,
+	): WorkersAIChatLanguageModel;
 	/**
-	 * Creates a model for text generation.
+	 * Creates a model for text generation. Accepts a `@cf/...` Workers AI id, or
+	 * a `"<provider>/<model>"` catalog slug when `providers` is configured.
 	 **/
-	chat(
-		modelId: TextGenerationModels,
-		settings?: WorkersAIChatSettings,
+	chat<M extends string>(
+		modelId: M | KnownTextGenerationModels,
+		settings?: ModelSettings<M>,
 	): WorkersAIChatLanguageModel;
 
 	embedding(
@@ -178,6 +291,61 @@ export function createWorkersAI(options: WorkersAISettings): WorkersAI {
 			isBinding,
 		});
 
+	// Third-party catalog routing: when `providers` is configured, a non-`@cf/`
+	// `"<provider>/<model>"` slug is dispatched through the gateway delegate
+	// instead of being treated as a Workers AI model id. Built lazily so the
+	// delegate (and its plugin requirements) only materializes on first use.
+	let delegate: GatewayDelegate | undefined;
+	const getDelegate = (slug: string): GatewayDelegate => {
+		if (!options.providers?.length) {
+			throw new Error(
+				`"${slug}" looks like a third-party AI Gateway catalog model, but this Workers AI ` +
+					"provider was not configured to route them. Pass provider plugins, e.g.:\n" +
+					'  import { openai } from "workers-ai-provider/openai";\n' +
+					"  createWorkersAI({ binding: env.AI, providers: [openai] });\n" +
+					'A gateway defaults to "default" but can be set via `gateway`. ' +
+					'Otherwise use a Workers AI model id (e.g. "@cf/meta/llama-3.1-8b-instruct").',
+			);
+		}
+		delegate ??= createGatewayDelegate({
+			binding,
+			// Catalog routing needs a gateway (resume runs through it). When one
+			// isn't configured, fall back to the account's `"default"` gateway so
+			// `createWorkersAI({ providers })` works out of the box. An explicit
+			// `gateway` (here or per call) always wins.
+			gateway: options.gateway ?? { id: DEFAULT_GATEWAY_ID },
+			providers: options.providers,
+			resume: options.resume,
+			onResumeExpired: options.onResumeExpired,
+		});
+		return delegate;
+	};
+
+	// Workers AI model ids are always `@cf/...`; gateway catalog slugs are
+	// `"<provider>/<model>"`. Anything with a slash that is not `@`-prefixed is
+	// treated as a catalog slug.
+	const isGatewaySlug = (id: unknown): id is string =>
+		typeof id === "string" && !id.startsWith("@") && id.includes("/");
+
+	// Settings is the union of both shapes here; the public `WorkersAI` interface
+	// narrows it per call via `ModelSettings<M>`. We branch at runtime and cast to
+	// the concrete shape each path expects.
+	const buildChat = (
+		modelId: TextGenerationModels,
+		settings?: WorkersAIChatSettings | DelegateCallOptions,
+	): WorkersAIChatLanguageModel => {
+		if (isGatewaySlug(modelId)) {
+			// The delegate returns a `LanguageModelV3` built by the configured plugin.
+			// It's structurally compatible with the AI SDK consumers this provider is
+			// used with; the cast keeps the public return type unchanged.
+			return getDelegate(modelId)(
+				modelId,
+				settings as DelegateCallOptions,
+			) as unknown as WorkersAIChatLanguageModel;
+		}
+		return createChatModel(modelId, settings as WorkersAIChatSettings | undefined);
+	};
+
 	const createImageModel = (
 		modelId: ImageGenerationModels,
 		settings: WorkersAIImageSettings = {},
@@ -229,14 +397,17 @@ export function createWorkersAI(options: WorkersAISettings): WorkersAI {
 			provider: "workersai.reranking",
 		});
 
-	const provider = (modelId: TextGenerationModels, settings?: WorkersAIChatSettings) => {
+	const provider = (
+		modelId: TextGenerationModels,
+		settings?: WorkersAIChatSettings | DelegateCallOptions,
+	) => {
 		if (new.target) {
 			throw new Error("The WorkersAI model function cannot be called with the new keyword.");
 		}
-		return createChatModel(modelId, settings);
+		return buildChat(modelId, settings);
 	};
 
-	provider.chat = createChatModel;
+	provider.chat = buildChat;
 	provider.embedding = createEmbeddingModel;
 	provider.textEmbedding = createEmbeddingModel;
 	provider.textEmbeddingModel = createEmbeddingModel;

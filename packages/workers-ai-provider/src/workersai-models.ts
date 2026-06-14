@@ -1,11 +1,19 @@
 /**
+ * The known (typed) BaseAiTextGeneration model ids — the literal union without
+ * the `(string & {})` escape hatch. Used to drive editor autocomplete while
+ * still capturing the exact literal a caller passed (see `WorkersAI`).
+ */
+export type KnownTextGenerationModels = Exclude<
+	value2key<AiModels, BaseAiTextGeneration>,
+	value2key<AiModels, BaseAiTextToImage>
+>;
+
+/**
  * The names of the BaseAiTextGeneration models.
  *
  * Accepts any string at runtime, but provides autocomplete for known models.
  */
-export type TextGenerationModels =
-	| Exclude<value2key<AiModels, BaseAiTextGeneration>, value2key<AiModels, BaseAiTextToImage>>
-	| (string & {});
+export type TextGenerationModels = KnownTextGenerationModels | (string & {});
 
 /*
  * The names of the BaseAiTextToImage models.
