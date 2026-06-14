@@ -173,6 +173,115 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 		expect(runFinished.finishReason).toBe("tool_calls");
 	});
 
+	it("should keep arguments streamed BEFORE the tool name (issue #523)", async () => {
+		// Some models stream argument fragments before the function name. The
+		// adapter must wait for the name before emitting TOOL_CALL_START (the
+		// StreamProcessor reads the name only once, from START), but it must NOT
+		// drop the argument fragments buffered while waiting.
+		const binding = createStreamingBinding([
+			// args first, no name yet
+			'data: {"id":"c1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"x","type":"function","function":{"arguments":"{\\"location\\":"}}]},"finish_reason":null}]}\n\n',
+			// name + remaining args
+			'data: {"id":"c1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"name":"get_weather","arguments":"\\"SF\\"}"}}]},"finish_reason":null}]}\n\n',
+			'data: {"id":"c1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}\n\n',
+		]);
+		const adapter = new WorkersAiTextAdapter(MODEL, { binding });
+
+		const chunks = await collectChunks(
+			adapter.chatStream({
+				model: MODEL,
+				messages: [{ role: "user", content: "Weather in SF?" }],
+				tools: [{ name: "get_weather", description: "Get weather", inputSchema: { type: "object" } }],
+			} as any),
+		);
+
+		// START must carry the name (both fields the StreamProcessor accepts).
+		const toolStart = chunks.filter((c: any) => c.type === "TOOL_CALL_START");
+		expect(toolStart).toHaveLength(1);
+		expect(toolStart[0].toolName).toBe("get_weather");
+		expect(toolStart[0].toolCallName).toBe("get_weather");
+
+		// START must precede the first ARGS event.
+		const startIdx = chunks.findIndex((c: any) => c.type === "TOOL_CALL_START");
+		const firstArgsIdx = chunks.findIndex((c: any) => c.type === "TOOL_CALL_ARGS");
+		expect(startIdx).toBeGreaterThanOrEqual(0);
+		expect(firstArgsIdx).toBeGreaterThan(startIdx);
+
+		// Concatenated ARGS deltas must reconstruct the FULL argument string,
+		// including the fragment that arrived before the name.
+		const argsDeltas = chunks
+			.filter((c: any) => c.type === "TOOL_CALL_ARGS")
+			.map((c: any) => c.delta)
+			.join("");
+		expect(argsDeltas).toBe('{"location":"SF"}');
+
+		// END carries the parsed input and the name.
+		const toolEnd = chunks.filter((c: any) => c.type === "TOOL_CALL_END");
+		expect(toolEnd).toHaveLength(1);
+		expect(toolEnd[0].toolName).toBe("get_weather");
+		expect(toolEnd[0].input).toEqual({ location: "SF" });
+	});
+
+	it("should not emit TOOL_CALL_ARGS before a name (and START) are known", async () => {
+		// Until the name arrives, START cannot be emitted, so no ARGS should
+		// leak out either — otherwise the consumer would receive args for a tool
+		// call it never saw start.
+		const binding = createStreamingBinding([
+			'data: {"id":"c1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"x","type":"function","function":{"arguments":"{\\"a\\":1}"}}]},"finish_reason":null}]}\n\n',
+			// Stream ends WITHOUT a name ever arriving.
+		]);
+		const adapter = new WorkersAiTextAdapter(MODEL, { binding });
+
+		const chunks = await collectChunks(
+			adapter.chatStream({
+				model: MODEL,
+				messages: [{ role: "user", content: "hi" }],
+				tools: [{ name: "noop", description: "noop", inputSchema: { type: "object" } }],
+			} as any),
+		);
+
+		// No START (no name) ⇒ no ARGS either.
+		expect(chunks.find((c: any) => c.type === "TOOL_CALL_START")).toBeUndefined();
+		expect(chunks.find((c: any) => c.type === "TOOL_CALL_ARGS")).toBeUndefined();
+	});
+
+	it("should handle parallel streamed tool calls with unique ids and names", async () => {
+		const binding = createStreamingBinding([
+			'data: {"id":"c1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"a","type":"function","function":{"name":"get_weather","arguments":""}},{"index":1,"id":"b","type":"function","function":{"name":"get_time","arguments":""}}]},"finish_reason":null}]}\n\n',
+			'data: {"id":"c1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{\\"city\\":\\"SF\\"}"}}]},"finish_reason":null}]}\n\n',
+			'data: {"id":"c1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"index":1,"function":{"arguments":"{\\"tz\\":\\"PT\\"}"}}]},"finish_reason":null}]}\n\n',
+			'data: {"id":"c1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}\n\n',
+		]);
+		const adapter = new WorkersAiTextAdapter(MODEL, { binding });
+
+		const chunks = await collectChunks(
+			adapter.chatStream({
+				model: MODEL,
+				messages: [{ role: "user", content: "Weather and time in SF?" }],
+				tools: [
+					{ name: "get_weather", description: "w", inputSchema: { type: "object" } },
+					{ name: "get_time", description: "t", inputSchema: { type: "object" } },
+				],
+			} as any),
+		);
+
+		const starts = chunks.filter((c: any) => c.type === "TOOL_CALL_START");
+		const ends = chunks.filter((c: any) => c.type === "TOOL_CALL_END");
+		expect(starts).toHaveLength(2);
+		expect(ends).toHaveLength(2);
+
+		const names = starts.map((s: any) => s.toolName).sort();
+		expect(names).toEqual(["get_time", "get_weather"]);
+
+		// Unique tool call ids so results can be matched back.
+		const ids = starts.map((s: any) => s.toolCallId);
+		expect(new Set(ids).size).toBe(2);
+
+		const endByName = Object.fromEntries(ends.map((e: any) => [e.toolName, e.input]));
+		expect(endByName.get_weather).toEqual({ city: "SF" });
+		expect(endByName.get_time).toEqual({ tz: "PT" });
+	});
+
 	it("should forward tools to the binding", async () => {
 		const binding = createStreamingBinding(['data: {"response":"ok"}\n\n']);
 		const adapter = new WorkersAiTextAdapter(MODEL, { binding });

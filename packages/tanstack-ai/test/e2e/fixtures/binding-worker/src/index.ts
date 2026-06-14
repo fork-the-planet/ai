@@ -15,6 +15,7 @@ import { WorkersAiTranscriptionAdapter } from "../../../../../src/adapters/worke
 import type { WorkersAiTranscriptionModel } from "../../../../../src/adapters/workers-ai-transcription";
 import { WorkersAiSummarizeAdapter } from "../../../../../src/adapters/workers-ai-summarize";
 import { resolveDebugOption } from "@tanstack/ai/adapter-internals";
+import { StreamProcessor } from "@tanstack/ai";
 
 const logger = resolveDebugOption(false);
 
@@ -163,6 +164,48 @@ export default {
 						} as any),
 					);
 					return jsonResponse({ chunks });
+				}
+
+				// ----- Tool call run through the real StreamProcessor -----
+				// Validates the FULL consumer pipeline: adapter event stream →
+				// @tanstack/ai StreamProcessor → UIMessage `tool-call` part.
+				// Regression coverage for https://github.com/cloudflare/ai/issues/523
+				// where the resulting part was missing its `name`/arguments.
+				case "/chat/tool-call-processed": {
+					const stream = adapter.chatStream({
+						model,
+						messages: [
+							{
+								role: "user",
+								content: "What is 2 + 3? You MUST use the calculator tool to answer.",
+							},
+						],
+						tools: [
+							{
+								name: "calculator",
+								description:
+									"Add two numbers. Returns their sum. Always use this tool for math.",
+								inputSchema: {
+									type: "object",
+									properties: {
+										a: { type: "number", description: "first number" },
+										b: { type: "number", description: "second number" },
+									},
+									required: ["a", "b"],
+								},
+							},
+						],
+						temperature: 0,
+					} as any);
+
+					const processor = new StreamProcessor();
+					await processor.process(stream as any);
+					const messages = processor.getMessages();
+					const toolCallParts = messages
+						.flatMap((m: any) => m.parts)
+						.filter((p: any) => p.type === "tool-call");
+
+					return jsonResponse({ messages, toolCallParts });
 				}
 
 				// ----- Tool round-trip (two calls simulating chat() loop) -----

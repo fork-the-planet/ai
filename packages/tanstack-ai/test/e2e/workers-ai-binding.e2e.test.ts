@@ -347,6 +347,51 @@ describe("Workers AI Binding E2E", () => {
 	});
 
 	// ------------------------------------------------------------------
+	// Per-model: tool call through the real StreamProcessor
+	// Regression guard for https://github.com/cloudflare/ai/issues/523 —
+	// the resulting UIMessage tool-call part must carry its `name` (and args).
+	// ------------------------------------------------------------------
+
+	describe("tool call → StreamProcessor part (per model)", () => {
+		for (const model of MODELS) {
+			it(`${model.label} — processed tool-call part has a name`, async () => {
+				if (!serverReady) return;
+
+				const r = getResult(model.label);
+				const data = await post("/chat/tool-call-processed", { model: model.id });
+
+				if (data.error) {
+					r.notes.push(`tool-proc: ${(data.error as string).slice(0, 40)}`);
+					return;
+				}
+
+				const parts = (data.toolCallParts as any[]) ?? [];
+
+				if (parts.length === 0) {
+					// Model may have answered as text instead of calling the tool.
+					// The dedicated tool-call test already records that; don't fail here.
+					r.notes.push("tool-proc: no tool-call part");
+					return;
+				}
+
+				// The core regression: every tool-call part MUST have a non-empty
+				// name, otherwise dispatch silently fails (issue #523).
+				for (const part of parts) {
+					expect(part.name, "tool-call part is missing its name").toBeTruthy();
+					expect(part.state).toBe("input-complete");
+					// Arguments must be valid JSON the consumer can dispatch.
+					expect(() => JSON.parse(part.arguments)).not.toThrow();
+				}
+
+				expect(parts[0].name).toBe("calculator");
+				console.log(
+					`  ✓ ${model.label}: processed tool-call part OK — name="${parts[0].name}" args=${parts[0].arguments}`,
+				);
+			});
+		}
+	});
+
+	// ------------------------------------------------------------------
 	// Per-model: tool round-trip (the key test for the binding bug fix)
 	// ------------------------------------------------------------------
 
