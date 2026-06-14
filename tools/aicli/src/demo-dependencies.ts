@@ -18,10 +18,7 @@ async function getDemos(): Promise<string[]> {
 		.map((entry) => path.join(demosRoot, entry.name));
 }
 
-export async function updateDemoDependency(
-	packageName: string,
-	range: string,
-): Promise<void> {
+export async function updateDemoDependency(packageName: string, range: string): Promise<void> {
 	const demos = await getDemos();
 	let updated = 0;
 
@@ -44,10 +41,7 @@ export async function updateDemoDependency(
 		}
 
 		packageJson.dependencies![packageName] = range;
-		await fs.writeFile(
-			packageJsonPath,
-			`${JSON.stringify(packageJson, null, "\t")}\n`,
-		);
+		await fs.writeFile(packageJsonPath, `${JSON.stringify(packageJson, null, "\t")}\n`);
 
 		console.log(
 			`Updated ${path.relative(repoRoot, packageJsonPath)}: ${packageName} ${currentRange} -> ${range}`,

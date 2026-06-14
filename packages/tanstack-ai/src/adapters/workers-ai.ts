@@ -643,10 +643,10 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 
 					// Emit RUN_FINISHED
 					yield {
-					type: EventType.RUN_FINISHED,
-					runId,
-					threadId,
-					model: chunk.model || model || this.model,
+						type: EventType.RUN_FINISHED,
+						runId,
+						threadId,
+						model: chunk.model || model || this.model,
 						timestamp,
 						usage: chunk.usage
 							? {

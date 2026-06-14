@@ -73,10 +73,10 @@ Some good defaults:
 
 | Task           | Model                                  | Notes                               |
 | -------------- | -------------------------------------- | ----------------------------------- |
-| Chat           | `@cf/moonshotai/kimi-k2.7-code`             | 256k ctx, tools, vision, reasoning  |
+| Chat           | `@cf/moonshotai/kimi-k2.7-code`        | 256k ctx, tools, vision, reasoning  |
 | Chat           | `@cf/zai-org/glm-4.7-flash`            | Fast, multilingual, 131k ctx        |
 | Chat           | `@cf/openai/gpt-oss-120b`              | OpenAI open-weights, high reasoning |
-| Reasoning      | `@cf/moonshotai/kimi-k2.7-code`             | Configurable `reasoning_effort`     |
+| Reasoning      | `@cf/moonshotai/kimi-k2.7-code`        | Configurable `reasoning_effort`     |
 | Reasoning      | `@cf/qwen/qwq-32b`                     | Emits `reasoning_content`           |
 | Embeddings     | `@cf/baai/bge-base-en-v1.5`            | 768-dim, English                    |
 | Embeddings     | `@cf/google/embeddinggemma-300m`       | 100+ languages, by Google           |

@@ -10,28 +10,28 @@
 	"migrations": [
 		{
 			"new_sqlite_classes": ["MyMCP"],
-			"tag": "v1"
-		}
+			"tag": "v1",
+		},
 	],
 	"durable_objects": {
 		"bindings": [
 			{
 				"class_name": "MyMCP",
-				"name": "MCP_OBJECT"
-			}
-		]
+				"name": "MCP_OBJECT",
+			},
+		],
 	},
 	"kv_namespaces": [
 		{
 			"binding": "OAUTH_KV",
-			"id": "<ADD YOUR KV NAMESPACEID HERE>"
-		}
+			"id": "<ADD YOUR KV NAMESPACEID HERE>",
+		},
 	],
 	"ai": {
-		"binding": "AI"
+		"binding": "AI",
 	},
 	"observability": {
-		"enabled": true
+		"enabled": true,
 	},
-	"assets": { "directory": "./static/", "binding": "ASSETS" }
+	"assets": { "directory": "./static/", "binding": "ASSETS" },
 }
