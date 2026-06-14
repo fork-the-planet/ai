@@ -1,4 +1,11 @@
 import type { LanguageModelV3 } from "@ai-sdk/provider";
+import { createResumableStream, type ResumeExpiredPolicy } from "./resumable-stream";
+
+export {
+	createResumableStream,
+	type ResumableStreamOptions,
+	type ResumeExpiredPolicy,
+} from "./resumable-stream";
 
 /**
  * Gateway delegate — route AI SDK catalog models through Cloudflare AI Gateway,
@@ -122,6 +129,12 @@ export interface DelegateCallOptions {
 	skipCache?: boolean;
 	/** Escape hatch: force a transport. */
 	transport?: Transport;
+	/**
+	 * Run path only: behavior when the resume buffer has expired (404) after a
+	 * mid-stream drop. `"error"` (default) surfaces a `GatewayDelegateError`;
+	 * `"accept-partial"` ends the stream cleanly with whatever was delivered.
+	 */
+	onResumeExpired?: ResumeExpiredPolicy;
 	/** Extra request headers (run path: `extraHeaders`; gateway path: entry headers). */
 	extraHeaders?: Record<string, string>;
 	/** Override the delegate's gateway for this model. */
@@ -271,6 +284,8 @@ export interface GatewayDelegateConfig {
 	providers: ProviderPlugin[];
 	/** Default resume behavior when a call does not specify one. Defaults to `true`. */
 	resume?: boolean;
+	/** Default resume-expiry policy (run path). Defaults to `"error"`. */
+	onResumeExpired?: ResumeExpiredPolicy;
 }
 
 export interface GatewayDelegate {
@@ -317,6 +332,7 @@ export function createGatewayDelegate(config: GatewayDelegateConfig): GatewayDel
 		const effectiveOptions: DelegateCallOptions = {
 			...options,
 			resume: options.resume ?? defaultResume,
+			onResumeExpired: options.onResumeExpired ?? config.onResumeExpired,
 		};
 		const selection = selectTransport(effectiveOptions, resumeExplicitlyTrue);
 		for (const w of selection.warnings) console.warn(w);
@@ -395,6 +411,20 @@ function makeRunFetch(
 		};
 		const resp = await ai.run(slug, body, runOptions);
 		fireDispatch(resp, selection, callOptions);
+
+		// Wrap the stream so a transient mid-stream drop reconnects via the gateway
+		// resume endpoint transparently — the @ai-sdk parser never sees the break.
+		const runId = resp.headers.get("cf-aig-run-id");
+		if (selection.resumeEnabled && runId && resp.body) {
+			const resumable = createResumableStream({
+				binding,
+				gateway: gatewayOptions.id,
+				runId,
+				initial: resp.body,
+				onResumeExpired: opts.onResumeExpired,
+			});
+			return new Response(resumable, { status: resp.status, headers: resp.headers });
+		}
 		return resp;
 	}) as typeof globalThis.fetch;
 }
