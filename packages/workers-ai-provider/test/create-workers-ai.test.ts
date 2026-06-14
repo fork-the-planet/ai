@@ -188,6 +188,17 @@ describe("createWorkersAI implicit gateway routing", () => {
 		expect(model.provider).toBe("test.openai");
 	});
 
+	it('routes catalog slugs even when no gateway is configured (defaults to "default")', () => {
+		const { binding } = makeBinding();
+		const workersai = createWorkersAI({
+			binding,
+			providers: [openaiPlugin],
+		});
+		const model = workersai("openai/gpt-5-mini");
+		expect(model.modelId).toBe("gpt-5-mini");
+		expect(model.provider).toBe("test.openai");
+	});
+
 	it("routes via provider.chat() too", () => {
 		const { binding } = makeBinding();
 		const workersai = createWorkersAI({

@@ -98,6 +98,12 @@ import {
 // Workers AI
 // ---------------------------------------------------------------------------
 
+/**
+ * The account-wide AI Gateway used for catalog routing when no `gateway` is
+ * configured. Every Cloudflare account has a `"default"` gateway.
+ */
+const DEFAULT_GATEWAY_ID = "default";
+
 export type WorkersAISettings = (
 	| {
 			/**
@@ -131,7 +137,8 @@ export type WorkersAISettings = (
 	  }
 ) & {
 	/**
-	 * Optionally specify a gateway.
+	 * Optionally specify a gateway. For third-party catalog routing (see
+	 * `providers`) this defaults to the account's `"default"` gateway when unset.
 	 */
 	gateway?: GatewayOptions;
 
@@ -293,15 +300,20 @@ export function createWorkersAI(options: WorkersAISettings): WorkersAI {
 		if (!options.providers?.length) {
 			throw new Error(
 				`"${slug}" looks like a third-party AI Gateway catalog model, but this Workers AI ` +
-					"provider was not configured to route them. Pass provider plugins (and a gateway), e.g.:\n" +
+					"provider was not configured to route them. Pass provider plugins, e.g.:\n" +
 					'  import { openai } from "workers-ai-provider/openai";\n' +
-					'  createWorkersAI({ binding: env.AI, gateway: { id: "default" }, providers: [openai] });\n' +
+					"  createWorkersAI({ binding: env.AI, providers: [openai] });\n" +
+					'A gateway defaults to "default" but can be set via `gateway`. ' +
 					'Otherwise use a Workers AI model id (e.g. "@cf/meta/llama-3.1-8b-instruct").',
 			);
 		}
 		delegate ??= createGatewayDelegate({
 			binding,
-			gateway: options.gateway,
+			// Catalog routing needs a gateway (resume runs through it). When one
+			// isn't configured, fall back to the account's `"default"` gateway so
+			// `createWorkersAI({ providers })` works out of the box. An explicit
+			// `gateway` (here or per call) always wins.
+			gateway: options.gateway ?? { id: DEFAULT_GATEWAY_ID },
 			providers: options.providers,
 			resume: options.resume,
 			onResumeExpired: options.onResumeExpired,

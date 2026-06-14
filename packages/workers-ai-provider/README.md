@@ -355,8 +355,9 @@ import { streamText } from "ai";
 
 const workersai = createWorkersAI({
 	binding: env.AI,
-	gateway: { id: "my-gateway" },
 	providers: [openai, anthropic], // opt-in; enables third-party routing
+	// gateway is optional — catalog routing uses your account's "default"
+	// gateway unless you set one, e.g. gateway: { id: "my-gateway" }.
 });
 
 workersai("@cf/meta/llama-3.1-8b-instruct"); // Workers AI (unchanged)
@@ -369,6 +370,8 @@ const result = streamText({
 ```
 
 The settings argument is **typed from the model id**: pass a `"<provider>/<model>"` catalog slug and the second argument autocompletes the per-call gateway options (`resume`, `fallback`, `cacheTtl`, `byok`, `metadata`, …, i.e. `DelegateCallOptions`); pass a `@cf/...` id and it autocompletes the usual `WorkersAIChatSettings`. `providers` is optional and **additive**: leave it unset and `createWorkersAI` behaves exactly as before; passing a catalog slug without it throws a helpful error pointing you here.
+
+`gateway` is optional for catalog routing — when unset, requests use your account's `"default"` AI Gateway. Set `gateway: { id: "…" }` (here or per call) to use a specific gateway.
 
 The examples below assume a `workersai` configured with `providers` as above.
 
@@ -415,7 +418,9 @@ Without `byok`, provider auth headers are stripped so unified billing / the gate
 
 ```ts
 // Client-side: keeps resume per leg. A failed pre-stream dispatch falls through.
-workersai("openai/gpt-5", { fallback: { mode: "client", models: ["anthropic/claude-sonnet-4-5"] } });
+workersai("openai/gpt-5", {
+	fallback: { mode: "client", models: ["anthropic/claude-sonnet-4-5"] },
+});
 
 // Server-side: same-vendor, on the gateway path.
 workersai("openai/gpt-5", { fallback: { mode: "server", models: ["openai/gpt-5-mini"] } });
@@ -477,15 +482,15 @@ The provider id is detected from the request URL (or pass `provider` explicitly)
 
 ### `createWorkersAI(options)`
 
-| Option            | Type               | Description                                                                                       |
-| ----------------- | ------------------ | ------------------------------------------------------------------------------------------------- |
-| `binding`         | `Ai`               | Workers AI binding (`env.AI`). Use this OR credentials.                                            |
-| `accountId`       | `string`           | Cloudflare account ID. Required with `apiKey`.                                                     |
-| `apiKey`          | `string`           | Cloudflare API token. Required with `accountId`.                                                  |
-| `gateway`         | `GatewayOptions`   | Optional [AI Gateway](https://developers.cloudflare.com/ai-gateway/) config.                      |
-| `providers`       | `ProviderPlugin[]` | _Experimental._ Wire-format plugins that enable routing `"<provider>/<model>"` slugs via gateway. |
-| `resume`          | `boolean`          | _Experimental._ Default resume behavior for gateway-routed catalog models. Defaults to `true`.    |
-| `onResumeExpired` | `"error"` \| `"accept-partial"` | _Experimental._ Default policy when the gateway resume buffer expires. Defaults to `"error"`. |
+| Option            | Type                            | Description                                                                                       |
+| ----------------- | ------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `binding`         | `Ai`                            | Workers AI binding (`env.AI`). Use this OR credentials.                                           |
+| `accountId`       | `string`                        | Cloudflare account ID. Required with `apiKey`.                                                    |
+| `apiKey`          | `string`                        | Cloudflare API token. Required with `accountId`.                                                  |
+| `gateway`         | `GatewayOptions`                | Optional [AI Gateway](https://developers.cloudflare.com/ai-gateway/) config.                      |
+| `providers`       | `ProviderPlugin[]`              | _Experimental._ Wire-format plugins that enable routing `"<provider>/<model>"` slugs via gateway. |
+| `resume`          | `boolean`                       | _Experimental._ Default resume behavior for gateway-routed catalog models. Defaults to `true`.    |
+| `onResumeExpired` | `"error"` \| `"accept-partial"` | _Experimental._ Default policy when the gateway resume buffer expires. Defaults to `"error"`.     |
 
 Returns a provider with model factories. Each factory accepts an optional second argument for per-model settings:
 
