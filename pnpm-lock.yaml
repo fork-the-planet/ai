@@ -1778,6 +1778,12 @@ importers:
 
   packages/workers-ai-provider:
     devDependencies:
+      '@ai-sdk/anthropic':
+        specifier: ^3.0.84
+        version: 3.0.84(zod@4.4.3)
+      '@ai-sdk/openai':
+        specifier: ^3.0.71
+        version: 3.0.71(zod@4.4.3)
       '@ai-sdk/provider':
         specifier: ^3.0.10
         version: 3.0.10
@@ -7174,7 +7180,6 @@ snapshots:
       '@ai-sdk/provider': 3.0.10
       '@ai-sdk/provider-utils': 4.0.29(zod@4.4.3)
       zod: 4.4.3
-    optional: true
 
   '@ai-sdk/azure@3.0.74(zod@4.4.3)':
     dependencies:
