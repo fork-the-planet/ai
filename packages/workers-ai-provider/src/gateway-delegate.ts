@@ -141,6 +141,13 @@ export interface DelegateCallOptions {
 	gateway?: GatewayOptions | string;
 	/** Called once per dispatch with the resolved transport + gateway headers. */
 	onDispatch?: (info: DispatchInfo) => void;
+	/**
+	 * Run path only: fired with the cumulative SSE event offset as the resumable
+	 * stream advances. Pair with `onDispatch` (for `runId`) to persist
+	 * `{ runId, eventOffset }` for cross-invocation re-attach after eviction.
+	 * Throttle your own writes — this can fire per chunk.
+	 */
+	onProgress?: (eventOffset: number) => void;
 }
 
 interface Selection {
@@ -422,6 +429,7 @@ function makeRunFetch(
 				runId,
 				initial: resp.body,
 				onResumeExpired: opts.onResumeExpired,
+				...(opts.onProgress ? { onProgress: opts.onProgress } : {}),
 			});
 			return new Response(resumable, { status: resp.status, headers: resp.headers });
 		}

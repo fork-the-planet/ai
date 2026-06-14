@@ -137,6 +137,91 @@ describe("createResumableStream", () => {
 		expect(await readAll(rs)).toBe("data: 1\n\n");
 	});
 
+	it("fires onProgress with the cumulative event offset", async () => {
+		const offsets: number[] = [];
+		const rs = createResumableStream({
+			binding: {} as Ai,
+			gateway: "gw",
+			runId: "r1",
+			initial: streamFrom(["data: a\n\n", "data: b\n\ndata: c\n\n"]),
+			onProgress: (n) => offsets.push(n),
+		});
+		await readAll(rs);
+		// First chunk = 1 event; second chunk = 2 more (cumulative 3).
+		expect(offsets).toEqual([1, 3]);
+	});
+
+	// ── cross-invocation re-attach (no initial body) ──────────────────────────
+
+	it("re-attaches with no initial body by resuming from fromEvent", async () => {
+		const urls: string[] = [];
+		const binding = bindingWithTail(["data: 7\n\n", "data: 8\n\n"], urls);
+
+		const rs = createResumableStream({
+			binding,
+			gateway: "gw",
+			runId: "r9",
+			fromEvent: 6,
+			// no `initial` — pure re-attach
+		});
+
+		expect(await readAll(rs)).toBe("data: 7\n\ndata: 8\n\n");
+		expect(urls[0]).toContain("/run/r9/resume?from=6");
+	});
+
+	it("continues counting from fromEvent so a later reconnect uses the absolute index", async () => {
+		const urls: string[] = [];
+		// `initial` provided + fromEvent:6 — the live body delivers 2 events then drops.
+		const initial = streamFrom(["data: 7\n\n", "data: 8\n\n"], 2);
+		// The only fetch is the reconnect; it must carry the absolute index.
+		const binding = bindingWithTail(["data: 9\n\n"], urls);
+
+		const rs = createResumableStream({
+			binding,
+			gateway: "gw",
+			runId: "r9",
+			fromEvent: 6,
+			initial,
+		});
+
+		expect(await readAll(rs)).toBe("data: 7\n\ndata: 8\n\ndata: 9\n\n");
+		// fromEvent(6) + 2 emitted = reconnect at absolute index 8.
+		expect(urls[0]).toContain("resume?from=8");
+	});
+
+	it("treats an initial-attach 404 as terminal (not charged to the reconnect budget)", async () => {
+		const fetchMock = vi.fn(async () => new Response("nope", { status: 404 }));
+		const binding = { fetch: fetchMock } as unknown as Ai;
+
+		const rs = createResumableStream({
+			binding,
+			gateway: "gw",
+			runId: "gone",
+			fromEvent: 3,
+		});
+
+		await expect(readAll(rs)).rejects.toMatchObject({ kind: "resume-expired" });
+		expect(fetchMock).toHaveBeenCalledTimes(1);
+	});
+
+	it("errors with kind dispatch on a non-404 resume failure", async () => {
+		const binding = {
+			fetch: vi.fn(async () => new Response("boom", { status: 500 })),
+		} as unknown as Ai;
+
+		const rs = createResumableStream({
+			binding,
+			gateway: "gw",
+			runId: "r1",
+			initial: streamFrom(["data: 1\n\n"], 1),
+		});
+
+		await expect(readAll(rs)).rejects.toMatchObject({
+			name: "GatewayDelegateError",
+			kind: "dispatch",
+		});
+	});
+
 	it("gives up after maxReconnects", async () => {
 		// Every resume attempt also drops immediately, so we exhaust the budget.
 		const binding = {
