@@ -18,7 +18,7 @@ export type WorkersAIChatSettings = {
 
 	/**
 	 * Controls the reasoning budget for reasoning-capable Workers AI models
-	 * (e.g. `@cf/zai-org/glm-4.7-flash`, `@cf/moonshotai/kimi-k2.5`,
+	 * (e.g. `@cf/zai-org/glm-4.7-flash`, `@cf/moonshotai/kimi-k2.7-code`,
 	 * `@cf/openai/gpt-oss-120b`).
 	 *
 	 * `null` is a valid value and disables reasoning for models that support it.

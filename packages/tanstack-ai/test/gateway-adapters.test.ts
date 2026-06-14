@@ -18,10 +18,9 @@ vi.mock("@tanstack/ai-anthropic", () => ({
 			mockAnthropicTextCtor(...args);
 		}
 	},
-	AnthropicSummarizeAdapter: class {
-		constructor(...args: unknown[]) {
-			mockAnthropicSummarizeCtor(...args);
-		}
+	createAnthropicSummarize: (...args: unknown[]) => {
+		mockAnthropicSummarizeCtor(...args);
+		return {};
 	},
 	ANTHROPIC_MODELS: ["claude-sonnet-4-5"],
 }));
@@ -42,10 +41,9 @@ vi.mock("@tanstack/ai-gemini", () => ({
 			mockGeminiImageCtor(...args);
 		}
 	},
-	GeminiSummarizeAdapter: class {
-		constructor(...args: unknown[]) {
-			mockGeminiSummarizeCtor(...args);
-		}
+	createGeminiSummarize: (...args: unknown[]) => {
+		mockGeminiSummarizeCtor(...args);
+		return {};
 	},
 	GeminiTTSAdapter: class {
 		constructor(...args: unknown[]) {
@@ -73,10 +71,9 @@ vi.mock("@tanstack/ai-grok", () => ({
 			mockGrokImageCtor(...args);
 		}
 	},
-	GrokSummarizeAdapter: class {
-		constructor(...args: unknown[]) {
-			mockGrokSummarizeCtor(...args);
-		}
+	createGrokSummarize: (...args: unknown[]) => {
+		mockGrokSummarizeCtor(...args);
+		return {};
 	},
 	GROK_CHAT_MODELS: ["grok-3"],
 	GROK_IMAGE_MODELS: ["grok-2-image-1212"],
@@ -95,10 +92,9 @@ vi.mock("@tanstack/ai-openai", () => ({
 			mockOpenAITextCtor(...args);
 		}
 	},
-	OpenAISummarizeAdapter: class {
-		constructor(...args: unknown[]) {
-			mockOpenAISummarizeCtor(...args);
-		}
+	createOpenaiSummarize: (...args: unknown[]) => {
+		mockOpenAISummarizeCtor(...args);
+		return {};
 	},
 	OpenAIImageAdapter: class {
 		constructor(...args: unknown[]) {
@@ -143,10 +139,9 @@ vi.mock("@tanstack/ai-openrouter", () => ({
 			mockOpenRouterImageCtor(...args);
 		}
 	},
-	OpenRouterSummarizeAdapter: class {
-		constructor(...args: unknown[]) {
-			mockOpenRouterSummarizeCtor(...args);
-		}
+	createOpenRouterSummarize: (...args: unknown[]) => {
+		mockOpenRouterSummarizeCtor(...args);
+		return {};
 	},
 }));
 
@@ -251,8 +246,11 @@ describe("Anthropic gateway adapters", () => {
 		const { createAnthropicSummarize } = await import("../src/adapters/anthropic");
 		createAnthropicSummarize("claude-sonnet-4-5" as any, credentialsConfig);
 
-		assertFetchInjected(mockAnthropicSummarizeCtor, "test-api-key");
-		expect(mockAnthropicSummarizeCtor.mock.calls[0]![1]).toBe("claude-sonnet-4-5");
+		expect(mockAnthropicSummarizeCtor).toHaveBeenCalledOnce();
+		const [model, apiKey, cfg] = mockAnthropicSummarizeCtor.mock.calls[0]!;
+		expect(model).toBe("claude-sonnet-4-5");
+		expect(apiKey).toBe("test-api-key");
+		expect(typeof cfg.fetch).toBe("function");
 	});
 });
 
@@ -318,8 +316,11 @@ describe("Gemini gateway adapters", () => {
 		const { createGeminiSummarize } = await import("../src/adapters/gemini");
 		createGeminiSummarize("gemini-2.0-flash" as any, geminiConfig);
 
-		assertGeminiConfig(mockGeminiSummarizeCtor, "test-api-key");
-		expect(mockGeminiSummarizeCtor.mock.calls[0]![1]).toBe("gemini-2.0-flash");
+		expect(mockGeminiSummarizeCtor).toHaveBeenCalledOnce();
+		const [apiKey, model, cfg] = mockGeminiSummarizeCtor.mock.calls[0]!;
+		expect(apiKey).toBe("test-api-key");
+		expect(model).toBe("gemini-2.0-flash");
+		expect(cfg.httpOptions.baseUrl).toContain("google-ai-studio");
 	});
 
 	it("createGeminiTts with credentials config", async () => {
@@ -395,8 +396,11 @@ describe("Grok gateway adapters", () => {
 		const { createGrokSummarize } = await import("../src/adapters/grok");
 		createGrokSummarize("grok-3" as any, credentialsConfig);
 
-		assertFetchInjected(mockGrokSummarizeCtor, "test-api-key");
-		expect(mockGrokSummarizeCtor.mock.calls[0]![1]).toBe("grok-3");
+		expect(mockGrokSummarizeCtor).toHaveBeenCalledOnce();
+		const [model, apiKey, cfg] = mockGrokSummarizeCtor.mock.calls[0]!;
+		expect(model).toBe("grok-3");
+		expect(apiKey).toBe("test-api-key");
+		expect(typeof cfg.fetch).toBe("function");
 	});
 
 	it("createGrokChat defaults apiKey to 'unused'", async () => {
@@ -435,8 +439,11 @@ describe("OpenAI gateway adapters", () => {
 		const { createOpenAiSummarize } = await import("../src/adapters/openai");
 		createOpenAiSummarize("gpt-4o" as any, credentialsConfig);
 
-		assertFetchInjected(mockOpenAISummarizeCtor, "test-api-key");
-		expect(mockOpenAISummarizeCtor.mock.calls[0]![1]).toBe("gpt-4o");
+		expect(mockOpenAISummarizeCtor).toHaveBeenCalledOnce();
+		const [model, apiKey, cfg] = mockOpenAISummarizeCtor.mock.calls[0]!;
+		expect(model).toBe("gpt-4o");
+		expect(apiKey).toBe("test-api-key");
+		expect(typeof cfg.fetch).toBe("function");
 	});
 
 	it("createOpenAiImage with credentials config", async () => {
@@ -521,7 +528,10 @@ describe("OpenRouter gateway adapters", () => {
 		createOpenRouterSummarize("openai/gpt-4o", credentialsConfig);
 
 		expect(mockOpenRouterSummarizeCtor).toHaveBeenCalledOnce();
-		expect(mockOpenRouterSummarizeCtor.mock.calls[0]![1]).toBe("openai/gpt-4o");
+		const [model, apiKey, cfg] = mockOpenRouterSummarizeCtor.mock.calls[0]!;
+		expect(model).toBe("openai/gpt-4o");
+		expect(apiKey).toBe("test-api-key");
+		expect(cfg.httpClient).toBeDefined();
 	});
 
 	it("createOpenRouterChat defaults apiKey to 'unused'", async () => {

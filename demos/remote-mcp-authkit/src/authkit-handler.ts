@@ -1,5 +1,5 @@
 import type { AuthRequest, OAuthHelpers } from "@cloudflare/workers-oauth-provider";
-import { type AccessToken, type AuthenticationResponse, WorkOS } from "@workos-inc/node";
+import { type AuthenticationResponse, WorkOS } from "@workos-inc/node";
 import { Hono } from "hono";
 import * as jose from "jose";
 import type { Props } from "./props";
@@ -180,7 +180,7 @@ app.get("/callback", async (c) => {
 	}
 
 	const { accessToken, organizationId, refreshToken, user } = response;
-	const { permissions = [] } = jose.decodeJwt<AccessToken>(accessToken);
+	const { permissions = [] } = jose.decodeJwt<{ permissions?: string[] }>(accessToken);
 
 	const { redirectTo } = await c.env.OAUTH_PROVIDER.completeAuthorization({
 		request: oauthReqInfo,

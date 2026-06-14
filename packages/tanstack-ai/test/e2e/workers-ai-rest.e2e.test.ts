@@ -11,7 +11,10 @@
  *
  * These are excluded from the default `pnpm test` / `pnpm test:ci` runs.
  */
+import { resolveDebugOption } from "@tanstack/ai/adapter-internals";
 import { afterAll, describe, expect, it, vi } from "vitest";
+
+const logger = resolveDebugOption(false);
 
 // Load env vars from .env at package root
 import { config } from "dotenv";
@@ -27,10 +30,11 @@ vi.mock("@tanstack/ai/adapters", () => ({
 			this.model = model;
 		}
 	},
+	// Image / Transcription / TTS base adapters take `(model, config?)`.
 	BaseImageAdapter: class {
 		kind = "image";
 		model: string;
-		constructor(_config: unknown, model: string) {
+		constructor(model: string, _config?: unknown) {
 			this.model = model;
 		}
 		generateId() {
@@ -40,7 +44,7 @@ vi.mock("@tanstack/ai/adapters", () => ({
 	BaseTranscriptionAdapter: class {
 		kind = "transcription";
 		model: string;
-		constructor(_config: unknown, model: string) {
+		constructor(model: string, _config?: unknown) {
 			this.model = model;
 		}
 		generateId() {
@@ -50,7 +54,7 @@ vi.mock("@tanstack/ai/adapters", () => ({
 	BaseTTSAdapter: class {
 		kind = "tts";
 		model: string;
-		constructor(_config: unknown, model: string) {
+		constructor(model: string, _config?: unknown) {
 			this.model = model;
 		}
 		generateId() {
@@ -68,7 +72,10 @@ vi.mock("@tanstack/ai/adapters", () => ({
 		}
 	},
 }));
-vi.mock("@tanstack/ai", () => ({}));
+vi.mock("@tanstack/ai", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("@tanstack/ai")>();
+	return { EventType: actual.EventType };
+});
 
 import { WorkersAiTextAdapter } from "../../src/adapters/workers-ai";
 import type { WorkersAiTextModel } from "../../src/adapters/workers-ai";
@@ -194,13 +201,15 @@ const MODELS = [
 	{ id: "@cf/meta/llama-3.1-8b-instruct-fast", label: "Llama 3.1 8B Fast", reasoning: false },
 	{ id: "@cf/openai/gpt-oss-20b", label: "GPT-OSS 20B", reasoning: false },
 	{ id: "@cf/qwen/qwen3-30b-a3b-fp8", label: "Qwen3 30B", reasoning: false },
-	{ id: "@cf/google/gemma-3-12b-it", label: "Gemma 3 12B", reasoning: false },
+	// Gemma 4 (replaces deprecated gemma-3-12b-it) is a reasoning + vision model.
+	{ id: "@cf/google/gemma-4-26b-a4b-it", label: "Gemma 4 26B", reasoning: true },
 	{
 		id: "@cf/mistralai/mistral-small-3.1-24b-instruct",
 		label: "Mistral Small 3.1",
 		reasoning: false,
 	},
-	{ id: "@cf/moonshotai/kimi-k2.5", label: "Kimi K2.5", reasoning: true },
+	// Kimi K2.7 Code replaces deprecated kimi-k2.5.
+	{ id: "@cf/moonshotai/kimi-k2.7-code", label: "Kimi K2.7 Code", reasoning: true },
 ];
 
 // ---------------------------------------------------------------------------
@@ -768,6 +777,7 @@ describe.skipIf(skip())("Workers AI REST E2E", () => {
 				const result = await adapter.generateSpeech({
 					model: model.id,
 					text: "Hello, this is a test of text to speech.",
+					logger,
 				});
 
 				expect(result).toBeDefined();
@@ -791,6 +801,7 @@ describe.skipIf(skip())("Workers AI REST E2E", () => {
 					model: model.id,
 					text: "Testing voice selection.",
 					voice: "asteria",
+					logger,
 				});
 
 				expect(result).toBeDefined();
@@ -830,6 +841,7 @@ describe.skipIf(skip())("Workers AI REST E2E", () => {
 				const result = await adapter.generateImages({
 					model: model.id,
 					prompt: "a simple red circle on a white background",
+					logger,
 				});
 
 				expect(result).toBeDefined();
@@ -915,6 +927,7 @@ describe.skipIf(skip())("Workers AI REST E2E", () => {
 				const result = await adapter.transcribe({
 					model: model.id,
 					audio: wavBuffer,
+					logger,
 				});
 
 				expect(result).toBeDefined();
@@ -931,7 +944,12 @@ describe.skipIf(skip())("Workers AI REST E2E", () => {
 	// ------------------------------------------------------------------
 
 	describe("Summarization", () => {
-		it("BART-large-CNN — summarizes text via REST", async () => {
+		// Workers AI retired its dedicated summarization task: the only model,
+		// @cf/facebook/bart-large-cnn, was deprecated on 2026-05-30 and now returns
+		// HTTP 410. There is no drop-in `input_text`→`summary` replacement, so this
+		// test is skipped until the summarize adapter is reworked to summarize via a
+		// text-generation model.
+		it.skip("BART-large-CNN — summarizes text via REST", async () => {
 			const { WorkersAiSummarizeAdapter } =
 				await import("../../src/adapters/workers-ai-summarize");
 			const adapter = new WorkersAiSummarizeAdapter(
@@ -942,6 +960,7 @@ describe.skipIf(skip())("Workers AI REST E2E", () => {
 			const result = await adapter.summarize({
 				model: "@cf/facebook/bart-large-cnn",
 				text: "Artificial intelligence (AI) is intelligence demonstrated by machines, as opposed to the natural intelligence displayed by animals including humans. AI research has been defined as the field of study of intelligent agents, which refers to any system that perceives its environment and takes actions that maximize its chance of achieving its goals. The term artificial intelligence had previously been used to describe machines that mimic and display human cognitive skills that are associated with the human mind, such as learning and problem-solving.",
+				logger,
 			});
 
 			expect(result).toBeDefined();

@@ -1,4 +1,7 @@
+import { resolveDebugOption } from "@tanstack/ai/adapter-internals";
 import { describe, expect, it, vi } from "vitest";
+
+const logger = resolveDebugOption(false);
 
 describe("WorkersAiSummarizeAdapter", () => {
 	// -----------------------------------------------------------------------
@@ -21,6 +24,7 @@ describe("WorkersAiSummarizeAdapter", () => {
 		const result = await adapter.summarize({
 			model: "@cf/facebook/bart-large-cnn",
 			text: "A very long article about something important...",
+			logger,
 		});
 
 		expect(result).toHaveProperty("id");
@@ -48,6 +52,7 @@ describe("WorkersAiSummarizeAdapter", () => {
 			model: "@cf/facebook/bart-large-cnn",
 			text: "Long text here",
 			maxLength: 100,
+			logger,
 		});
 
 		const callArgs = mockBinding.run.mock.calls[0]![1] as Record<string, unknown>;
@@ -71,6 +76,7 @@ describe("WorkersAiSummarizeAdapter", () => {
 		const result = await adapter.summarize({
 			model: "@cf/facebook/bart-large-cnn",
 			text: "Some text",
+			logger,
 		});
 
 		// Falls back to empty string when summary is missing
@@ -93,6 +99,7 @@ describe("WorkersAiSummarizeAdapter", () => {
 		await adapter.summarize({
 			model: "@cf/facebook/bart-large-cnn",
 			text: "Some text",
+			logger,
 		});
 
 		const callArgs = mockBinding.run.mock.calls[0]![1] as Record<string, unknown>;
@@ -124,6 +131,7 @@ describe("WorkersAiSummarizeAdapter", () => {
 			const result = await adapter.summarize({
 				model: "@cf/facebook/bart-large-cnn",
 				text: "Long article here...",
+				logger,
 			});
 
 			expect(result.summary).toBe("REST summary");
@@ -160,6 +168,7 @@ describe("WorkersAiSummarizeAdapter", () => {
 				adapter.summarize({
 					model: "@cf/facebook/bart-large-cnn",
 					text: "Some text",
+					logger,
 				}),
 			).rejects.toThrow(/Workers AI summarize request failed \(400\)/);
 		} finally {
@@ -194,6 +203,7 @@ describe("WorkersAiSummarizeAdapter", () => {
 		const result = await adapter.summarize({
 			model: "@cf/facebook/bart-large-cnn",
 			text: "Long article...",
+			logger,
 		});
 
 		expect(result.summary).toBe("Gateway summary");
@@ -230,6 +240,7 @@ describe("WorkersAiSummarizeAdapter", () => {
 		const result = await adapter.summarize({
 			model: "@cf/facebook/bart-large-cnn",
 			text: "Some text",
+			logger,
 		});
 
 		expect(result.summary).toBe("Top-level summary");
@@ -258,6 +269,7 @@ describe("WorkersAiSummarizeAdapter", () => {
 			adapter.summarize({
 				model: "@cf/facebook/bart-large-cnn",
 				text: "Some text",
+				logger,
 			}),
 		).rejects.toThrow(/Workers AI summarize gateway request failed \(502\)/);
 

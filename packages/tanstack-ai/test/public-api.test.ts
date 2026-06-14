@@ -165,7 +165,6 @@ describe("public API exports", () => {
 		// Gemini
 		expect(exports.GeminiTextModels).toBeDefined();
 		expect(exports.GeminiImageModels).toBeDefined();
-		expect(exports.GeminiSummarizeModels).toBeDefined();
 		expect(exports.GeminiTTSModels).toBeDefined();
 
 		// Grok

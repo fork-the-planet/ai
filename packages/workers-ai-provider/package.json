@@ -41,10 +41,10 @@
 		"type-check": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@ai-sdk/provider": "^3.0.8",
-		"@cloudflare/workers-types": "^4.20260402.1",
-		"ai": "^6.0.143",
-		"zod": "^4.3.6"
+		"@ai-sdk/provider": "^3.0.10",
+		"@cloudflare/workers-types": "^4.20260613.1",
+		"ai": "^6.0.204",
+		"zod": "^4.4.3"
 	},
 	"peerDependencies": {
 		"@ai-sdk/provider": "^3.0.0",

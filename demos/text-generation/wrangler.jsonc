@@ -5,9 +5,9 @@
 	"compatibility_date": "2025-01-29",
 	"compatibility_flags": ["nodejs_compat"],
 	"observability": {
-		"enabled": true
+		"enabled": true,
 	},
 	"ai": {
-		"binding": "AI"
-	}
+		"binding": "AI",
+	},
 }

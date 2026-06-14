@@ -20,7 +20,7 @@ export default {
 		const workersai = createWorkersAI({ binding: env.AI });
 
 		const result = streamText({
-			model: workersai("@cf/moonshotai/kimi-k2.5"),
+			model: workersai("@cf/moonshotai/kimi-k2.7-code"),
 			messages: [{ role: "user", content: "Write a haiku about Cloudflare" }],
 		});
 
@@ -73,10 +73,10 @@ Some good defaults:
 
 | Task           | Model                                  | Notes                               |
 | -------------- | -------------------------------------- | ----------------------------------- |
-| Chat           | `@cf/moonshotai/kimi-k2.5`             | 256k ctx, tools, vision, reasoning  |
+| Chat           | `@cf/moonshotai/kimi-k2.7-code`        | 256k ctx, tools, vision, reasoning  |
 | Chat           | `@cf/zai-org/glm-4.7-flash`            | Fast, multilingual, 131k ctx        |
 | Chat           | `@cf/openai/gpt-oss-120b`              | OpenAI open-weights, high reasoning |
-| Reasoning      | `@cf/moonshotai/kimi-k2.5`             | Configurable `reasoning_effort`     |
+| Reasoning      | `@cf/moonshotai/kimi-k2.7-code`        | Configurable `reasoning_effort`     |
 | Reasoning      | `@cf/qwen/qwq-32b`                     | Emits `reasoning_content`           |
 | Embeddings     | `@cf/baai/bge-base-en-v1.5`            | 768-dim, English                    |
 | Embeddings     | `@cf/google/embeddinggemma-300m`       | 100+ languages, by Google           |
@@ -92,7 +92,7 @@ Some good defaults:
 import { generateText } from "ai";
 
 const { text } = await generateText({
-	model: workersai("@cf/moonshotai/kimi-k2.5"),
+	model: workersai("@cf/moonshotai/kimi-k2.7-code"),
 	prompt: "Explain Workers AI in one paragraph",
 });
 ```
@@ -103,7 +103,7 @@ Streaming:
 import { streamText } from "ai";
 
 const result = streamText({
-	model: workersai("@cf/moonshotai/kimi-k2.5"),
+	model: workersai("@cf/moonshotai/kimi-k2.7-code"),
 	messages: [{ role: "user", content: "Write a short story" }],
 });
 
@@ -149,7 +149,7 @@ Send images to vision-capable models like Kimi K2.5:
 import { generateText } from "ai";
 
 const { text } = await generateText({
-	model: workersai("@cf/moonshotai/kimi-k2.5"),
+	model: workersai("@cf/moonshotai/kimi-k2.7-code"),
 	messages: [
 		{
 			role: "user",
@@ -171,7 +171,7 @@ import { generateText, stepCountIs } from "ai";
 import { z } from "zod";
 
 const { text } = await generateText({
-	model: workersai("@cf/moonshotai/kimi-k2.5"),
+	model: workersai("@cf/moonshotai/kimi-k2.7-code"),
 	prompt: "What's the weather in London?",
 	tools: {
 		getWeather: {
@@ -191,7 +191,7 @@ import { generateText, Output } from "ai";
 import { z } from "zod";
 
 const { output } = await generateText({
-	model: workersai("@cf/moonshotai/kimi-k2.5"),
+	model: workersai("@cf/moonshotai/kimi-k2.7-code"),
 	prompt: "Recipe for spaghetti bolognese",
 	output: Output.object({
 		schema: z.object({
@@ -343,7 +343,7 @@ Streaming works the same way — use `streamText` instead of `generateText`.
 Returns a provider with model factories. Each factory accepts an optional second argument for per-model settings:
 
 ```ts
-workersai("@cf/moonshotai/kimi-k2.5", {
+workersai("@cf/moonshotai/kimi-k2.7-code", {
 	sessionAffinity: "my-unique-session-id",
 });
 ```

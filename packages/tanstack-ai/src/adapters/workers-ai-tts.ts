@@ -39,7 +39,7 @@ export class WorkersAiTTSAdapter extends BaseTTSAdapter<WorkersAiTTSModel> {
 	private adapterConfig: WorkersAiAdapterConfig;
 
 	constructor(config: WorkersAiAdapterConfig, model: WorkersAiTTSModel) {
-		super({}, model);
+		super(model);
 		validateWorkersAiConfig(config);
 		this.adapterConfig = config;
 	}

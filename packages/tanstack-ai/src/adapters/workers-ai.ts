@@ -1,5 +1,12 @@
 import type { AiModels, BaseAiTextGeneration } from "@cloudflare/workers-types";
-import type { ContentPart, ModelMessage, StreamChunk, TextOptions } from "@tanstack/ai";
+import type {
+	ContentPart,
+	ModelMessage,
+	StreamChunk,
+	SystemPrompt,
+	TextOptions,
+} from "@tanstack/ai";
+import { EventType } from "@tanstack/ai";
 import {
 	BaseTextAdapter,
 	type StructuredOutputOptions,
@@ -48,7 +55,7 @@ export type WorkersAiTextModel =
 export interface WorkersAiTextModelOptions {
 	/**
 	 * Controls the reasoning budget for reasoning-capable models
-	 * (e.g. `@cf/zai-org/glm-4.7-flash`, `@cf/moonshotai/kimi-k2.5`,
+	 * (e.g. `@cf/zai-org/glm-4.7-flash`, `@cf/moonshotai/kimi-k2.7-code`,
 	 * `@cf/openai/gpt-oss-120b`).
 	 *
 	 * `null` is a valid value and disables reasoning for models that support it.
@@ -186,7 +193,7 @@ function buildUserContent(
 }
 
 function buildOpenAIMessages(
-	systemPrompts: string[] | undefined,
+	systemPrompts: SystemPrompt[] | undefined,
 	messages: ModelMessage[],
 	options?: { includeToolMessages?: boolean },
 ): OpenAI.Chat.ChatCompletionMessageParam[] {
@@ -196,7 +203,9 @@ function buildOpenAIMessages(
 	if (systemPrompts && systemPrompts.length > 0) {
 		openAIMessages.push({
 			role: "system",
-			content: systemPrompts.join("\n"),
+			content: systemPrompts
+				.map((prompt) => (typeof prompt === "string" ? prompt : prompt.content))
+				.join("\n"),
 		});
 	}
 
@@ -323,15 +332,15 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 	}
 
 	async *chatStream(options: TextOptions<WorkersAiTextModelOptions>): AsyncIterable<StreamChunk> {
-		const { systemPrompts, messages, tools, temperature, maxTokens, model, modelOptions } =
-			options;
+		const { systemPrompts, messages, tools, model, modelOptions } = options;
 		const extraBody = normalizeModelOptions(modelOptions);
 
 		const openAIMessages = buildOpenAIMessages(systemPrompts, messages);
 		const openAITools = buildOpenAITools(tools);
 
 		const timestamp = Date.now();
-		const runId = generateId();
+		const runId = options.runId ?? generateId();
+		const threadId = options.threadId ?? generateId("thread");
 		const messageId = generateId();
 		let hasEmittedRunStarted = false;
 		let hasEmittedTextMessageStart = false;
@@ -353,8 +362,6 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 					model: model ?? this.model,
 					messages: openAIMessages,
 					tools: openAITools,
-					temperature,
-					max_tokens: maxTokens,
 					stream: true,
 					stream_options: { include_usage: true },
 				} as OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming);
@@ -370,13 +377,12 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 					model: model ?? this.model,
 					messages: openAIMessages,
 					tools: openAITools,
-					temperature,
-					max_tokens: maxTokens,
 				} as OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming);
 
 				yield {
-					type: "RUN_STARTED",
+					type: EventType.RUN_STARTED,
 					runId,
+					threadId,
 					model: nonStreamResult.model || model || this.model,
 					timestamp,
 				} satisfies StreamChunk;
@@ -384,14 +390,14 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 				const msg = nonStreamResult.choices[0]?.message;
 				if (msg?.content) {
 					yield {
-						type: "TEXT_MESSAGE_START",
+						type: EventType.TEXT_MESSAGE_START,
 						messageId,
 						model: nonStreamResult.model || model || this.model,
 						timestamp,
 						role: "assistant",
 					} satisfies StreamChunk;
 					yield {
-						type: "TEXT_MESSAGE_CONTENT",
+						type: EventType.TEXT_MESSAGE_CONTENT,
 						messageId,
 						model: nonStreamResult.model || model || this.model,
 						timestamp,
@@ -399,7 +405,7 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 						content: msg.content,
 					} satisfies StreamChunk;
 					yield {
-						type: "TEXT_MESSAGE_END",
+						type: EventType.TEXT_MESSAGE_END,
 						messageId,
 						model: nonStreamResult.model || model || this.model,
 						timestamp,
@@ -417,15 +423,16 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 							parsedInput = {};
 						}
 						yield {
-							type: "TOOL_CALL_START",
+							type: EventType.TOOL_CALL_START,
 							toolCallId: tc.id,
+							toolCallName: fn.name,
 							toolName: fn.name,
 							model: nonStreamResult.model || model || this.model,
 							timestamp,
 							index: 0,
 						} satisfies StreamChunk;
 						yield {
-							type: "TOOL_CALL_END",
+							type: EventType.TOOL_CALL_END,
 							toolCallId: tc.id,
 							toolName: fn.name,
 							model: nonStreamResult.model || model || this.model,
@@ -437,8 +444,9 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 
 				const finishReason = nonStreamResult.choices[0]?.finish_reason;
 				yield {
-					type: "RUN_FINISHED",
+					type: EventType.RUN_FINISHED,
 					runId,
+					threadId,
 					model: nonStreamResult.model || model || this.model,
 					timestamp,
 					usage: nonStreamResult.usage
@@ -465,8 +473,9 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 				if (!hasEmittedRunStarted) {
 					hasEmittedRunStarted = true;
 					yield {
-						type: "RUN_STARTED",
+						type: EventType.RUN_STARTED,
 						runId,
+						threadId,
 						model: chunk.model || model || this.model,
 						timestamp,
 					} satisfies StreamChunk;
@@ -483,7 +492,8 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 					if (!hasEmittedStepStarted) {
 						hasEmittedStepStarted = true;
 						yield {
-							type: "STEP_STARTED",
+							type: EventType.STEP_STARTED,
+							stepName: "thinking",
 							stepId,
 							stepType: "thinking",
 							model: chunk.model || model || this.model,
@@ -498,7 +508,8 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 					// STEP_FINISHED when reasoning ends (i.e. when the first non-reasoning
 					// content or finish_reason arrives).
 					yield {
-						type: "STEP_FINISHED",
+						type: EventType.STEP_FINISHED,
+						stepName: "thinking",
 						stepId,
 						delta: reasoningContent,
 						content: accumulatedReasoning,
@@ -512,7 +523,7 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 					if (!hasEmittedTextMessageStart) {
 						hasEmittedTextMessageStart = true;
 						yield {
-							type: "TEXT_MESSAGE_START",
+							type: EventType.TEXT_MESSAGE_START,
 							messageId,
 							model: chunk.model || model || this.model,
 							timestamp,
@@ -522,7 +533,7 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 
 					accumulatedContent += delta.content;
 					yield {
-						type: "TEXT_MESSAGE_CONTENT",
+						type: EventType.TEXT_MESSAGE_CONTENT,
 						messageId,
 						model: chunk.model || model || this.model,
 						timestamp,
@@ -564,8 +575,9 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 						if (toolCall.id && toolCall.name && !toolCall.started) {
 							toolCall.started = true;
 							yield {
-								type: "TOOL_CALL_START",
+								type: EventType.TOOL_CALL_START,
 								toolCallId: toolCall.id,
+								toolCallName: toolCall.name,
 								toolName: toolCall.name,
 								model: chunk.model || model || this.model,
 								timestamp,
@@ -576,7 +588,7 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 						// Stream tool call arguments
 						if (toolCallDelta.function?.arguments && toolCall.started) {
 							yield {
-								type: "TOOL_CALL_ARGS",
+								type: EventType.TOOL_CALL_ARGS,
 								toolCallId: toolCall.id,
 								model: chunk.model || model || this.model,
 								timestamp,
@@ -602,7 +614,7 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 								parsedInput = {};
 							}
 							yield {
-								type: "TOOL_CALL_END",
+								type: EventType.TOOL_CALL_END,
 								toolCallId: toolCall.id,
 								toolName: toolCall.name,
 								model: chunk.model || model || this.model,
@@ -622,7 +634,7 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 					// End text message if started
 					if (hasEmittedTextMessageStart) {
 						yield {
-							type: "TEXT_MESSAGE_END",
+							type: EventType.TEXT_MESSAGE_END,
 							messageId,
 							model: chunk.model || model || this.model,
 							timestamp,
@@ -631,8 +643,9 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 
 					// Emit RUN_FINISHED
 					yield {
-						type: "RUN_FINISHED",
+						type: EventType.RUN_FINISHED,
 						runId,
+						threadId,
 						model: chunk.model || model || this.model,
 						timestamp,
 						usage: chunk.usage
@@ -665,7 +678,7 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 							parsedInput = {};
 						}
 						yield {
-							type: "TOOL_CALL_END",
+							type: EventType.TOOL_CALL_END,
 							toolCallId: toolCall.id,
 							toolName: toolCall.name,
 							model: model ?? this.model,
@@ -678,7 +691,7 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 				// Close text message if open
 				if (hasEmittedTextMessageStart) {
 					yield {
-						type: "TEXT_MESSAGE_END",
+						type: EventType.TEXT_MESSAGE_END,
 						messageId,
 						model: model ?? this.model,
 						timestamp,
@@ -686,8 +699,9 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 				}
 
 				yield {
-					type: "RUN_FINISHED",
+					type: EventType.RUN_FINISHED,
 					runId,
+					threadId,
 					model: model ?? this.model,
 					timestamp,
 					finishReason: "stop",
@@ -699,17 +713,21 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 				error instanceof Error ? (error as Error & { code?: string }).code : undefined;
 			if (!hasEmittedRunStarted) {
 				yield {
-					type: "RUN_STARTED",
+					type: EventType.RUN_STARTED,
 					runId,
+					threadId,
 					model: model ?? this.model,
 					timestamp,
 				} satisfies StreamChunk;
 			}
 			yield {
-				type: "RUN_ERROR",
+				type: EventType.RUN_ERROR,
 				runId,
+				threadId,
 				model: model ?? this.model,
 				timestamp,
+				message: message || "Unknown error",
+				code,
 				error: {
 					message: message || "Unknown error",
 					code,
@@ -722,7 +740,7 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 		options: StructuredOutputOptions<WorkersAiTextModelOptions>,
 	): Promise<StructuredOutputResult<unknown>> {
 		const { outputSchema, chatOptions } = options;
-		const { systemPrompts, messages, temperature, model, modelOptions } = chatOptions;
+		const { systemPrompts, messages, model, modelOptions } = chatOptions;
 		const extraBody = normalizeModelOptions(modelOptions);
 
 		const openAIMessages = buildOpenAIMessages(systemPrompts, messages, {
@@ -733,7 +751,6 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 			...extraBody,
 			model: model ?? this.model,
 			messages: openAIMessages,
-			temperature,
 			stream: false,
 			response_format: {
 				type: "json_schema",

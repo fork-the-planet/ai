@@ -1,4 +1,7 @@
+import { resolveDebugOption } from "@tanstack/ai/adapter-internals";
 import { describe, expect, it, vi } from "vitest";
+
+const logger = resolveDebugOption(false);
 
 describe("WorkersAiTranscriptionAdapter", () => {
 	// -----------------------------------------------------------------------
@@ -29,6 +32,7 @@ describe("WorkersAiTranscriptionAdapter", () => {
 		const result = await adapter.transcribe({
 			model: "@cf/openai/whisper",
 			audio: new ArrayBuffer(10),
+			logger,
 		});
 
 		expect(result).toHaveProperty("id");
@@ -67,6 +71,7 @@ describe("WorkersAiTranscriptionAdapter", () => {
 		const result = await adapter.transcribe({
 			model: "@cf/openai/whisper-large-v3-turbo",
 			audio: new ArrayBuffer(10),
+			logger,
 		});
 
 		expect(result.text).toBe("This is a test transcription.");
@@ -96,6 +101,7 @@ describe("WorkersAiTranscriptionAdapter", () => {
 			audio: new ArrayBuffer(10),
 			language: "fr",
 			prompt: "This is French audio",
+			logger,
 		});
 
 		const callArgs = mockBinding.run.mock.calls[0]![1] as Record<string, unknown>;
@@ -126,6 +132,7 @@ describe("WorkersAiTranscriptionAdapter", () => {
 			const result = await adapter.transcribe({
 				model: "@cf/openai/whisper",
 				audio: new ArrayBuffer(10),
+				logger,
 			});
 
 			expect(result.text).toBe("Hello from REST");
@@ -157,6 +164,7 @@ describe("WorkersAiTranscriptionAdapter", () => {
 			await adapter.transcribe({
 				model: "@cf/openai/whisper-large-v3-turbo",
 				audio: new ArrayBuffer(4),
+				logger,
 			});
 
 			const call = (globalThis.fetch as any).mock.calls[0]!;
@@ -186,6 +194,7 @@ describe("WorkersAiTranscriptionAdapter", () => {
 				adapter.transcribe({
 					model: "@cf/openai/whisper",
 					audio: new ArrayBuffer(10),
+					logger,
 				}),
 			).rejects.toThrow(/Workers AI transcription request failed \(404\)/);
 		} finally {
@@ -220,6 +229,7 @@ describe("WorkersAiTranscriptionAdapter", () => {
 		const result = await adapter.transcribe({
 			model: "@cf/openai/whisper",
 			audio: new ArrayBuffer(10),
+			logger,
 		});
 
 		expect(result.text).toBe("Hello from gateway");
@@ -250,6 +260,7 @@ describe("WorkersAiTranscriptionAdapter", () => {
 			adapter.transcribe({
 				model: "@cf/openai/whisper",
 				audio: new ArrayBuffer(10),
+				logger,
 			}),
 		).rejects.toThrow(/Workers AI transcription gateway request failed \(502\)/);
 
@@ -275,7 +286,7 @@ describe("WorkersAiTranscriptionAdapter", () => {
 		);
 
 		const b64Audio = btoa("test");
-		await adapter.transcribe({ model: "@cf/openai/whisper", audio: b64Audio });
+		await adapter.transcribe({ model: "@cf/openai/whisper", audio: b64Audio, logger });
 
 		const callArgs = mockBinding.run.mock.calls[0]![1] as Record<string, unknown>;
 		expect(callArgs.audio).toBeInstanceOf(Array);
@@ -297,7 +308,7 @@ describe("WorkersAiTranscriptionAdapter", () => {
 		);
 
 		const blob = new Blob([new Uint8Array([1, 2, 3])]);
-		await adapter.transcribe({ model: "@cf/openai/whisper", audio: blob });
+		await adapter.transcribe({ model: "@cf/openai/whisper", audio: blob, logger });
 
 		const callArgs = mockBinding.run.mock.calls[0]![1] as Record<string, unknown>;
 		expect(callArgs.audio).toBeInstanceOf(Array);
@@ -319,7 +330,7 @@ describe("WorkersAiTranscriptionAdapter", () => {
 		);
 
 		const buffer = new Uint8Array([10, 20, 30]).buffer;
-		await adapter.transcribe({ model: "@cf/openai/whisper", audio: buffer });
+		await adapter.transcribe({ model: "@cf/openai/whisper", audio: buffer, logger });
 
 		const callArgs = mockBinding.run.mock.calls[0]![1] as Record<string, unknown>;
 		expect(callArgs.audio).toBeInstanceOf(Array);

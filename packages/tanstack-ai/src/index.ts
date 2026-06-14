@@ -13,7 +13,6 @@ export type { GeminiGatewayConfig } from "./adapters/gemini";
 export {
 	GeminiTextModels,
 	GeminiImageModels,
-	GeminiSummarizeModels,
 	GeminiTTSModels,
 	type GeminiChatModel,
 	type GeminiTextModel,

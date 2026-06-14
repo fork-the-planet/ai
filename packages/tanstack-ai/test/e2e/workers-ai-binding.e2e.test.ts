@@ -43,7 +43,7 @@ const MODELS = [
 		label: "Mistral Small 3.1",
 		reasoning: false,
 	},
-	{ id: "@cf/moonshotai/kimi-k2.5", label: "Kimi K2.5", reasoning: true },
+	{ id: "@cf/moonshotai/kimi-k2.7-code", label: "Kimi K2.7 Code", reasoning: true },
 ] as const;
 
 // ---------------------------------------------------------------------------

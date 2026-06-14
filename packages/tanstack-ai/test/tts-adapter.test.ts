@@ -1,4 +1,7 @@
+import { resolveDebugOption } from "@tanstack/ai/adapter-internals";
 import { describe, expect, it, vi } from "vitest";
+
+const logger = resolveDebugOption(false);
 
 describe("WorkersAiTTSAdapter", () => {
 	// -----------------------------------------------------------------------
@@ -19,6 +22,7 @@ describe("WorkersAiTTSAdapter", () => {
 		const result = await adapter.generateSpeech({
 			model: "@cf/deepgram/aura-1",
 			text: "Hello world",
+			logger,
 		});
 
 		expect(result).toHaveProperty("id");
@@ -47,6 +51,7 @@ describe("WorkersAiTTSAdapter", () => {
 		const result = await adapter.generateSpeech({
 			model: "@cf/deepgram/aura-1",
 			text: "Hello",
+			logger,
 		});
 
 		expect(result.audio).toBeTruthy();
@@ -76,6 +81,7 @@ describe("WorkersAiTTSAdapter", () => {
 		const result = await adapter.generateSpeech({
 			model: "@cf/deepgram/aura-1",
 			text: "Hello",
+			logger,
 		});
 
 		expect(result.audio).toBeTruthy();
@@ -98,6 +104,7 @@ describe("WorkersAiTTSAdapter", () => {
 		const result = await adapter.generateSpeech({
 			model: "@cf/deepgram/aura-1",
 			text: "Hello",
+			logger,
 		});
 
 		expect(result.audio).toBe(b64Audio);
@@ -117,6 +124,7 @@ describe("WorkersAiTTSAdapter", () => {
 			adapter.generateSpeech({
 				model: "@cf/deepgram/aura-1",
 				text: "Hello",
+				logger,
 			}),
 		).rejects.toThrow(/Unexpected binary response format/);
 	});
@@ -143,6 +151,7 @@ describe("WorkersAiTTSAdapter", () => {
 			const result = await adapter.generateSpeech({
 				model: "@cf/deepgram/aura-1",
 				text: "Hello world",
+				logger,
 			});
 
 			expect(result.audio).toBeTruthy();
@@ -180,6 +189,7 @@ describe("WorkersAiTTSAdapter", () => {
 				adapter.generateSpeech({
 					model: "@cf/deepgram/aura-1",
 					text: "Hello",
+					logger,
 				}),
 			).rejects.toThrow(/Workers AI TTS request failed \(400\)/);
 		} finally {
@@ -212,6 +222,7 @@ describe("WorkersAiTTSAdapter", () => {
 		const result = await adapter.generateSpeech({
 			model: "@cf/deepgram/aura-1",
 			text: "Hello world",
+			logger,
 		});
 
 		expect(result.audio).toBeTruthy();
@@ -246,6 +257,7 @@ describe("WorkersAiTTSAdapter", () => {
 			adapter.generateSpeech({
 				model: "@cf/deepgram/aura-1",
 				text: "Hello",
+				logger,
 			}),
 		).rejects.toThrow(/Workers AI TTS gateway request failed \(502\)/);
 
@@ -272,6 +284,7 @@ describe("WorkersAiTTSAdapter", () => {
 			text: "Hello",
 			voice: "asteria",
 			speed: 1.5,
+			logger,
 		});
 
 		const callArgs = mockBinding.run.mock.calls[0]![1] as Record<string, unknown>;
@@ -295,6 +308,7 @@ describe("WorkersAiTTSAdapter", () => {
 			model: "@cf/deepgram/aura-1",
 			text: "Hello",
 			format: "wav",
+			logger,
 		});
 
 		expect(result.format).toBe("wav");
@@ -316,6 +330,7 @@ describe("WorkersAiTTSAdapter", () => {
 			model: "@cf/deepgram/aura-1",
 			text: "Hello",
 			modelOptions: { sample_rate: 24000 },
+			logger,
 		});
 
 		const callArgs = mockBinding.run.mock.calls[0]![1] as Record<string, unknown>;
