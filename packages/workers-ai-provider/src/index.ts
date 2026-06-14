@@ -41,6 +41,51 @@ export { WorkersAIRerankingModel } from "./workersai-reranking-model";
 export type { WorkersAIRerankingSettings } from "./workersai-reranking-settings";
 
 // ---------------------------------------------------------------------------
+// AI Gateway delegate (route catalog models through AI Gateway)
+//
+// The transport + registry + error surface is safe to re-export here (no
+// optional `@ai-sdk/*` peer imports). The provider plugins (`openai`,
+// `anthropic`, `google`) stay sub-path-only so those packages remain optional.
+// ---------------------------------------------------------------------------
+
+export {
+	type Billing,
+	createClientFallbackModel,
+	createGatewayDelegate,
+	type DelegateCallOptions,
+	type DispatchInfo,
+	type FallbackAttempt,
+	type FallbackLeg,
+	type FallbackOptions,
+	type GatewayDelegate,
+	type GatewayDelegateConfig,
+	GatewayDelegateError,
+	type GatewayErrorCode,
+	type GatewayErrorContext,
+	GATEWAY_PROVIDERS,
+	type GatewayProviderInfo,
+	type ParsedSlug,
+	type ProviderPlugin,
+	type ResumableStreamOptions,
+	type ResumeExpiredPolicy,
+	type Transport,
+	type WireFormat,
+	WorkersAIFallbackError,
+	WorkersAIGatewayError,
+	createResumableStream,
+	detectProviderByUrl,
+	findProviderBySlug,
+	parseSlug,
+	selectTransport,
+	wireableProviders,
+} from "./gateway-delegate";
+export {
+	createGatewayFetch,
+	createGatewayProvider,
+	type GatewayFetchConfig,
+} from "./gateway-provider";
+
+// ---------------------------------------------------------------------------
 // Workers AI
 // ---------------------------------------------------------------------------
 

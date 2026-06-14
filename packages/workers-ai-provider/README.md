@@ -329,6 +329,136 @@ Streaming works the same way — use `streamText` instead of `generateText`.
 
 > `createAutoRAG` still works but is deprecated. Use `createAISearch` instead.
 
+## AI Gateway delegate (third-party models)
+
+Route **third-party** catalog models (OpenAI, Anthropic, Google, xAI/Grok, Groq, and the OpenAI-compatible long tail) through [AI Gateway](https://developers.cloudflare.com/ai-gateway/) using the same `env.AI` binding — with resumable streaming, BYOK, caching, and fallback.
+
+```bash
+# install only the wire-format plugins you use (optional peer deps)
+npm install @ai-sdk/openai      # openai, deepseek, xai/grok, groq, mistral, perplexity, openrouter, cerebras
+npm install @ai-sdk/anthropic   # anthropic
+npm install @ai-sdk/google      # google, google-vertex
+```
+
+```ts
+import { createGatewayDelegate } from "workers-ai-provider/gateway-delegate";
+import { openai } from "workers-ai-provider/openai";
+import { anthropic } from "workers-ai-provider/anthropic";
+import { google } from "workers-ai-provider/google";
+import { streamText } from "ai";
+
+const wai = createGatewayDelegate({
+	binding: env.AI,
+	gateway: "my-gateway",
+	providers: [openai, anthropic, google], // wire-format plugins
+});
+
+const result = streamText({
+	model: wai("openai/gpt-5"),
+	prompt: "Hello",
+});
+// result.response.headers["cf-aig-run-id"] is set — resume from there.
+```
+
+One plugin per **wire format** serves every provider of that format. The `openai` plugin alone covers `openai/…`, `deepseek/…`, `xai/…` (alias `grok`), `groq/…`, `mistral/…`, `perplexity/…`, `cerebras/…`, `openrouter/…`, `fireworks/…`, plus the unified-catalog chat providers `alibaba/…` (Qwen) and `minimax/…` (all OpenAI-wire on the run path).
+
+The registry covers every provider in the [AI Gateway provider directory](https://developers.cloudflare.com/ai-gateway/usage/providers/) — OpenAI, Anthropic, Google AI Studio, Google Vertex AI, xAI/Grok, Groq, DeepSeek, Mistral, Perplexity, Cerebras, OpenRouter, Cohere, Baseten, Parallel, Azure OpenAI, Amazon Bedrock, HuggingFace, Replicate, Fal, Ideogram, Cartesia, Deepgram, ElevenLabs (plus Fireworks) — so `createGatewayFetch` auto-detects them all from the request URL.
+
+> **Run-path wire format is per-provider — not always OpenAI.** On the resumable run path (`env.AI.run`), Cloudflare's unified catalog **normalizes most providers to OpenAI chat-completions** (so `google/…` is parsed with the `openai` plugin on the run path, even though the gateway path uses the native `google` plugin), but **passes Anthropic through natively** (`content[].text`, native tool shape), so `anthropic/…` is parsed with the `anthropic` plugin on both paths. Practically: include `openai` for the openai-wire run-path providers (openai, google, xai/grok, groq), and include `anthropic` to use `anthropic/…`. The native `google` plugin is only needed if you force google onto the **gateway path**. The delegate throws a helpful `GatewayDelegateError` naming the exact plugin a transport needs if it's missing.
+
+Providers whose gateway-path URL isn't reliably reproducible from the shared builder (cohere, baseten, parallel, azure-openai, google-vertex) and provider-native/non-chat providers (bedrock, replicate, audio/image) are **bring-your-own-provider only** — see below.
+
+### Transports
+
+The delegate picks a transport from the options you pass:
+
+| Transport         | Backed by                    | Resume (`cf-aig-run-id`) | Caching | Server fallback | Billing           |
+| ----------------- | ---------------------------- | ------------------------ | ------- | --------------- | ----------------- |
+| **run** (default) | `env.AI.run(...)`            | ✅                       | ❌      | ❌              | Unified billing   |
+| **gateway**       | `env.AI.gateway(id).run([])` | ❌                       | ✅      | ✅              | BYOK / stored key |
+
+Run-catalog providers (OpenAI, Anthropic, Google, xAI, Groq, plus the unified-catalog chat providers Alibaba/Qwen and MiniMax) default to the resumable **run path**. BYOK-only providers (deepseek, mistral, perplexity, …) always use the **gateway path**. Asking for an impossible combination (e.g. `resume: true` with `fallback.mode: "server"`) throws a `GatewayDelegateError`.
+
+> Alibaba and MiniMax are **run-path only** — they're on the unified catalog but not the native gateway directory, so there's no gateway path. Asking for `transport: "gateway"`, caching, or server-side fallback on them throws a clear `GatewayDelegateError` at build time (rather than failing upstream); use the default run path or `fallback.mode: "client"`.
+
+### BYOK (bring your own key)
+
+On the gateway path, set `byok: true` and supply the upstream key via `extraHeaders`:
+
+```ts
+streamText({
+	model: wai("deepseek/deepseek-chat", {
+		byok: true,
+		extraHeaders: { authorization: `Bearer ${env.DEEPSEEK_API_KEY}` },
+	}),
+	prompt: "Hello",
+});
+```
+
+Without `byok`, provider auth headers are stripped so unified billing / the gateway's stored key applies.
+
+### Fallback
+
+```ts
+// Client-side: keeps resume per leg. A failed pre-stream dispatch falls through.
+wai("openai/gpt-5", { fallback: { mode: "client", models: ["anthropic/claude-sonnet-4-5"] } });
+
+// Server-side: same-vendor, on the gateway path.
+wai("openai/gpt-5", { fallback: { mode: "server", models: ["openai/gpt-5-mini"] } });
+```
+
+If every client-side leg fails, a `WorkersAIFallbackError` carries the per-attempt tree.
+
+### Caching
+
+```ts
+wai("openai/gpt-5", { cacheTtl: 3600 }); // gateway path; cacheTtl/skipCache force it
+```
+
+### Metadata & logging
+
+Attach custom metadata (for spend attribution, tenant breakdowns, etc.) and toggle gateway log collection per request. Both work on either transport — on the run path they go into the typed gateway options; on the gateway path they become `cf-aig-metadata` / `cf-aig-collect-log` headers. Call-level `metadata` merges over (and wins against) any `metadata` set via `gateway: { metadata }`.
+
+```ts
+wai("openai/gpt-5", {
+	metadata: { teamId: "AI", userId: 12345 }, // breaks down spend in the dashboard
+	collectLog: false, // opt this request out of log collection
+});
+```
+
+### Resume after disconnect
+
+The run path wraps the response stream so a transient mid-stream drop reconnects through the gateway resume endpoint transparently. For cross-invocation recovery (e.g. a Durable Object re-attaching after eviction), persist `{ runId, eventOffset }` via `onDispatch` + `onProgress` and re-attach with `createResumableStream`:
+
+```ts
+wai("openai/gpt-5", {
+	onDispatch: (info) => save({ runId: info.runId }),
+	onProgress: (eventOffset) => save({ eventOffset }), // throttle your own writes
+	onResumeExpired: "accept-partial", // or "error" (default) once the ~5.5 min buffer TTL elapses
+});
+```
+
+### Bring your own provider
+
+For provider-native or non-chat providers the slug delegate can't auto-wire (bedrock, replicate, audio/image), or for full control, route any `@ai-sdk/*` provider through the gateway:
+
+```ts
+import { createOpenAI } from "@ai-sdk/openai";
+import { createGatewayFetch } from "workers-ai-provider/gateway";
+
+const openai = createOpenAI({
+	apiKey: env.OPENAI_API_KEY, // forwarded when byok: true
+	fetch: createGatewayFetch({ binding: env.AI, gateway: "my-gateway", byok: true }),
+});
+const model = openai("gpt-5");
+```
+
+The provider id is detected from the request URL (or pass `provider` explicitly).
+
+### Errors
+
+`WorkersAIGatewayError` carries a coarse `code` (`auth`, `rate-limit`, `not-found`, `bad-request`, `provider-error`, `gateway-error`, `resume-expired`), a `recoverable` hint, the HTTP `status`, and the parsed CF/provider envelope. `WorkersAIFallbackError` carries the `attempts` tree.
+
 ## API Reference
 
 ### `createWorkersAI(options)`

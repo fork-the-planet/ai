@@ -46,10 +46,18 @@
 			"types": "./dist/anthropic.d.mts",
 			"import": "./dist/anthropic.mjs"
 		},
+		"./google": {
+			"types": "./dist/google.d.mts",
+			"import": "./dist/google.mjs"
+		},
+		"./gateway": {
+			"types": "./dist/gateway-provider.d.mts",
+			"import": "./dist/gateway-provider.mjs"
+		},
 		"./package.json": "./package.json"
 	},
 	"scripts": {
-		"build": "rm -rf dist && tsdown src/index.ts src/gateway-delegate.ts src/openai.ts src/anthropic.ts --dts --sourcemap --format esm --target es2020",
+		"build": "rm -rf dist && tsdown src/index.ts src/gateway-delegate.ts src/gateway-provider.ts src/openai.ts src/anthropic.ts src/google.ts --dts --sourcemap --format esm --target es2020",
 		"prepare": "pnpm build",
 		"format": "oxfmt --write .",
 		"test:ci": "vitest --watch=false",
@@ -57,10 +65,12 @@
 		"test:e2e": "vitest --config vitest.e2e.config.ts --watch=false",
 		"test:e2e:rest": "vitest --config vitest.e2e.config.ts --watch=false test/e2e/workers-ai-rest.e2e.test.ts",
 		"test:e2e:binding": "vitest --config vitest.e2e.config.ts --watch=false test/e2e/workers-ai-binding.e2e.test.ts",
+		"test:e2e:gateway": "vitest --config vitest.e2e.config.ts --watch=false test/e2e/workers-ai-gateway.e2e.test.ts",
 		"type-check": "tsc --noEmit"
 	},
 	"devDependencies": {
 		"@ai-sdk/anthropic": "^3.0.84",
+		"@ai-sdk/google": "^3.0.0",
 		"@ai-sdk/openai": "^3.0.71",
 		"@ai-sdk/provider": "^3.0.10",
 		"@cloudflare/workers-types": "^4.20260613.1",
@@ -69,12 +79,16 @@
 	},
 	"peerDependencies": {
 		"@ai-sdk/anthropic": "^3.0.0",
+		"@ai-sdk/google": "^3.0.0",
 		"@ai-sdk/openai": "^3.0.0",
 		"@ai-sdk/provider": "^3.0.0",
 		"ai": "^6.0.0"
 	},
 	"peerDependenciesMeta": {
 		"@ai-sdk/anthropic": {
+			"optional": true
+		},
+		"@ai-sdk/google": {
 			"optional": true
 		},
 		"@ai-sdk/openai": {

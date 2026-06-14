@@ -1781,6 +1781,9 @@ importers:
       '@ai-sdk/anthropic':
         specifier: ^3.0.84
         version: 3.0.84(zod@4.4.3)
+      '@ai-sdk/google':
+        specifier: ^3.0.0
+        version: 3.0.82(zod@4.4.3)
       '@ai-sdk/openai':
         specifier: ^3.0.71
         version: 3.0.71(zod@4.4.3)
@@ -7266,7 +7269,6 @@ snapshots:
       '@ai-sdk/provider': 3.0.10
       '@ai-sdk/provider-utils': 4.0.29(zod@4.4.3)
       zod: 4.4.3
-    optional: true
 
   '@ai-sdk/groq@3.0.41(zod@4.4.3)':
     dependencies:

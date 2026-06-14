@@ -1,4 +1,6 @@
 import type { LanguageModelV3 } from "@ai-sdk/provider";
+import { createClientFallbackModel } from "./client-fallback";
+import { findProviderBySlug, type GatewayProviderInfo, type WireFormat } from "./gateway-providers";
 import { createResumableStream, type ResumeExpiredPolicy } from "./resumable-stream";
 
 export {
@@ -6,6 +8,23 @@ export {
 	type ResumableStreamOptions,
 	type ResumeExpiredPolicy,
 } from "./resumable-stream";
+export {
+	type FallbackAttempt,
+	type GatewayErrorCode,
+	type GatewayErrorContext,
+	WorkersAIFallbackError,
+	WorkersAIGatewayError,
+} from "./errors";
+export { type FallbackLeg, createClientFallbackModel } from "./client-fallback";
+export {
+	type Billing,
+	GATEWAY_PROVIDERS,
+	type GatewayProviderInfo,
+	type WireFormat,
+	detectProviderByUrl,
+	findProviderBySlug,
+	wireableProviders,
+} from "./gateway-providers";
 
 /**
  * Gateway delegate — route AI SDK catalog models through Cloudflare AI Gateway,
@@ -46,17 +65,15 @@ export {
 // ---------------------------------------------------------------------------
 
 export interface ParsedSlug {
-	/** First path segment — selects the provider plugin and gateway provider id. */
+	/** First path segment — the registry resolver key (selects provider + wire format). */
 	resolverKey: string;
-	/** Provider id sent to the gateway universal endpoint. */
-	providerId: string;
 	/** Remaining segments — the provider-native model id. */
 	modelId: string;
 }
 
 /**
  * Parse a `vendor/model` slug. The first segment is the resolver key (which
- * provider plugin handles it); the rest is the provider-native model id. Routing
+ * registry entry handles it); the rest is the provider-native model id. Routing
  * providers keep multi-segment model ids, e.g. `openrouter/anthropic/claude`.
  */
 export function parseSlug(slug: string): ParsedSlug {
@@ -75,7 +92,31 @@ export function parseSlug(slug: string): ParsedSlug {
 			`Model slug "${slug}" is malformed. Use "<provider>/<model>" (e.g. "openai/gpt-5").`,
 		);
 	}
-	return { resolverKey, providerId: resolverKey, modelId };
+	return { resolverKey, modelId };
+}
+
+/**
+ * Resolve a slug to its registry entry, raising a helpful error for unknown or
+ * bring-your-own-provider-only providers.
+ */
+export function resolveProvider(slug: string, parsed: ParsedSlug): GatewayProviderInfo {
+	const info = findProviderBySlug(parsed.resolverKey);
+	if (!info) {
+		throw new GatewayDelegateError(
+			"config",
+			`Unknown gateway provider "${parsed.resolverKey}" (from slug "${slug}"). ` +
+				"See the AI Gateway provider directory for valid slugs, or use " +
+				"createGatewayProvider to bring your own @ai-sdk provider.",
+		);
+	}
+	if (!info.wireFormat) {
+		throw new GatewayDelegateError(
+			"config",
+			`Provider "${parsed.resolverKey}" is not chat/completions-shaped and has no built-in ` +
+				"parser. Reach it with createGatewayProvider (bring your own @ai-sdk provider).",
+		);
+	}
+	return info;
 }
 
 // ---------------------------------------------------------------------------
@@ -83,15 +124,27 @@ export function parseSlug(slug: string): ParsedSlug {
 // ---------------------------------------------------------------------------
 
 /**
- * Adapts a `@ai-sdk/*` provider to the delegate. Imported from a sub-path module
- * (e.g. `workers-ai-provider/openai`) so the AI SDK package stays an optional peer
- * dependency.
+ * Adapts a `@ai-sdk/*` provider to the delegate, keyed by the response wire
+ * format it parses. Imported from a sub-path module (e.g.
+ * `workers-ai-provider/openai`) so the AI SDK package stays an optional peer
+ * dependency. One plugin serves every registry provider of that wire format —
+ * the `openai` plugin covers the whole OpenAI-compatible long tail (deepseek,
+ * grok, groq, mistral, perplexity, openrouter, …).
  */
 export interface ProviderPlugin {
-	/** Matches the first segment of a model slug (e.g. `"openai"`). */
-	readonly resolverKey: string;
-	/** Build the AI SDK model, wiring the gateway-dispatching `fetch`. */
-	create(args: { modelId: string; fetch: typeof globalThis.fetch }): LanguageModelV3;
+	/** The response wire format this builder parses. */
+	readonly wireFormat: WireFormat;
+	/**
+	 * Build the AI SDK model, wiring the gateway-dispatching `fetch`. `baseURL`
+	 * (when provided by the registry) targets the provider's host so the request
+	 * URL host-strips to its gateway-native endpoint — pass it to the underlying
+	 * `@ai-sdk` provider.
+	 */
+	create(args: {
+		modelId: string;
+		fetch: typeof globalThis.fetch;
+		baseURL?: string;
+	}): LanguageModelV3;
 }
 
 // ---------------------------------------------------------------------------
@@ -137,8 +190,25 @@ export interface DelegateCallOptions {
 	onResumeExpired?: ResumeExpiredPolicy;
 	/** Extra request headers (run path: `extraHeaders`; gateway path: entry headers). */
 	extraHeaders?: Record<string, string>;
+	/**
+	 * Gateway path only: forward the upstream provider key instead of stripping it.
+	 * Required for BYOK providers (not on unified billing). Supply the key via
+	 * `extraHeaders` (e.g. `{ authorization: "Bearer …" }`); without `byok` the
+	 * delegate strips provider auth headers so unified billing applies.
+	 */
+	byok?: boolean;
 	/** Override the delegate's gateway for this model. */
 	gateway?: GatewayOptions | string;
+	/**
+	 * Custom metadata attached to the gateway log for this request (spend
+	 * attribution, tenant ids, etc.). Merges over any `metadata` already set via
+	 * `gateway: { metadata }`. Applied on both transports (run path: gateway
+	 * options; gateway path: `cf-aig-metadata` header). `bigint` values are
+	 * coerced to strings for the header form.
+	 */
+	metadata?: Record<string, number | string | boolean | null | bigint>;
+	/** Force gateway log collection on/off for this request (both transports). */
+	collectLog?: boolean;
 	/** Called once per dispatch with the resolved transport + gateway headers. */
 	onDispatch?: (info: DispatchInfo) => void;
 	/**
@@ -165,12 +235,47 @@ interface Selection {
 export function selectTransport(
 	opts: DelegateCallOptions,
 	resumeExplicitlyTrue: boolean,
+	runCatalog = true,
+	gatewayAvailable = true,
 ): Selection {
 	const warnings: string[] = [];
 	const wantsServerFallback = opts.fallback?.mode === "server";
 	const wantsCaching = opts.cacheTtl !== undefined || opts.skipCache === true;
 	const gatewayOnly = wantsServerFallback || wantsCaching;
 	const feature = wantsServerFallback ? 'fallback.mode:"server"' : "caching (cacheTtl/skipCache)";
+
+	// Run-path-only providers (on the run catalog, but not native gateway
+	// providers) have no gateway path at all — reject anything that would need it
+	// here, with a clear message, rather than letting it fail upstream.
+	if (runCatalog && !gatewayAvailable && (opts.transport === "gateway" || gatewayOnly)) {
+		const what = opts.transport === "gateway" ? 'transport:"gateway"' : feature;
+		throw new GatewayDelegateError(
+			"config",
+			`${what} is unavailable: this provider is on the unified run catalog but is not a ` +
+				"native gateway provider, so it has no gateway path (no caching, server-side " +
+				'fallback, or transport:"gateway"). Use the default run path, or fallback.mode:"client".',
+		);
+	}
+
+	// BYOK providers are not on the resumable run catalog — they can only be
+	// reached through the gateway path.
+	if (!runCatalog) {
+		if (opts.transport === "run") {
+			throw new GatewayDelegateError(
+				"config",
+				'transport:"run" is unavailable: this provider is not on the unified-billing run ' +
+					"catalog, so it can only be reached through the gateway path (BYOK).",
+			);
+		}
+		if (resumeExplicitlyTrue) {
+			throw new GatewayDelegateError(
+				"config",
+				"resume:true is unavailable: this provider is not on the resumable run catalog " +
+					"(cf-aig-run-id requires the unified-billing run path).",
+			);
+		}
+		return { transport: "gateway", resumeEnabled: false, warnings };
+	}
 
 	if (opts.transport === "run" && gatewayOnly) {
 		throw new GatewayDelegateError(
@@ -232,9 +337,8 @@ export class GatewayDelegateError extends Error {
 // Dispatch internals
 // ---------------------------------------------------------------------------
 
-// Stripped on the gateway path — unified billing / BYOK is the gateway's job, and
-// forwarding the AI SDK's placeholder key would 401 upstream.
-const STRIP_HEADERS = new Set(["authorization", "x-api-key", "content-length", "host"]);
+// Always stripped on the gateway path (transport-level headers the binding sets).
+const STRIP_HEADERS_BASE = new Set(["content-length", "host"]);
 
 interface GatewayEntry {
 	provider: string;
@@ -319,21 +423,16 @@ export function createGatewayDelegate(config: GatewayDelegateConfig): GatewayDel
 		);
 	}
 
-	const plugins = new Map<string, ProviderPlugin>();
-	for (const p of config.providers) plugins.set(p.resolverKey, p);
+	const plugins = new Map<WireFormat, ProviderPlugin>();
+	for (const p of config.providers) plugins.set(p.wireFormat, p);
 	const defaultResume = config.resume ?? true;
 
-	return (slug, options = {}) => {
+	const buildOne = (
+		slug: string,
+		options: DelegateCallOptions,
+	): { model: LanguageModelV3; transport: Transport } => {
 		const parsed = parseSlug(slug);
-		const plugin = plugins.get(parsed.resolverKey);
-		if (!plugin) {
-			throw new GatewayDelegateError(
-				"config",
-				`No provider plugin for "${parsed.resolverKey}" (from slug "${slug}"). ` +
-					`Registered: ${[...plugins.keys()].join(", ") || "<none>"}. ` +
-					'Install + pass the matching plugin (e.g. `openai` from "workers-ai-provider/openai").',
-			);
-		}
+		const info = resolveProvider(slug, parsed);
 
 		const resumeExplicitlyTrue = options.resume === true;
 		const effectiveOptions: DelegateCallOptions = {
@@ -341,8 +440,39 @@ export function createGatewayDelegate(config: GatewayDelegateConfig): GatewayDel
 			resume: options.resume ?? defaultResume,
 			onResumeExpired: options.onResumeExpired ?? config.onResumeExpired,
 		};
-		const selection = selectTransport(effectiveOptions, resumeExplicitlyTrue);
+		const selection = selectTransport(
+			effectiveOptions,
+			resumeExplicitlyTrue,
+			info.runCatalog,
+			info.gatewayPath !== false,
+		);
 		for (const w of selection.warnings) console.warn(w);
+
+		// Pick the parser by transport. The unified-billing run path (`env.AI.run`)
+		// does NOT speak a uniform wire format: Cloudflare normalizes most providers
+		// to OpenAI chat-completions (so `google` is parsed with the `openai` plugin
+		// on the run path), but passes Anthropic through natively. So the run path
+		// uses the registry's `runWireFormat` (default "openai"), while the gateway
+		// path — which hits provider-native endpoints — uses the native `wireFormat`.
+		const wire: WireFormat =
+			selection.transport === "run"
+				? (info.runWireFormat ?? "openai")
+				: (info.wireFormat as WireFormat);
+		const plugin = plugins.get(wire);
+		if (!plugin) {
+			throw new GatewayDelegateError(
+				"config",
+				selection.transport === "run"
+					? `The run path for "${parsed.resolverKey}" (from slug "${slug}") returns ` +
+							`"${wire}"-wire responses, so it needs the "${wire}" plugin. ` +
+							`Install + pass it from "workers-ai-provider/${wire}". ` +
+							`Registered: ${[...plugins.keys()].join(", ") || "<none>"}.`
+					: `No provider plugin for wire format "${wire}" (needed by "${parsed.resolverKey}" ` +
+							`on the gateway path from slug "${slug}"). ` +
+							`Registered: ${[...plugins.keys()].join(", ") || "<none>"}. ` +
+							`Install + pass the matching plugin from "workers-ai-provider/${wire}".`,
+			);
+		}
 
 		const { id: gatewayId, options: gatewayOptions } = normalizeGateway(
 			options.gateway ?? config.gateway,
@@ -352,7 +482,9 @@ export function createGatewayDelegate(config: GatewayDelegateConfig): GatewayDel
 			selection.transport === "run"
 				? makeRunFetch(
 						config.binding,
-						slug,
+						// Use the canonical run-catalog author (e.g. "grok" → "xai"), not the
+						// raw alias the caller typed, so `env.AI.run` resolves the model.
+						`${info.resolverKey}/${parsed.modelId}`,
 						gatewayOptions,
 						effectiveOptions,
 						selection,
@@ -360,14 +492,43 @@ export function createGatewayDelegate(config: GatewayDelegateConfig): GatewayDel
 					)
 				: makeGatewayFetch(
 						config.binding,
-						parsed,
+						info,
 						gatewayId,
+						gatewayOptions,
 						effectiveOptions,
 						selection,
 						options,
 					);
 
-		return plugin.create({ modelId: parsed.modelId, fetch: fetchImpl });
+		return {
+			model: plugin.create({
+				modelId: parsed.modelId,
+				fetch: fetchImpl,
+				// baseURL only matters on the gateway path (host-strip to the native
+				// endpoint); the run path ignores the request URL entirely.
+				...(selection.transport === "gateway" && info.baseURL
+					? { baseURL: info.baseURL }
+					: {}),
+			}),
+			transport: selection.transport,
+		};
+	};
+
+	return (slug, options = {}) => {
+		// Client-side fallback: build a model per slug and wrap them so a failed
+		// pre-stream dispatch falls through to the next, each on its own transport
+		// (so resume is preserved per leg). Server-side fallback stays on the
+		// gateway path inside makeGatewayFetch.
+		if (options.fallback?.mode === "client") {
+			const { fallback, ...rest } = options;
+			const slugs = [slug, ...fallback.models];
+			const legs = slugs.map((s) => {
+				const { model, transport } = buildOne(s, rest);
+				return { slug: s, model, transport };
+			});
+			return createClientFallbackModel(legs);
+		}
+		return buildOne(slug, options).model;
 	};
 }
 
@@ -385,6 +546,22 @@ function fireDispatch(resp: Response, selection: Selection, options: DelegateCal
 	});
 }
 
+type GatewayMetadata = Record<string, number | string | boolean | null | bigint>;
+
+/** Merge call-level metadata over gateway-option metadata (call wins). */
+function mergeMetadata(
+	base: GatewayMetadata | undefined,
+	override: GatewayMetadata | undefined,
+): GatewayMetadata | undefined {
+	if (!base && !override) return undefined;
+	return { ...base, ...override };
+}
+
+/** JSON-encode metadata for the `cf-aig-metadata` header (bigint → string). */
+function serializeMetadata(metadata: GatewayMetadata): string {
+	return JSON.stringify(metadata, (_k, v) => (typeof v === "bigint" ? v.toString() : v));
+}
+
 function makeRunFetch(
 	binding: Ai,
 	slug: string,
@@ -398,8 +575,15 @@ function makeRunFetch(
 		// The slug carries the model; drop the redundant body field (both are tolerated).
 		delete body.model;
 
+		// Fold first-class metadata/collectLog over anything supplied via
+		// `gateway: { ... }`; explicit call options win.
+		const mergedGateway: GatewayOptions = { ...gatewayOptions };
+		const mergedMeta = mergeMetadata(gatewayOptions.metadata, opts.metadata);
+		if (mergedMeta) mergedGateway.metadata = mergedMeta;
+		if (opts.collectLog !== undefined) mergedGateway.collectLog = opts.collectLog;
+
 		const runOptions = {
-			gateway: gatewayOptions,
+			gateway: mergedGateway,
 			returnRawResponse: true,
 			...(opts.extraHeaders ? { extraHeaders: opts.extraHeaders } : {}),
 			...(init?.signal ? { signal: init.signal } : {}),
@@ -439,28 +623,45 @@ function makeRunFetch(
 
 function makeGatewayFetch(
 	binding: Ai,
-	parsed: ParsedSlug,
+	info: GatewayProviderInfo,
 	gatewayId: string,
+	gatewayOptions: GatewayOptions,
 	opts: DelegateCallOptions,
 	selection: Selection,
 	callOptions: DelegateCallOptions,
 ): typeof globalThis.fetch {
+	// Strip the AI SDK's placeholder provider key unless BYOK forwards a real one;
+	// unified billing / the gateway's stored key authenticates upstream otherwise.
+	const strip = new Set(STRIP_HEADERS_BASE);
+	if (!opts.byok) for (const h of info.authHeaders) strip.add(h.toLowerCase());
+
 	return (async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-		const url = new URL(typeof input === "string" ? input : input.toString());
-		const endpoint = url.pathname.replace(/^\//, "") + (url.search || "");
+		const rawUrl = typeof input === "string" ? input : input.toString();
+		// Host-strip to the provider's gateway-native endpoint. The registry
+		// transform matches because the builder targeted the provider's baseURL;
+		// fall back to a generic pathname strip if it somehow doesn't.
+		const endpoint = info.transformEndpoint
+			? info.transformEndpoint(rawUrl)
+			: new URL(rawUrl).pathname.replace(/^\//, "") + (new URL(rawUrl).search || "");
 		const body = JSON.parse(asText(init?.body)) as Record<string, unknown>;
 
 		const headers: Record<string, string> = {};
 		for (const [k, v] of Object.entries(headersToObject(init?.headers))) {
-			if (!STRIP_HEADERS.has(k.toLowerCase())) headers[k] = v;
+			if (!strip.has(k.toLowerCase())) headers[k] = v;
 		}
 		if (opts.extraHeaders) Object.assign(headers, opts.extraHeaders);
 		// Best-effort gateway cache control (gateway-side config may still override).
 		if (opts.cacheTtl !== undefined) headers["cf-aig-cache-ttl"] = String(opts.cacheTtl);
 		if (opts.skipCache) headers["cf-aig-skip-cache"] = "true";
+		// Gateway log controls (mirror the run path's typed gateway options).
+		const metadata = mergeMetadata(gatewayOptions.metadata, opts.metadata);
+		if (metadata) headers["cf-aig-metadata"] = serializeMetadata(metadata);
+		if (opts.collectLog !== undefined) {
+			headers["cf-aig-collect-log"] = String(opts.collectLog);
+		}
 
 		const primary: GatewayEntry = {
-			provider: parsed.providerId,
+			provider: info.gatewayProviderId,
 			endpoint,
 			headers,
 			query: body,
@@ -470,11 +671,13 @@ function makeGatewayFetch(
 		if (opts.fallback?.mode === "server") {
 			for (const fb of opts.fallback.models) {
 				const fbParsed = parseSlug(fb);
-				if (fbParsed.providerId !== parsed.providerId) {
+				const fbInfo = resolveProvider(fb, fbParsed);
+				if (fbInfo.gatewayProviderId !== info.gatewayProviderId) {
 					throw new GatewayDelegateError(
 						"config",
-						`Cross-vendor server-side fallback (${parsed.providerId} → ${fbParsed.providerId}) ` +
-							'is not supported yet. Use fallback.mode:"client", or same-vendor fallback models.',
+						`Cross-vendor server-side fallback (${info.gatewayProviderId} → ` +
+							`${fbInfo.gatewayProviderId}) is not supported yet. Use fallback.mode:"client", ` +
+							"or same-vendor fallback models.",
 					);
 				}
 				entries.push({ ...primary, query: { ...body, model: fbParsed.modelId } });
@@ -484,7 +687,9 @@ function makeGatewayFetch(
 		const gw = (binding as unknown as { gateway(id: string): AiGatewayRunner }).gateway(
 			gatewayId,
 		);
-		const resp = await gw.run(entries);
+		const runOptions: Record<string, unknown> = {};
+		if (init?.signal) runOptions.signal = init.signal;
+		const resp = await gw.run(entries, runOptions);
 		fireDispatch(resp, selection, callOptions);
 		return resp;
 	}) as typeof globalThis.fetch;
