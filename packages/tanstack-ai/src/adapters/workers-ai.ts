@@ -351,7 +351,14 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 		let hasReceivedFinishReason = false;
 		const toolCallsInProgress = new Map<
 			number,
-			{ id: string; name: string; arguments: string; started: boolean }
+			{
+				id: string;
+				name: string;
+				arguments: string;
+				started: boolean;
+				/** Number of `arguments` chars already forwarded via TOOL_CALL_ARGS. */
+				emittedArgsLength: number;
+			}
 		>();
 
 		try {
@@ -556,6 +563,7 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 								name: toolCallDelta.function?.name || "",
 								arguments: "",
 								started: false,
+								emittedArgsLength: 0,
 							});
 						}
 
@@ -571,7 +579,11 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 							toolCall.arguments += toolCallDelta.function.arguments;
 						}
 
-						// Emit TOOL_CALL_START once we have id and name
+						// Emit TOOL_CALL_START once we have id and name. We must wait
+						// for the name: TanStack AI's StreamProcessor reads the tool
+						// name ONLY from TOOL_CALL_START (it is never updated by later
+						// events), so emitting early with an empty name produces a
+						// tool-call part with no `name`, breaking dispatch (issue #523).
 						if (toolCall.id && toolCall.name && !toolCall.started) {
 							toolCall.started = true;
 							yield {
@@ -585,14 +597,22 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 							} satisfies StreamChunk;
 						}
 
-						// Stream tool call arguments
-						if (toolCallDelta.function?.arguments && toolCall.started) {
+						// Stream any argument fragments that haven't been forwarded
+						// yet. We track the emitted length rather than forwarding the
+						// raw per-chunk delta because some models stream argument
+						// fragments BEFORE the name arrives; those are buffered in
+						// `arguments` while we wait for the name, and must be flushed
+						// once START is emitted so the full argument string reaches
+						// the consumer (issue #523).
+						if (toolCall.started && toolCall.arguments.length > toolCall.emittedArgsLength) {
+							const argsDelta = toolCall.arguments.slice(toolCall.emittedArgsLength);
+							toolCall.emittedArgsLength = toolCall.arguments.length;
 							yield {
 								type: EventType.TOOL_CALL_ARGS,
 								toolCallId: toolCall.id,
 								model: chunk.model || model || this.model,
 								timestamp,
-								delta: toolCallDelta.function.arguments,
+								delta: argsDelta,
 							} satisfies StreamChunk;
 						}
 					}
