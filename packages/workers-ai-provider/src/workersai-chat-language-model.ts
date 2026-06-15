@@ -9,6 +9,7 @@ import {
 	prepareToolsAndToolChoice,
 	processText,
 	processToolCalls,
+	salvageToolCallsFromText,
 } from "./utils";
 import type { WorkersAIChatSettings } from "./workersai-chat-settings";
 import type { TextGenerationModels } from "./workersai-models";
@@ -203,6 +204,57 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 		};
 	}
 
+	/**
+	 * Extract reasoning, text, and tool calls from a non-streaming response.
+	 *
+	 * Shared by `doGenerate` and `doStream`'s graceful-degradation branch (the
+	 * path gpt-oss falls through, since it doesn't support `/ai/run/` streaming
+	 * and is retried non-streaming). When a forced tool call was leaked into
+	 * text content (gpt-oss harmony quirk), it is salvaged into a structured
+	 * tool call and the leaked JSON text is suppressed. A warning is appended in
+	 * place so callers can observe the reinterpretation.
+	 */
+	private extractContent(
+		outputRecord: Record<string, unknown>,
+		args: ReturnType<typeof this.getArgs>["args"],
+		warnings: SharedV3Warning[],
+	) {
+		const choices = outputRecord.choices as
+			| Array<{ message?: { reasoning_content?: string; reasoning?: string } }>
+			| undefined;
+		const reasoningContent =
+			choices?.[0]?.message?.reasoning_content ?? choices?.[0]?.message?.reasoning;
+
+		const toolCalls = processToolCalls(outputRecord);
+		const salvaged =
+			toolCalls.length === 0
+				? salvageToolCallsFromText(outputRecord, {
+						tools: args.tools,
+						toolChoice: args.tool_choice,
+					})
+				: null;
+
+		if (salvaged) {
+			warnings.push({
+				type: "other",
+				message: `Recovered ${salvaged.length} forced tool call(s) that the model emitted as text content instead of structured tool calls (model: ${this.modelId}).`,
+			});
+		}
+
+		return {
+			reasoningContent,
+			// Suppress the leaked JSON text when we salvaged a tool call from it.
+			text: salvaged ? "" : (processText(outputRecord) ?? ""),
+			toolCalls: salvaged ?? toolCalls,
+			// When salvaged, the upstream finish_reason is "stop"; report
+			// "tool-calls" so the response is indistinguishable from a native
+			// tool call and the agentic loop continues correctly.
+			finishReason: salvaged
+				? ({ unified: "tool-calls", raw: "stop" } as const)
+				: mapWorkersAIFinishReason(outputRecord),
+		};
+	}
+
 	async doGenerate(
 		options: Parameters<LanguageModelV3["doGenerate"]>[0],
 	): Promise<Awaited<ReturnType<LanguageModelV3["doGenerate"]>>> {
@@ -230,25 +282,20 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 		}
 
 		const outputRecord = output as Record<string, unknown>;
-		const choices = outputRecord.choices as
-			| Array<{
-					message?: { reasoning_content?: string; reasoning?: string };
-			  }>
-			| undefined;
-		const reasoningContent =
-			choices?.[0]?.message?.reasoning_content ?? choices?.[0]?.message?.reasoning;
+		const { reasoningContent, text, toolCalls, finishReason } = this.extractContent(
+			outputRecord,
+			args,
+			warnings,
+		);
 
 		return {
-			finishReason: mapWorkersAIFinishReason(outputRecord),
+			finishReason,
 			content: [
 				...(reasoningContent
 					? [{ type: "reasoning" as const, text: reasoningContent }]
 					: []),
-				{
-					type: "text",
-					text: processText(outputRecord) ?? "",
-				},
-				...processToolCalls(outputRecord),
+				{ type: "text" as const, text },
+				...toolCalls,
 			],
 			usage: mapWorkersAIUsage(output as Record<string, unknown>),
 			warnings,
@@ -279,20 +326,24 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 		// If the binding returned a stream, pipe it through the SSE mapper
 		if (response instanceof ReadableStream) {
 			return {
-				stream: prependStreamStart(getMappedStream(response), warnings),
+				stream: prependStreamStart(
+					getMappedStream(response, {
+						tools: args.tools,
+						toolChoice: args.tool_choice,
+					}),
+					warnings,
+				),
 			};
 		}
 
 		// Graceful degradation: some models return a non-streaming response even
 		// when stream:true is requested. Wrap the complete response as a stream.
 		const outputRecord = response as Record<string, unknown>;
-		const choices = outputRecord.choices as
-			| Array<{
-					message?: { reasoning_content?: string; reasoning?: string };
-			  }>
-			| undefined;
-		const reasoningContent =
-			choices?.[0]?.message?.reasoning_content ?? choices?.[0]?.message?.reasoning;
+		const { reasoningContent, text, toolCalls, finishReason } = this.extractContent(
+			outputRecord,
+			args,
+			warnings,
+		);
 
 		let textId: string | null = null;
 		let reasoningId: string | null = null;
@@ -316,7 +367,6 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 						controller.enqueue({ type: "reasoning-end", id: reasoningId });
 					}
 
-					const text = processText(outputRecord);
 					if (text) {
 						textId = generateId();
 						controller.enqueue({ type: "text-start", id: textId });
@@ -324,13 +374,13 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 						controller.enqueue({ type: "text-end", id: textId });
 					}
 
-					for (const toolCall of processToolCalls(outputRecord)) {
+					for (const toolCall of toolCalls) {
 						controller.enqueue(toolCall);
 					}
 
 					controller.enqueue({
 						type: "finish",
-						finishReason: mapWorkersAIFinishReason(outputRecord),
+						finishReason,
 						usage: mapWorkersAIUsage(response as Record<string, unknown>),
 					});
 					controller.close();

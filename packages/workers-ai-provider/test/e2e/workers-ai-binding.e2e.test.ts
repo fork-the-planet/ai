@@ -53,6 +53,7 @@ const results: Record<
 		toolRoundTrip: Status;
 		toolMultiStep: Status;
 		toolRequired: Status;
+		toolForced: Status;
 		structuredOutput: Status;
 		notes: string[];
 	}
@@ -68,6 +69,7 @@ function getResult(label: string) {
 			toolRoundTrip: "fail",
 			toolMultiStep: "fail",
 			toolRequired: "fail",
+			toolForced: "fail",
 			structuredOutput: "fail",
 			notes: [],
 		};
@@ -88,7 +90,7 @@ function printSummaryTable() {
 	const pad = (s: string, n: number) => s + " ".repeat(Math.max(0, n - s.length));
 	const maxLabel = Math.max(...labels.map((l) => l.length), 5);
 
-	const header = `${pad("Model", maxLabel)} | Chat | Strm | Turn | Tool | T-RT | T-MS | T-Rq | JSON | Notes`;
+	const header = `${pad("Model", maxLabel)} | Chat | Strm | Turn | Tool | T-RT | T-MS | T-Rq | T-Fc | JSON | Notes`;
 	const sep = "-".repeat(header.length + 10);
 
 	console.log(`\n${sep}`);
@@ -101,13 +103,14 @@ function printSummaryTable() {
 		const r = results[label];
 		const notes = r.notes.length > 0 ? r.notes.join("; ") : "";
 		console.log(
-			`${pad(label, maxLabel)} | ${statusIcon(r.chat)} | ${statusIcon(r.stream)} | ${statusIcon(r.multiTurn)} | ${statusIcon(r.toolCall)} | ${statusIcon(r.toolRoundTrip)} | ${statusIcon(r.toolMultiStep)} | ${statusIcon(r.toolRequired)} | ${statusIcon(r.structuredOutput)} | ${notes}`,
+			`${pad(label, maxLabel)} | ${statusIcon(r.chat)} | ${statusIcon(r.stream)} | ${statusIcon(r.multiTurn)} | ${statusIcon(r.toolCall)} | ${statusIcon(r.toolRoundTrip)} | ${statusIcon(r.toolMultiStep)} | ${statusIcon(r.toolRequired)} | ${statusIcon(r.toolForced)} | ${statusIcon(r.structuredOutput)} | ${notes}`,
 		);
 	}
 
 	console.log(sep);
 	console.log("  OK = works    ~ = partial/quirky    X = broken/error");
 	console.log("  T-MS = multi-step agentic loop    T-Rq = toolChoice required");
+	console.log("  T-Fc = toolChoice forced to a specific tool (named-function form)");
 	console.log(`${sep}\n`);
 }
 
@@ -401,6 +404,44 @@ describe("Workers AI Binding E2E", () => {
 				} else {
 					r.toolRequired = "fail";
 					r.notes.push("t-rq: no tool call or content");
+				}
+			});
+		}
+	});
+
+	// ------------------------------------------------------------------
+	// toolChoice forced to a specific tool (per model)
+	// Validates the named-function mapping over the binding path.
+	// ------------------------------------------------------------------
+	describe("toolChoice forced (named tool, per model)", () => {
+		for (const model of MODELS) {
+			it(`${model.label} — toolChoice forced via binding`, async () => {
+				if (!serverReady) return;
+
+				const r = getResult(model.label);
+				const data = await post("/chat/tool-forced", { model: model.id });
+
+				if (data.error) {
+					r.toolForced = "fail";
+					r.notes.push(`t-fc: ${String(data.error).slice(0, 60)}`);
+					return;
+				}
+
+				const toolCalls = data.toolCalls as Array<{ toolName?: string }> | undefined;
+				const forcedCall = Array.isArray(toolCalls)
+					? toolCalls.find((c) => c.toolName === "record_feedback")
+					: undefined;
+				if (forcedCall) {
+					r.toolForced = "ok";
+				} else if (Array.isArray(toolCalls) && toolCalls.length > 0) {
+					r.toolForced = "warn";
+					r.notes.push(`t-fc: called ${toolCalls[0].toolName} instead of forced tool`);
+				} else if (typeof data.text === "string" && (data.text as string).length > 0) {
+					r.toolForced = "warn";
+					r.notes.push("t-fc: answered as text despite forced tool");
+				} else {
+					r.toolForced = "fail";
+					r.notes.push("t-fc: no tool call or content");
 				}
 			});
 		}

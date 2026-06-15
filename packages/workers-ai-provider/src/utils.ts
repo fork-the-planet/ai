@@ -301,12 +301,17 @@ export function prepareToolsAndToolChoice(
 		case "required":
 			return { tool_choice: "required", tools: mappedTools };
 
-		// Workers AI does not support tool mode directly,
-		// so we filter the tools and force the tool choice through 'required'
+		// Force a specific tool via the OpenAI-style named-function form.
+		// Workers AI enforces this server-side, unlike "required" which is
+		// advisory and "fails open" on long contexts / reasoning models (the
+		// model can answer in prose instead of calling the tool). The full tool
+		// list is kept (not filtered to the single function) to match OpenAI
+		// semantics and preserve tool-result context fidelity.
+		// See https://github.com/cloudflare/ai/issues/560.
 		case "tool":
 			return {
-				tool_choice: "required",
-				tools: mappedTools.filter((tool) => tool.function.name === toolChoice.toolName),
+				tool_choice: { type: "function", function: { name: toolChoice.toolName } },
+				tools: mappedTools,
 			};
 		default: {
 			const exhaustiveCheck = type satisfies never;
@@ -462,6 +467,133 @@ export function processToolCalls(output: Record<string, unknown>): LanguageModel
 export function processPartialToolCalls(partialToolCalls: PartialToolCall[]) {
 	const mergedToolCalls = mergePartialToolCalls(partialToolCalls);
 	return processToolCalls({ tool_calls: mergedToolCalls });
+}
+
+// ---------------------------------------------------------------------------
+// Forced tool-call salvage (gpt-oss harmony quirk)
+// ---------------------------------------------------------------------------
+
+/**
+ * Was a specific tool forced for this request?
+ *
+ * True for both `tool_choice: "required"` and the named-function form
+ * `{ type: "function", function: { name } }`.
+ */
+export function isForcedToolChoice(toolChoice: unknown): boolean {
+	if (toolChoice === "required") return true;
+	return (
+		typeof toolChoice === "object" &&
+		toolChoice !== null &&
+		(toolChoice as { type?: unknown }).type === "function"
+	);
+}
+
+/**
+ * Parse tool calls that a model leaked as JSON text instead of structured
+ * `tool_calls`. Shared by the non-streaming salvage and the streaming buffer.
+ *
+ * Only JSON objects whose `name` is one of `knownToolNames` are recovered;
+ * everything else (prose, harmony channel/role leaks like `{"name":"analysis"}`,
+ * hallucinated names) is ignored to avoid fabricating bogus calls.
+ */
+export function parseLeakedToolCalls(
+	text: string,
+	knownToolNames: Set<string>,
+): LanguageModelV3ToolCall[] {
+	let parsed: unknown;
+	try {
+		parsed = JSON.parse(text.trim());
+	} catch {
+		return [];
+	}
+
+	const candidates = Array.isArray(parsed) ? parsed : [parsed];
+	const salvaged: LanguageModelV3ToolCall[] = [];
+
+	for (const candidate of candidates) {
+		if (typeof candidate !== "object" || candidate === null) continue;
+		const obj = candidate as Record<string, unknown>;
+		const name = obj.name;
+		if (typeof name !== "string" || !knownToolNames.has(name)) continue;
+
+		// Arguments may be wrapped (`arguments`/`parameters`) or flattened as
+		// siblings of `name`.
+		let args: unknown;
+		if ("arguments" in obj) {
+			args = obj.arguments;
+		} else if ("parameters" in obj) {
+			args = obj.parameters;
+		} else {
+			const { name: _name, ...rest } = obj;
+			args = rest;
+		}
+
+		salvaged.push({
+			input: typeof args === "string" ? args : JSON.stringify(args ?? {}),
+			toolCallId: createAISDKToolCallId(undefined),
+			type: "tool-call",
+			toolName: name,
+		});
+	}
+
+	return salvaged;
+}
+
+/** Collect the requested tool names from mapped tools. */
+export function getToolNames(
+	tools: Array<{ function: { name?: string } }> | undefined,
+): Set<string> {
+	return new Set(
+		(tools ?? [])
+			.map((tool) => tool.function?.name)
+			.filter((name): name is string => typeof name === "string"),
+	);
+}
+
+/**
+ * Salvage a tool call that a model leaked into text content instead of the
+ * structured `tool_calls` field.
+ *
+ * Workers AI's gpt-oss models (harmony format) sometimes emit a forced tool
+ * call as raw JSON in `message.content` with an empty `tool_calls` array and
+ * `finish_reason: "stop"` — typically when the forced tool is a poor fit for
+ * the conversation. The content looks like one of:
+ *
+ *   {"name":"read_skill_resource","path":"feedback.txt"}        (flat args)
+ *   {"name":"calc","arguments":{"a":1}}                          (wrapped args)
+ *   [{"name":"calc","parameters":{"a":1}}]                       (array form)
+ *
+ * This reinterprets that text as a structured tool call. It is intentionally
+ * narrow to avoid false positives:
+ *   - only runs when a tool was *forced* (required / named-function), so a
+ *     tool call was explicitly demanded by the caller;
+ *   - only runs when there are no real structured tool calls to override;
+ *   - only matches JSON objects whose `name` is one of the requested tools.
+ *
+ * Returns the salvaged tool calls, or `null` when nothing was salvaged.
+ *
+ * See https://github.com/cloudflare/ai/issues/560.
+ */
+export function salvageToolCallsFromText(
+	output: Record<string, unknown>,
+	context: {
+		tools: Array<{ function: { name?: string } }> | undefined;
+		toolChoice: unknown;
+	},
+): LanguageModelV3ToolCall[] | null {
+	if (!isForcedToolChoice(context.toolChoice)) return null;
+
+	// Never override real tool calls.
+	if (processToolCalls(output).length > 0) return null;
+
+	const knownToolNames = getToolNames(context.tools);
+	if (knownToolNames.size === 0) return null;
+
+	const text = processText(output);
+	if (!text) return null;
+
+	const salvaged = parseLeakedToolCalls(text, knownToolNames);
+	return salvaged.length > 0 ? salvaged : null;
 }
 
 // ---------------------------------------------------------------------------

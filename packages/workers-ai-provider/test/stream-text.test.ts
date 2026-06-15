@@ -212,6 +212,117 @@ describe("REST API - Streaming Text Tests", () => {
 		expect(await result.finishReason).toBe("tool-calls");
 	});
 
+	it("should salvage a forced tool call leaked into streamed text content (gpt-oss harmony)", async () => {
+		// gpt-oss can stream a forced tool call as `content` text deltas with
+		// finish_reason "stop" instead of structured tool_calls. With a forced
+		// tool choice, the provider buffers the text and reinterprets it.
+		server.use(
+			http.post(
+				`https://api.cloudflare.com/client/v4/accounts/${TEST_ACCOUNT_ID}/ai/run/${TEST_MODEL}`,
+				async () => {
+					return new Response(
+						[
+							`data: {"choices":[{"delta":{"content":"{\\"name\\":\\"get_weather\\","},"finish_reason":null}]}\n\n`,
+							`data: {"choices":[{"delta":{"content":"\\"location\\":\\"London\\"}"},"finish_reason":null}]}\n\n`,
+							`data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n`,
+							"data: [DONE]\n\n",
+						].join(""),
+						{
+							headers: {
+								"Content-Type": "text/event-stream",
+								"Transfer-Encoding": "chunked",
+							},
+						},
+					);
+				},
+			),
+		);
+
+		const workersai = createWorkersAI({
+			accountId: TEST_ACCOUNT_ID,
+			apiKey: TEST_API_KEY,
+		});
+
+		const result = streamText({
+			model: workersai(TEST_MODEL),
+			prompt: "Get the weather for London",
+			tools: {
+				get_weather: {
+					description: "Get the weather in a location",
+					inputSchema: z.object({ location: z.string() }),
+				},
+			},
+			toolChoice: { type: "tool", toolName: "get_weather" },
+		});
+
+		const toolCalls: any[] = [];
+		let accumulatedText = "";
+		for await (const chunk of result.fullStream) {
+			if (chunk.type === "tool-call") toolCalls.push(chunk);
+			if (chunk.type === "text-delta") accumulatedText += (chunk as { text: string }).text;
+		}
+
+		expect(toolCalls).toHaveLength(1);
+		expect(toolCalls[0].toolName).toBe("get_weather");
+		expect(toolCalls[0].input).toEqual({ location: "London" });
+		// The leaked JSON text must not surface as assistant text.
+		expect(accumulatedText).toBe("");
+		expect(await result.finishReason).toBe("tool-calls");
+	});
+
+	it("should not salvage streamed text when the leaked name is not a known tool", async () => {
+		// A harmony channel/role leak (e.g. "analysis") must not be fabricated
+		// into a tool call; the buffered text is surfaced as-is instead.
+		server.use(
+			http.post(
+				`https://api.cloudflare.com/client/v4/accounts/${TEST_ACCOUNT_ID}/ai/run/${TEST_MODEL}`,
+				async () => {
+					return new Response(
+						[
+							`data: {"choices":[{"delta":{"content":"{\\"name\\":\\"analysis\\",\\"location\\":\\"x\\"}"},"finish_reason":null}]}\n\n`,
+							`data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n`,
+							"data: [DONE]\n\n",
+						].join(""),
+						{
+							headers: {
+								"Content-Type": "text/event-stream",
+								"Transfer-Encoding": "chunked",
+							},
+						},
+					);
+				},
+			),
+		);
+
+		const workersai = createWorkersAI({
+			accountId: TEST_ACCOUNT_ID,
+			apiKey: TEST_API_KEY,
+		});
+
+		const result = streamText({
+			model: workersai(TEST_MODEL),
+			prompt: "Get the weather for London",
+			tools: {
+				get_weather: {
+					description: "Get the weather in a location",
+					inputSchema: z.object({ location: z.string() }),
+				},
+			},
+			toolChoice: { type: "tool", toolName: "get_weather" },
+		});
+
+		const toolCalls: any[] = [];
+		let accumulatedText = "";
+		for await (const chunk of result.fullStream) {
+			if (chunk.type === "tool-call") toolCalls.push(chunk);
+			if (chunk.type === "text-delta") accumulatedText += (chunk as { text: string }).text;
+		}
+
+		expect(toolCalls).toHaveLength(0);
+		expect(accumulatedText).toBe('{"name":"analysis","location":"x"}');
+		expect(await result.finishReason).toBe("stop");
+	});
+
 	it("should handle streamed tool calls (OpenAI format) with tools present", async () => {
 		server.use(
 			http.post(

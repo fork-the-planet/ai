@@ -6,7 +6,12 @@ import type {
 import { generateId } from "ai";
 import { mapWorkersAIFinishReason } from "./map-workersai-finish-reason";
 import { mapWorkersAIUsage } from "./map-workersai-usage";
-import { createAISDKToolCallId } from "./utils";
+import {
+	createAISDKToolCallId,
+	getToolNames,
+	isForcedToolChoice,
+	parseLeakedToolCalls,
+} from "./utils";
 
 /**
  * Prepend a stream-start event to an existing LanguageModelV3 stream.
@@ -64,6 +69,10 @@ function isNullFinalizationChunk(tc: Record<string, unknown>): boolean {
  */
 export function getMappedStream(
 	response: Response | ReadableStream<Uint8Array>,
+	salvageContext?: {
+		tools: Array<{ function: { name?: string } }> | undefined;
+		toolChoice: unknown;
+	},
 ): ReadableStream<LanguageModelV3StreamPart> {
 	const rawStream =
 		response instanceof ReadableStream
@@ -73,6 +82,18 @@ export function getMappedStream(
 	if (!rawStream) {
 		throw new Error("No readable stream available for SSE parsing.");
 	}
+
+	// gpt-oss harmony quirk: a forced tool call can be streamed as `content`
+	// text deltas instead of structured tool calls. When a tool was forced,
+	// buffer the text content (rather than emitting it incrementally) so we can
+	// reinterpret it as a tool call at flush time. Text is unexpected in forced
+	// mode anyway, so buffering it does not regress a useful stream.
+	// See https://github.com/cloudflare/ai/issues/560.
+	const knownToolNames = getToolNames(salvageContext?.tools);
+	const bufferContentForSalvage =
+		isForcedToolChoice(salvageContext?.toolChoice) && knownToolNames.size > 0;
+	let contentBuffer = "";
+	let anyToolCallStarted = false;
 
 	// State shared across the transform
 	let usage: LanguageModelV3Usage = {
@@ -146,20 +167,24 @@ export function getMappedStream(
 				if (nativeResponse != null && nativeResponse !== "") {
 					const responseText = String(nativeResponse);
 					if (responseText.length > 0) {
-						// Close active reasoning block before text starts
-						if (reasoningId) {
-							controller.enqueue({ type: "reasoning-end", id: reasoningId });
-							reasoningId = null;
+						if (bufferContentForSalvage) {
+							contentBuffer += responseText;
+						} else {
+							// Close active reasoning block before text starts
+							if (reasoningId) {
+								controller.enqueue({ type: "reasoning-end", id: reasoningId });
+								reasoningId = null;
+							}
+							if (!textId) {
+								textId = generateId();
+								controller.enqueue({ type: "text-start", id: textId });
+							}
+							controller.enqueue({
+								type: "text-delta",
+								id: textId,
+								delta: responseText,
+							});
 						}
-						if (!textId) {
-							textId = generateId();
-							controller.enqueue({ type: "text-start", id: textId });
-						}
-						controller.enqueue({
-							type: "text-delta",
-							id: textId,
-							delta: responseText,
-						});
 					}
 				}
 
@@ -197,20 +222,24 @@ export function getMappedStream(
 
 					const textDelta = delta.content as string | undefined;
 					if (textDelta && textDelta.length > 0) {
-						// Close active reasoning block before text starts
-						if (reasoningId) {
-							controller.enqueue({ type: "reasoning-end", id: reasoningId });
-							reasoningId = null;
+						if (bufferContentForSalvage) {
+							contentBuffer += textDelta;
+						} else {
+							// Close active reasoning block before text starts
+							if (reasoningId) {
+								controller.enqueue({ type: "reasoning-end", id: reasoningId });
+								reasoningId = null;
+							}
+							if (!textId) {
+								textId = generateId();
+								controller.enqueue({ type: "text-start", id: textId });
+							}
+							controller.enqueue({
+								type: "text-delta",
+								id: textId,
+								delta: textDelta,
+							});
 						}
-						if (!textId) {
-							textId = generateId();
-							controller.enqueue({ type: "text-start", id: textId });
-						}
-						controller.enqueue({
-							type: "text-delta",
-							id: textId,
-							delta: textDelta,
-						});
 					}
 
 					const deltaToolCalls = delta.tool_calls as
@@ -234,17 +263,59 @@ export function getMappedStream(
 					closeToolCall(idx, controller);
 				}
 
-				// Close open text/reasoning blocks
+				// Close open reasoning block before any salvaged tool calls.
 				if (reasoningId) {
 					controller.enqueue({ type: "reasoning-end", id: reasoningId });
 				}
+
+				// Salvage a forced tool call that streamed as buffered text.
+				let salvagedToolCalls = false;
+				if (bufferContentForSalvage && !anyToolCallStarted && contentBuffer.trim()) {
+					const salvaged = parseLeakedToolCalls(contentBuffer, knownToolNames);
+					if (salvaged.length > 0) {
+						for (const call of salvaged) {
+							controller.enqueue({
+								type: "tool-input-start",
+								id: call.toolCallId,
+								toolName: call.toolName,
+							});
+							controller.enqueue({
+								type: "tool-input-delta",
+								id: call.toolCallId,
+								delta: call.input,
+							});
+							controller.enqueue({ type: "tool-input-end", id: call.toolCallId });
+							controller.enqueue(call);
+						}
+						salvagedToolCalls = true;
+						// Stream warnings are fixed at stream-start, so surface the
+						// reinterpretation here for observability instead.
+						console.warn(
+							`[workers-ai-provider] Recovered ${salvaged.length} forced tool call(s) that the model streamed as text content instead of structured tool calls.`,
+						);
+					} else {
+						// Not a recoverable tool call — emit the buffered text as-is.
+						const id = generateId();
+						controller.enqueue({ type: "text-start", id });
+						controller.enqueue({ type: "text-delta", id, delta: contentBuffer });
+						controller.enqueue({ type: "text-end", id });
+					}
+				} else if (bufferContentForSalvage && contentBuffer.trim()) {
+					// Real tool calls were present alongside buffered text — emit text.
+					const id = generateId();
+					controller.enqueue({ type: "text-start", id });
+					controller.enqueue({ type: "text-delta", id, delta: contentBuffer });
+					controller.enqueue({ type: "text-end", id });
+				}
+
 				if (textId) {
 					controller.enqueue({ type: "text-end", id: textId });
 				}
 
 				// Detect premature termination
-				const effectiveFinishReason =
-					!receivedDone && receivedAnyData && !finishReason
+				const effectiveFinishReason = salvagedToolCalls
+					? ({ unified: "tool-calls", raw: "stop" } as LanguageModelV3FinishReason)
+					: !receivedDone && receivedAnyData && !finishReason
 						? ({
 								unified: "error",
 								raw: "stream-truncated",
@@ -322,6 +393,7 @@ export function getMappedStream(
 				const toolName = tcName || "";
 				activeToolCalls.set(tcIndex, { id, toolName, args: "" });
 				lastActiveToolIndex = tcIndex;
+				anyToolCallStarted = true;
 
 				controller.enqueue({
 					type: "tool-input-start",
