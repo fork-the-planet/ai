@@ -529,6 +529,68 @@ describe.skipIf(skip())("Workers AI REST E2E", () => {
 				console.log(`  [vision] ${model.label} OK — "${result.text.slice(0, 100)}"`);
 			});
 		}
+
+		// SVG (image/svg+xml) is accepted by the converter because it is an
+		// image/* media type, but Workers AI does NOT actually support vector
+		// markup as a vision input. As of this writing, Kimi K2.7 raster vision
+		// works (see the test above) while the same request with an SVG data URL
+		// is rejected server-side with an Internal Server Error (code 8005),
+		// whereas an equivalent PNG succeeds.
+		//
+		// This test is exploratory and intentionally tolerant: it documents that
+		// the converter forwards SVG unchanged and records whichever outcome the
+		// backend returns, so it won't flake if Cloudflare later adds (or keeps
+		// rejecting) SVG support.
+		it("Kimi K2.7 Code — SVG image input via REST (currently unsupported by backend)", async () => {
+			const provider = makeProvider();
+
+			// A plain red circle on a white background.
+			const svg =
+				'<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64">' +
+				'<rect width="64" height="64" fill="white"/>' +
+				'<circle cx="32" cy="32" r="24" fill="red"/>' +
+				"</svg>";
+			const svgBytes = new TextEncoder().encode(svg);
+
+			try {
+				const result = await generateText({
+					model: provider("@cf/moonshotai/kimi-k2.7-code" as ModelId),
+					messages: [
+						{
+							role: "user",
+							content: [
+								{
+									type: "text",
+									text: "What shape and color is in this image? Answer in one short sentence.",
+								},
+								{
+									type: "image",
+									image: svgBytes,
+									mediaType: "image/svg+xml",
+								},
+							],
+						},
+					],
+				});
+
+				// If the backend ever starts accepting SVG, just record what came back.
+				expect(typeof result.text).toBe("string");
+				const understoodSvg =
+					result.text.toLowerCase().includes("circle") ||
+					result.text.toLowerCase().includes("red");
+				console.log(
+					`  [vision:svg] Kimi K2.7 Code accepted SVG — understood=${understoodSvg} — "${result.text.slice(0, 120)}"`,
+				);
+			} catch (err: unknown) {
+				// Expected today: the converter forwarded the SVG (no client-side
+				// rejection), but Workers AI rejected it server-side.
+				const message = (err as Error).message;
+				expect(message).toContain("Workers AI API error");
+				console.log(
+					`  [vision:svg] Kimi K2.7 Code rejected SVG server-side — "${message.slice(0, 120)}"`,
+				);
+			}
+		});
 	});
 
 	// ------------------------------------------------------------------

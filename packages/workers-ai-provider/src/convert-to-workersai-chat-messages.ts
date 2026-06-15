@@ -1,4 +1,5 @@
 import type { LanguageModelV3DataContent, LanguageModelV3Prompt } from "@ai-sdk/provider";
+import { UnsupportedFunctionalityError } from "@ai-sdk/provider";
 import { toWorkersAIToolCallId } from "./utils";
 import type { WorkersAIContentPart, WorkersAIChatPrompt } from "./workersai-chat-prompt";
 
@@ -43,17 +44,23 @@ function toUint8Array(data: LanguageModelV3DataContent): Uint8Array | null {
 
 function assertImageMediaType(mediaType: string | undefined): string {
 	if (!mediaType) {
-		throw new Error(
-			"Workers AI chat only supports image file parts with an image/* mediaType. " +
+		throw new UnsupportedFunctionalityError({
+			functionality: "file-part-without-media-type",
+			message:
+				"Workers AI chat only supports image file parts with an image/* mediaType. " +
 				"Received a file part without a mediaType.",
-		);
+		});
 	}
 
-	if (!mediaType.startsWith("image/")) {
-		throw new Error(
-			"Workers AI chat only supports image file parts with an image/* mediaType. " +
+	// Media types are case-insensitive (RFC 2045), so compare against a
+	// lower-cased copy while preserving the caller's original casing on output.
+	if (!mediaType.toLowerCase().startsWith("image/")) {
+		throw new UnsupportedFunctionalityError({
+			functionality: "non-image-file-part",
+			message:
+				"Workers AI chat only supports image file parts with an image/* mediaType. " +
 				`Received mediaType "${mediaType}".`,
-		);
+		});
 	}
 
 	return mediaType;
@@ -83,7 +90,7 @@ export function convertToWorkersAIChatMessages(prompt: LanguageModelV3Prompt): {
 
 			case "user": {
 				const textParts: string[] = [];
-				const imageParts: { image: Uint8Array; mediaType: string | undefined }[] = [];
+				const imageParts: { image: Uint8Array; mediaType: string }[] = [];
 
 				for (const part of content) {
 					switch (part.type) {
