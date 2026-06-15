@@ -220,6 +220,40 @@ export default {
 					});
 				}
 
+				// ----- toolChoice forced to a specific tool (named-function form) -----
+				case "/chat/tool-forced": {
+					const result = await generateText({
+						model: provider(model as any),
+						messages: [
+							{ role: "system", content: "You are a warm, encouraging coach." },
+							{
+								role: "user",
+								content: "That went really well! How do you think I did?",
+							},
+						],
+						tools: {
+							record_feedback: {
+								description: "Record structured coaching feedback.",
+								inputSchema: z.object({
+									score: z.number().describe("score out of 10"),
+									note: z.string().describe("short feedback note"),
+								}),
+							},
+							lookup_schedule: {
+								description: "Look up the practice schedule.",
+								inputSchema: z.object({ day: z.string() }),
+							},
+						},
+						toolChoice: { type: "tool", toolName: "record_feedback" },
+					});
+
+					return jsonResponse({
+						text: result.text,
+						toolCalls: result.toolCalls,
+						finishReason: result.finishReason,
+					});
+				}
+
 				// ----- Structured output -----
 				case "/chat/structured": {
 					const result = await generateText({

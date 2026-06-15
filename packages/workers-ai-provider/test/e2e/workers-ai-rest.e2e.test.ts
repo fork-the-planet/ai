@@ -82,6 +82,7 @@ const results: Record<
 		toolRoundTrip: Status;
 		toolMultiStep: Status;
 		toolRequired: Status;
+		toolForced: Status;
 		structuredOutput: Status;
 		notes: string[];
 	}
@@ -96,6 +97,7 @@ function getResult(label: string) {
 			toolRoundTrip: "skip",
 			toolMultiStep: "skip",
 			toolRequired: "skip",
+			toolForced: "skip",
 			structuredOutput: "skip",
 			notes: [],
 		};
@@ -123,7 +125,7 @@ function printSummaryTable() {
 	const pad = (s: string, n: number) => s + " ".repeat(Math.max(0, n - s.length));
 	const maxLabel = Math.max(...labels.map((l) => l.length), 5);
 
-	const header = `${pad("Model", maxLabel)} | Chat | Turn | Tool | T-RT | T-MS | T-Rq | JSON | Notes`;
+	const header = `${pad("Model", maxLabel)} | Chat | Turn | Tool | T-RT | T-MS | T-Rq | T-Fc | JSON | Notes`;
 	const sep = "-".repeat(header.length + 10);
 
 	console.log(`\n${sep}`);
@@ -136,13 +138,14 @@ function printSummaryTable() {
 		const r = results[label];
 		const notes = r.notes.length > 0 ? r.notes.join("; ") : "";
 		console.log(
-			`${pad(label, maxLabel)} | ${statusIcon(r.chat)} | ${statusIcon(r.multiTurn)} | ${statusIcon(r.toolCalling)} | ${statusIcon(r.toolRoundTrip)} | ${statusIcon(r.toolMultiStep)} | ${statusIcon(r.toolRequired)} | ${statusIcon(r.structuredOutput)} | ${notes}`,
+			`${pad(label, maxLabel)} | ${statusIcon(r.chat)} | ${statusIcon(r.multiTurn)} | ${statusIcon(r.toolCalling)} | ${statusIcon(r.toolRoundTrip)} | ${statusIcon(r.toolMultiStep)} | ${statusIcon(r.toolRequired)} | ${statusIcon(r.toolForced)} | ${statusIcon(r.structuredOutput)} | ${notes}`,
 		);
 	}
 
 	console.log(sep);
 	console.log("  OK = works    ~ = partial/quirky    X = broken    - = skipped");
 	console.log("  T-MS = multi-step agentic loop    T-Rq = toolChoice required");
+	console.log("  T-Fc = toolChoice forced to a specific tool (named-function form)");
 	console.log(`${sep}\n`);
 }
 
@@ -437,6 +440,72 @@ describe.skipIf(skip())("Workers AI REST E2E", () => {
 				} catch (err: unknown) {
 					r.toolRequired = "fail";
 					r.notes.push(`t-rq: ${(err as Error).message.slice(0, 60)}`);
+				}
+			});
+		}
+	});
+
+	// ------------------------------------------------------------------
+	// toolChoice forced to a specific tool (per model)
+	// Validates the named-function mapping: toolChoice { type: "tool", toolName }
+	// must force that exact tool even with a prose-tempting prompt. "required"
+	// alone "fails open" on reasoning models (qwq-32b, gemma-4) — see issue #560.
+	// ------------------------------------------------------------------
+	describe("toolChoice forced (named tool)", () => {
+		for (const model of MODELS) {
+			it(`${model.label} — toolChoice forced to specific tool`, async () => {
+				const r = getResult(model.label);
+
+				try {
+					const provider = makeProvider();
+
+					const result = await generateText({
+						model: provider(model.id as ModelId),
+						messages: [
+							{ role: "system", content: "You are a warm, encouraging coach." },
+							{
+								role: "user",
+								content: "That went really well! How do you think I did?",
+							},
+						],
+						tools: {
+							record_feedback: {
+								description: "Record structured coaching feedback.",
+								inputSchema: z.object({
+									score: z.number().describe("score out of 10"),
+									note: z.string().describe("short feedback note"),
+								}),
+							},
+							// A second, unrelated tool to confirm the forced choice
+							// targets the named tool while the full list is sent.
+							lookup_schedule: {
+								description: "Look up the practice schedule.",
+								inputSchema: z.object({ day: z.string() }),
+							},
+						},
+						toolChoice: { type: "tool", toolName: "record_feedback" },
+					});
+
+					const forcedCall = result.toolCalls?.find(
+						(c) => c.toolName === "record_feedback",
+					);
+					if (forcedCall) {
+						r.toolForced = "ok";
+					} else if (result.toolCalls && result.toolCalls.length > 0) {
+						r.toolForced = "warn";
+						r.notes.push(
+							`t-fc: called ${result.toolCalls[0].toolName} instead of forced tool`,
+						);
+					} else if (result.text.length > 0) {
+						r.toolForced = "warn";
+						r.notes.push("t-fc: answered as text despite forced tool");
+					} else {
+						r.toolForced = "fail";
+						r.notes.push("t-fc: no tool call or content");
+					}
+				} catch (err: unknown) {
+					r.toolForced = "fail";
+					r.notes.push(`t-fc: ${(err as Error).message.slice(0, 60)}`);
 				}
 			});
 		}

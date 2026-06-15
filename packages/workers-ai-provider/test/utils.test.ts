@@ -6,6 +6,7 @@ import {
 	processText,
 	normalizeMessagesForBinding,
 	prepareToolsAndToolChoice,
+	salvageToolCallsFromText,
 	createRun,
 	toWorkersAIToolCallId,
 } from "../src/utils";
@@ -379,14 +380,127 @@ describe("prepareToolsAndToolChoice", () => {
 		expect(result.tools).toHaveLength(2);
 	});
 
-	it("should handle 'tool' tool choice by filtering and using 'required'", () => {
+	it("should handle 'tool' tool choice with the named-function form", () => {
 		const result = prepareToolsAndToolChoice(sampleTools, {
 			type: "tool",
 			toolName: "calculator",
 		});
-		expect(result.tool_choice).toBe("required");
-		expect(result.tools).toHaveLength(1);
-		expect(result.tools![0].function.name).toBe("calculator");
+		expect(result.tool_choice).toEqual({
+			type: "function",
+			function: { name: "calculator" },
+		});
+		// Full tool list is preserved (not filtered to the single function).
+		expect(result.tools).toHaveLength(2);
+		expect(result.tools!.map((t) => t.function.name)).toEqual(["get_weather", "calculator"]);
+	});
+});
+
+// ---------------------------------------------------------------------------
+// salvageToolCallsFromText (gpt-oss harmony quirk)
+// ---------------------------------------------------------------------------
+
+describe("salvageToolCallsFromText", () => {
+	const tools = [
+		{ function: { name: "read_skill_resource" } },
+		{ function: { name: "calculator" } },
+	];
+	const namedChoice = { type: "function", function: { name: "read_skill_resource" } };
+
+	// A gpt-oss response that leaked the forced tool call into text content.
+	function leakedResponse(content: string) {
+		return {
+			choices: [
+				{
+					message: { role: "assistant", content, tool_calls: [] },
+					finish_reason: "stop",
+				},
+			],
+		};
+	}
+
+	it("salvages a flat-args tool call leaked into content", () => {
+		const output = leakedResponse(
+			'{"name":"read_skill_resource","path":"feedback.txt","name_arg":"x"}',
+		);
+		const result = salvageToolCallsFromText(output, { tools, toolChoice: namedChoice });
+		expect(result).not.toBeNull();
+		expect(result).toHaveLength(1);
+		expect(result![0].toolName).toBe("read_skill_resource");
+		expect(JSON.parse(result![0].input)).toEqual({ path: "feedback.txt", name_arg: "x" });
+		expect(result![0].type).toBe("tool-call");
+	});
+
+	it("salvages a wrapped-arguments tool call", () => {
+		const output = leakedResponse('{"name":"calculator","arguments":{"a":1,"b":2}}');
+		const result = salvageToolCallsFromText(output, {
+			tools,
+			toolChoice: { type: "function", function: { name: "calculator" } },
+		});
+		expect(result).toHaveLength(1);
+		expect(result![0].toolName).toBe("calculator");
+		expect(JSON.parse(result![0].input)).toEqual({ a: 1, b: 2 });
+	});
+
+	it("salvages a wrapped-parameters tool call in array form", () => {
+		const output = leakedResponse('[{"name":"calculator","parameters":{"a":3,"b":4}}]');
+		const result = salvageToolCallsFromText(output, { tools, toolChoice: "required" });
+		expect(result).toHaveLength(1);
+		expect(result![0].toolName).toBe("calculator");
+		expect(JSON.parse(result![0].input)).toEqual({ a: 3, b: 4 });
+	});
+
+	it("returns null when the tool choice is not forced", () => {
+		const output = leakedResponse('{"name":"read_skill_resource","path":"x.txt"}');
+		expect(
+			salvageToolCallsFromText(output, { tools, toolChoice: { type: "auto" } }),
+		).toBeNull();
+		expect(salvageToolCallsFromText(output, { tools, toolChoice: undefined })).toBeNull();
+	});
+
+	it("returns null when real structured tool calls are present", () => {
+		const output = {
+			choices: [
+				{
+					message: {
+						content: '{"name":"read_skill_resource","path":"x.txt"}',
+						tool_calls: [
+							{
+								id: "1",
+								type: "function",
+								function: { name: "calculator", arguments: "{}" },
+							},
+						],
+					},
+				},
+			],
+		};
+		expect(salvageToolCallsFromText(output, { tools, toolChoice: namedChoice })).toBeNull();
+	});
+
+	it("returns null when the JSON name is not a known tool", () => {
+		const output = leakedResponse('{"name":"unknown_tool","path":"x.txt"}');
+		expect(salvageToolCallsFromText(output, { tools, toolChoice: namedChoice })).toBeNull();
+	});
+
+	it("returns null when content is plain prose (not JSON)", () => {
+		const output = leakedResponse("You did wonderfully, I'm proud of your progress!");
+		expect(salvageToolCallsFromText(output, { tools, toolChoice: namedChoice })).toBeNull();
+	});
+
+	it("returns null when there are no tools", () => {
+		const output = leakedResponse('{"name":"read_skill_resource","path":"x.txt"}');
+		expect(
+			salvageToolCallsFromText(output, { tools: undefined, toolChoice: "required" }),
+		).toBeNull();
+	});
+
+	it("ignores array entries whose name is unknown, keeping known ones", () => {
+		const output = leakedResponse(
+			'[{"name":"unknown","x":1},{"name":"calculator","arguments":{"a":9}}]',
+		);
+		const result = salvageToolCallsFromText(output, { tools, toolChoice: "required" });
+		expect(result).toHaveLength(1);
+		expect(result![0].toolName).toBe("calculator");
 	});
 });
 
