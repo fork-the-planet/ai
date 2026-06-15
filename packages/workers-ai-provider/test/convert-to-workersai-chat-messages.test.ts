@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { UnsupportedFunctionalityError } from "@ai-sdk/provider";
 import { convertToWorkersAIChatMessages } from "../src/convert-to-workersai-chat-messages";
 import { createAISDKToolCallId } from "../src/utils";
 
@@ -442,6 +443,93 @@ describe("convertToWorkersAIChatMessages", () => {
 			expect(() => convertToWorkersAIChatMessages(prompt)).toThrow(
 				"URL image sources are not supported by Workers AI",
 			);
+		});
+
+		it("should throw for non-image file parts", () => {
+			const prompt = [
+				{
+					role: "user" as const,
+					content: [
+						{ type: "text" as const, text: "Summarize this PDF" },
+						{
+							type: "file" as const,
+							data: new Uint8Array([0x25, 0x50, 0x44, 0x46]),
+							mediaType: "application/pdf",
+							providerOptions: undefined,
+						},
+					],
+				},
+			];
+
+			expect(() => convertToWorkersAIChatMessages(prompt)).toThrow(
+				'Workers AI chat only supports image file parts with an image/* mediaType. Received mediaType "application/pdf".',
+			);
+		});
+
+		it("should throw when a file part is missing a media type", () => {
+			const prompt = [
+				{
+					role: "user" as const,
+					content: [
+						{
+							type: "file" as const,
+							data: new Uint8Array([1, 2, 3]),
+							providerOptions: undefined,
+						} as any,
+					],
+				},
+			];
+
+			expect(() => convertToWorkersAIChatMessages(prompt)).toThrow(
+				"Workers AI chat only supports image file parts with an image/* mediaType. Received a file part without a mediaType.",
+			);
+		});
+
+		it("should throw an UnsupportedFunctionalityError for non-image file parts", () => {
+			const prompt = [
+				{
+					role: "user" as const,
+					content: [
+						{
+							type: "file" as const,
+							data: new Uint8Array([0x25, 0x50, 0x44, 0x46]),
+							mediaType: "application/pdf",
+							providerOptions: undefined,
+						},
+					],
+				},
+			];
+
+			expect(() => convertToWorkersAIChatMessages(prompt)).toThrow(
+				UnsupportedFunctionalityError,
+			);
+		});
+
+		it("should accept image media types regardless of casing", () => {
+			const prompt = [
+				{
+					role: "user" as const,
+					content: [
+						{ type: "text" as const, text: "What is this?" },
+						{
+							type: "file" as const,
+							data: new Uint8Array([0xff, 0xd8, 0xff, 0xe0]),
+							mediaType: "IMAGE/JPEG",
+							providerOptions: undefined,
+						},
+					],
+				},
+			];
+
+			const { messages } = convertToWorkersAIChatMessages(prompt);
+
+			expect(messages).toHaveLength(1);
+			const content = messages[0].content;
+			expect(Array.isArray(content)).toBe(true);
+			const parts = content as Array<{ type: string; image_url?: { url: string } }>;
+			expect(parts[1].type).toBe("image_url");
+			// Original casing is preserved in the emitted data URL.
+			expect(parts[1].image_url!.url).toMatch(/^data:IMAGE\/JPEG;base64,/);
 		});
 
 		it("should use plain string content when no images are present", () => {

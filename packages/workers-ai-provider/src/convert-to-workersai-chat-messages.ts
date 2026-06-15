@@ -1,4 +1,5 @@
 import type { LanguageModelV3DataContent, LanguageModelV3Prompt } from "@ai-sdk/provider";
+import { UnsupportedFunctionalityError } from "@ai-sdk/provider";
 import { toWorkersAIToolCallId } from "./utils";
 import type { WorkersAIContentPart, WorkersAIChatPrompt } from "./workersai-chat-prompt";
 
@@ -41,6 +42,30 @@ function toUint8Array(data: LanguageModelV3DataContent): Uint8Array | null {
 	return null;
 }
 
+function assertImageMediaType(mediaType: string | undefined): string {
+	if (!mediaType) {
+		throw new UnsupportedFunctionalityError({
+			functionality: "file-part-without-media-type",
+			message:
+				"Workers AI chat only supports image file parts with an image/* mediaType. " +
+				"Received a file part without a mediaType.",
+		});
+	}
+
+	// Media types are case-insensitive (RFC 2045), so compare against a
+	// lower-cased copy while preserving the caller's original casing on output.
+	if (!mediaType.toLowerCase().startsWith("image/")) {
+		throw new UnsupportedFunctionalityError({
+			functionality: "non-image-file-part",
+			message:
+				"Workers AI chat only supports image file parts with an image/* mediaType. " +
+				`Received mediaType "${mediaType}".`,
+		});
+	}
+
+	return mediaType;
+}
+
 function uint8ArrayToBase64(bytes: Uint8Array): string {
 	let binary = "";
 	const chunkSize = 8192;
@@ -65,7 +90,7 @@ export function convertToWorkersAIChatMessages(prompt: LanguageModelV3Prompt): {
 
 			case "user": {
 				const textParts: string[] = [];
-				const imageParts: { image: Uint8Array; mediaType: string | undefined }[] = [];
+				const imageParts: { image: Uint8Array; mediaType: string }[] = [];
 
 				for (const part of content) {
 					switch (part.type) {
@@ -74,11 +99,12 @@ export function convertToWorkersAIChatMessages(prompt: LanguageModelV3Prompt): {
 							break;
 						}
 						case "file": {
+							const mediaType = assertImageMediaType(part.mediaType);
 							const imageBytes = toUint8Array(part.data);
 							if (imageBytes) {
 								imageParts.push({
 									image: imageBytes,
-									mediaType: part.mediaType,
+									mediaType,
 								});
 							}
 							break;
@@ -93,10 +119,9 @@ export function convertToWorkersAIChatMessages(prompt: LanguageModelV3Prompt): {
 					}
 					for (const img of imageParts) {
 						const base64 = uint8ArrayToBase64(img.image);
-						const mediaType = img.mediaType || "image/png";
 						contentArray.push({
 							type: "image_url",
-							image_url: { url: `data:${mediaType};base64,${base64}` },
+							image_url: { url: `data:${img.mediaType};base64,${base64}` },
 						});
 					}
 					messages.push({ content: contentArray, role: "user" });
