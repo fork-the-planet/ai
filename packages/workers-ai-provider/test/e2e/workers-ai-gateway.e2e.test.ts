@@ -67,6 +67,17 @@ function isModelUnavailable(err: string): boolean {
 	);
 }
 
+/**
+ * A model returned a response the AI SDK could not coerce into the requested
+ * object — a structured-output *capability* limitation of that model, not a
+ * delegate/provider bug. Tolerated for non-guaranteed models only.
+ */
+function isStructuredOutputUnsupported(err: string): boolean {
+	return /no object generated|could not parse the response|did not match schema|response did not match/i.test(
+		err,
+	);
+}
+
 let wrangler: ChildProcess | null = null;
 let ready = false;
 /** Set in beforeAll: does the resumable run path actually work on this account? */
@@ -175,6 +186,39 @@ describe.skipIf(!RUN)("AI Gateway delegate E2E", () => {
 					expect(typeof data.runId).toBe("string");
 					expect((data.runId as string).length).toBeGreaterThan(0);
 					expect(data.lastOffset).toBeGreaterThan(0);
+				})();
+			});
+		}
+	});
+
+	// --- Structured output (issue #559) ---
+	// The partner path must satisfy OpenAI's `response_format.json_schema.name`
+	// requirement (built by the real @ai-sdk/openai provider, not dropped).
+	describe("run path — structured output", () => {
+		for (const m of RUN_MODELS) {
+			it(`${m.label} — structured output via Output.object`, (ctx) => {
+				if (!runPathReady) return ctx.skip(`run path not ready (${runPathReason})`);
+				return (async () => {
+					const data = await post("/run/structured", { slug: m.slug });
+					if (data.error) {
+						const err = String(data.error);
+						if (
+							!m.guaranteed &&
+							(isModelUnavailable(err) || isStructuredOutputUnsupported(err))
+						) {
+							return ctx.skip(
+								`structured output unavailable/unsupported: ${err.slice(0, 80)}`,
+							);
+						}
+						throw new Error(`[run/structured] ${m.label}: ${err}`);
+					}
+					const output = data.output as {
+						capital?: unknown;
+						population_millions?: unknown;
+					} | null;
+					expect(output, "no structured output returned").toBeTruthy();
+					expect(typeof output?.capital).toBe("string");
+					expect(typeof output?.population_millions).toBe("number");
 				})();
 			});
 		}

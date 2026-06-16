@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import {
+	buildJsonSchemaPayload,
 	createAISDKToolCallId,
 	processPartialToolCalls,
 	processToolCalls,
@@ -10,6 +11,100 @@ import {
 	createRun,
 	toWorkersAIToolCallId,
 } from "../src/utils";
+
+// ---------------------------------------------------------------------------
+// buildJsonSchemaPayload
+// ---------------------------------------------------------------------------
+
+describe("buildJsonSchemaPayload", () => {
+	const schema = {
+		type: "object",
+		properties: { ok: { type: "boolean" } },
+		required: ["ok"],
+	} as const;
+
+	it("returns the bare schema unchanged when no name/description given", () => {
+		const result = buildJsonSchemaPayload(schema);
+		// Same reference: nothing to add, no clone needed.
+		expect(result).toBe(schema);
+	});
+
+	it("does NOT wrap the schema in an OpenAI { name, schema } envelope", () => {
+		const result = buildJsonSchemaPayload(schema, "Result", "A result") as Record<
+			string,
+			unknown
+		>;
+		// The bare schema keywords stay at the top level...
+		expect(result.type).toBe("object");
+		expect(result.properties).toEqual(schema.properties);
+		// ...and the envelope keys are absent.
+		expect(result).not.toHaveProperty("schema");
+		expect(result).not.toHaveProperty("strict");
+	});
+
+	it("folds name into JSON Schema `title`", () => {
+		const result = buildJsonSchemaPayload(schema, "Result") as Record<string, unknown>;
+		expect(result.title).toBe("Result");
+		expect(result).not.toHaveProperty("description");
+	});
+
+	it("folds description into JSON Schema `description`", () => {
+		const result = buildJsonSchemaPayload(schema, undefined, "A boolean result") as Record<
+			string,
+			unknown
+		>;
+		expect(result.description).toBe("A boolean result");
+		expect(result).not.toHaveProperty("title");
+	});
+
+	it("folds both name and description when both are provided", () => {
+		const result = buildJsonSchemaPayload(schema, "Result", "A boolean result") as Record<
+			string,
+			unknown
+		>;
+		expect(result.title).toBe("Result");
+		expect(result.description).toBe("A boolean result");
+	});
+
+	it("never overwrites an existing schema-level title", () => {
+		const withTitle = { ...schema, title: "Existing" };
+		const result = buildJsonSchemaPayload(withTitle, "Result") as Record<string, unknown>;
+		expect(result.title).toBe("Existing");
+	});
+
+	it("never overwrites an existing schema-level description", () => {
+		const withDescription = { ...schema, description: "Existing description" };
+		const result = buildJsonSchemaPayload(
+			withDescription,
+			undefined,
+			"New description",
+		) as Record<string, unknown>;
+		expect(result.description).toBe("Existing description");
+	});
+
+	it("ignores empty-string name/description", () => {
+		const result = buildJsonSchemaPayload(schema, "", "");
+		expect(result).toBe(schema);
+	});
+
+	it("does not mutate the input schema", () => {
+		const input = { type: "object", properties: { ok: { type: "boolean" } } };
+		const snapshot = structuredClone(input);
+		buildJsonSchemaPayload(input, "Result", "A result");
+		expect(input).toEqual(snapshot);
+	});
+
+	it("passes through undefined (no schema, plain JSON mode)", () => {
+		expect(buildJsonSchemaPayload(undefined, "Result", "A result")).toBeUndefined();
+	});
+
+	it("passes through non-object schemas untouched", () => {
+		expect(buildJsonSchemaPayload(true as unknown, "Result")).toBe(true);
+		expect(buildJsonSchemaPayload(null, "Result")).toBeNull();
+		const arr = [1, 2, 3];
+		expect(buildJsonSchemaPayload(arr, "Result")).toBe(arr);
+	});
+});
 
 // ---------------------------------------------------------------------------
 // normalizeMessagesForBinding

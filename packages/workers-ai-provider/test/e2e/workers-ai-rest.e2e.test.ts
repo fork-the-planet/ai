@@ -524,11 +524,16 @@ describe.skipIf(skip())("Workers AI REST E2E", () => {
 					const result = await generateText({
 						model: provider(model.id as ModelId),
 						prompt: "What is the capital of France and its approximate population in millions?",
+						// name/description are folded into the bare schema as
+						// title/description on the native path (issue #559) — assert
+						// real models still accept the payload.
 						output: Output.object({
 							schema: z.object({
 								capital: z.string(),
 								population_millions: z.number(),
 							}),
+							name: "CountryCapital",
+							description: "A country's capital city and its population.",
 						}),
 					});
 
