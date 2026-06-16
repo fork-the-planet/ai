@@ -18,7 +18,7 @@
 		"agents": "^0.16.0",
 		"ai": "^6.0.204",
 		"hono": "^4.12.25",
-		"workers-ai-provider": "^3.1.14",
+		"workers-ai-provider": "^3.2.0",
 		"zod": "^4.4.3"
 	},
 	"devDependencies": {

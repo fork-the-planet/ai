@@ -604,7 +604,10 @@ export class WorkersAiTextAdapter<TModel extends WorkersAiTextModel> extends Bas
 						// `arguments` while we wait for the name, and must be flushed
 						// once START is emitted so the full argument string reaches
 						// the consumer (issue #523).
-						if (toolCall.started && toolCall.arguments.length > toolCall.emittedArgsLength) {
+						if (
+							toolCall.started &&
+							toolCall.arguments.length > toolCall.emittedArgsLength
+						) {
 							const argsDelta = toolCall.arguments.slice(toolCall.emittedArgsLength);
 							toolCall.emittedArgsLength = toolCall.arguments.length;
 							yield {

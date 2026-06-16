@@ -100,14 +100,25 @@ describe("streamed tool calls → real StreamProcessor (OpenAI format)", () => {
 		const binding = createSseBinding([
 			oaiChunk({
 				tool_calls: [
-					{ index: 0, id: "x", type: "function", function: { name: "search_events", arguments: "" } },
+					{
+						index: 0,
+						id: "x",
+						type: "function",
+						function: { name: "search_events", arguments: "" },
+					},
 				],
 			}),
-			oaiChunk({ tool_calls: [{ index: 0, function: { arguments: '{"date_from": "2026-05-05"' } }] }),
-			oaiChunk({ tool_calls: [{ index: 0, function: { arguments: ', "date_to": "2026-05-05"}' } }] }),
+			oaiChunk({
+				tool_calls: [{ index: 0, function: { arguments: '{"date_from": "2026-05-05"' } }],
+			}),
+			oaiChunk({
+				tool_calls: [{ index: 0, function: { arguments: ', "date_to": "2026-05-05"}' } }],
+			}),
 			oaiChunk({}, "tool_calls"),
 		]);
-		const parts = toolCallParts(await processToUiMessages(chatWith(new WorkersAiTextAdapter(MODEL, { binding }))));
+		const parts = toolCallParts(
+			await processToUiMessages(chatWith(new WorkersAiTextAdapter(MODEL, { binding }))),
+		);
 
 		expect(parts).toHaveLength(1);
 		expect(parts[0].name).toBe("search_events");
@@ -121,12 +132,33 @@ describe("streamed tool calls → real StreamProcessor (OpenAI format)", () => {
 	it("args streamed BEFORE the name arrives (issue #523)", async () => {
 		const binding = createSseBinding([
 			// first delta carries args but NO name yet
-			oaiChunk({ tool_calls: [{ index: 0, id: "x", type: "function", function: { arguments: '{"date_from": "2026-05-05"' } }] }),
+			oaiChunk({
+				tool_calls: [
+					{
+						index: 0,
+						id: "x",
+						type: "function",
+						function: { arguments: '{"date_from": "2026-05-05"' },
+					},
+				],
+			}),
 			// name arrives later, with the remaining args
-			oaiChunk({ tool_calls: [{ index: 0, function: { name: "search_events", arguments: ', "date_to": "2026-05-05"}' } }] }),
+			oaiChunk({
+				tool_calls: [
+					{
+						index: 0,
+						function: {
+							name: "search_events",
+							arguments: ', "date_to": "2026-05-05"}',
+						},
+					},
+				],
+			}),
 			oaiChunk({}, "tool_calls"),
 		]);
-		const parts = toolCallParts(await processToUiMessages(chatWith(new WorkersAiTextAdapter(MODEL, { binding }))));
+		const parts = toolCallParts(
+			await processToUiMessages(chatWith(new WorkersAiTextAdapter(MODEL, { binding }))),
+		);
 
 		expect(parts).toHaveLength(1);
 		// Name must be present — this is the core regression.
@@ -157,7 +189,9 @@ describe("streamed tool calls → real StreamProcessor (OpenAI format)", () => {
 				"tool_calls",
 			),
 		]);
-		const parts = toolCallParts(await processToUiMessages(chatWith(new WorkersAiTextAdapter(MODEL, { binding }))));
+		const parts = toolCallParts(
+			await processToUiMessages(chatWith(new WorkersAiTextAdapter(MODEL, { binding }))),
+		);
 
 		expect(parts).toHaveLength(1);
 		expect(parts[0].name).toBe("search_events");
@@ -171,15 +205,31 @@ describe("streamed tool calls → real StreamProcessor (OpenAI format)", () => {
 		const binding = createSseBinding([
 			oaiChunk({
 				tool_calls: [
-					{ index: 0, id: "a", type: "function", function: { name: "search_events", arguments: "" } },
-					{ index: 1, id: "b", type: "function", function: { name: "search_events", arguments: "" } },
+					{
+						index: 0,
+						id: "a",
+						type: "function",
+						function: { name: "search_events", arguments: "" },
+					},
+					{
+						index: 1,
+						id: "b",
+						type: "function",
+						function: { name: "search_events", arguments: "" },
+					},
 				],
 			}),
-			oaiChunk({ tool_calls: [{ index: 0, function: { arguments: '{"date_from": "2026-05-05"}' } }] }),
-			oaiChunk({ tool_calls: [{ index: 1, function: { arguments: '{"date_from": "2026-06-01"}' } }] }),
+			oaiChunk({
+				tool_calls: [{ index: 0, function: { arguments: '{"date_from": "2026-05-05"}' } }],
+			}),
+			oaiChunk({
+				tool_calls: [{ index: 1, function: { arguments: '{"date_from": "2026-06-01"}' } }],
+			}),
 			oaiChunk({}, "tool_calls"),
 		]);
-		const parts = toolCallParts(await processToUiMessages(chatWith(new WorkersAiTextAdapter(MODEL, { binding }))));
+		const parts = toolCallParts(
+			await processToUiMessages(chatWith(new WorkersAiTextAdapter(MODEL, { binding }))),
+		);
 
 		expect(parts).toHaveLength(2);
 		for (const part of parts) {
@@ -194,10 +244,24 @@ describe("streamed tool calls → real StreamProcessor (OpenAI format)", () => {
 
 	it("stream truncated before finish_reason still yields a usable tool call", async () => {
 		const binding = createSseBinding([
-			oaiChunk({ tool_calls: [{ index: 0, id: "x", type: "function", function: { name: "search_events", arguments: '{"date_from": "2026-05-05"}' } }] }),
+			oaiChunk({
+				tool_calls: [
+					{
+						index: 0,
+						id: "x",
+						type: "function",
+						function: {
+							name: "search_events",
+							arguments: '{"date_from": "2026-05-05"}',
+						},
+					},
+				],
+			}),
 			// no finish_reason chunk — premature termination
 		]);
-		const parts = toolCallParts(await processToUiMessages(chatWith(new WorkersAiTextAdapter(MODEL, { binding }))));
+		const parts = toolCallParts(
+			await processToUiMessages(chatWith(new WorkersAiTextAdapter(MODEL, { binding }))),
+		);
 
 		expect(parts).toHaveLength(1);
 		expect(parts[0].name).toBe("search_events");
@@ -215,7 +279,9 @@ describe("streamed tool calls → real StreamProcessor (native Workers AI format
 		const binding = createSseBinding([
 			'data: {"response":"","tool_calls":[{"name":"search_events","arguments":{"date_from":"2026-05-05","date_to":"2026-05-05"}}]}\n\n',
 		]);
-		const parts = toolCallParts(await processToUiMessages(chatWith(new WorkersAiTextAdapter(MODEL, { binding }))));
+		const parts = toolCallParts(
+			await processToUiMessages(chatWith(new WorkersAiTextAdapter(MODEL, { binding }))),
+		);
 
 		expect(parts).toHaveLength(1);
 		expect(parts[0].name).toBe("search_events");
@@ -231,7 +297,9 @@ describe("streamed tool calls → real StreamProcessor (native Workers AI format
 			'data: {"tool_calls":[{"index":0,"function":{"arguments":"{\\"date_from\\": \\"2026-05-05\\""}}]}\n\n',
 			'data: {"tool_calls":[{"index":0,"function":{"arguments":", \\"date_to\\": \\"2026-05-05\\"}"}}]}\n\n',
 		]);
-		const parts = toolCallParts(await processToUiMessages(chatWith(new WorkersAiTextAdapter(MODEL, { binding }))));
+		const parts = toolCallParts(
+			await processToUiMessages(chatWith(new WorkersAiTextAdapter(MODEL, { binding }))),
+		);
 
 		expect(parts).toHaveLength(1);
 		expect(parts[0].name).toBe("search_events");

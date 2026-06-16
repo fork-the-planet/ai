@@ -191,7 +191,13 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 			adapter.chatStream({
 				model: MODEL,
 				messages: [{ role: "user", content: "Weather in SF?" }],
-				tools: [{ name: "get_weather", description: "Get weather", inputSchema: { type: "object" } }],
+				tools: [
+					{
+						name: "get_weather",
+						description: "Get weather",
+						inputSchema: { type: "object" },
+					},
+				],
 			} as any),
 		);
 

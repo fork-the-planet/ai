@@ -27,5 +27,6 @@ minimumReleaseAgeExclude:
     - "@cloudflare/workers-types@4.20260613.1"
     - "@microsoft/api-extractor@7.58.9"
     - "@rushstack/ts-command-line@5.3.10"
+    - workers-ai-provider@3.2.0
 patchedDependencies:
     "@ai-sdk/google-vertex": patches/@ai-sdk__google-vertex.patch

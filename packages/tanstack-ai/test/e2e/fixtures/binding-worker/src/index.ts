@@ -177,7 +177,8 @@ export default {
 						messages: [
 							{
 								role: "user",
-								content: "What is 2 + 3? You MUST use the calculator tool to answer.",
+								content:
+									"What is 2 + 3? You MUST use the calculator tool to answer.",
 							},
 						],
 						tools: [
