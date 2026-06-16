@@ -5,6 +5,7 @@ import { mapWorkersAIFinishReason } from "./map-workersai-finish-reason";
 import { mapWorkersAIUsage } from "./map-workersai-usage";
 import { getMappedStream, prependStreamStart } from "./streaming";
 import {
+	buildJsonSchemaPayload,
 	normalizeMessagesForBinding,
 	prepareToolsAndToolChoice,
 	processText,
@@ -94,13 +95,23 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 			}
 
 			case "json": {
+				// Native Workers AI expects a BARE JSON Schema under `json_schema`
+				// (not OpenAI's `{ name, schema, strict }` envelope — partner models
+				// that need that go through the gateway delegate, not this path). We
+				// fold the AI SDK's `name`/`description` into the schema as `title`/
+				// `description` so they aren't lost. See
+				// https://github.com/cloudflare/ai/issues/559.
+				const json = responseFormat?.type === "json" ? responseFormat : undefined;
 				return {
 					args: {
 						...baseArgs,
 						response_format: {
 							type: "json_schema",
-							json_schema:
-								responseFormat?.type === "json" ? responseFormat.schema : undefined,
+							json_schema: buildJsonSchemaPayload(
+								json?.schema,
+								json?.name,
+								json?.description,
+							),
 						},
 						tools: undefined,
 						tool_choice: undefined,

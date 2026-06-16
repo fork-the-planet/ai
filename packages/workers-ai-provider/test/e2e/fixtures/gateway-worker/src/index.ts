@@ -7,7 +7,7 @@
  * JSON so the test harness can assert on it.
  */
 import { createOpenAI } from "@ai-sdk/openai";
-import { generateText, streamText } from "ai";
+import { generateText, jsonSchema, Output, streamText } from "ai";
 import { anthropic } from "../../../../../src/anthropic";
 import type { DispatchInfo } from "../../../../../src/gateway-delegate";
 import { createGatewayDelegate } from "../../../../../src/gateway-delegate";
@@ -144,6 +144,43 @@ export default {
 						resumeEnabled: dispatch?.resumeEnabled,
 						lastOffset,
 						streamErr,
+					});
+				}
+
+				// --- Run path: structured output (issue #559) ---
+				// Drives a partner model (openai-wire) through the delegate with
+				// `Output.object({ schema, name, description })`. The real @ai-sdk/openai
+				// provider must build the `response_format.json_schema.name` envelope
+				// OpenAI requires — the failure mode reported in #559.
+				case "/run/structured": {
+					let dispatch: DispatchInfo | undefined;
+					const result = await generateText({
+						model: wai(body.slug ?? "openai/gpt-5-mini", {
+							onDispatch: (info) => {
+								dispatch = info;
+							},
+						}),
+						prompt: "What is the capital of France and its approximate population in millions?",
+						output: Output.object({
+							schema: jsonSchema<{
+								capital: string;
+								population_millions: number;
+							}>({
+								type: "object",
+								properties: {
+									capital: { type: "string" },
+									population_millions: { type: "number" },
+								},
+								required: ["capital", "population_millions"],
+								additionalProperties: false,
+							}),
+							name: "CountryCapital",
+							description: "A country's capital city and its population.",
+						}),
+					});
+					return json({
+						output: result.output,
+						transport: dispatch?.transport,
 					});
 				}
 

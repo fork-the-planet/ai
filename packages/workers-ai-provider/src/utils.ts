@@ -267,6 +267,57 @@ export async function createRunBinary(
 }
 
 // ---------------------------------------------------------------------------
+// Structured output (JSON mode)
+// ---------------------------------------------------------------------------
+
+/**
+ * Build the `response_format.json_schema` payload for native Workers AI models.
+ *
+ * Native Workers AI (`@cf/...`) expects `json_schema` to be a **bare** JSON
+ * Schema, NOT OpenAI's `{ name, schema, strict }` envelope. That envelope is
+ * only required by partner-model routes (e.g. `openai/...`), which never reach
+ * this code — they go through the gateway delegate and the real `@ai-sdk/*`
+ * providers, which build the envelope themselves. Wrapping the schema here would
+ * break native models, so we must keep the bare shape.
+ *
+ * The AI SDK's structured-output `name` / `description` (from
+ * `Output.object({ schema, name, description })` / `generateObject`) would
+ * otherwise be silently dropped on this path. We preserve them as the standard
+ * JSON Schema `title` (from `name`) and `description` keywords, which keeps the
+ * payload a valid bare schema while still passing the LLM guidance through.
+ *
+ * Existing schema-level `title` / `description` are never overwritten, empty
+ * strings are ignored, and the input schema object is never mutated.
+ *
+ * See https://github.com/cloudflare/ai/issues/559.
+ */
+export function buildJsonSchemaPayload(
+	schema: unknown,
+	name?: string,
+	description?: string,
+): unknown {
+	// Only objects can carry JSON Schema keywords. Anything else (incl.
+	// `undefined` when no schema was supplied) passes through untouched.
+	if (typeof schema !== "object" || schema === null || Array.isArray(schema)) {
+		return schema;
+	}
+
+	const record = schema as Record<string, unknown>;
+	const addTitle = !!name && record.title === undefined;
+	const addDescription = !!description && record.description === undefined;
+
+	if (!addTitle && !addDescription) {
+		return schema;
+	}
+
+	return {
+		...record,
+		...(addTitle ? { title: name } : {}),
+		...(addDescription ? { description } : {}),
+	};
+}
+
+// ---------------------------------------------------------------------------
 // Tool preparation
 // ---------------------------------------------------------------------------
 
