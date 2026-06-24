@@ -305,12 +305,13 @@ export function createWorkersAI(options: WorkersAISettings): WorkersAI {
 			isBinding,
 		});
 
-	const toGatewayOptions = (gateway: GatewayOptions | string | undefined): GatewayOptions | undefined =>
-		typeof gateway === "string" ? { id: gateway } : gateway;
+	const toGatewayOptions = (
+		gateway: GatewayOptions | string | undefined,
+	): GatewayOptions | undefined => (typeof gateway === "string" ? { id: gateway } : gateway);
 
 	const createDynamicRouteModel = (
 		modelId: TextGenerationModels,
-		settings: (WorkersAIChatSettings & DelegateCallOptions) = {},
+		settings: WorkersAIChatSettings & DelegateCallOptions = {},
 	) => {
 		if (
 			settings.fallback ||
@@ -329,7 +330,8 @@ export function createWorkersAI(options: WorkersAISettings): WorkersAI {
 		}
 
 		const gateway = {
-			...(toGatewayOptions(settings.gateway) ?? options.gateway ?? { id: DEFAULT_GATEWAY_ID }),
+			...(toGatewayOptions(settings.gateway) ??
+				options.gateway ?? { id: DEFAULT_GATEWAY_ID }),
 		};
 		if (settings.metadata) {
 			gateway.metadata = {
@@ -375,7 +377,10 @@ export function createWorkersAI(options: WorkersAISettings): WorkersAI {
 			}
 			return createChatModel(modelId, chatSettings);
 		}
-		const fetchImpl = (async (_input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+		const fetchImpl = (async (
+			_input: RequestInfo | URL,
+			init?: RequestInit,
+		): Promise<Response> => {
 			const body = JSON.parse(String(init?.body ?? "{}")) as Record<string, unknown>;
 			delete body.model;
 
@@ -385,13 +390,15 @@ export function createWorkersAI(options: WorkersAISettings): WorkersAI {
 				...(settings.extraHeaders ? { extraHeaders: settings.extraHeaders } : {}),
 				...(init?.signal ? { signal: init.signal } : {}),
 			};
-			const response = await (binding as unknown as {
-				run(
-					model: string,
-					inputs: Record<string, unknown>,
-					options: Record<string, unknown>,
-				): Promise<Response>;
-			}).run(modelId, body, runOptions);
+			const response = await (
+				binding as unknown as {
+					run(
+						model: string,
+						inputs: Record<string, unknown>,
+						options: Record<string, unknown>,
+					): Promise<Response>;
+				}
+			).run(modelId, body, runOptions);
 			settings.onDispatch?.({
 				transport: "run",
 				resumeEnabled: false,

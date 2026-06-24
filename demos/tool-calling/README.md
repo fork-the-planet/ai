@@ -34,12 +34,12 @@ The architecture of the Tool Calling project is designed to support robust testi
 
 ```mermaid
 graph TD;
-    A[Client] -->|POST Request| B[DevServerTestHelper]
-    B -->|Start Server| C[Weather Worker]
+    A[Client] -->|POST Request| B[Local Dev Server]
+    B -->|Run Worker| C[Weather Worker]
     C -->|Process Prompt| D[Fetch Weather Data]
     D -->|Return Response| A
 ```
 
-The diagram illustrates the flow of data from the client to the server, where the `DevServerTestHelper` manages the server lifecycle, and the `Weather Worker` processes prompts to fetch and return weather data.
+The diagram illustrates the flow of data from the client to the local server, where the `Weather Worker` processes prompts to fetch and return weather data.
 
 <!-- Last updated: 0308b1a3da967e903a9ef2c03aa3e4608ce199e9 -->

@@ -6,8 +6,7 @@
 	"scripts": {
 		"build": "uv run pywrangler sync",
 		"dev": "uv run pywrangler dev",
-		"deploy": "uv run pywrangler deploy",
-		"type-check": "tsc --noEmit"
+		"deploy": "uv run pywrangler deploy"
 	},
 	"devDependencies": {
 		"wrangler": "^4.100.0"

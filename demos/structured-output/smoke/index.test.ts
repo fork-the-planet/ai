@@ -1,12 +1,40 @@
+import { type ChildProcess, spawn } from "node:child_process";
+import getPort from "get-port";
+import waitOn from "wait-on";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import z from "zod";
-import { DevServerTestHelper } from "../../../libs/test-utils/src/DevServerTestHelper";
 
 const TEST_ITERATIONS = 4;
 const PASSING_THRESHOLD = 0.75; // 75% pass rate required
 
+class LocalDevServer {
+	private serverProcess?: ChildProcess;
+	private port?: number;
+	private serverUrl?: string;
+
+	public async start(): Promise<string> {
+		this.port = await getPort();
+		this.serverUrl = `http://localhost:${this.port}`;
+
+		this.serverProcess = spawn("npm", ["run", "dev", "--", `--port=${this.port}`], {
+			shell: true,
+			stdio: "ignore",
+		});
+
+		await waitOn({ resources: [this.serverUrl] });
+
+		return this.serverUrl;
+	}
+
+	public stop(): void {
+		if (this.serverProcess) {
+			this.serverProcess.kill("SIGTERM");
+		}
+	}
+}
+
 describe("Structured Outputs Integration Tests", () => {
-	const serverHelper = new DevServerTestHelper();
+	const serverHelper = new LocalDevServer();
 	let serverUrl: string;
 
 	beforeAll(async () => {

@@ -59,7 +59,7 @@ The project interacts with a local development server API. Below is the API call
 
 The project is structured as an application that tests the output of a local server. It uses the following components:
 
-- **DevServerTestHelper**: A utility to start and stop the local development server.
+- **Local Dev Server**: The smoke test starts the app locally before making requests.
 - **Integration Tests**: Tests that validate the server's response against a predefined schema using Zod.
 
 ### System Diagram

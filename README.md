@@ -19,7 +19,7 @@ Packages and examples for building AI-powered applications on Cloudflare. Includ
 
 ## Demos
 
-The [`demos/`](./demos/) directory contains additional focused demos for specific patterns — tool calling, structured output, agents, MCP servers, and more. See [demos.json](./demos.json) for the full list.
+The [`demos/`](./demos/) directory contains additional focused demos for specific patterns — tool calling, structured output, agents, MCP servers, and more.
 
 ## Local Development
 

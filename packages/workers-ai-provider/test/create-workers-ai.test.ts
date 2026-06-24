@@ -358,9 +358,9 @@ describe("createWorkersAI implicit gateway routing", () => {
 				fallback: { mode: "client", models: ["openai/gpt-5-mini"] },
 			}),
 		).toThrow(/must be configured on the dynamic route/);
-		expect(() =>
-			workersai("dynamic/gemma-4-fallback", { transport: "gateway" }),
-		).toThrow(/must be configured on the dynamic route/);
+		expect(() => workersai("dynamic/gemma-4-fallback", { transport: "gateway" })).toThrow(
+			/must be configured on the dynamic route/,
+		);
 		expect(() => workersai("dynamic/gemma-4-fallback", { resume: true })).toThrow(
 			/must be configured on the dynamic route/,
 		);
