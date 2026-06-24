@@ -1,7 +1,9 @@
 import type { LanguageModelV3 } from "@ai-sdk/provider";
+import { generateText } from "ai";
 import { describe, expect, it, vi } from "vitest";
 import { createWorkersAI } from "../src/index";
 import type { ProviderPlugin } from "../src/gateway-delegate";
+import { openai as openaiWirePlugin } from "../src/openai";
 
 /** Minimal binding that records run/gateway calls. */
 function makeBinding() {
@@ -221,6 +223,149 @@ describe("createWorkersAI implicit gateway routing", () => {
 		expect(model.provider).toBe("workersai.chat");
 	});
 
+	it("passes `dynamic/...` ids through as Workers AI models when no OpenAI-wire plugin is configured", async () => {
+		const run = vi.fn(async () => ({ response: "Hello from dynamic route" }));
+		const binding = { run } as unknown as Parameters<typeof createWorkersAI>[0] extends {
+			binding: infer B;
+		}
+			? B
+			: never;
+		const workersai = createWorkersAI({
+			binding,
+		});
+
+		const result = await generateText({
+			model: workersai("dynamic/gemma-4-fallback", { safePrompt: true }),
+			prompt: "Say hello.",
+		});
+
+		expect(result.text).toBe("Hello from dynamic route");
+		expect(run).toHaveBeenCalledTimes(1);
+		expect(run.mock.calls[0][0]).toBe("dynamic/gemma-4-fallback");
+		expect(run.mock.calls[0][2]).toMatchObject({
+			gateway: { id: "default" },
+		});
+	});
+
+	it("uses the OpenAI-wire provider plugin for `dynamic/...` ids when configured", async () => {
+		const run = vi.fn(
+			async () =>
+				new Response(
+					JSON.stringify({
+						id: "chatcmpl-test",
+						object: "chat.completion",
+						created: 0,
+						model: "gpt-4o",
+						choices: [
+							{
+								index: 0,
+								message: {
+									role: "assistant",
+									content: "Hello from OpenAI-wire dynamic route",
+								},
+								finish_reason: "stop",
+							},
+						],
+						usage: {
+							prompt_tokens: 4,
+							completion_tokens: 6,
+							total_tokens: 10,
+						},
+					}),
+					{
+						headers: {
+							"content-type": "application/json",
+							"cf-aig-cache-status": "MISS",
+							"cf-aig-log-id": "log-123",
+						},
+					},
+				),
+		);
+		const onDispatch = vi.fn();
+		const binding = { run } as unknown as Parameters<typeof createWorkersAI>[0] extends {
+			binding: infer B;
+		}
+			? B
+			: never;
+		const workersai = createWorkersAI({
+			binding,
+			gateway: { id: "default" },
+			providers: [openaiWirePlugin],
+		});
+
+		const result = await generateText({
+			model: workersai("dynamic/gemma-4-fallback", {
+				cacheTtl: 60,
+				collectLog: true,
+				metadata: { route: "gemma" },
+				onDispatch,
+				skipCache: true,
+			}),
+			prompt: "Say hello.",
+		});
+
+		expect(result.text).toBe("Hello from OpenAI-wire dynamic route");
+		expect(run).toHaveBeenCalledTimes(1);
+		expect(run.mock.calls[0][0]).toBe("dynamic/gemma-4-fallback");
+		expect(run.mock.calls[0][1]).not.toHaveProperty("model");
+		expect(run.mock.calls[0][2]).toMatchObject({
+			gateway: {
+				cacheTtl: 60,
+				collectLog: true,
+				id: "default",
+				metadata: { route: "gemma" },
+				skipCache: true,
+			},
+			returnRawResponse: true,
+		});
+		expect(onDispatch).toHaveBeenCalledWith(
+			expect.objectContaining({
+				cacheStatus: "MISS",
+				logId: "log-123",
+				resumeEnabled: false,
+				transport: "run",
+			}),
+		);
+	});
+
+	it("throws for `dynamic/...` ids when providers are configured without the OpenAI-wire plugin", () => {
+		const { binding } = makeBinding();
+		const workersai = createWorkersAI({
+			binding,
+			gateway: { id: "default" },
+			providers: [
+				{
+					wireFormat: "anthropic",
+					create: openaiPlugin.create,
+				},
+			],
+		});
+
+		expect(() => workersai("dynamic/anty")).toThrow(/OpenAI-compatible/);
+		expect(() => workersai("dynamic/anty")).toThrow(/workers-ai-provider\/openai/);
+	});
+
+	it("throws for unsupported delegate-only options on `dynamic/...` ids", () => {
+		const { binding } = makeBinding();
+		const workersai = createWorkersAI({
+			binding,
+			gateway: { id: "default" },
+			providers: [openaiWirePlugin],
+		});
+
+		expect(() =>
+			workersai("dynamic/gemma-4-fallback", {
+				fallback: { mode: "client", models: ["openai/gpt-5-mini"] },
+			}),
+		).toThrow(/must be configured on the dynamic route/);
+		expect(() =>
+			workersai("dynamic/gemma-4-fallback", { transport: "gateway" }),
+		).toThrow(/must be configured on the dynamic route/);
+		expect(() => workersai("dynamic/gemma-4-fallback", { resume: true })).toThrow(
+			/must be configured on the dynamic route/,
+		);
+	});
+
 	it("throws a helpful error for a catalog slug when providers are NOT configured", () => {
 		const { binding } = makeBinding();
 		const workersai = createWorkersAI({ binding, gateway: { id: "default" } });
@@ -268,6 +413,10 @@ describe("createWorkersAI implicit gateway routing", () => {
 
 		// `@cf/...` id → WorkersAIChatSettings autocompletes.
 		workersai("@cf/zai-org/glm-4.7-flash", {
+			safePrompt: true,
+			reasoning_effort: "low",
+		});
+		workersai("dynamic/gemma-4-fallback", {
 			safePrompt: true,
 			reasoning_effort: "low",
 		});

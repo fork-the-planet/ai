@@ -92,6 +92,7 @@ import {
 	type GatewayDelegate,
 	type ProviderPlugin,
 	type ResumeExpiredPolicy,
+	type WireFormat,
 } from "./gateway-delegate";
 
 // ---------------------------------------------------------------------------
@@ -103,6 +104,7 @@ import {
  * configured. Every Cloudflare account has a `"default"` gateway.
  */
 const DEFAULT_GATEWAY_ID = "default";
+const DYNAMIC_ROUTE_WIRE_FORMAT: WireFormat = "openai";
 
 export type WorkersAISettings = (
 	| {
@@ -178,9 +180,17 @@ type IsCatalogSlug<M extends string> = string extends M
 	? false
 	: M extends `@${string}`
 		? false
-		: M extends `${string}/${string}`
-			? true
-			: false;
+		: M extends `dynamic/${string}`
+			? false
+			: M extends `${string}/${string}`
+				? true
+				: false;
+
+type IsDynamicRoute<M extends string> = string extends M
+	? false
+	: M extends `dynamic/${string}`
+		? true
+		: false;
 
 /**
  * Picks the per-model settings type from the (captured) literal model id:
@@ -189,7 +199,11 @@ type IsCatalogSlug<M extends string> = string extends M
  * options while `workersai("@cf/…", { … })` autocompletes chat settings.
  */
 type ModelSettings<M extends string> =
-	IsCatalogSlug<M> extends true ? DelegateCallOptions : WorkersAIChatSettings;
+	IsCatalogSlug<M> extends true
+		? DelegateCallOptions
+		: IsDynamicRoute<M> extends true
+			? DelegateCallOptions | WorkersAIChatSettings
+			: WorkersAIChatSettings;
 
 export interface WorkersAI {
 	<M extends string>(
@@ -291,6 +305,112 @@ export function createWorkersAI(options: WorkersAISettings): WorkersAI {
 			isBinding,
 		});
 
+	const toGatewayOptions = (gateway: GatewayOptions | string | undefined): GatewayOptions | undefined =>
+		typeof gateway === "string" ? { id: gateway } : gateway;
+
+	const createDynamicRouteModel = (
+		modelId: TextGenerationModels,
+		settings: (WorkersAIChatSettings & DelegateCallOptions) = {},
+	) => {
+		if (
+			settings.fallback ||
+			settings.transport === "gateway" ||
+			settings.resume === true ||
+			settings.onProgress ||
+			settings.onResumeExpired ||
+			settings.byok
+		) {
+			throw new Error(
+				`"${modelId}" is an AI Gateway dynamic route. Dynamic routes use AI.run with ` +
+					"OpenAI-compatible chat-completions wire format; fallback, gateway transport, " +
+					"resume, BYOK, and resume callbacks must be configured on the dynamic route or " +
+					"gateway instead of per call.",
+			);
+		}
+
+		const gateway = {
+			...(toGatewayOptions(settings.gateway) ?? options.gateway ?? { id: DEFAULT_GATEWAY_ID }),
+		};
+		if (settings.metadata) {
+			gateway.metadata = {
+				...(gateway.metadata ?? {}),
+				...settings.metadata,
+			};
+		}
+		if (settings.collectLog !== undefined) {
+			gateway.collectLog = settings.collectLog;
+		}
+		if (settings.cacheTtl !== undefined) {
+			gateway.cacheTtl = settings.cacheTtl;
+		}
+		if (settings.skipCache !== undefined) {
+			gateway.skipCache = settings.skipCache;
+		}
+
+		const chatSettings = {
+			...settings,
+			gateway,
+		};
+		delete chatSettings.metadata;
+		delete chatSettings.collectLog;
+		delete chatSettings.cacheTtl;
+		delete chatSettings.skipCache;
+		delete chatSettings.resume;
+		delete chatSettings.fallback;
+		delete chatSettings.transport;
+		delete chatSettings.onDispatch;
+		delete chatSettings.onProgress;
+		delete chatSettings.onResumeExpired;
+		delete chatSettings.byok;
+
+		const plugin = options.providers?.find((p) => p.wireFormat === DYNAMIC_ROUTE_WIRE_FORMAT);
+		if (!plugin) {
+			if (options.providers?.length) {
+				throw new Error(
+					`"${modelId}" is an AI Gateway dynamic route. Dynamic routes return OpenAI-compatible ` +
+						"chat-completions wire format on the AI.run path, so configure the OpenAI " +
+						'provider plugin: import { openai } from "workers-ai-provider/openai"; ' +
+						"createWorkersAI({ binding: env.AI, providers: [openai] }).",
+				);
+			}
+			return createChatModel(modelId, chatSettings);
+		}
+		const fetchImpl = (async (_input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+			const body = JSON.parse(String(init?.body ?? "{}")) as Record<string, unknown>;
+			delete body.model;
+
+			const runOptions: Record<string, unknown> = {
+				gateway,
+				returnRawResponse: true,
+				...(settings.extraHeaders ? { extraHeaders: settings.extraHeaders } : {}),
+				...(init?.signal ? { signal: init.signal } : {}),
+			};
+			const response = await (binding as unknown as {
+				run(
+					model: string,
+					inputs: Record<string, unknown>,
+					options: Record<string, unknown>,
+				): Promise<Response>;
+			}).run(modelId, body, runOptions);
+			settings.onDispatch?.({
+				transport: "run",
+				resumeEnabled: false,
+				warnings: [],
+				status: response.status,
+				runId: response.headers.get("cf-aig-run-id"),
+				cfStep: response.headers.get("cf-aig-step"),
+				cacheStatus: response.headers.get("cf-aig-cache-status"),
+				logId: response.headers.get("cf-aig-log-id"),
+			});
+			return response;
+		}) as typeof globalThis.fetch;
+
+		return plugin.create({
+			modelId,
+			fetch: fetchImpl,
+		}) as unknown as WorkersAIChatLanguageModel;
+	};
+
 	// Third-party catalog routing: when `providers` is configured, a non-`@cf/`
 	// `"<provider>/<model>"` slug is dispatched through the gateway delegate
 	// instead of being treated as a Workers AI model id. Built lazily so the
@@ -321,11 +441,14 @@ export function createWorkersAI(options: WorkersAISettings): WorkersAI {
 		return delegate;
 	};
 
-	// Workers AI model ids are always `@cf/...`; gateway catalog slugs are
-	// `"<provider>/<model>"`. Anything with a slash that is not `@`-prefixed is
-	// treated as a catalog slug.
+	// Workers AI model ids are usually `@cf/...`, but AI Gateway dynamic routes
+	// use the `dynamic/<route>` namespace and must pass through to `AI.run`.
+	// Other non-`@` ids with a slash are treated as catalog slugs.
 	const isGatewaySlug = (id: unknown): id is string =>
-		typeof id === "string" && !id.startsWith("@") && id.includes("/");
+		typeof id === "string" &&
+		!id.startsWith("@") &&
+		!id.startsWith("dynamic/") &&
+		id.includes("/");
 
 	// Settings is the union of both shapes here; the public `WorkersAI` interface
 	// narrows it per call via `ModelSettings<M>`. We branch at runtime and cast to
@@ -334,6 +457,12 @@ export function createWorkersAI(options: WorkersAISettings): WorkersAI {
 		modelId: TextGenerationModels,
 		settings?: WorkersAIChatSettings | DelegateCallOptions,
 	): WorkersAIChatLanguageModel => {
+		if (typeof modelId === "string" && modelId.startsWith("dynamic/")) {
+			return createDynamicRouteModel(
+				modelId,
+				settings as (WorkersAIChatSettings & DelegateCallOptions) | undefined,
+			);
+		}
 		if (isGatewaySlug(modelId)) {
 			// The delegate returns a `LanguageModelV3` built by the configured plugin.
 			// It's structurally compatible with the AI SDK consumers this provider is
