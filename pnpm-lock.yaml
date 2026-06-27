@@ -59,9 +59,6 @@ importers:
       hono:
         specifier: ^4.12.25
         version: 4.12.25
-      husky:
-        specifier: ^9.1.7
-        version: 9.1.7
       langchain:
         specifier: ^1.4.5
         version: 1.4.5(@langchain/core@1.1.49(@opentelemetry/api@1.9.0)(openai@6.42.0(ws@8.20.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.4.3)))(@opentelemetry/api@1.9.0)(openai@6.42.0(ws@8.20.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.4.3))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(zod-to-json-schema@3.25.1(zod@4.4.3))
@@ -5173,11 +5170,6 @@ packages:
     resolution: {integrity: sha512-3gKm/gCSUipeLsRYZbbdA1BD83lBoWUkZ7G9VFrhWPAU76KwYo5KR8V28bpoPm/ygy0x5/GCbpRQdY7VLYCoIg==}
     hasBin: true
 
-  husky@9.1.7:
-    resolution: {integrity: sha512-5gs5ytaNjBrh5Ow3zrvdUUY+0VxIuWVL4i9irt6friV+BqdCfmV11CQTWMiBYWHbXhco+J1kHfTOUkePhCDvMA==}
-    engines: {node: '>=18'}
-    hasBin: true
-
   iconv-lite@0.7.0:
     resolution: {integrity: sha512-cf6L2Ds3h57VVmkZe+Pn+5APsT7FpqJtEhhieDCvrE2MK5Qk9MyffgQyuxQTm6BChfeZNtcOLHp9IcWRVcIcBQ==}
     engines: {node: '>=0.10.0'}
@@ -10165,8 +10157,6 @@ snapshots:
     optional: true
 
   human-id@4.1.1: {}
-
-  husky@9.1.7: {}
 
   iconv-lite@0.7.0:
     dependencies:
