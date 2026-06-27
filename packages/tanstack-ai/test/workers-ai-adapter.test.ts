@@ -242,7 +242,13 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 			adapter.chatStream({
 				model: MODEL,
 				messages: [{ role: "user", content: "hi" }],
-				tools: [{ name: "noop", description: "noop", inputSchema: { type: "object" } }],
+				tools: [
+					{
+						name: "noop",
+						description: "noop",
+						inputSchema: { type: "object" },
+					},
+				],
 			} as any),
 		);
 
@@ -265,8 +271,16 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 				model: MODEL,
 				messages: [{ role: "user", content: "Weather and time in SF?" }],
 				tools: [
-					{ name: "get_weather", description: "w", inputSchema: { type: "object" } },
-					{ name: "get_time", description: "t", inputSchema: { type: "object" } },
+					{
+						name: "get_weather",
+						description: "w",
+						inputSchema: { type: "object" },
+					},
+					{
+						name: "get_time",
+						description: "t",
+						inputSchema: { type: "object" },
+					},
 				],
 			} as any),
 		);
@@ -462,7 +476,10 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 		const [, inputs] = binding.run.mock.calls[0]!;
 		expect(inputs.messages[0].content).toEqual([
 			{ type: "text", text: "Describe this: " },
-			{ type: "image_url", image_url: { url: "https://example.com/photo.jpg" } },
+			{
+				type: "image_url",
+				image_url: { url: "https://example.com/photo.jpg" },
+			},
 		]);
 	});
 
@@ -480,7 +497,11 @@ describe("WorkersAiTextAdapter.chatStream", () => {
 							{ type: "text", content: "Describe this: " },
 							{
 								type: "image",
-								source: { type: "data", value: "abc123", mimeType: "image/png" },
+								source: {
+									type: "data",
+									value: "abc123",
+									mimeType: "image/png",
+								},
 							},
 						],
 					},
@@ -1212,7 +1233,12 @@ describe("WorkersAiTextAdapter modelOptions passthrough", () => {
 			// Second call (non-streaming fallback) succeeds
 			.mockResolvedValueOnce({
 				model: "@cf/openai/gpt-oss-120b",
-				choices: [{ message: { role: "assistant", content: "ok" }, finish_reason: "stop" }],
+				choices: [
+					{
+						message: { role: "assistant", content: "ok" },
+						finish_reason: "stop",
+					},
+				],
 				usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 },
 			});
 
@@ -1349,7 +1375,9 @@ describe("WorkersAiTextAdapter config modes", () => {
 
 	it("should accept an arbitrary model string", () => {
 		const binding = createMockBinding({ response: "ok" });
-		const adapter = new WorkersAiTextAdapter("@cf/my-org/custom-model-v1", { binding });
+		const adapter = new WorkersAiTextAdapter("@cf/my-org/custom-model-v1", {
+			binding,
+		});
 		expect(adapter).toBeDefined();
 	});
 

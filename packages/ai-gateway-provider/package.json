@@ -189,9 +189,11 @@
 		"format": "oxfmt --write .",
 		"test:ci": "vitest --watch=false",
 		"test": "vitest",
+		"test:e2e": "vitest --config vitest.e2e.config.ts --watch=false",
 		"type-check": "tsc --noEmit"
 	},
 	"devDependencies": {
+		"@cloudflare/gateway-core": "workspace:*",
 		"tsdown": "^0.22.2",
 		"typescript": "6.0.3"
 	},

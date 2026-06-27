@@ -326,7 +326,11 @@ export default {
 
 				// ----- TTS -----
 				case "/tts": {
-					const ttsBody = body as { model?: string; text?: string; voice?: string };
+					const ttsBody = body as {
+						model?: string;
+						text?: string;
+						voice?: string;
+					};
 					const ttsModel = (ttsBody.model || "@cf/deepgram/aura-1") as WorkersAiTTSModel;
 					const ttsAdapter = new WorkersAiTTSAdapter({ binding: env.AI }, ttsModel);
 					const ttsResult = await ttsAdapter.generateSpeech({
@@ -379,13 +383,11 @@ export default {
 
 				// ----- Summarization -----
 				case "/summarize": {
-					const sumBody = body as { text?: string };
-					const sumAdapter = new WorkersAiSummarizeAdapter(
-						{ binding: env.AI },
-						"@cf/facebook/bart-large-cnn",
-					);
+					const sumBody = body as { text?: string; model?: string };
+					const sumModel = sumBody.model || "@cf/facebook/bart-large-cnn";
+					const sumAdapter = new WorkersAiSummarizeAdapter({ binding: env.AI }, sumModel);
 					const sumResult = await sumAdapter.summarize({
-						model: "@cf/facebook/bart-large-cnn",
+						model: sumModel,
 						text:
 							sumBody.text ||
 							"Artificial intelligence is the simulation of human intelligence processes by computer systems.",
@@ -401,7 +403,9 @@ export default {
 						messages?: Array<{ role: string; content: string }>;
 					};
 					const streamModel = (streamBody.model || model) as WorkersAiTextModel;
-					const streamAdapter = createWorkersAiChat(streamModel, { binding: env.AI });
+					const streamAdapter = createWorkersAiChat(streamModel, {
+						binding: env.AI,
+					});
 					const streamChunks = await collectChunks(
 						streamAdapter.chatStream({
 							model: streamModel,
@@ -412,6 +416,31 @@ export default {
 						} as any),
 					);
 					return jsonResponse({ chunks: streamChunks });
+				}
+
+				// ----- Resume-enabled streaming (run path through the gateway) -----
+				// Drives the binding's resumable run path (binding.run(model, inputs,
+				// { gateway, returnRawResponse })) so a live cf-aig-run-id is surfaced
+				// and the resume engine is wired in. When the gateway/run path is
+				// unavailable the chat() pipeline surfaces a RUN_ERROR which the test
+				// classifies as a skip rather than a failure.
+				case "/chat/stream-resume": {
+					const rBody = body as { model?: string; gateway?: string };
+					const rModel = (rBody.model || "@cf/zai-org/glm-5.2") as WorkersAiTextModel;
+					const resumeAdapter = createWorkersAiChat(rModel, {
+						binding: env.AI,
+						gateway: rBody.gateway || "default",
+						resume: true,
+						onResumeExpired: "accept-partial",
+					});
+					const resumeChunks = await collectChunks(
+						resumeAdapter.chatStream({
+							model: rModel,
+							messages: [{ role: "user", content: "Say hello in one sentence." }],
+							temperature: 0,
+						} as any),
+					);
+					return jsonResponse({ chunks: resumeChunks });
 				}
 
 				default:

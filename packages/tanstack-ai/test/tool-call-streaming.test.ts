@@ -77,7 +77,10 @@ const TOOLS = [
 		description: "Search the calendar",
 		inputSchema: {
 			type: "object",
-			properties: { date_from: { type: "string" }, date_to: { type: "string" } },
+			properties: {
+				date_from: { type: "string" },
+				date_to: { type: "string" },
+			},
 		},
 	},
 ];

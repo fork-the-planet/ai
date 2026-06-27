@@ -18,6 +18,19 @@ export default defineConfig({
 	clean: true,
 	dts: true,
 	format: ["cjs", "esm"],
-	deps: { skipNodeModulesBundle: true },
+	// Production deps (openai, @tanstack/ai*, the optional SDKs) stay external by
+	// default; `@cloudflare/gateway-core` is a private, source-only workspace
+	// package, so inline its source rather than treating it as external.
+	deps: {
+		// Keep node_modules external (matching the prior `skipNodeModulesBundle`
+		// behavior for the types we import directly), but inline the private
+		// source-only `@cloudflare/gateway-core` into both JS and dts.
+		neverBundle: ["@cloudflare/workers-types"],
+		alwaysBundle: ["@cloudflare/gateway-core"],
+		dts: {
+			neverBundle: ["@cloudflare/workers-types"],
+			alwaysBundle: ["@cloudflare/gateway-core"],
+		},
+	},
 	target: "es2020",
 });

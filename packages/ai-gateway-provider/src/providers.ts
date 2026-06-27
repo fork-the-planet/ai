@@ -1,87 +1,46 @@
-export const providers = [
-	{
-		name: "openai",
-		regex: /^https:\/\/api\.openai\.com\//,
-		transformEndpoint: (url: string) => url.replace(/^https:\/\/api\.openai\.com\//, ""),
-	},
-	{
-		name: "deepseek",
-		regex: /^https:\/\/api\.deepseek\.com\//,
-		transformEndpoint: (url: string) => url.replace(/^https:\/\/api\.deepseek\.com\//, ""),
-	},
-	{
-		name: "anthropic",
-		regex: /^https:\/\/api\.anthropic\.com\//,
-		transformEndpoint: (url: string) => url.replace(/^https:\/\/api\.anthropic\.com\//, ""),
-		headerKey: "x-api-key",
-	},
-	{
-		name: "google-ai-studio",
-		regex: /^https:\/\/generativelanguage\.googleapis\.com\//,
-		headerKey: "x-goog-api-key",
-		transformEndpoint: (url: string) =>
-			url.replace(/^https:\/\/generativelanguage\.googleapis\.com\//, ""),
-	},
-	{
-		name: "google-vertex-ai",
-		regex: /aiplatform\.googleapis\.com/,
-		transformEndpoint: (url: string) =>
-			url.replace(/https:\/\/(.*)[-]?aiplatform\.googleapis\.com\//, ""),
-	},
-	{
-		name: "grok",
-		regex: /^https:\/\/api\.x\.ai\//,
-		transformEndpoint: (url: string) => url.replace(/^https:\/\/api\.x\.ai\//, ""),
-	},
-	{
-		name: "mistral",
-		regex: /^https:\/\/api\.mistral\.ai\//,
-		transformEndpoint: (url: string) => url.replace(/^https:\/\/api\.mistral\.ai\//, ""),
-	},
-	{
-		name: "perplexity-ai",
-		regex: /^https:\/\/api\.perplexity\.ai\//,
-		transformEndpoint: (url: string) => url.replace(/^https:\/\/api\.perplexity\.ai\//, ""),
-	},
-	{
-		name: "replicate",
-		regex: /^https:\/\/api\.replicate\.com\//,
-		transformEndpoint: (url: string) => url.replace(/^https:\/\/api\.replicate\.com\//, ""),
-	},
-	{
-		name: "groq",
-		regex: /^https:\/\/api\.groq\.com\/openai\/v1\//,
-		transformEndpoint: (url: string) =>
-			url.replace(/^https:\/\/api\.groq\.com\/openai\/v1\//, ""),
-	},
-	{
-		name: "google-vertex-ai",
-		regex: /^https:\/\/(?:[a-z0-9]+-)*aiplatform\.googleapis\.com\//,
-		transformEndpoint: (url: string) =>
-			url.replace(/^https:\/\/(?:[a-z0-9]+-)*aiplatform\.googleapis\.com\//, ""),
-		headerKey: "authorization",
-	},
-	{
-		name: "azure-openai",
-		regex: /^https:\/\/(?<resource>[^.]+)\.openai\.azure\.com\/openai\/deployments\/(?<deployment>[^/]+)\/(?<rest>.*)$/,
-		transformEndpoint: (url: string) => {
-			const match = url.match(
-				/^https:\/\/(?<resource>[^.]+)\.openai\.azure\.com\/openai\/deployments\/(?<deployment>[^/]+)\/(?<rest>.*)$/,
-			);
-			if (!match || !match.groups) return url;
-			const { resource, deployment, rest } = match.groups;
-			if (!resource || !deployment || !rest) {
-				throw new Error("Failed to parse Azure OpenAI endpoint URL.");
-			}
-			return `${resource}/${deployment}/${rest}`;
+/**
+ * `ai-gateway-provider`'s URL→provider lookup table.
+ *
+ * The canonical provider registry now lives in `@cloudflare/gateway-core` and is
+ * shared with `workers-ai-provider` / `@cloudflare/tanstack-ai`. This module
+ * derives the legacy `{ name, regex, transformEndpoint, headerKey? }` shape that
+ * `index.ts` consumes from that single source of truth, so there's only one place
+ * that knows how to map a provider host to its gateway endpoint.
+ *
+ * Two things are intentionally preserved here:
+ *  - the `compat` entry (the unified `/v1/compat/` surface) has no core
+ *    equivalent, so it stays local and is appended last; and
+ *  - `headerKey` is only emitted for providers whose native BYOK header is not
+ *    `authorization` (matching the historical table, where `index.ts` defaults to
+ *    stripping `authorization`).
+ */
+import { GATEWAY_PROVIDERS } from "@cloudflare/gateway-core";
+
+export interface AiGatewayProviderConfig {
+	name: string;
+	regex: RegExp;
+	transformEndpoint: (url: string) => string;
+	headerKey?: string;
+}
+
+const derived: AiGatewayProviderConfig[] = GATEWAY_PROVIDERS.flatMap((p) => {
+	// Only providers with a detectable host shape participate in URL routing.
+	if (!p.hostPattern || !p.transformEndpoint) return [];
+	const nativeAuthHeader = p.authHeaders[0];
+	return [
+		{
+			name: p.gatewayProviderId,
+			regex: p.hostPattern,
+			transformEndpoint: p.transformEndpoint,
+			...(nativeAuthHeader && nativeAuthHeader !== "authorization"
+				? { headerKey: nativeAuthHeader }
+				: {}),
 		},
-		headerKey: "api-key",
-	},
-	{
-		name: "openrouter",
-		regex: /^https:\/\/openrouter\.ai\/api\//,
-		transformEndpoint: (url: string) => url.replace(/^https:\/\/openrouter\.ai\/api\//, ""),
-	},
+	];
+});
+
+export const providers: AiGatewayProviderConfig[] = [
+	...derived,
 	{
 		name: "compat",
 		regex: /^https:\/\/gateway\.ai\.cloudflare\.com\/v1\/compat\//,

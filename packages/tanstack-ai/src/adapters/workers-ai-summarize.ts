@@ -94,7 +94,10 @@ export class WorkersAiSummarizeAdapter extends BaseSummarizeAdapter<WorkersAiSum
 			);
 		}
 
-		const data = (await response.json()) as { result?: { summary?: string }; summary?: string };
+		const data = (await response.json()) as {
+			result?: { summary?: string };
+			summary?: string;
+		};
 		return this.wrapResult(data.result?.summary ?? data.summary ?? "");
 	}
 

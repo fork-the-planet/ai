@@ -2,6 +2,10 @@
 
 [Workers AI](https://developers.cloudflare.com/workers-ai/) provider for the [AI SDK](https://sdk.vercel.ai/). Run Cloudflare's models for chat, embeddings, image generation, transcription, text-to-speech, reranking, and [AI Search](https://developers.cloudflare.com/ai-search/) — all from a single provider. It can also route **third-party** models (OpenAI, Anthropic, Google, …) through [AI Gateway](https://developers.cloudflare.com/ai-gateway/) — see [Third-party models](#third-party-models-via-ai-gateway).
 
+> 📚 In-depth guides and the AI Gateway **delegate** reference (unified catalog,
+> resumable streaming _(coming soon)_, server-side fallback) live in
+> [`docs/workers-ai-provider`](../../docs/workers-ai-provider/README.md).
+
 ## Quick start
 
 ```bash
@@ -333,7 +337,7 @@ Streaming works the same way — use `streamText` instead of `generateText`.
 
 > **⚠️ Experimental.** Everything in this section (routing third-party models via `createWorkersAI({ providers })`, the provider plugins, the registry, the resume layer, and `createGatewayFetch`/`createGatewayProvider`) is a new and substantial addition — well beyond the package's original job of wrapping Workers AI. Treat the whole surface as experimental: APIs may change, and several behaviors depend on undocumented AI Gateway internals (the `cf-aig-run-id` resume buffer, per-provider run-path wire formats). It does **not** affect the stable Workers AI / AI Search APIs above. Bug reports and feedback are very welcome.
 
-Route **third-party** catalog models — OpenAI, Anthropic, Google, xAI/Grok, Groq, and the OpenAI-compatible long tail — through [AI Gateway](https://developers.cloudflare.com/ai-gateway/) using the same `env.AI` binding, with resumable streaming, BYOK, caching, and fallback.
+Route **third-party** catalog models — OpenAI, Anthropic, Google, xAI/Grok, Groq, and the OpenAI-compatible long tail — through [AI Gateway](https://developers.cloudflare.com/ai-gateway/) using the same `env.AI` binding, with resumable streaming _(coming soon)_, BYOK, caching, and fallback.
 
 Install only the wire-format plugins you actually use. They're **optional** peer dependencies:
 
@@ -360,7 +364,7 @@ const workersai = createWorkersAI({
 	// gateway unless you set one, e.g. gateway: { id: "my-gateway" }.
 });
 
-workersai("@cf/meta/llama-3.1-8b-instruct"); // Workers AI (unchanged)
+workersai("@cf/zai-org/glm-5.2"); // Workers AI (unchanged)
 
 const result = streamText({
 	model: workersai("openai/gpt-5", { resume: true }), // routed through AI Gateway
@@ -389,10 +393,10 @@ The registry covers every provider in the [AI Gateway provider directory](https:
 
 The transport is chosen automatically from the options you pass:
 
-| Transport         | Backed by                    | Resume (`cf-aig-run-id`) | Caching | Server fallback | Billing           |
-| ----------------- | ---------------------------- | ------------------------ | ------- | --------------- | ----------------- |
-| **run** (default) | `env.AI.run(...)`            | ✅                       | ❌      | ❌              | Unified billing   |
-| **gateway**       | `env.AI.gateway(id).run([])` | ❌                       | ✅      | ✅              | BYOK / stored key |
+| Transport         | Backed by                    | Resume _(coming soon)_ (`cf-aig-run-id`) | Caching | Server fallback | Billing           |
+| ----------------- | ---------------------------- | ---------------------------------------- | ------- | --------------- | ----------------- |
+| **run** (default) | `env.AI.run(...)`            | ✅                                       | ❌      | ❌              | Unified billing   |
+| **gateway**       | `env.AI.gateway(id).run([])` | ❌                                       | ✅      | ✅              | BYOK / stored key |
 
 Run-catalog providers (OpenAI, Anthropic, Google, xAI, Groq, plus the unified-catalog chat providers Alibaba/Qwen and MiniMax) default to the resumable **run path**. BYOK-only providers (deepseek, mistral, perplexity, …) always use the **gateway path**. Asking for an impossible combination (e.g. `resume: true` with `fallback.mode: "server"`) throws a `GatewayDelegateError`.
 
@@ -447,6 +451,11 @@ workersai("openai/gpt-5", {
 
 ### Resume after disconnect
 
+> **🚧 Coming soon.** Resumable streaming is not generally available yet — the AI
+> Gateway resume backend is still rolling out. The options here are in place so
+> you can adopt them early, but treat resume as experimental until the rollout
+> completes.
+
 The run path wraps the response stream so a transient mid-stream drop reconnects through the gateway resume endpoint transparently. For cross-invocation recovery (e.g. a Durable Object re-attaching after eviction), persist `{ runId, eventOffset }` via `onDispatch` + `onProgress` and re-attach with `createResumableStream`:
 
 ```ts
@@ -482,15 +491,15 @@ The provider id is detected from the request URL (or pass `provider` explicitly)
 
 ### `createWorkersAI(options)`
 
-| Option            | Type                            | Description                                                                                       |
-| ----------------- | ------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `binding`         | `Ai`                            | Workers AI binding (`env.AI`). Use this OR credentials.                                           |
-| `accountId`       | `string`                        | Cloudflare account ID. Required with `apiKey`.                                                    |
-| `apiKey`          | `string`                        | Cloudflare API token. Required with `accountId`.                                                  |
-| `gateway`         | `GatewayOptions`                | Optional [AI Gateway](https://developers.cloudflare.com/ai-gateway/) config.                      |
-| `providers`       | `ProviderPlugin[]`              | _Experimental._ Wire-format plugins that enable routing `"<provider>/<model>"` slugs via gateway. |
-| `resume`          | `boolean`                       | _Experimental._ Default resume behavior for gateway-routed catalog models. Defaults to `true`.    |
-| `onResumeExpired` | `"error"` \| `"accept-partial"` | _Experimental._ Default policy when the gateway resume buffer expires. Defaults to `"error"`.     |
+| Option            | Type                            | Description                                                                                                  |
+| ----------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `binding`         | `Ai`                            | Workers AI binding (`env.AI`). Use this OR credentials.                                                      |
+| `accountId`       | `string`                        | Cloudflare account ID. Required with `apiKey`.                                                               |
+| `apiKey`          | `string`                        | Cloudflare API token. Required with `accountId`.                                                             |
+| `gateway`         | `GatewayOptions`                | Optional [AI Gateway](https://developers.cloudflare.com/ai-gateway/) config.                                 |
+| `providers`       | `ProviderPlugin[]`              | _Experimental._ Wire-format plugins that enable routing `"<provider>/<model>"` slugs via gateway.            |
+| `resume`          | `boolean`                       | _Experimental — coming soon._ Default resume behavior for gateway-routed catalog models. Defaults to `true`. |
+| `onResumeExpired` | `"error"` \| `"accept-partial"` | _Experimental — coming soon._ Default policy when the gateway resume buffer expires. Defaults to `"error"`.  |
 
 Returns a provider with model factories. Each factory accepts an optional second argument for per-model settings:
 

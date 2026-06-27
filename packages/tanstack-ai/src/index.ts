@@ -85,3 +85,4 @@ export type { WorkersAiSummarizeModel } from "./adapters/workers-ai-summarize";
 
 // Config types
 export type { AiGatewayAdapterConfig, WorkersAiAdapterConfig } from "./utils/create-fetcher";
+export type { ResumeExpiredPolicy } from "@cloudflare/gateway-core";

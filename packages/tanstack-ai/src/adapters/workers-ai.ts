@@ -94,13 +94,24 @@ function buildWorkersAiClient(config: WorkersAiAdapterConfig): OpenAI {
 		: undefined;
 
 	if (isDirectBindingConfig(config)) {
-		// Plain binding mode: shim translates OpenAI fetch calls to env.AI.run()
+		if (config.resume && !config.gateway) {
+			console.warn(
+				"[tanstack-ai] `resume: true` requires a `gateway` id (resume runs through the " +
+					"gateway run path). Ignoring resume; set `gateway` to enable it.",
+			);
+		}
+		// Plain binding mode: shim translates OpenAI fetch calls to env.AI.run().
+		// When `gateway` is set, the shim uses the resumable run path instead.
 		return new OpenAI({
 			apiKey: "unused",
-			fetch: createWorkersAiBindingFetch(
-				config.binding,
-				sessionHeaders ? { extraHeaders: sessionHeaders } : undefined,
-			),
+			fetch: createWorkersAiBindingFetch(config.binding, {
+				...(sessionHeaders ? { extraHeaders: sessionHeaders } : {}),
+				...(config.gateway ? { gateway: config.gateway } : {}),
+				...(config.resume !== undefined ? { resume: config.resume } : {}),
+				...(config.onResumeExpired !== undefined
+					? { onResumeExpired: config.onResumeExpired }
+					: {}),
+			}),
 		});
 	}
 

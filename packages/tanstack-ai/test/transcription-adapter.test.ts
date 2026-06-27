@@ -117,11 +117,11 @@ describe("WorkersAiTranscriptionAdapter", () => {
 		const { WorkersAiTranscriptionAdapter } =
 			await import("../src/adapters/workers-ai-transcription");
 		const originalFetch = globalThis.fetch;
-		globalThis.fetch = vi
-			.fn()
-			.mockResolvedValue(
-				new Response(JSON.stringify({ text: "Hello from REST" }), { status: 200 }),
-			) as any;
+		globalThis.fetch = vi.fn().mockResolvedValue(
+			new Response(JSON.stringify({ text: "Hello from REST" }), {
+				status: 200,
+			}),
+		) as any;
 
 		try {
 			const adapter = new WorkersAiTranscriptionAdapter(
@@ -207,11 +207,11 @@ describe("WorkersAiTranscriptionAdapter", () => {
 	// -----------------------------------------------------------------------
 
 	it("transcribeViaGateway: returns transcription on success", async () => {
-		const mockGatewayFetch = vi
-			.fn()
-			.mockResolvedValue(
-				new Response(JSON.stringify({ text: "Hello from gateway" }), { status: 200 }),
-			);
+		const mockGatewayFetch = vi.fn().mockResolvedValue(
+			new Response(JSON.stringify({ text: "Hello from gateway" }), {
+				status: 200,
+			}),
+		);
 
 		vi.resetModules();
 		vi.doMock("../src/utils/create-fetcher", async (importOriginal) => {
@@ -286,7 +286,11 @@ describe("WorkersAiTranscriptionAdapter", () => {
 		);
 
 		const b64Audio = btoa("test");
-		await adapter.transcribe({ model: "@cf/openai/whisper", audio: b64Audio, logger });
+		await adapter.transcribe({
+			model: "@cf/openai/whisper",
+			audio: b64Audio,
+			logger,
+		});
 
 		const callArgs = mockBinding.run.mock.calls[0]![1] as Record<string, unknown>;
 		expect(callArgs.audio).toBeInstanceOf(Array);
@@ -308,7 +312,11 @@ describe("WorkersAiTranscriptionAdapter", () => {
 		);
 
 		const blob = new Blob([new Uint8Array([1, 2, 3])]);
-		await adapter.transcribe({ model: "@cf/openai/whisper", audio: blob, logger });
+		await adapter.transcribe({
+			model: "@cf/openai/whisper",
+			audio: blob,
+			logger,
+		});
 
 		const callArgs = mockBinding.run.mock.calls[0]![1] as Record<string, unknown>;
 		expect(callArgs.audio).toBeInstanceOf(Array);
@@ -330,7 +338,11 @@ describe("WorkersAiTranscriptionAdapter", () => {
 		);
 
 		const buffer = new Uint8Array([10, 20, 30]).buffer;
-		await adapter.transcribe({ model: "@cf/openai/whisper", audio: buffer, logger });
+		await adapter.transcribe({
+			model: "@cf/openai/whisper",
+			audio: buffer,
+			logger,
+		});
 
 		const callArgs = mockBinding.run.mock.calls[0]![1] as Record<string, unknown>;
 		expect(callArgs.audio).toBeInstanceOf(Array);

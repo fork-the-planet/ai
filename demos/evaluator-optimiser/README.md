@@ -24,7 +24,7 @@ To start the project locally, you can use the following npm scripts:
     ```bash
     npx nx dev evaluator-optimiser
     ```
-- **lint**: Lints the source code using Biome.
+- **lint**: Lints the source code using oxlint.
     ```bash
     npx nx lint evaluator-optimiser
     ```

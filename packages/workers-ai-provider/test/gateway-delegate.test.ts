@@ -148,6 +148,41 @@ function capturePlugin(wireFormat: "openai" | "anthropic" | "google"): {
 	};
 }
 
+/**
+ * A plugin whose model actually drives `fetch` (so the cross-vendor server-fallback
+ * engine can capture each leg's native request) and parses the response by echoing
+ * `modelId:body`. `url` is the provider-native endpoint the model posts to.
+ */
+function fallbackPlugin(
+	wireFormat: "openai" | "anthropic" | "google",
+	url: string,
+): ProviderPlugin {
+	return {
+		wireFormat,
+		create: ({ modelId, fetch }) => {
+			const call = async () => {
+				const resp = await fetch(url, {
+					method: "POST",
+					headers: {
+						authorization: "Bearer sk-placeholder",
+						"content-type": "application/json",
+					},
+					body: JSON.stringify({ model: modelId, messages: [] }),
+				});
+				return `${modelId}:${await resp.text()}`;
+			};
+			return {
+				specificationVersion: "v3",
+				provider: wireFormat,
+				modelId,
+				supportedUrls: {},
+				doGenerate: async () => ({ content: [{ type: "text", text: await call() }] }),
+				doStream: async () => ({ stream: new ReadableStream(), text: await call() }),
+			} as unknown as LanguageModelV3;
+		},
+	};
+}
+
 interface GwCall {
 	id: string;
 	entries: Array<{
@@ -414,6 +449,44 @@ describe("createGatewayDelegate", () => {
 		expect(gwCalls[0].entries[0].headers.authorization).toBe("Bearer real");
 	});
 
+	it("maps byok-alias/zdr (call) + event-id/timeout/retries/cache-key (gateway opts) to cf-aig-* headers", async () => {
+		const { binding, gwCalls } = makeBinding();
+		const { plugin, getFetch } = capturePlugin("openai");
+		const wai = createGatewayDelegate({
+			binding,
+			gateway: {
+				id: "gw-1",
+				cacheKey: "ck-1",
+				eventId: "evt-9",
+				requestTimeoutMs: 9000,
+				retries: { maxAttempts: 4, retryDelayMs: 200, backoff: "linear" },
+			},
+			providers: [plugin],
+		});
+		wai("openai/gpt-5", { transport: "gateway", byokAlias: "production", zdr: true });
+		await getFetch()("https://api.openai.com/v1/chat/completions", REQ);
+
+		const { headers } = gwCalls[0].entries[0];
+		expect(headers["cf-aig-byok-alias"]).toBe("production");
+		expect(headers["cf-aig-zdr"]).toBe("true");
+		expect(headers["cf-aig-event-id"]).toBe("evt-9");
+		expect(headers["cf-aig-request-timeout"]).toBe("9000");
+		expect(headers["cf-aig-cache-key"]).toBe("ck-1");
+		expect(headers["cf-aig-max-attempts"]).toBe("4");
+		expect(headers["cf-aig-retry-delay"]).toBe("200");
+		expect(headers["cf-aig-backoff"]).toBe("linear");
+	});
+
+	it("passes zdr through as a cf-aig-zdr extra header on the run path", async () => {
+		const { binding, runCalls } = makeBinding();
+		const { plugin, getFetch } = capturePlugin("openai");
+		const wai = createGatewayDelegate({ binding, gateway: "gw-1", providers: [plugin] });
+		wai("openai/gpt-5", { zdr: false }); // run path (default)
+		await getFetch()("https://api.openai.com/v1/chat/completions", REQ);
+		const opts = (runCalls[0] as { opts: { extraHeaders?: Record<string, string> } }).opts;
+		expect(opts.extraHeaders?.["cf-aig-zdr"]).toBe("false");
+	});
+
 	it("adds fallback entries for same-vendor server fallback", async () => {
 		const { binding, gwCalls } = makeBinding();
 		const { plugin, getFetch } = capturePlugin("openai");
@@ -427,17 +500,91 @@ describe("createGatewayDelegate", () => {
 		expect((gwCalls[0].entries[1].query as { model: string }).model).toBe("gpt-5-mini");
 	});
 
-	it("rejects cross-vendor server fallback", async () => {
-		const { binding } = makeBinding();
-		const { plugin, getFetch } = capturePlugin("openai");
-		const wai = createGatewayDelegate({ binding, gateway: "gw-1", providers: [plugin] });
-		wai("openai/gpt-5", {
-			transport: "gateway",
+	it("dispatches cross-vendor server fallback as one run + parses the winning leg", async () => {
+		// Each leg is a different vendor with a different wire format, so the
+		// delegate must capture each one's native request, dispatch them as a single
+		// gateway run, then feed the winner's raw response back into its own parser.
+		const gwCalls: GwCall[] = [];
+		const binding = {
+			gateway: vi.fn((id: string) => ({
+				run: vi.fn(
+					async (entries: GwCall["entries"], options: Record<string, unknown> = {}) => {
+						gwCalls.push({ id, entries, options });
+						// cf-aig-step:"1" ⇒ the gateway served the second (anthropic) leg.
+						return new Response("winner-body", { headers: { "cf-aig-step": "1" } });
+					},
+				),
+			})),
+		} as unknown as Ai;
+
+		const wai = createGatewayDelegate({
+			binding,
+			gateway: "gw-1",
+			providers: [
+				fallbackPlugin("openai", "https://api.openai.com/v1/chat/completions"),
+				fallbackPlugin("anthropic", "https://api.anthropic.com/v1/messages"),
+			],
+		});
+
+		const model = wai("openai/gpt-5", {
 			fallback: { mode: "server", models: ["anthropic/claude-sonnet-4-5"] },
 		});
-		await expect(getFetch()("https://api.openai.com/v1/chat/completions", REQ)).rejects.toThrow(
-			/Cross-vendor server-side fallback/,
-		);
+		const result = (await model.doGenerate({} as never)) as {
+			content: Array<{ type: string; text: string }>;
+		};
+
+		// One run, two entries, the two distinct vendors in order.
+		expect(gwCalls).toHaveLength(1);
+		expect(gwCalls[0].entries).toHaveLength(2);
+		expect(gwCalls[0].entries.map((e) => e.provider)).toEqual(["openai", "anthropic"]);
+		expect((gwCalls[0].entries[0].query as { model: string }).model).toBe("gpt-5");
+		expect((gwCalls[0].entries[1].query as { model: string }).model).toBe("claude-sonnet-4-5");
+		// Provider auth headers are stripped (unified billing authenticates).
+		expect(gwCalls[0].entries[0].headers.authorization).toBeUndefined();
+		// The winner (step 1 = anthropic) parsed the raw run response.
+		expect(result.content[0].text).toBe("claude-sonnet-4-5:winner-body");
+	});
+
+	it("threads an abort signal through a cross-vendor server fallback run", async () => {
+		const seen: Record<string, unknown>[] = [];
+		const binding = {
+			gateway: vi.fn(() => ({
+				run: vi.fn(async (_entries: unknown, options: Record<string, unknown> = {}) => {
+					seen.push(options);
+					return new Response("ok", { headers: { "cf-aig-step": "0" } });
+				}),
+			})),
+		} as unknown as Ai;
+		const wai = createGatewayDelegate({
+			binding,
+			gateway: "gw-1",
+			providers: [
+				fallbackPlugin("openai", "https://api.openai.com/v1/chat/completions"),
+				fallbackPlugin("anthropic", "https://api.anthropic.com/v1/messages"),
+			],
+		});
+		const model = wai("openai/gpt-5", {
+			fallback: { mode: "server", models: ["anthropic/claude-sonnet-4-5"] },
+		});
+		const controller = new AbortController();
+		await model.doGenerate({ abortSignal: controller.signal } as never);
+		expect(seen[0].signal).toBe(controller.signal);
+	});
+
+	it("rejects a cross-vendor server-fallback leg with no native gateway path", () => {
+		const { binding } = makeBinding();
+		const wai = createGatewayDelegate({
+			binding,
+			gateway: "gw-1",
+			providers: [fallbackPlugin("openai", "https://api.openai.com/v1/chat/completions")],
+		});
+		// alibaba is a run-only unified-catalog provider (no native gateway path),
+		// so it cannot be a server-fallback leg.
+		expect(() =>
+			wai("openai/gpt-5", {
+				fallback: { mode: "server", models: ["alibaba/qwen3-max"] },
+			}),
+		).toThrow(/no native gateway path/);
 	});
 
 	it("passes an abort signal through to the gateway run", async () => {

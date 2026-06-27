@@ -18,7 +18,7 @@ To start the project locally, you can use the following npm scripts:
 
 - `npx nx deploy parallelisation`: Deploys the project using Wrangler.
 - `npx nx dev parallelisation`: Starts the development server with Wrangler.
-- `npx nx lint parallelisation`: Lints the source code using Biome.
+- `npx nx lint parallelisation`: Lints the source code using oxlint.
 - `npx nx start parallelisation`: Starts the development server with Wrangler.
 - `npx nx test parallelisation`: Runs the tests using Vitest.
 - `npx nx test:ci parallelisation`: Runs the tests in CI mode using Vitest.

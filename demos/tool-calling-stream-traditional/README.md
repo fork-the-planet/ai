@@ -30,7 +30,7 @@ npx nx dev tool-calling-stream-traditional
     ```bash
     npx nx dev tool-calling-stream-traditional
     ```
-- **lint**: Lints the source code using Biome.
+- **lint**: Lints the source code using oxlint.
     ```bash
     npx nx lint tool-calling-stream-traditional
     ```

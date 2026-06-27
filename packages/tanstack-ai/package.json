@@ -122,7 +122,7 @@
 	},
 	"scripts": {
 		"build": "rm -rf dist && tsdown --config tsdown.config.ts",
-		"format": "biome format --write",
+		"format": "oxfmt --write .",
 		"type-check": "tsc --noEmit",
 		"test": "vitest --run",
 		"test:watch": "vitest",
@@ -135,23 +135,24 @@
 		"openai": "^6.42.0"
 	},
 	"devDependencies": {
+		"@cloudflare/gateway-core": "workspace:*",
 		"@cloudflare/workers-types": "^4.20260613.1",
 		"@microsoft/api-extractor": "^7.58.9",
-		"@tanstack/ai": "^0.28.0",
+		"@tanstack/ai": "^0.38.0",
 		"dotenv": "^17.4.2"
 	},
 	"peerDependencies": {
-		"@tanstack/ai": ">=0.8.0 <1.0.0"
+		"@tanstack/ai": ">=0.28.0 <1.0.0"
 	},
 	"optionalDependencies": {
 		"@anthropic-ai/sdk": "^0.104.1",
 		"@google/genai": "^2.8.0",
 		"@openrouter/sdk": "^0.12.79",
-		"@tanstack/ai-anthropic": ">=0.7.1 <1.0.0",
-		"@tanstack/ai-gemini": ">=0.8.4 <1.0.0",
-		"@tanstack/ai-grok": ">=0.6.3 <1.0.0",
-		"@tanstack/ai-openai": ">=0.7.2 <1.0.0",
-		"@tanstack/ai-openrouter": ">=0.7.0 <1.0.0"
+		"@tanstack/ai-anthropic": ">=0.15.11 <1.0.0",
+		"@tanstack/ai-gemini": ">=0.18.3 <1.0.0",
+		"@tanstack/ai-grok": ">=0.14.5 <1.0.0",
+		"@tanstack/ai-openai": ">=0.15.9 <1.0.0",
+		"@tanstack/ai-openrouter": ">=0.15.4 <1.0.0"
 	},
 	"packageManager": "pnpm@11.6.0"
 }

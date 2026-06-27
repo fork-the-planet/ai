@@ -6,8 +6,7 @@
 		"format": "oxfmt --write .",
 		"lint": "oxlint",
 		"lint:fix": "oxlint --fix",
-		"postinstall": "nx run-many --target=build --projects='packages/*'",
-		"prepare": "if [ \"$CI\" ]; then echo 'Skipping husky setup in CI'; else husky; fi"
+		"postinstall": "nx run-many --target=build --projects='packages/*'"
 	},
 	"devDependencies": {
 		"@ai-sdk/openai": "^3.0.71",
@@ -26,7 +25,6 @@
 		"get-port": "^7.2.0",
 		"globals": "^17.6.0",
 		"hono": "^4.12.25",
-		"husky": "^9.1.7",
 		"langchain": "^1.4.5",
 		"msw": "^2.14.6",
 		"nx": "22.7.5",

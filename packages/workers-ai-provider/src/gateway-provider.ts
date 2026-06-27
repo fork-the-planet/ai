@@ -1,3 +1,4 @@
+import { asText, buildGatewayEntry } from "@cloudflare/gateway-core";
 import { WorkersAIGatewayError } from "./errors";
 import { detectProviderByUrl, type GatewayProviderInfo } from "./gateway-providers";
 
@@ -47,30 +48,8 @@ export interface GatewayFetchConfig {
 	skipCache?: boolean;
 }
 
-const STRIP_HEADERS_BASE = new Set(["content-length", "host"]);
-
 interface AiGatewayRunner {
 	run(body: unknown, options?: Record<string, unknown>): Promise<Response>;
-}
-
-function asText(body: BodyInit | null | undefined): string {
-	if (typeof body === "string") return body;
-	if (body instanceof Uint8Array) return new TextDecoder().decode(body);
-	if (body instanceof ArrayBuffer) return new TextDecoder().decode(body);
-	return "{}";
-}
-
-function headersToObject(h: HeadersInit | undefined): Record<string, string> {
-	const out: Record<string, string> = {};
-	if (!h) return out;
-	if (h instanceof Headers) {
-		for (const [k, v] of h) out[k] = v;
-	} else if (Array.isArray(h)) {
-		for (const [k, v] of h) out[k] = v;
-	} else {
-		Object.assign(out, h);
-	}
-	return out;
 }
 
 /**
@@ -117,18 +96,15 @@ export function createGatewayFetch(config: GatewayFetchConfig): typeof globalThi
 			: rawUrl.replace(/^https?:\/\/[^/]+\//, "");
 		const body = JSON.parse(asText(init?.body)) as Record<string, unknown>;
 
-		const strip = new Set(STRIP_HEADERS_BASE);
-		if (!config.byok && info) for (const h of info.authHeaders) strip.add(h.toLowerCase());
-
-		const headers: Record<string, string> = {};
-		for (const [k, v] of Object.entries(headersToObject(init?.headers))) {
-			if (!strip.has(k.toLowerCase())) headers[k] = v;
-		}
-		if (config.extraHeaders) Object.assign(headers, config.extraHeaders);
-		if (config.cacheTtl !== undefined) headers["cf-aig-cache-ttl"] = String(config.cacheTtl);
-		if (config.skipCache) headers["cf-aig-skip-cache"] = "true";
-
-		const entry = { provider: providerId, endpoint, headers, query: body };
+		const entry = buildGatewayEntry({
+			providerId,
+			endpoint,
+			initHeaders: init?.headers,
+			body,
+			...(!config.byok && info ? { stripAuthHeaders: info.authHeaders } : {}),
+			...(config.extraHeaders ? { extraHeaders: config.extraHeaders } : {}),
+			cache: { cacheTtl: config.cacheTtl, skipCache: config.skipCache },
+		});
 		const gw = (config.binding as unknown as { gateway(id: string): AiGatewayRunner }).gateway(
 			gatewayId,
 		);

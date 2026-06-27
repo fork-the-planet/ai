@@ -24,7 +24,7 @@ npx nx dev agent-task-manager-human-in-the-loop
 
 - **deploy**: Deploys the application using Wrangler.
 - **dev**: Starts the development server using Wrangler.
-- **lint**: Lints the source code using Biome.
+- **lint**: Lints the source code using oxlint.
 - **start**: Starts the development server using Wrangler.
 - **test**: Runs tests using Vitest.
 - **test:ci**: Runs tests in CI mode using Vitest.

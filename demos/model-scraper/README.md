@@ -25,7 +25,7 @@ npx nx start model-scraper
 - **deploy:production**: Deploys the application to the production environment using Wrangler.
 - **deploy:staging**: Deploys the application to the staging environment using Wrangler.
 - **dev**: Starts the application in development mode with remote access.
-- **lint**: Lints the source code using Biome, reporting errors on warnings.
+- **lint**: Lints the source code using oxlint, reporting errors on warnings.
 - **start**: Starts the application in development mode.
 - **test**: Runs the test suite using Vitest without watching for changes.
 - **test:ci**: Runs the test suite in continuous integration mode.

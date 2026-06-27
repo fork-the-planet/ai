@@ -32,7 +32,7 @@ This command runs the project in development mode using Wrangler.
     ```
     npx nx dev tool-calling-stream
     ```
-- **lint**: Lints the source code using Biome.
+- **lint**: Lints the source code using oxlint.
     ```
     npx nx lint tool-calling-stream
     ```

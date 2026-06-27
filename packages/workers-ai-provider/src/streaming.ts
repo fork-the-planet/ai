@@ -3,6 +3,7 @@ import type {
 	LanguageModelV3StreamPart,
 	LanguageModelV3Usage,
 } from "@ai-sdk/provider";
+import { SSEDecoder } from "@cloudflare/gateway-core";
 import { generateId } from "ai";
 import { mapWorkersAIFinishReason } from "./map-workersai-finish-reason";
 import { mapWorkersAIUsage } from "./map-workersai-usage";
@@ -424,46 +425,5 @@ export function getMappedStream(
 				}
 			}
 		}
-	}
-}
-
-/**
- * TransformStream that decodes a raw byte stream into SSE `data:` payloads.
- * Each output chunk is the string content after "data: " (one per SSE event).
- * Handles line buffering for partial chunks.
- */
-class SSEDecoder extends TransformStream<Uint8Array, string> {
-	constructor() {
-		let buffer = "";
-		const decoder = new TextDecoder();
-
-		super({
-			transform(chunk, controller) {
-				buffer += decoder.decode(chunk, { stream: true });
-				const lines = buffer.split("\n");
-				buffer = lines.pop() || "";
-
-				for (const line of lines) {
-					const trimmed = line.trim();
-					if (!trimmed) continue;
-					if (trimmed.startsWith("data: ")) {
-						controller.enqueue(trimmed.slice(6));
-					} else if (trimmed.startsWith("data:")) {
-						controller.enqueue(trimmed.slice(5));
-					}
-				}
-			},
-
-			flush(controller) {
-				if (buffer.trim()) {
-					const trimmed = buffer.trim();
-					if (trimmed.startsWith("data: ")) {
-						controller.enqueue(trimmed.slice(6));
-					} else if (trimmed.startsWith("data:")) {
-						controller.enqueue(trimmed.slice(5));
-					}
-				}
-			},
-		});
 	}
 }

@@ -30,7 +30,7 @@ npx nx dev routing
     ```bash
     npx nx dev routing
     ```
-- **lint**: Lints the source code using Biome.
+- **lint**: Lints the source code using oxlint.
     ```bash
     npx nx lint routing
     ```
