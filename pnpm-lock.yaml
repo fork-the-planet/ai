@@ -37,7 +37,7 @@ importers:
         version: 5.3.4
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       ai:
         specifier: ^6.0.204
         version: 6.0.204(zod@4.4.3)
@@ -106,7 +106,7 @@ importers:
     dependencies:
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       ai:
         specifier: ^6.0.204
         version: 6.0.204(zod@4.4.3)
@@ -149,7 +149,7 @@ importers:
     dependencies:
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       ai:
         specifier: ^6.0.204
         version: 6.0.204(zod@4.4.3)
@@ -192,7 +192,7 @@ importers:
     dependencies:
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       ai:
         specifier: ^6.0.204
         version: 6.0.204(zod@4.4.3)
@@ -235,7 +235,7 @@ importers:
     dependencies:
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       ai:
         specifier: ^6.0.204
         version: 6.0.204(zod@4.4.3)
@@ -278,7 +278,7 @@ importers:
     dependencies:
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
     devDependencies:
       typescript:
         specifier: 6.0.3
@@ -331,7 +331,7 @@ importers:
     dependencies:
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       nanoid:
         specifier: ^5.1.11
         version: 5.1.11
@@ -368,7 +368,7 @@ importers:
         version: 0.8.0
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       hono:
         specifier: ^4.12.25
         version: 4.12.25
@@ -433,7 +433,7 @@ importers:
         version: 6.0.9
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       commander:
         specifier: ^15.0.0
         version: 15.0.0
@@ -494,7 +494,7 @@ importers:
         version: 6.0.9
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       hono:
         specifier: ^4.12.25
         version: 4.12.25
@@ -546,7 +546,7 @@ importers:
         version: 3.0.71(zod@4.4.3)
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       ai:
         specifier: ^6.0.204
         version: 6.0.204(zod@4.4.3)
@@ -589,7 +589,7 @@ importers:
     dependencies:
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       ai:
         specifier: ^6.0.204
         version: 6.0.204(zod@4.4.3)
@@ -632,7 +632,7 @@ importers:
     dependencies:
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       ai:
         specifier: ^6.0.204
         version: 6.0.204(zod@4.4.3)
@@ -675,7 +675,7 @@ importers:
     dependencies:
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       ai:
         specifier: ^6.0.204
         version: 6.0.204(zod@4.4.3)
@@ -727,7 +727,7 @@ importers:
         version: 0.8.0
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       hono:
         specifier: ^4.12.25
         version: 4.12.25
@@ -786,7 +786,7 @@ importers:
         version: 10.2.0
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       hono:
         specifier: ^4.12.25
         version: 4.12.25
@@ -817,7 +817,7 @@ importers:
     dependencies:
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       zod:
         specifier: ^4.4.3
         version: 4.4.3
@@ -842,7 +842,7 @@ importers:
         version: 0.8.0
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       just-pick:
         specifier: ^4.2.0
         version: 4.2.0
@@ -867,7 +867,7 @@ importers:
     dependencies:
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       jose:
         specifier: ^6.2.3
         version: 6.2.3
@@ -892,7 +892,7 @@ importers:
         version: 0.8.0
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       hono:
         specifier: ^4.12.25
         version: 4.12.25
@@ -923,7 +923,7 @@ importers:
         version: 0.8.0
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       hono:
         specifier: ^4.12.25
         version: 4.12.25
@@ -954,7 +954,7 @@ importers:
         version: 3.1.10
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       hono:
         specifier: ^4.12.25
         version: 4.12.25
@@ -982,7 +982,7 @@ importers:
         version: 0.8.0
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       hono:
         specifier: ^4.12.25
         version: 4.12.25
@@ -1013,7 +1013,7 @@ importers:
         version: 0.8.0
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       hono:
         specifier: ^4.12.25
         version: 4.12.25
@@ -1044,7 +1044,7 @@ importers:
         version: 0.8.0
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       hono:
         specifier: ^4.12.25
         version: 4.12.25
@@ -1072,7 +1072,7 @@ importers:
     dependencies:
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       ai:
         specifier: ^6.0.204
         version: 6.0.204(zod@4.4.3)
@@ -1112,7 +1112,7 @@ importers:
     dependencies:
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       ai:
         specifier: ^6.0.204
         version: 6.0.204(zod@4.4.3)
@@ -1183,7 +1183,7 @@ importers:
     dependencies:
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       ai:
         specifier: ^6.0.204
         version: 6.0.204(zod@4.4.3)
@@ -1223,7 +1223,7 @@ importers:
     dependencies:
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       ai:
         specifier: ^6.0.204
         version: 6.0.204(zod@4.4.3)
@@ -1266,7 +1266,7 @@ importers:
     dependencies:
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       ai:
         specifier: ^6.0.204
         version: 6.0.204(zod@4.4.3)
@@ -1309,7 +1309,7 @@ importers:
     dependencies:
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       ai:
         specifier: ^6.0.204
         version: 6.0.204(zod@4.4.3)
@@ -1352,7 +1352,7 @@ importers:
     dependencies:
       agents:
         specifier: ^0.16.0
-        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
+        version: 0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3)
       ai:
         specifier: ^6.0.204
         version: 6.0.204(zod@4.4.3)
@@ -1537,11 +1537,11 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tanstack-ai
       '@tanstack/ai':
-        specifier: ^0.28.0
-        version: 0.28.0(@opentelemetry/api@1.9.0)
+        specifier: ^0.38.0
+        version: 0.38.0(@opentelemetry/api@1.9.0)
       '@tanstack/ai-react':
-        specifier: ^0.15.4
-        version: 0.15.4(@opentelemetry/api@1.9.0)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(@types/react@19.2.17)(react@19.2.7)
+        specifier: ^0.16.0
+        version: 0.16.0(@opentelemetry/api@1.9.0)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(@types/react@19.2.17)(react@19.2.7)
       react:
         specifier: ^19.2.7
         version: 19.2.7
@@ -1576,6 +1576,12 @@ importers:
 
   examples/workers-ai:
     dependencies:
+      '@ai-sdk/anthropic':
+        specifier: ^3.0.84
+        version: 3.0.84(zod@4.4.3)
+      '@ai-sdk/openai':
+        specifier: ^3.0.71
+        version: 3.0.71(zod@4.4.3)
       '@ai-sdk/react':
         specifier: ^3.0.206
         version: 3.0.206(react@19.2.7)(zod@4.4.3)
@@ -1641,6 +1647,9 @@ importers:
         specifier: ^6.0.0
         version: 6.0.204(zod@4.4.3)
     devDependencies:
+      '@cloudflare/gateway-core':
+        specifier: workspace:*
+        version: link:../gateway-core
       tsdown:
         specifier: ^0.22.2
         version: 0.22.2(tsx@4.22.4)(typescript@6.0.3)(unrun@0.2.34(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0))
@@ -1700,12 +1709,30 @@ importers:
         specifier: ^2.9.1
         version: 2.9.1(ai@6.0.204(zod@4.4.3))(zod@4.4.3)
 
+  packages/gateway-core:
+    devDependencies:
+      '@ai-sdk/provider':
+        specifier: ^3.0.10
+        version: 3.0.10
+      '@cloudflare/workers-types':
+        specifier: ^4.20260613.1
+        version: 4.20260613.1
+      tsdown:
+        specifier: ^0.22.2
+        version: 0.22.2(tsx@4.22.4)(typescript@6.0.3)(unrun@0.2.34(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0))
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
   packages/tanstack-ai:
     dependencies:
       openai:
         specifier: ^6.42.0
         version: 6.42.0(ws@8.20.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.4.3)
     devDependencies:
+      '@cloudflare/gateway-core':
+        specifier: workspace:*
+        version: link:../gateway-core
       '@cloudflare/workers-types':
         specifier: ^4.20260613.1
         version: 4.20260613.1
@@ -1713,8 +1740,8 @@ importers:
         specifier: ^7.58.9
         version: 7.58.9(@types/node@25.9.3)
       '@tanstack/ai':
-        specifier: ^0.28.0
-        version: 0.28.0(@opentelemetry/api@1.9.0)
+        specifier: ^0.38.0
+        version: 0.38.0(@opentelemetry/api@1.9.0)
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
@@ -1729,20 +1756,20 @@ importers:
         specifier: ^0.12.79
         version: 0.12.79
       '@tanstack/ai-anthropic':
-        specifier: '>=0.7.1 <1.0.0'
-        version: 0.15.1(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(zod@4.4.3)
+        specifier: '>=0.15.11 <1.0.0'
+        version: 0.15.11(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(zod@4.4.3)
       '@tanstack/ai-gemini':
-        specifier: '>=0.8.4 <1.0.0'
-        version: 0.15.1(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.4.3))(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        specifier: '>=0.18.3 <1.0.0'
+        version: 0.18.3(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.4.3))(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       '@tanstack/ai-grok':
-        specifier: '>=0.6.3 <1.0.0'
-        version: 0.11.2(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ws@8.20.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.4.3)
+        specifier: '>=0.14.5 <1.0.0'
+        version: 0.14.5(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ws@8.20.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.4.3)
       '@tanstack/ai-openai':
-        specifier: '>=0.7.2 <1.0.0'
-        version: 0.14.1(@tanstack/ai-client@0.16.3(@opentelemetry/api@1.9.0))(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ws@8.20.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.4.3)
+        specifier: '>=0.15.9 <1.0.0'
+        version: 0.15.9(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ws@8.20.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.4.3)
       '@tanstack/ai-openrouter':
-        specifier: '>=0.7.0 <1.0.0'
-        version: 0.13.1(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))
+        specifier: '>=0.15.4 <1.0.0'
+        version: 0.15.4(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))
 
   packages/workers-ai-provider:
     devDependencies:
@@ -1758,6 +1785,9 @@ importers:
       '@ai-sdk/provider':
         specifier: ^3.0.10
         version: 3.0.10
+      '@cloudflare/gateway-core':
+        specifier: workspace:*
+        version: link:../gateway-core
       '@cloudflare/workers-types':
         specifier: ^4.20260613.1
         version: 4.20260613.1
@@ -2580,15 +2610,6 @@ packages:
 
   '@floating-ui/utils@0.2.11':
     resolution: {integrity: sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg==}
-
-  '@google/genai@1.48.0':
-    resolution: {integrity: sha512-plonYK4ML2PrxsRD9SeqmFt76eREWkQdPCglOA6aYDzL1AAbE+7PUnT54SvpWGfws13L0AZEqGSpL7+1IPnTxQ==}
-    engines: {node: '>=20.0.0'}
-    peerDependencies:
-      '@modelcontextprotocol/sdk': ^1.25.2
-    peerDependenciesMeta:
-      '@modelcontextprotocol/sdk':
-        optional: true
 
   '@google/genai@2.8.0':
     resolution: {integrity: sha512-pc2ayxqO5+O7AvnHBqpNHIk7PAZkHZgL31tbyx0gJZBSS9qPYiQoqwK7oYOw/ePmG6QY4EMSu+304vD5QlhXAw==}
@@ -4052,55 +4073,56 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7 || ^8
 
-  '@tanstack/ai-anthropic@0.15.1':
-    resolution: {integrity: sha512-rd9xcY2hXlXtEDCTKnbG4sdITmk9gsQ81EL1aIIvL5Tp1+xyA4UGS588E2YUQ4JaE8wcVv4ZCUh7PzgyOMaQww==}
+  '@tanstack/ai-anthropic@0.15.11':
+    resolution: {integrity: sha512-4H/5sSNYeR5ToIrc2TtNUHlDfYjgYqbTv8hY5LGfLgJq/cKvU+p/WT5u+MHBZlMnOXk44X23QryDOI78b94WqA==}
     peerDependencies:
-      '@tanstack/ai': ^0.28.0
+      '@tanstack/ai': ^0.38.0
       zod: ^4.0.0
 
-  '@tanstack/ai-client@0.16.3':
-    resolution: {integrity: sha512-BOKFTPWFVt39zeNrDl8m+/7ADjW5E4k4Hs2/SlfbuwWhDEIJzd4p0wgnWV+6SvRWshDTsmc7x1c6Zk2qsQSCxQ==}
+  '@tanstack/ai-client@0.19.0':
+    resolution: {integrity: sha512-TjbV1LgOfNKewdWtHGH0mhMYWyTenwGA5Pl3VZs2ZVePIANKjw85VKoRNSvkJgKBJMSiSUR5uLcSJkFCXXI93A==}
 
-  '@tanstack/ai-event-client@0.5.4':
-    resolution: {integrity: sha512-DoF6LKkGCVeF0N6Vky3DdhYxseTZfvTpOkhEQud/Za/GLQ+5p1xH4egQX8oZJkx1S6HZEZTQA1hKSGFYGULtFw==}
-    peerDependencies:
-      '@tanstack/ai': 0.28.0
+  '@tanstack/ai-event-client@0.6.8':
+    resolution: {integrity: sha512-h7/HLz9u2LF9ba6uKFMnSZkFlkzQONJ5u3Hi+4qGxpsHyvcGRtW6v186jaFLoklndhEwyC49ytkC4eafi7Qq8w==}
 
-  '@tanstack/ai-gemini@0.15.1':
-    resolution: {integrity: sha512-mh5CdhMACUw9//ic1Qa2Wc+9xwCz70/3+0mzF8vzqX8FEni2HXsdpLSSU1BNUcSGogXqmlCcn3Fu+XGYCM7ZQw==}
+  '@tanstack/ai-gemini@0.18.3':
+    resolution: {integrity: sha512-GvquWWPJ6Euuk+coCjXY9zbXKNBAS35QXcU5L9mGLeKLgj2VIuSnpnkElyJVo530kk+5pZHyGZeu1ykTjNBpIw==}
     peerDependencies:
-      '@tanstack/ai': ^0.28.0
+      '@tanstack/ai': ^0.38.0
 
-  '@tanstack/ai-grok@0.11.2':
-    resolution: {integrity: sha512-iv5/AjnVRT50O+/x0XsuIhq78PReBEqf4Zq26kDbAoN4Ye0//OL6jYNFkRg8u0NxYN+Twwgdho19S0hpw5qgPQ==}
+  '@tanstack/ai-grok@0.14.5':
+    resolution: {integrity: sha512-WwNt0fH9unF4HaOfU6R5A3l4/Z8J7H1u5QwiTrrf+bzjOp4QMP9KzQU8ARU1YcAjlFaPhOeG/5Dr+bTqu6YmSg==}
     peerDependencies:
-      '@tanstack/ai': ^0.28.0
+      '@tanstack/ai': ^0.38.0
       zod: ^4.0.0
 
-  '@tanstack/ai-openai@0.14.1':
-    resolution: {integrity: sha512-88SgdoYjPQQCJuajtMuyi7jiFf+zu4Pt3q/jwHrxHFAPyeovF1tbU4EFTZkj0aksIBrugvZ0OUOPb1V7auSSVw==}
+  '@tanstack/ai-openai@0.15.9':
+    resolution: {integrity: sha512-oY7lREtyzjfnTxfLK5jS5Ij0QbU0bn6Iu9mnYO/yRcwghUwJqGaSaoHh4sMrtpbTIg8m+9GOzG7pbDXn5dZJ2w==}
     peerDependencies:
-      '@tanstack/ai': ^0.28.0
-      '@tanstack/ai-client': ^0.16.3
+      '@tanstack/ai': ^0.38.0
       zod: ^4.0.0
 
-  '@tanstack/ai-openrouter@0.13.1':
-    resolution: {integrity: sha512-I073pJqcfyTcLK7jvDUPsrjN3ZEMq9gsdy8fgmuUkKbGaSD1M6XxPZveuVccgtOqucaaXFf41xm3B7+LpzGD/w==}
+  '@tanstack/ai-openrouter@0.15.4':
+    resolution: {integrity: sha512-FNyb+Rd39jABlgurw+LCk8gblFIGBuyE8pGyMniJmKFcEjwKM4Wz1hOpvO0aOwhEQmaLDPlZCfIwOYgFQqvq4Q==}
     peerDependencies:
-      '@tanstack/ai': ^0.28.0
+      '@tanstack/ai': ^0.38.0
 
-  '@tanstack/ai-react@0.15.4':
-    resolution: {integrity: sha512-TxEkCXpjC3KsXFuUi+WR9sVBIFyC0OopUJ6ygUWvLDPWtQaXmVMpGwNWfT4j6HKRa+pfY06YOOtJbgczTDtT2g==}
+  '@tanstack/ai-react@0.16.0':
+    resolution: {integrity: sha512-0ujDK3cYHnUZETsbPR6rC+ACXOtRfMJ1KTddpnFnsmK7dGEPevl0eGVTL48uVJIcRXUenacgE2ZfR69q/Z5lUA==}
     peerDependencies:
-      '@tanstack/ai': ^0.28.0
+      '@mcp-ui/client': ^7
+      '@tanstack/ai': ^0.38.0
       '@types/react': '>=18.0.0'
       react: '>=18.0.0'
+    peerDependenciesMeta:
+      '@mcp-ui/client':
+        optional: true
 
-  '@tanstack/ai-utils@0.2.1':
-    resolution: {integrity: sha512-cFsSeaiAOOEtAOWvFWD0jHiLlFSYi+FYmbEPeD70zHntM8ws2YFb4Dgz94+J8rsoffLXIFTkKswTowx5QlTsWg==}
+  '@tanstack/ai-utils@0.3.1':
+    resolution: {integrity: sha512-fgbjd5DohL3k5rTWr/KInauLVYMiHVm0cnmTsNrzL3cr4wWhEld5vmFSrjiwUWACAuONjZa+uBXuS+ZSO8fwDQ==}
 
-  '@tanstack/ai@0.28.0':
-    resolution: {integrity: sha512-DT02H5CeqtsdH90bb1hx3zIxboiyMjuQPzbj7ov3uVkMWIFjuCjhgJbc7w27AY38ewd4d8G63QHYj4AnMSEB9Q==}
+  '@tanstack/ai@0.38.0':
+    resolution: {integrity: sha512-fAX8pmaLXRx8jB8v4CyYqCxCAagvHzvmU7l4J89XkKlzuun69F/pumcKFUOGxZyQswiz1+pzfmNwscv7K8AJmA==}
     engines: {node: '>=18'}
     peerDependencies:
       '@opentelemetry/api': '>=1.9.0'
@@ -4113,10 +4135,10 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  '@tanstack/openai-base@0.8.1':
-    resolution: {integrity: sha512-TKaSoC1Nbv7wz7bJN44pQFgcYJ/8co9UGRPBhhUNM/7m4XXdO86l0Q9ihplR0SPNLAK2RsYc33y2yVSPmVxGUA==}
+  '@tanstack/openai-base@0.9.5':
+    resolution: {integrity: sha512-JTi8OAHeB+f2qxTU9Q9e7h4heNmgCmqzmymeg2tA0e8UJgTNFf9J165xrWE4BBMYI00bxdsNC+YgSHq77QhmhA==}
     peerDependencies:
-      '@tanstack/ai': ^0.28.0
+      '@tanstack/ai': ^0.38.0
 
   '@tokenizer/inflate@0.4.1':
     resolution: {integrity: sha512-2mAv+8pkG6GIZiF1kNg1jAjh27IDxEPKwdGul3snfztFerfPGI1LjDezZp3i7BElXompqEtPmoPx6c2wgtWsOA==}
@@ -7451,13 +7473,13 @@ snapshots:
       human-id: 4.1.1
       prettier: 2.8.8
 
-  '@cloudflare/codemode@0.4.0(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.4.3))(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(zod@4.4.3)':
+  '@cloudflare/codemode@0.4.0(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.4.3))(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(zod@4.4.3)':
     dependencies:
       '@types/json-schema': 7.0.15
       acorn: 8.17.0
     optionalDependencies:
       '@modelcontextprotocol/sdk': 1.29.0(@cfworker/json-schema@4.1.1)(zod@4.4.3)
-      '@tanstack/ai': 0.28.0(@opentelemetry/api@1.9.0)
+      '@tanstack/ai': 0.38.0(@opentelemetry/api@1.9.0)
       ai: 6.0.204(zod@4.4.3)
       zod: 4.4.3
 
@@ -7744,20 +7766,6 @@ snapshots:
       tabbable: 6.2.0
 
   '@floating-ui/utils@0.2.11': {}
-
-  '@google/genai@1.48.0(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.4.3))(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
-    dependencies:
-      google-auth-library: 10.5.0
-      p-retry: 4.6.2
-      protobufjs: 7.5.4
-      ws: 8.20.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-    optionalDependencies:
-      '@modelcontextprotocol/sdk': 1.29.0(@cfworker/json-schema@4.1.1)(zod@4.4.3)
-    transitivePeerDependencies:
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-    optional: true
 
   '@google/genai@2.8.0(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.4.3))(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
     dependencies:
@@ -8997,31 +9005,32 @@ snapshots:
       tailwindcss: 4.3.1
       vite: 8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0)
 
-  '@tanstack/ai-anthropic@0.15.1(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(zod@4.4.3)':
+  '@tanstack/ai-anthropic@0.15.11(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(zod@4.4.3)':
     dependencies:
       '@anthropic-ai/sdk': 0.97.1(zod@4.4.3)
-      '@tanstack/ai': 0.28.0(@opentelemetry/api@1.9.0)
-      '@tanstack/ai-utils': 0.2.1
+      '@tanstack/ai': 0.38.0(@opentelemetry/api@1.9.0)
+      '@tanstack/ai-utils': 0.3.1
       zod: 4.4.3
     optional: true
 
-  '@tanstack/ai-client@0.16.3(@opentelemetry/api@1.9.0)':
+  '@tanstack/ai-client@0.19.0(@opentelemetry/api@1.9.0)':
     dependencies:
-      '@tanstack/ai': 0.28.0(@opentelemetry/api@1.9.0)
-      '@tanstack/ai-event-client': 0.5.4(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))
+      '@tanstack/ai': 0.38.0(@opentelemetry/api@1.9.0)
+      '@tanstack/ai-event-client': 0.6.8
+      '@tanstack/ai-utils': 0.3.1
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@tanstack/ai-event-client@0.5.4(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))':
+  '@tanstack/ai-event-client@0.6.8':
     dependencies:
-      '@tanstack/ai': 0.28.0(@opentelemetry/api@1.9.0)
       '@tanstack/devtools-event-client': 0.4.3
 
-  '@tanstack/ai-gemini@0.15.1(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.4.3))(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
+  '@tanstack/ai-gemini@0.18.3(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.4.3))(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
     dependencies:
-      '@google/genai': 1.48.0(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.4.3))(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      '@tanstack/ai': 0.28.0(@opentelemetry/api@1.9.0)
-      '@tanstack/ai-utils': 0.2.1
+      '@google/genai': 2.8.0(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.4.3))(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      '@tanstack/ai': 0.38.0(@opentelemetry/api@1.9.0)
+      '@tanstack/ai-utils': 0.3.1
+      partial-json: 0.1.7
     transitivePeerDependencies:
       - '@modelcontextprotocol/sdk'
       - bufferutil
@@ -9029,63 +9038,62 @@ snapshots:
       - utf-8-validate
     optional: true
 
-  '@tanstack/ai-grok@0.11.2(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ws@8.20.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.4.3)':
+  '@tanstack/ai-grok@0.14.5(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ws@8.20.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.4.3)':
     dependencies:
-      '@tanstack/ai': 0.28.0(@opentelemetry/api@1.9.0)
-      '@tanstack/ai-utils': 0.2.1
-      '@tanstack/openai-base': 0.8.1(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ws@8.20.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.4.3)
+      '@tanstack/ai': 0.38.0(@opentelemetry/api@1.9.0)
+      '@tanstack/ai-utils': 0.3.1
+      '@tanstack/openai-base': 0.9.5(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ws@8.20.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.4.3)
       openai: 6.42.0(ws@8.20.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.4.3)
       zod: 4.4.3
     transitivePeerDependencies:
       - ws
     optional: true
 
-  '@tanstack/ai-openai@0.14.1(@tanstack/ai-client@0.16.3(@opentelemetry/api@1.9.0))(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ws@8.20.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.4.3)':
+  '@tanstack/ai-openai@0.15.9(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ws@8.20.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.4.3)':
     dependencies:
-      '@tanstack/ai': 0.28.0(@opentelemetry/api@1.9.0)
-      '@tanstack/ai-client': 0.16.3(@opentelemetry/api@1.9.0)
-      '@tanstack/ai-utils': 0.2.1
-      '@tanstack/openai-base': 0.8.1(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ws@8.20.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.4.3)
+      '@tanstack/ai': 0.38.0(@opentelemetry/api@1.9.0)
+      '@tanstack/ai-utils': 0.3.1
+      '@tanstack/openai-base': 0.9.5(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ws@8.20.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.4.3)
       openai: 6.42.0(ws@8.20.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.4.3)
       zod: 4.4.3
     transitivePeerDependencies:
       - ws
     optional: true
 
-  '@tanstack/ai-openrouter@0.13.1(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))':
+  '@tanstack/ai-openrouter@0.15.4(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))':
     dependencies:
       '@openrouter/sdk': 0.12.35
-      '@tanstack/ai': 0.28.0(@opentelemetry/api@1.9.0)
-      '@tanstack/ai-utils': 0.2.1
+      '@tanstack/ai': 0.38.0(@opentelemetry/api@1.9.0)
+      '@tanstack/ai-utils': 0.3.1
     optional: true
 
-  '@tanstack/ai-react@0.15.4(@opentelemetry/api@1.9.0)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(@types/react@19.2.17)(react@19.2.7)':
+  '@tanstack/ai-react@0.16.0(@opentelemetry/api@1.9.0)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(@types/react@19.2.17)(react@19.2.7)':
     dependencies:
-      '@tanstack/ai': 0.28.0(@opentelemetry/api@1.9.0)
-      '@tanstack/ai-client': 0.16.3(@opentelemetry/api@1.9.0)
+      '@tanstack/ai': 0.38.0(@opentelemetry/api@1.9.0)
+      '@tanstack/ai-client': 0.19.0(@opentelemetry/api@1.9.0)
       '@types/react': 19.2.17
       react: 19.2.7
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@tanstack/ai-utils@0.2.1':
-    optional: true
+  '@tanstack/ai-utils@0.3.1': {}
 
-  '@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0)':
+  '@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@ag-ui/core': 0.0.52
       '@standard-schema/spec': 1.1.0
-      '@tanstack/ai-event-client': 0.5.4(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))
+      '@tanstack/ai-event-client': 0.6.8
+      '@tanstack/ai-utils': 0.3.1
       partial-json: 0.1.7
     optionalDependencies:
       '@opentelemetry/api': 1.9.0
 
   '@tanstack/devtools-event-client@0.4.3': {}
 
-  '@tanstack/openai-base@0.8.1(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ws@8.20.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.4.3)':
+  '@tanstack/openai-base@0.9.5(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ws@8.20.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.4.3)':
     dependencies:
-      '@tanstack/ai': 0.28.0(@opentelemetry/api@1.9.0)
-      '@tanstack/ai-utils': 0.2.1
+      '@tanstack/ai': 0.38.0(@opentelemetry/api@1.9.0)
+      '@tanstack/ai-utils': 0.3.1
       openai: 6.42.0(ws@8.20.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.4.3)
     transitivePeerDependencies:
       - ws
@@ -9257,11 +9265,11 @@ snapshots:
   agent-base@7.1.4:
     optional: true
 
-  agents@0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3):
+  agents@0.16.0(@babel/core@7.29.0)(@babel/runtime@7.27.0)(@cloudflare/workers-types@4.20260613.1)(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(react@19.2.7)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))(zod@4.4.3):
     dependencies:
       '@babel/plugin-proposal-decorators': 7.29.7(@babel/core@7.29.0)
       '@cfworker/json-schema': 4.1.1
-      '@cloudflare/codemode': 0.4.0(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.4.3))(@tanstack/ai@0.28.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(zod@4.4.3)
+      '@cloudflare/codemode': 0.4.0(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@4.4.3))(@tanstack/ai@0.38.0(@opentelemetry/api@1.9.0))(ai@6.0.204(zod@4.4.3))(zod@4.4.3)
       '@modelcontextprotocol/sdk': 1.29.0(@cfworker/json-schema@4.1.1)(zod@4.4.3)
       '@rolldown/plugin-babel': 0.2.3(@babel/core@7.29.0)(@babel/runtime@7.27.0)(rolldown@1.1.1)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0))
       ai: 6.0.204(zod@4.4.3)
@@ -9277,7 +9285,7 @@ snapshots:
       yargs: 18.0.0
       zod: 4.4.3
     optionalDependencies:
-      '@tanstack/ai': 0.28.0(@opentelemetry/api@1.9.0)
+      '@tanstack/ai': 0.38.0(@opentelemetry/api@1.9.0)
       vite: 8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(sugarss@5.0.0(postcss@8.5.15))(tsx@4.22.4)(yaml@2.9.0)
     transitivePeerDependencies:
       - '@babel/core'

@@ -18,7 +18,7 @@ To start the project locally, you can use the following npm scripts:
 
 - `npx nx dev text-generation`: Starts the development server using Wrangler.
 - `npx nx deploy text-generation`: Deploys the application using Wrangler.
-- `npx nx lint text-generation`: Lints the source code using Biome.
+- `npx nx lint text-generation`: Lints the source code using oxlint.
 - `npx nx start text-generation`: Starts the application in development mode.
 - `npx nx test text-generation`: Runs the test suite using Vitest.
 - `npx nx test:ci text-generation`: Runs the test suite in CI mode using Vitest.

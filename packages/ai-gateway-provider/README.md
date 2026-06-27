@@ -125,6 +125,37 @@ const { text } = await generateText({
 });
 ```
 
+### Resumable Streaming (binding path)
+
+> **🚧 Coming soon.** Resumable streaming is not generally available yet — the AI
+> Gateway resume backend is still rolling out. The `resume` option below is in
+> place so you can adopt it early, but treat resume as experimental until the
+> rollout completes.
+
+On the binding (run) path, you can opt into **resumable streaming**: when a
+streaming run surfaces a `cf-aig-run-id`, a transient mid-stream drop reconnects
+to the gateway resume endpoint transparently, so the downstream parser never
+sees the break. Pass the full `env.AI` binding plus the gateway id under
+`resume` (the reconnect uses `env.AI.fetch(...)`, so it needs the AI binding —
+not the `env.AI.gateway(...)` sub-binding):
+
+```typescript
+const aigateway = createAiGateway({
+	binding: env.AI.gateway("my-gateway"),
+	resume: {
+		binding: env.AI, // full AI binding for the resume fetch
+		gateway: "my-gateway", // same gateway id
+		onResumeExpired: "error", // or "accept-partial" (default: "error")
+	},
+});
+
+const model = aigateway(openai.chat("gpt-5.1"));
+const { textStream } = streamText({ model, prompt: "Tell me a long story." });
+```
+
+Resume is a no-op on the REST/API-key path (no `cf-aig-run-id` is available
+there) and on non-streaming `generateText()` calls.
+
 ### Request-Level Options
 
 You can now customize AI Gateway settings for each request:
@@ -147,9 +178,18 @@ const aigateway = createAiGateway({
 			retryDelayMs: 1000,
 			backoff: "exponential",
 		},
+		// BYOK stored-key alias to authenticate with (cf-aig-byok-alias)
+		byokAlias: "my-openai-key",
+		// Per-request Zero Data Retention override for Unified Billing (cf-aig-zdr)
+		zdr: true,
 	},
 });
 ```
+
+> Cache controls map to the current `cf-aig-cache-ttl` / `cf-aig-skip-cache` /
+> `cf-aig-cache-key` headers (the older `cf-cache-ttl` / `cf-skip-cache` names are
+> deprecated upstream). Header building is shared with the `workers-ai-provider`
+> AI Gateway delegate, so the two stay in lockstep.
 
 ## Configuration
 
@@ -179,25 +219,35 @@ const aigateway = createAiGateway({
     - `maxAttempts`: Number of retry attempts (1-5)
     - `retryDelayMs`: Delay between retries
     - `backoff`: Retry backoff strategy ('constant', 'linear', 'exponential')
+- `byokAlias`: BYOK stored-key alias to authenticate with (`cf-aig-byok-alias`)
+- `zdr`: Per-request Zero Data Retention override for Unified Billing (`cf-aig-zdr`)
 
 ## Supported Providers
+
+The provider routing table is shared with the `workers-ai-provider` AI Gateway
+delegate, so support stays in sync. Currently routed providers include:
 
 - OpenAI
 - Anthropic
 - DeepSeek
 - Google AI Studio
+- Google Vertex AI
 - Grok
 - Mistral
 - Perplexity AI
 - Replicate
 - Groq
+- Azure OpenAI
+- OpenRouter
+- The unified `compat` endpoint (`ai-gateway-provider/providers/unified`)
 
 ## Supported Methods
 
-Currently, the following methods are supported:
+The following methods are supported:
 
-- **Non-streaming text generation**: Using `generateText()` from the Vercel AI SDK
-- **Chat completions**: Using `generateText()` with message-based prompts
+- **Text generation**: `generateText()` from the Vercel AI SDK
+- **Streaming text generation**: `streamText()` (streams through the gateway universal endpoint)
+- **Chat completions**: `generateText()` / `streamText()` with message-based prompts
 
 More can be added, please open an issue in the GitHub repository!
 

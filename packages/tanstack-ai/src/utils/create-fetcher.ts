@@ -1,3 +1,16 @@
+import {
+	applyGatewayCacheHeaders,
+	createResumableStream,
+	type GatewayMetadata,
+	getToolNames,
+	isForcedToolChoice,
+	normalizeMessagesForBinding,
+	parseLeakedToolCalls,
+	processText,
+	type ResumeExpiredPolicy,
+	SSEDecoder,
+} from "@cloudflare/gateway-core";
+
 // ---------------------------------------------------------------------------
 // AI Gateway types (for third-party providers + Workers AI through gateway)
 // ---------------------------------------------------------------------------
@@ -78,6 +91,30 @@ export interface WorkersAiDirectBindingConfig {
 	 * { binding: env.AI }
 	 */
 	binding: WorkersAiBinding;
+	/**
+	 * AI Gateway id to route the **resumable run path** through
+	 * (`env.AI.run(model, inputs, { gateway, returnRawResponse })`). Required to
+	 * enable {@link WorkersAiDirectBindingConfig.resume | resume}: the run path is
+	 * the only transport that surfaces a `cf-aig-run-id` to resume from. Works for
+	 * both `@cf/*` models and `"<provider>/<model>"` catalog slugs.
+	 */
+	gateway?: string;
+	/**
+	 * Enable resumable streaming for the run path. A transient mid-stream drop is
+	 * recovered transparently by reconnecting to the gateway resume endpoint.
+	 *
+	 * Requires {@link WorkersAiDirectBindingConfig.gateway | gateway} and a binding
+	 * exposing `.fetch` (i.e. the direct `env.AI` binding). When no `cf-aig-run-id`
+	 * is returned (e.g. the gateway path, or models that don't surface one), this
+	 * is a no-op and a one-time warning is logged. Defaults to `false`.
+	 */
+	resume?: boolean;
+	/**
+	 * What to do when the resume buffer has expired (gateway 404, ~5.5 min TTL):
+	 * `"error"` (default) surfaces the error into the stream; `"accept-partial"`
+	 * ends the stream cleanly with whatever was already delivered.
+	 */
+	onResumeExpired?: ResumeExpiredPolicy;
 }
 
 export interface WorkersAiDirectCredentialsConfig {
@@ -197,23 +234,19 @@ export function createGatewayFetch(
 			}
 		}
 
+		// Delegate cf-aig-* header construction to the shared gateway-core builder
+		// (single source of truth across wai + tanstack).
 		const cacheHeaders: Record<string, string> = {};
-
-		if ("skipCache" in config && config.skipCache) {
-			cacheHeaders["cf-aig-skip-cache"] = "true";
-		}
-
-		if (typeof config.cacheTtl === "number") {
-			cacheHeaders["cf-aig-cache-ttl"] = String(config.cacheTtl);
-		}
-
-		if (typeof config.customCacheKey === "string") {
-			cacheHeaders["cf-aig-cache-key"] = config.customCacheKey;
-		}
-
-		if (typeof config.metadata === "object") {
-			cacheHeaders["cf-aig-metadata"] = JSON.stringify(config.metadata);
-		}
+		applyGatewayCacheHeaders(cacheHeaders, {
+			...("skipCache" in config && config.skipCache ? { skipCache: true } : {}),
+			...(typeof config.cacheTtl === "number" ? { cacheTtl: config.cacheTtl } : {}),
+			...(typeof config.customCacheKey === "string"
+				? { cacheKey: config.customCacheKey }
+				: {}),
+			...(config.metadata && typeof config.metadata === "object"
+				? { metadata: config.metadata as GatewayMetadata }
+				: {}),
+		});
 
 		const request: {
 			provider: string;
@@ -275,27 +308,153 @@ export function createGatewayFetch(
 // ---------------------------------------------------------------------------
 
 /**
- * Normalize messages before passing to Workers AI binding.
- *
- * The binding has strict schema validation that may differ from the OpenAI API:
- * - `content` must not be null
- *
- * Content arrays (with image_url parts) are passed through as-is since the
- * Workers AI binding accepts them at runtime for vision-capable models.
+ * Options for {@link createWorkersAiBindingFetch}.
  */
-function normalizeMessagesForBinding(
-	messages: Record<string, unknown>[],
-): Record<string, unknown>[] {
-	return messages.map((msg) => {
-		const normalized = { ...msg };
+export interface WorkersAiBindingFetchOptions {
+	extraHeaders?: Record<string, string>;
+	/**
+	 * AI Gateway id. When set, requests dispatch through the resumable **run
+	 * path** (`binding.run(model, inputs, { gateway, returnRawResponse })`) which
+	 * surfaces a `cf-aig-run-id`. Leave unset for the plain binding path.
+	 */
+	gateway?: string;
+	/** Enable resumable streaming on the run path (requires `gateway`). */
+	resume?: boolean;
+	/** Resume-expiry policy. Defaults to `"error"`. */
+	onResumeExpired?: ResumeExpiredPolicy;
+}
 
-		// content: null → content: ""
-		if (normalized.content === null || normalized.content === undefined) {
-			normalized.content = "";
+let warnedNoRunId = false;
+
+let warnedSalvage = false;
+
+/**
+ * Context for the gpt-oss forced-tool-call salvage: the requested tools and the
+ * tool-choice from the original request body.
+ */
+interface SalvageContext {
+	tools?: Array<{ function: { name?: string } }>;
+	toolChoice?: unknown;
+}
+
+/**
+ * Wrap a Workers AI native result (`{ response, tool_calls? }`) into an OpenAI
+ * Chat Completion object the OpenAI SDK can parse. Shared by the streaming
+ * graceful-degradation fallback and the non-streaming path.
+ *
+ * When `salvageContext` indicates a tool was forced but the model leaked the
+ * call as JSON text instead of structured `tool_calls`, the leaked call is
+ * recovered into proper `tool_calls` (gpt-oss harmony quirk, cloudflare/ai#560).
+ */
+function wrapWorkersAiResultAsOpenAI(
+	result: unknown,
+	model: string,
+	salvageContext?: SalvageContext,
+): Response {
+	const responseObj =
+		typeof result === "object" && result !== null
+			? (result as Record<string, unknown>)
+			: { response: String(result) };
+
+	const responseText =
+		typeof responseObj.response === "string"
+			? responseObj.response
+			: typeof responseObj.response === "object" && responseObj.response !== null
+				? JSON.stringify(responseObj.response)
+				: "";
+
+	const message: Record<string, unknown> = {
+		role: "assistant",
+		content: responseText,
+	};
+	let finishReason = "stop";
+
+	const hasStructuredToolCalls =
+		Array.isArray(responseObj.tool_calls) && responseObj.tool_calls.length > 0;
+
+	if (hasStructuredToolCalls) {
+		finishReason = "tool_calls";
+		const toolCalls = responseObj.tool_calls as Array<{
+			id?: string;
+			name?: string;
+			arguments?: unknown;
+			function?: { name?: string; arguments?: unknown };
+		}>;
+		message.tool_calls = toolCalls.map((tc) => ({
+			id: tc.id || crypto.randomUUID(),
+			type: "function",
+			function: {
+				name: tc.function?.name || tc.name || "",
+				arguments:
+					typeof (tc.function?.arguments ?? tc.arguments) === "string"
+						? ((tc.function?.arguments ?? tc.arguments) as string)
+						: JSON.stringify(tc.function?.arguments ?? tc.arguments ?? {}),
+			},
+		}));
+	} else if (salvageContext && isForcedToolChoice(salvageContext.toolChoice)) {
+		// Forced tool call that streamed/returned as text content — recover it.
+		const knownToolNames = getToolNames(salvageContext.tools);
+		const text = processText(responseObj);
+		const salvaged =
+			knownToolNames.size > 0 && text ? parseLeakedToolCalls(text, knownToolNames) : [];
+		if (salvaged.length > 0) {
+			finishReason = "tool_calls";
+			message.content = "";
+			message.tool_calls = salvaged.map((call) => ({
+				id: crypto.randomUUID(),
+				type: "function",
+				function: { name: call.toolName, arguments: call.input },
+			}));
+			if (!warnedSalvage) {
+				warnedSalvage = true;
+				console.warn(
+					`[tanstack-ai] Recovered ${salvaged.length} forced tool call(s) that the model returned as text content instead of structured tool calls.`,
+				);
+			}
 		}
+	}
 
-		return normalized;
+	const openAiResponse = {
+		id: `workers-ai-${crypto.randomUUID()}`,
+		object: "chat.completion",
+		created: Math.floor(Date.now() / 1000),
+		model,
+		choices: [{ index: 0, message, finish_reason: finishReason }],
+	};
+
+	return new Response(JSON.stringify(openAiResponse), {
+		headers: { "Content-Type": "application/json" },
 	});
+}
+
+/**
+ * Build the Workers AI `inputs` object from an OpenAI-shaped request body.
+ */
+function buildBindingInputs(body: Record<string, unknown>): Record<string, unknown> {
+	const stream = body.stream as boolean | undefined;
+	const inputs: Record<string, unknown> = {};
+	if (body.messages) {
+		inputs.messages = normalizeMessagesForBinding(body.messages as Record<string, unknown>[]);
+	}
+	if (body.tools) inputs.tools = body.tools;
+	if (typeof body.temperature === "number") inputs.temperature = body.temperature;
+	if (typeof body.max_tokens === "number") inputs.max_tokens = body.max_tokens;
+	if (body.response_format) inputs.response_format = body.response_format;
+	if (stream) inputs.stream = true;
+
+	// Workers AI-specific reasoning controls. These belong on the INPUTS object
+	// passed to binding.run(model, inputs), not on the options (3rd) arg.
+	// See https://github.com/cloudflare/ai/issues/503.
+	//
+	// `reasoning_effort: null` is a valid value (disables reasoning on models
+	// that support it), so we check `!== undefined` rather than truthiness.
+	if (body.reasoning_effort !== undefined) {
+		inputs.reasoning_effort = body.reasoning_effort;
+	}
+	if (body.chat_template_kwargs !== undefined) {
+		inputs.chat_template_kwargs = body.chat_template_kwargs;
+	}
+	return inputs;
 }
 
 /**
@@ -303,13 +462,21 @@ function normalizeMessagesForBinding(
  * to Workers AI binding calls (env.AI.run). This allows the WorkersAiTextAdapter
  * to use the OpenAI SDK against a plain Workers AI binding.
  *
+ * Two transports:
+ *   - **Plain binding** (default): `binding.run(model, inputs)` — no run-id, not
+ *     resumable.
+ *   - **Run path** (when `options.gateway` is set): `binding.run(model, inputs,
+ *     { gateway, returnRawResponse })` — surfaces `cf-aig-run-id`, so the stream
+ *     can be wrapped with the resume engine. Works for `@cf/*` models and
+ *     `"<provider>/<model>"` catalog slugs alike.
+ *
  * NOTE: The `input` URL parameter is intentionally ignored. The model name and all
  * request parameters are extracted from the JSON body, matching Workers AI's
  * `binding.run(model, inputs)` calling convention.
  */
 export function createWorkersAiBindingFetch(
 	binding: WorkersAiBinding,
-	options?: { extraHeaders?: Record<string, string> },
+	options?: WorkersAiBindingFetchOptions,
 ): typeof fetch {
 	return async (_input, init) => {
 		if (!init?.body) {
@@ -325,36 +492,76 @@ export function createWorkersAiBindingFetch(
 
 		const model = body.model as string;
 		const stream = body.stream as boolean | undefined;
+		const inputs = buildBindingInputs(body);
 
-		// Build Workers AI inputs from OpenAI format
-		const inputs: Record<string, unknown> = {};
-		if (body.messages) {
-			inputs.messages = normalizeMessagesForBinding(
-				body.messages as Record<string, unknown>[],
-			);
-		}
-		if (body.tools) inputs.tools = body.tools;
-		if (typeof body.temperature === "number") inputs.temperature = body.temperature;
-		if (typeof body.max_tokens === "number") inputs.max_tokens = body.max_tokens;
-		if (body.response_format) inputs.response_format = body.response_format;
-		if (stream) inputs.stream = true;
+		// Context for the gpt-oss forced-tool-call salvage on the non-streaming
+		// (graceful-degradation) paths. See cloudflare/ai#560.
+		const salvageContext: SalvageContext = {
+			tools: body.tools as Array<{ function: { name?: string } }> | undefined,
+			toolChoice: body.tool_choice,
+		};
 
-		// Workers AI-specific reasoning controls. These belong on the INPUTS object
-		// passed to binding.run(model, inputs), not on the options (3rd) arg.
-		// See https://github.com/cloudflare/ai/issues/503.
-		//
-		// `reasoning_effort: null` is a valid value (disables reasoning on models
-		// that support it), so we check `!== undefined` rather than truthiness.
-		if (body.reasoning_effort !== undefined) {
-			inputs.reasoning_effort = body.reasoning_effort;
-		}
-		if (body.chat_template_kwargs !== undefined) {
-			inputs.chat_template_kwargs = body.chat_template_kwargs;
+		const signal = init?.signal ?? undefined;
+		const sseResponse = (transformed: ReadableStream<Uint8Array>): Response =>
+			new Response(transformed, {
+				headers: {
+					"Content-Type": "text/event-stream",
+					"Cache-Control": "no-cache",
+				},
+			});
+
+		// --- Run path (gateway set): resumable, surfaces cf-aig-run-id ---
+		if (options?.gateway) {
+			const runOptions: Record<string, unknown> = {
+				gateway: { id: options.gateway },
+				returnRawResponse: true,
+			};
+			if (options.extraHeaders) runOptions.extraHeaders = options.extraHeaders;
+			if (signal) runOptions.signal = signal;
+
+			const raw = (await binding.run(model, inputs, runOptions)) as Response;
+			const runId = raw.headers?.get?.("cf-aig-run-id") ?? null;
+			const contentType = raw.headers?.get?.("content-type") ?? "";
+			const isStreamResponse =
+				stream && !!raw.body && contentType.includes("text/event-stream");
+
+			if (isStreamResponse) {
+				let byteStream = raw.body as ReadableStream<Uint8Array>;
+				if (options.resume !== false && runId) {
+					// Wrap the RAW run-path bytes with the resume engine BEFORE the
+					// SSE transform, so the engine's event-offset bookkeeping (it
+					// counts `\n\n` on the raw stream) stays correct.
+					byteStream = createResumableStream({
+						binding: binding as unknown as Ai,
+						gateway: options.gateway,
+						runId,
+						initial: byteStream,
+						onResumeExpired: options.onResumeExpired,
+						signal,
+					});
+				} else if (options.resume && !runId) {
+					if (!warnedNoRunId) {
+						warnedNoRunId = true;
+						console.warn(
+							"[tanstack-ai] resume was requested but no `cf-aig-run-id` was returned " +
+								"(the model/gateway path may not support resume yet); proceeding without resume.",
+						);
+					}
+				}
+				return sseResponse(transformWorkersAiStream(byteStream, model));
+			}
+
+			// Graceful degradation: a streaming request returned a non-SSE body
+			// (some models return a complete response even with `stream: true`),
+			// or this was a non-streaming request. Parse and wrap as OpenAI.
+			const json = await raw.json().catch(() => ({}));
+			return wrapWorkersAiResultAsOpenAI(json, model, salvageContext);
 		}
 
+		// --- Plain binding path (default): not resumable ---
 		const runOptions: Record<string, unknown> = {};
 		if (options?.extraHeaders) runOptions.extraHeaders = options.extraHeaders;
-		if (init?.signal) runOptions.signal = init.signal;
+		if (signal) runOptions.signal = signal;
 
 		const result = await binding.run(
 			model,
@@ -365,77 +572,16 @@ export function createWorkersAiBindingFetch(
 		if (stream && result instanceof ReadableStream) {
 			// Workers AI returns an SSE stream with `data: {"response":"chunk"}` format.
 			// Transform it to OpenAI-compatible SSE format.
-			const transformed = transformWorkersAiStream(
-				result as ReadableStream<Uint8Array>,
-				model,
+			return sseResponse(
+				transformWorkersAiStream(result as ReadableStream<Uint8Array>, model),
 			);
-			return new Response(transformed, {
-				headers: {
-					"Content-Type": "text/event-stream",
-					"Cache-Control": "no-cache",
-				},
-			});
 		}
 
 		// Graceful degradation: some models return a complete (non-streaming)
 		// response even when `stream: true` is requested. Fall through to the
 		// non-streaming wrapper which produces a valid OpenAI Chat Completion
 		// response that the SDK can consume.
-
-		// Non-streaming: Workers AI returns { response: "text", tool_calls?: [...] }
-		// Wrap into OpenAI Chat Completion format.
-		const responseObj =
-			typeof result === "object" && result !== null
-				? (result as Record<string, unknown>)
-				: { response: String(result) };
-
-		const responseText =
-			typeof responseObj.response === "string"
-				? responseObj.response
-				: typeof responseObj.response === "object" && responseObj.response !== null
-					? JSON.stringify(responseObj.response)
-					: "";
-
-		const message: Record<string, unknown> = {
-			role: "assistant",
-			content: responseText,
-		};
-		let finishReason = "stop";
-
-		// Handle tool calls if present in Workers AI response
-		if (Array.isArray(responseObj.tool_calls) && responseObj.tool_calls.length > 0) {
-			finishReason = "tool_calls";
-			message.tool_calls = responseObj.tool_calls.map(
-				(tc: {
-					id?: string;
-					name?: string;
-					arguments: unknown;
-					function?: { name: string; arguments?: unknown };
-				}) => ({
-					id: tc.id || crypto.randomUUID(),
-					type: "function",
-					function: {
-						name: tc.function?.name || tc.name || "",
-						arguments:
-							typeof (tc.function?.arguments ?? tc.arguments) === "string"
-								? ((tc.function?.arguments ?? tc.arguments) as string)
-								: JSON.stringify(tc.function?.arguments ?? tc.arguments ?? {}),
-					},
-				}),
-			);
-		}
-
-		const openAiResponse = {
-			id: `workers-ai-${crypto.randomUUID()}`,
-			object: "chat.completion",
-			created: Math.floor(Date.now() / 1000),
-			model,
-			choices: [{ index: 0, message, finish_reason: finishReason }],
-		};
-
-		return new Response(JSON.stringify(openAiResponse), {
-			headers: { "Content-Type": "application/json" },
-		});
+		return wrapWorkersAiResultAsOpenAI(result, model, salvageContext);
 	};
 }
 
@@ -457,13 +603,11 @@ function transformWorkersAiStream(
 	source: ReadableStream<Uint8Array>,
 	model: string,
 ): ReadableStream<Uint8Array> {
-	const decoder = new TextDecoder();
 	const encoder = new TextEncoder();
 	// Generate a stable ID and timestamp for the entire stream, matching OpenAI's
 	// convention where all chunks in a single response share the same id/created.
 	const streamId = `workers-ai-${crypto.randomUUID()}`;
 	const created = Math.floor(Date.now() / 1000);
-	let buffer = "";
 	let hasToolCalls = false;
 	// When true, the source stream is already in OpenAI format (some models
 	// like Qwen3, Kimi K2.5 stream OpenAI-compatible SSE through the binding).
@@ -473,65 +617,128 @@ function transformWorkersAiStream(
 	// subsequent argument deltas use the same ID (matching the working streaming.ts pattern).
 	const toolCallState = new Map<number, { id: string; name: string }>();
 
-	return source.pipeThrough(
-		new TransformStream<Uint8Array, Uint8Array>({
-			transform(chunk, controller) {
-				buffer += decoder.decode(chunk, { stream: true });
-				const lines = buffer.split("\n");
-				buffer = lines.pop() || "";
+	// Decode raw bytes into SSE `data:` payloads with the shared gateway-core
+	// decoder, then re-emit OpenAI-compatible SSE chunks.
+	return source.pipeThrough(new SSEDecoder()).pipeThrough(
+		new TransformStream<string, Uint8Array>({
+			transform(data, controller) {
+				// Swallow source [DONE]; we emit our own in flush()
+				if (!data || data === "[DONE]") return;
 
-				for (const line of lines) {
-					const trimmed = line.trim();
-					if (!trimmed || !trimmed.startsWith("data: ")) continue;
-					const data = trimmed.slice(6);
+				try {
+					const parsed = JSON.parse(data);
 
-					// Swallow source [DONE]; we emit our own in flush()
-					if (data === "[DONE]") continue;
-
-					try {
-						const parsed = JSON.parse(data);
-
-						// Some models (Qwen3, Kimi K2.5) return OpenAI-compatible format
-						// directly through the binding, with `choices[].delta.content` and
-						// optional `reasoning_content`. Detect this and pass through as-is.
-						if (parsed.choices !== undefined) {
-							// Already OpenAI format — pass through but ensure each tool call
-							// index gets a unique, stable ID across all chunks.
-							isOpenAiFormat = true;
-							const choice = parsed.choices?.[0];
-							if (choice?.delta?.tool_calls) {
-								hasToolCalls = true;
-								for (const tc of choice.delta.tool_calls) {
-									const tcIndex = tc.index ?? 0;
-									if (!toolCallState.has(tcIndex)) {
-										// First chunk for this index — generate/store unique ID
-										const id = tc.id || `call${streamId}${tcIndex}`;
-										toolCallState.set(tcIndex, {
-											id,
-											name: tc.function?.name || "",
-										});
-										tc.id = id;
-									} else {
-										// Subsequent chunk — reuse stored ID, remove id from delta
-										// (OpenAI format only sends id in first chunk)
-										delete tc.id;
-									}
+					// Some models (Qwen3, Kimi K2.5) return OpenAI-compatible format
+					// directly through the binding, with `choices[].delta.content` and
+					// optional `reasoning_content`. Detect this and pass through as-is.
+					if (parsed.choices !== undefined) {
+						// Already OpenAI format — pass through but ensure each tool call
+						// index gets a unique, stable ID across all chunks.
+						isOpenAiFormat = true;
+						const choice = parsed.choices?.[0];
+						if (choice?.delta?.tool_calls) {
+							hasToolCalls = true;
+							for (const tc of choice.delta.tool_calls) {
+								const tcIndex = tc.index ?? 0;
+								if (!toolCallState.has(tcIndex)) {
+									// First chunk for this index — generate/store unique ID
+									const id = tc.id || `call${streamId}${tcIndex}`;
+									toolCallState.set(tcIndex, {
+										id,
+										name: tc.function?.name || "",
+									});
+									tc.id = id;
+								} else {
+									// Subsequent chunk — reuse stored ID, remove id from delta
+									// (OpenAI format only sends id in first chunk)
+									delete tc.id;
 								}
 							}
-							if (choice?.finish_reason === "tool_calls") {
-								hasToolCalls = true;
-							}
-							controller.enqueue(
-								encoder.encode(`data: ${JSON.stringify(parsed)}\n\n`),
-							);
-							continue;
 						}
+						if (choice?.finish_reason === "tool_calls") {
+							hasToolCalls = true;
+						}
+						controller.enqueue(encoder.encode(`data: ${JSON.stringify(parsed)}\n\n`));
+						return;
+					}
 
-						// --- Workers AI native format handling below ---
+					// --- Workers AI native format handling below ---
 
-						// Text content
-						if (parsed.response != null && parsed.response !== "") {
-							const openAiChunk = {
+					// Text content
+					if (parsed.response != null && parsed.response !== "") {
+						const openAiChunk = {
+							id: streamId,
+							object: "chat.completion.chunk",
+							created,
+							model,
+							choices: [
+								{
+									index: 0,
+									delta: { content: parsed.response },
+									finish_reason: null,
+								},
+							],
+						};
+						controller.enqueue(
+							encoder.encode(`data: ${JSON.stringify(openAiChunk)}\n\n`),
+						);
+					}
+
+					// Tool calls — Workers AI binding streams these incrementally:
+					//   Chunk A: { id, type, index, function: { name } }          — start
+					//   Chunk B: { index, function: { arguments: "partial..." } }  — args delta
+					//   Chunk C: { index, function: { arguments: "rest..." } }     — args delta
+					//   Chunk D: { id: null, type: null, index, function: { name: null, arguments: "" } } — finalize (skip)
+					if (Array.isArray(parsed.tool_calls) && parsed.tool_calls.length > 0) {
+						for (const tc of parsed.tool_calls) {
+							const tcIndex = tc.index ?? 0;
+
+							// Resolve name and arguments from either nested or flat format
+							const tcName = tc.function?.name ?? tc.name ?? null;
+							const tcArgs = tc.function?.arguments ?? tc.arguments ?? null;
+							const tcId = tc.id ?? null;
+
+							// Skip finalization chunks where everything is null/empty
+							if (!tcId && !tcName && (!tcArgs || tcArgs === "")) continue;
+
+							hasToolCalls = true;
+
+							// Build the OpenAI-compatible tool_calls delta
+							const toolCallDelta: Record<string, unknown> = {
+								index: tcIndex,
+							};
+
+							if (!toolCallState.has(tcIndex)) {
+								// First chunk for this tool call index — emit id, type, name.
+								const id = tcId || `call${streamId}${tcIndex}`;
+								toolCallState.set(tcIndex, { id, name: tcName || "" });
+								toolCallDelta.id = id;
+								toolCallDelta.type = "function";
+								toolCallDelta.function = {
+									name: tcName || "",
+									// Include arguments if they arrive in the same chunk
+									arguments:
+										tcArgs != null
+											? typeof tcArgs === "string"
+												? tcArgs
+												: JSON.stringify(tcArgs)
+											: "",
+								};
+							} else {
+								// Subsequent chunks — only include arguments delta
+								if (tcArgs != null && tcArgs !== "") {
+									toolCallDelta.function = {
+										arguments:
+											typeof tcArgs === "string"
+												? tcArgs
+												: JSON.stringify(tcArgs),
+									};
+								} else {
+									continue; // Nothing useful to forward
+								}
+							}
+
+							const toolChunk = {
 								id: streamId,
 								object: "chat.completion.chunk",
 								created,
@@ -539,92 +746,19 @@ function transformWorkersAiStream(
 								choices: [
 									{
 										index: 0,
-										delta: { content: parsed.response },
+										delta: { tool_calls: [toolCallDelta] },
 										finish_reason: null,
 									},
 								],
 							};
 							controller.enqueue(
-								encoder.encode(`data: ${JSON.stringify(openAiChunk)}\n\n`),
+								encoder.encode(`data: ${JSON.stringify(toolChunk)}\n\n`),
 							);
 						}
-
-						// Tool calls — Workers AI binding streams these incrementally:
-						//   Chunk A: { id, type, index, function: { name } }          — start
-						//   Chunk B: { index, function: { arguments: "partial..." } }  — args delta
-						//   Chunk C: { index, function: { arguments: "rest..." } }     — args delta
-						//   Chunk D: { id: null, type: null, index, function: { name: null, arguments: "" } } — finalize (skip)
-						if (Array.isArray(parsed.tool_calls) && parsed.tool_calls.length > 0) {
-							for (const tc of parsed.tool_calls) {
-								const tcIndex = tc.index ?? 0;
-
-								// Resolve name and arguments from either nested or flat format
-								const tcName = tc.function?.name ?? tc.name ?? null;
-								const tcArgs = tc.function?.arguments ?? tc.arguments ?? null;
-								const tcId = tc.id ?? null;
-
-								// Skip finalization chunks where everything is null/empty
-								if (!tcId && !tcName && (!tcArgs || tcArgs === "")) continue;
-
-								hasToolCalls = true;
-
-								// Build the OpenAI-compatible tool_calls delta
-								const toolCallDelta: Record<string, unknown> = {
-									index: tcIndex,
-								};
-
-								if (!toolCallState.has(tcIndex)) {
-									// First chunk for this tool call index — emit id, type, name.
-									const id = tcId || `call${streamId}${tcIndex}`;
-									toolCallState.set(tcIndex, { id, name: tcName || "" });
-									toolCallDelta.id = id;
-									toolCallDelta.type = "function";
-									toolCallDelta.function = {
-										name: tcName || "",
-										// Include arguments if they arrive in the same chunk
-										arguments:
-											tcArgs != null
-												? typeof tcArgs === "string"
-													? tcArgs
-													: JSON.stringify(tcArgs)
-												: "",
-									};
-								} else {
-									// Subsequent chunks — only include arguments delta
-									if (tcArgs != null && tcArgs !== "") {
-										toolCallDelta.function = {
-											arguments:
-												typeof tcArgs === "string"
-													? tcArgs
-													: JSON.stringify(tcArgs),
-										};
-									} else {
-										continue; // Nothing useful to forward
-									}
-								}
-
-								const toolChunk = {
-									id: streamId,
-									object: "chat.completion.chunk",
-									created,
-									model,
-									choices: [
-										{
-											index: 0,
-											delta: { tool_calls: [toolCallDelta] },
-											finish_reason: null,
-										},
-									],
-								};
-								controller.enqueue(
-									encoder.encode(`data: ${JSON.stringify(toolChunk)}\n\n`),
-								);
-							}
-						}
-					} catch (e) {
-						// Log malformed SSE events for debugging; don't break the stream.
-						console.warn("[tanstack-ai] failed to parse SSE event:", data, e);
 					}
+				} catch (e) {
+					// Log malformed SSE events for debugging; don't break the stream.
+					console.warn("[tanstack-ai] failed to parse SSE event:", data, e);
 				}
 			},
 			flush(controller) {

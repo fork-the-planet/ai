@@ -155,6 +155,13 @@ function workersAiGatewayConfig(creds: RequestCredentials) {
 	if (creds.useBinding) {
 		return {
 			binding: env.AI.gateway(resolveGatewayId(creds)),
+			// Resumable streaming (COMING SOON — not generally available yet while
+			// the AI Gateway resume backend rolls out): when the catalog run path
+			// emits a cf-aig-run-id, a transient mid-stream drop reconnects
+			// transparently. With a gateway-binding-only config (or no run id) this
+			// is a no-op + warning, never a hard failure. See docs/concepts/resume.md.
+			resume: true,
+			onResumeExpired: "accept-partial" as const,
 		};
 	}
 	if (creds.cloudflare) {
@@ -168,7 +175,7 @@ function workersAiGatewayConfig(creds: RequestCredentials) {
 // ---------------------------------------------------------------------------
 
 const DEFAULT_WORKERS_AI_MODELS: Record<string, string> = {
-	"/ai/workers-ai-plain/chat": "@cf/moonshotai/kimi-k2.7-code",
+	"/ai/workers-ai-plain/chat": "@cf/zai-org/glm-5.2",
 	"/ai/workers-ai/chat": "@cf/qwen/qwen3-30b-a3b-fp8",
 };
 
@@ -176,7 +183,7 @@ function getChatAdapter(provider: string, creds: RequestCredentials): AnyTextAda
 	const pk = creds.providerKeys;
 	const waiModel = (creds.workersAiModel ||
 		DEFAULT_WORKERS_AI_MODELS[`/ai/${provider}/chat`] ||
-		"@cf/moonshotai/kimi-k2.7-code") as WorkersAiTextModel;
+		"@cf/zai-org/glm-5.2") as WorkersAiTextModel;
 
 	switch (provider) {
 		case "workers-ai-plain":
@@ -185,28 +192,28 @@ function getChatAdapter(provider: string, creds: RequestCredentials): AnyTextAda
 			return createWorkersAiChat(waiModel, workersAiGatewayConfig(creds));
 		case "openai":
 			return createOpenAiChat(
-				"gpt-5.2",
+				"gpt-5.5",
 				creds.useBinding
 					? gwBindingConfig(creds, pk.openai)
 					: gwRestConfig(creds, pk.openai),
 			);
 		case "anthropic":
 			return createAnthropicChat(
-				"claude-opus-4-6",
+				"claude-opus-4.8",
 				creds.useBinding
 					? gwBindingConfig(creds, pk.anthropic)
 					: gwRestConfig(creds, pk.anthropic),
 			);
 		case "gemini":
-			return createGeminiChat("gemini-3-flash-preview", gwRestConfig(creds, pk.gemini));
+			return createGeminiChat("gemini-3.5-flash", gwRestConfig(creds, pk.gemini));
 		case "grok":
 			return createGrokChat(
-				"grok-4-1-fast-reasoning",
+				"grok-4.3",
 				creds.useBinding ? gwBindingConfig(creds, pk.grok) : gwRestConfig(creds, pk.grok),
 			);
 		case "openrouter":
 			return createOpenRouterChat(
-				"openai/gpt-4o",
+				"openai/gpt-5.5",
 				creds.useBinding
 					? gwBindingConfig(creds, pk.openrouter)
 					: gwRestConfig(creds, pk.openrouter),
@@ -221,32 +228,32 @@ function getImageAdapter(provider: string, creds: RequestCredentials): AnyImageA
 
 	switch (provider) {
 		case "workers-ai-plain":
-			return createWorkersAiImage(
-				"@cf/stabilityai/stable-diffusion-xl-base-1.0",
-				workersAiConfig(creds),
-			);
+			return createWorkersAiImage("@cf/black-forest-labs/flux-2-dev", workersAiConfig(creds));
 		case "workers-ai":
 			return createWorkersAiImage(
-				"@cf/stabilityai/stable-diffusion-xl-base-1.0",
+				"@cf/black-forest-labs/flux-2-dev",
 				workersAiGatewayConfig(creds),
 			);
 		case "openai":
 			return createOpenAiImage(
-				"gpt-image-1",
+				"gpt-image-2",
 				creds.useBinding
 					? gwBindingConfig(creds, pk.openai)
 					: gwRestConfig(creds, pk.openai),
 			);
 		case "gemini":
-			return createGeminiImage("gemini-3-pro-image-preview", gwRestConfig(creds, pk.gemini));
+			return createGeminiImage(
+				"gemini-3.1-flash-image-preview",
+				gwRestConfig(creds, pk.gemini),
+			);
 		case "grok":
 			return createGrokImage(
-				"grok-2-image-1212",
+				"grok-imagine-image",
 				creds.useBinding ? gwBindingConfig(creds, pk.grok) : gwRestConfig(creds, pk.grok),
 			);
 		case "openrouter":
 			return createOpenRouterImage(
-				"openai/dall-e-3",
+				"openai/gpt-image-2",
 				creds.useBinding
 					? gwBindingConfig(creds, pk.openrouter)
 					: gwRestConfig(creds, pk.openrouter),
@@ -272,28 +279,28 @@ function getSummarizeAdapter(
 			);
 		case "openai":
 			return createOpenAiSummarize(
-				"gpt-5.2",
+				"gpt-5.5",
 				creds.useBinding
 					? gwBindingConfig(creds, pk.openai)
 					: gwRestConfig(creds, pk.openai),
 			);
 		case "anthropic":
 			return createAnthropicSummarize(
-				"claude-opus-4-6",
+				"claude-opus-4.8",
 				creds.useBinding
 					? gwBindingConfig(creds, pk.anthropic)
 					: gwRestConfig(creds, pk.anthropic),
 			);
 		case "gemini":
-			return createGeminiSummarize("gemini-2.0-flash", gwRestConfig(creds, pk.gemini));
+			return createGeminiSummarize("gemini-3.5-flash", gwRestConfig(creds, pk.gemini));
 		case "grok":
 			return createGrokSummarize(
-				"grok-4-1-fast-reasoning",
+				"grok-4.3",
 				creds.useBinding ? gwBindingConfig(creds, pk.grok) : gwRestConfig(creds, pk.grok),
 			);
 		case "openrouter":
 			return createOpenRouterSummarize(
-				"openai/gpt-4o",
+				"openai/gpt-5.5",
 				creds.useBinding
 					? gwBindingConfig(creds, pk.openrouter)
 					: gwRestConfig(creds, pk.openrouter),
@@ -322,7 +329,7 @@ function getTranscriptionAdapter(
 			);
 		case "openai":
 			return createOpenAiTranscription(
-				"whisper-1",
+				"gpt-4o-transcribe",
 				creds.useBinding
 					? gwBindingConfig(creds, pk.openai)
 					: gwRestConfig(creds, pk.openai),
@@ -342,13 +349,13 @@ function getTTSAdapter(provider: string, creds: RequestCredentials): AnyTTSAdapt
 			return createWorkersAiTts("@cf/deepgram/aura-2-en", workersAiGatewayConfig(creds));
 		case "openai":
 			return createOpenAiTts(
-				"tts-1",
+				"tts-1-hd",
 				creds.useBinding
 					? gwBindingConfig(creds, pk.openai)
 					: gwRestConfig(creds, pk.openai),
 			);
 		case "gemini":
-			return createGeminiTts("gemini-2.5-flash-preview-tts", gwRestConfig(creds, pk.gemini));
+			return createGeminiTts("gemini-3.1-flash-tts-preview", gwRestConfig(creds, pk.gemini));
 		default:
 			return null;
 	}
@@ -500,7 +507,6 @@ export default {
 						conversationId: body.data?.conversationId ?? crypto.randomUUID(),
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any -- messages from request body match at runtime
 						messages: body.messages as any,
-						temperature: 0.6,
 						tools,
 					});
 					return toHttpResponse(response);

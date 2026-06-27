@@ -220,7 +220,12 @@ export class WorkersAiTranscriptionAdapter extends BaseTranscriptionAdapter<Work
 				alternatives?: Array<{
 					transcript?: string;
 					confidence?: number;
-					words?: Array<{ word: string; start: number; end: number; confidence: number }>;
+					words?: Array<{
+						word: string;
+						start: number;
+						end: number;
+						confidence: number;
+					}>;
 				}>;
 			}>;
 			const alt = channels?.[0]?.alternatives?.[0];

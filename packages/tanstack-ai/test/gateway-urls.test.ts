@@ -26,7 +26,10 @@ describe("Workers AI gateway URL verification", () => {
 				new Response(
 					// Return valid image/audio bytes for binary adapters, JSON for others
 					new Uint8Array([137, 80, 78, 71]),
-					{ status: 200, headers: { "Content-Type": "application/octet-stream" } },
+					{
+						status: 200,
+						headers: { "Content-Type": "application/octet-stream" },
+					},
 				),
 		);
 		globalThis.fetch = mockFetch as any;

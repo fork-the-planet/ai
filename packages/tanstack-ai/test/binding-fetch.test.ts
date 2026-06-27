@@ -639,7 +639,9 @@ describe("createWorkersAiBindingFetch", () => {
 
 		expect(binding.run).toHaveBeenCalledOnce();
 		const [, , options] = binding.run.mock.calls[0]!;
-		expect(options).toEqual({ extraHeaders: { "x-session-affinity": "session-123" } });
+		expect(options).toEqual({
+			extraHeaders: { "x-session-affinity": "session-123" },
+		});
 	});
 
 	it("should not pass extraHeaders to binding.run() when not configured", async () => {
@@ -877,7 +879,10 @@ describe("createWorkersAiBindingFetch", () => {
 		const [, inputs] = binding.run.mock.calls[0]!;
 		expect(inputs.messages[0].content).toEqual([
 			{ type: "text", text: "Describe this" },
-			{ type: "image_url", image_url: { url: `data:image/png;base64,${base64}` } },
+			{
+				type: "image_url",
+				image_url: { url: `data:image/png;base64,${base64}` },
+			},
 		]);
 	});
 });

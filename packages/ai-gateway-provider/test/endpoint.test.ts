@@ -52,6 +52,16 @@ const testCases = [
 		name: "azure-openai",
 		url: "https://myresource.openai.azure.com/openai/deployments/mydeployment/chat/completions?api-version=2024-02-15-preview",
 	},
+	{
+		expected: "v1/chat/completions",
+		name: "openrouter",
+		url: "https://openrouter.ai/api/v1/chat/completions",
+	},
+	{
+		expected: "chat/completions",
+		name: "compat",
+		url: "https://gateway.ai.cloudflare.com/v1/compat/chat/completions",
+	},
 ];
 
 describe("ProvidersConfigs endpoint parsing", () => {
@@ -63,4 +73,27 @@ describe("ProvidersConfigs endpoint parsing", () => {
 			expect(result).toBe(testCase.expected);
 		});
 	}
+});
+
+describe("Provider auth header selection", () => {
+	// Providers whose native BYOK header is `authorization` omit `headerKey`
+	// (index.ts defaults to stripping `authorization`); others carry it.
+	const expectations: { name: string; headerKey: string | undefined }[] = [
+		{ name: "openai", headerKey: undefined },
+		{ name: "anthropic", headerKey: "x-api-key" },
+		{ name: "google-ai-studio", headerKey: "x-goog-api-key" },
+		{ name: "azure-openai", headerKey: "api-key" },
+	];
+
+	for (const { name, headerKey } of expectations) {
+		it(`exposes the expected headerKey for "${name}"`, () => {
+			const provider = providers.find((p) => p.name === name);
+			expect(provider).toBeDefined();
+			expect(provider!.headerKey).toBe(headerKey);
+		});
+	}
+
+	it("includes the local compat entry that has no core registry equivalent", () => {
+		expect(providers.find((p) => p.name === "compat")).toBeDefined();
+	});
 });

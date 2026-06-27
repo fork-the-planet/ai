@@ -158,7 +158,7 @@ function ChatView({ provider, workersAiModel }: { provider: ProviderDef; workers
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger on message count change
+	// oxlint-disable-next-line react-hooks/exhaustive-deps -- intentional trigger on message count change
 	useEffect(() => {
 		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 	}, [messages.length]);
@@ -291,7 +291,16 @@ function ChatView({ provider, workersAiModel }: { provider: ProviderDef; workers
 															key={key}
 															toolName={toolCall.name ?? "tool"}
 															args={toolCall.arguments}
-															result={toolResult?.content}
+															result={
+																typeof toolResult?.content ===
+																"string"
+																	? toolResult.content
+																	: toolResult?.content
+																		? JSON.stringify(
+																				toolResult.content,
+																			)
+																		: undefined
+															}
 															isUserMessage={message.role === "user"}
 														/>
 													);

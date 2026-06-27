@@ -1,13 +1,23 @@
-import type { LanguageModelV3 } from "@ai-sdk/provider";
+import type { LanguageModelV3, LanguageModelV3CallOptions } from "@ai-sdk/provider";
+import {
+	asText,
+	buildGatewayEntry,
+	createResumableStream,
+	GatewayDelegateError,
+	type GatewayCacheOptions,
+	type GatewayEntry,
+	type ResumeExpiredPolicy,
+} from "@cloudflare/gateway-core";
 import { createClientFallbackModel } from "./client-fallback";
 import { findProviderBySlug, type GatewayProviderInfo, type WireFormat } from "./gateway-providers";
-import { createResumableStream, type ResumeExpiredPolicy } from "./resumable-stream";
 
 export {
 	createResumableStream,
+	GatewayDelegateError,
+	type GatewayDelegateErrorKind,
 	type ResumableStreamOptions,
 	type ResumeExpiredPolicy,
-} from "./resumable-stream";
+} from "@cloudflare/gateway-core";
 export {
 	type FallbackAttempt,
 	type GatewayErrorCode,
@@ -197,6 +207,20 @@ export interface DelegateCallOptions {
 	 * delegate strips provider auth headers so unified billing applies.
 	 */
 	byok?: boolean;
+	/**
+	 * Gateway path only: BYOK stored-key alias to authenticate with
+	 * (`cf-aig-byok-alias`). Selects a non-`default` key you configured for the
+	 * provider on the gateway. Independent of `byok` (which controls whether the
+	 * caller's own provider auth header is forwarded vs. stripped).
+	 */
+	byokAlias?: string;
+	/**
+	 * Per-request Zero Data Retention override (`cf-aig-zdr`), Unified Billing
+	 * only: `true` forces ZDR-capable upstreams, `false` disables it for this
+	 * request. Overrides the gateway-level ZDR default. Applied on both transports
+	 * (run path: passed through gateway options as a header; gateway path: entry header).
+	 */
+	zdr?: boolean;
 	/** Override the delegate's gateway for this model. */
 	gateway?: GatewayOptions | string;
 	/**
@@ -316,59 +340,11 @@ export function selectTransport(
 }
 
 // ---------------------------------------------------------------------------
-// Errors
-// ---------------------------------------------------------------------------
-
-export type GatewayDelegateErrorKind = "config" | "dispatch" | "provider" | "resume-expired";
-
-export class GatewayDelegateError extends Error {
-	readonly kind: GatewayDelegateErrorKind;
-	override readonly cause?: unknown;
-
-	constructor(kind: GatewayDelegateErrorKind, message: string, cause?: unknown) {
-		super(message);
-		this.name = "GatewayDelegateError";
-		this.kind = kind;
-		this.cause = cause;
-	}
-}
-
-// ---------------------------------------------------------------------------
 // Dispatch internals
 // ---------------------------------------------------------------------------
 
-// Always stripped on the gateway path (transport-level headers the binding sets).
-const STRIP_HEADERS_BASE = new Set(["content-length", "host"]);
-
-interface GatewayEntry {
-	provider: string;
-	endpoint: string;
-	headers: Record<string, string>;
-	query: Record<string, unknown>;
-}
-
 interface AiGatewayRunner {
 	run(body: unknown, options?: Record<string, unknown>): Promise<Response>;
-}
-
-function asText(body: BodyInit | null | undefined): string {
-	if (typeof body === "string") return body;
-	if (body instanceof Uint8Array) return new TextDecoder().decode(body);
-	if (body instanceof ArrayBuffer) return new TextDecoder().decode(body);
-	return "{}";
-}
-
-function headersToObject(h: HeadersInit | undefined): Record<string, string> {
-	const out: Record<string, string> = {};
-	if (!h) return out;
-	if (h instanceof Headers) {
-		for (const [k, v] of h) out[k] = v;
-	} else if (Array.isArray(h)) {
-		for (const [k, v] of h) out[k] = v;
-	} else {
-		Object.assign(out, h);
-	}
-	return out;
 }
 
 function normalizeGateway(gateway: GatewayOptions | string | undefined): {
@@ -517,8 +493,7 @@ export function createGatewayDelegate(config: GatewayDelegateConfig): GatewayDel
 	return (slug, options = {}) => {
 		// Client-side fallback: build a model per slug and wrap them so a failed
 		// pre-stream dispatch falls through to the next, each on its own transport
-		// (so resume is preserved per leg). Server-side fallback stays on the
-		// gateway path inside makeGatewayFetch.
+		// (so resume is preserved per leg).
 		if (options.fallback?.mode === "client") {
 			const { fallback, ...rest } = options;
 			const slugs = [slug, ...fallback.models];
@@ -528,6 +503,75 @@ export function createGatewayDelegate(config: GatewayDelegateConfig): GatewayDel
 			});
 			return createClientFallbackModel(legs);
 		}
+
+		// Server-side fallback: all legs ship in one gateway run; `cf-aig-step`
+		// names the winner. Same-vendor legs are handled by makeGatewayFetch (it
+		// just swaps `model` in one body); cross-vendor legs need each leg's own
+		// builder to shape its native request, so route them through the
+		// capture/redispatch engine (ported from ai-gateway-provider).
+		if (options.fallback?.mode === "server") {
+			const slugs = [slug, ...options.fallback.models];
+			const resolved = slugs.map((s) => {
+				const parsed = parseSlug(s);
+				return { slug: s, modelId: parsed.modelId, info: resolveProvider(s, parsed) };
+			});
+			const crossVendor = resolved.some(
+				(r) => r.info.gatewayProviderId !== resolved[0]!.info.gatewayProviderId,
+			);
+			if (crossVendor) {
+				const resumeExplicitlyTrue = options.resume === true;
+				const effectiveOptions: DelegateCallOptions = {
+					...options,
+					resume: options.resume ?? defaultResume,
+					onResumeExpired: options.onResumeExpired ?? config.onResumeExpired,
+				};
+				const primaryInfo = resolved[0]!.info;
+				// Forces the gateway path + disables resume (throws if resume:true).
+				const selection = selectTransport(
+					effectiveOptions,
+					resumeExplicitlyTrue,
+					primaryInfo.runCatalog,
+					primaryInfo.gatewayPath !== false,
+				);
+				for (const w of selection.warnings) console.warn(w);
+
+				const { id: gatewayId, options: gatewayOptions } = normalizeGateway(
+					options.gateway ?? config.gateway,
+				);
+
+				const legs: ServerFallbackLeg[] = resolved.map((r) => {
+					if (r.info.gatewayPath === false) {
+						throw new GatewayDelegateError(
+							"config",
+							`Server-side fallback cannot use "${r.slug}": it is on the unified ` +
+								"run catalog but has no native gateway path.",
+						);
+					}
+					const wire = r.info.wireFormat as WireFormat;
+					const plugin = plugins.get(wire);
+					if (!plugin) {
+						throw new GatewayDelegateError(
+							"config",
+							`No provider plugin for wire format "${wire}" (needed by "${r.slug}" ` +
+								`for server-side fallback). Registered: ` +
+								`${[...plugins.keys()].join(", ") || "<none>"}.`,
+						);
+					}
+					return { slug: r.slug, modelId: r.modelId, info: r.info, plugin };
+				});
+
+				return makeServerFallbackModel({
+					binding: config.binding,
+					gatewayId,
+					gatewayOptions,
+					legs,
+					opts: effectiveOptions,
+					selection,
+					callOptions: options,
+				});
+			}
+		}
+
 		return buildOne(slug, options).model;
 	};
 }
@@ -557,9 +601,32 @@ function mergeMetadata(
 	return { ...base, ...override };
 }
 
-/** JSON-encode metadata for the `cf-aig-metadata` header (bigint → string). */
-function serializeMetadata(metadata: GatewayMetadata): string {
-	return JSON.stringify(metadata, (_k, v) => (typeof v === "bigint" ? v.toString() : v));
+/**
+ * Build the `cf-aig-*` request controls for a gateway-path entry. First-class
+ * call options (`cacheTtl`, `skipCache`, `collectLog`, `metadata`, `byokAlias`,
+ * `zdr`) are layered over the binding-style gateway options (`cacheKey`,
+ * `eventId`, `requestTimeoutMs`, `retries`) so the gateway path reaches parity
+ * with the run path, which forwards the whole `GatewayOptions` to `binding.run`.
+ */
+function buildGatewayControls(
+	gatewayOptions: GatewayOptions,
+	opts: DelegateCallOptions,
+): GatewayCacheOptions {
+	const metadata = mergeMetadata(gatewayOptions.metadata, opts.metadata);
+	return {
+		cacheTtl: opts.cacheTtl,
+		skipCache: opts.skipCache,
+		...(gatewayOptions.cacheKey !== undefined ? { cacheKey: gatewayOptions.cacheKey } : {}),
+		...(metadata ? { metadata } : {}),
+		...(opts.collectLog !== undefined ? { collectLog: opts.collectLog } : {}),
+		...(gatewayOptions.eventId !== undefined ? { eventId: gatewayOptions.eventId } : {}),
+		...(gatewayOptions.requestTimeoutMs !== undefined
+			? { requestTimeoutMs: gatewayOptions.requestTimeoutMs }
+			: {}),
+		...(gatewayOptions.retries ? { retries: gatewayOptions.retries } : {}),
+		...(opts.byokAlias !== undefined ? { byokAlias: opts.byokAlias } : {}),
+		...(opts.zdr !== undefined ? { zdr: opts.zdr } : {}),
+	};
 }
 
 function makeRunFetch(
@@ -582,10 +649,15 @@ function makeRunFetch(
 		if (mergedMeta) mergedGateway.metadata = mergedMeta;
 		if (opts.collectLog !== undefined) mergedGateway.collectLog = opts.collectLog;
 
+		// `zdr` is a Unified-Billing (run path) feature, but it's not a field on the
+		// binding's `GatewayOptions`, so pass it as a `cf-aig-zdr` extra header.
+		const extraHeaders: Record<string, string> = { ...opts.extraHeaders };
+		if (opts.zdr !== undefined) extraHeaders["cf-aig-zdr"] = String(opts.zdr);
+
 		const runOptions = {
 			gateway: mergedGateway,
 			returnRawResponse: true,
-			...(opts.extraHeaders ? { extraHeaders: opts.extraHeaders } : {}),
+			...(Object.keys(extraHeaders).length > 0 ? { extraHeaders } : {}),
 			...(init?.signal ? { signal: init.signal } : {}),
 		};
 
@@ -630,11 +702,6 @@ function makeGatewayFetch(
 	selection: Selection,
 	callOptions: DelegateCallOptions,
 ): typeof globalThis.fetch {
-	// Strip the AI SDK's placeholder provider key unless BYOK forwards a real one;
-	// unified billing / the gateway's stored key authenticates upstream otherwise.
-	const strip = new Set(STRIP_HEADERS_BASE);
-	if (!opts.byok) for (const h of info.authHeaders) strip.add(h.toLowerCase());
-
 	return (async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
 		const rawUrl = typeof input === "string" ? input : input.toString();
 		// Host-strip to the provider's gateway-native endpoint. The registry
@@ -645,39 +712,33 @@ function makeGatewayFetch(
 			: new URL(rawUrl).pathname.replace(/^\//, "") + (new URL(rawUrl).search || "");
 		const body = JSON.parse(asText(init?.body)) as Record<string, unknown>;
 
-		const headers: Record<string, string> = {};
-		for (const [k, v] of Object.entries(headersToObject(init?.headers))) {
-			if (!strip.has(k.toLowerCase())) headers[k] = v;
-		}
-		if (opts.extraHeaders) Object.assign(headers, opts.extraHeaders);
-		// Best-effort gateway cache control (gateway-side config may still override).
-		if (opts.cacheTtl !== undefined) headers["cf-aig-cache-ttl"] = String(opts.cacheTtl);
-		if (opts.skipCache) headers["cf-aig-skip-cache"] = "true";
-		// Gateway log controls (mirror the run path's typed gateway options).
-		const metadata = mergeMetadata(gatewayOptions.metadata, opts.metadata);
-		if (metadata) headers["cf-aig-metadata"] = serializeMetadata(metadata);
-		if (opts.collectLog !== undefined) {
-			headers["cf-aig-collect-log"] = String(opts.collectLog);
-		}
-
-		const primary: GatewayEntry = {
-			provider: info.gatewayProviderId,
+		// Strip the AI SDK's placeholder provider key unless BYOK forwards a real
+		// one; unified billing / the gateway's stored key authenticates otherwise.
+		const primary: GatewayEntry = buildGatewayEntry({
+			providerId: info.gatewayProviderId,
 			endpoint,
-			headers,
-			query: body,
-		};
+			initHeaders: init?.headers,
+			body,
+			...(opts.byok ? {} : { stripAuthHeaders: info.authHeaders }),
+			...(opts.extraHeaders ? { extraHeaders: opts.extraHeaders } : {}),
+			cache: buildGatewayControls(gatewayOptions, opts),
+		});
 		const entries: GatewayEntry[] = [primary];
 
+		// Same-vendor server fallback: every leg shares this provider + endpoint, so
+		// each is just the primary entry with `model` swapped. (Cross-vendor chains
+		// never reach here — the delegate routes them through makeServerFallbackModel,
+		// which captures each leg's native request; this stays a defensive guard.)
 		if (opts.fallback?.mode === "server") {
 			for (const fb of opts.fallback.models) {
 				const fbParsed = parseSlug(fb);
 				const fbInfo = resolveProvider(fb, fbParsed);
 				if (fbInfo.gatewayProviderId !== info.gatewayProviderId) {
 					throw new GatewayDelegateError(
-						"config",
-						`Cross-vendor server-side fallback (${info.gatewayProviderId} → ` +
-							`${fbInfo.gatewayProviderId}) is not supported yet. Use fallback.mode:"client", ` +
-							"or same-vendor fallback models.",
+						"dispatch",
+						`Internal: cross-vendor server fallback (${info.gatewayProviderId} → ` +
+							`${fbInfo.gatewayProviderId}) reached the same-vendor gateway fetch. ` +
+							"This should have been routed through makeServerFallbackModel.",
 					);
 				}
 				entries.push({ ...primary, query: { ...body, model: fbParsed.modelId } });
@@ -693,4 +754,147 @@ function makeGatewayFetch(
 		fireDispatch(resp, selection, callOptions);
 		return resp;
 	}) as typeof globalThis.fetch;
+}
+
+// ---------------------------------------------------------------------------
+// Cross-vendor server-side fallback (ported from ai-gateway-provider)
+// ---------------------------------------------------------------------------
+
+/** Sentinel thrown by the capture fetch to stop a leg before it hits the network. */
+class ServerFallbackCaptureStop extends Error {}
+
+/** One leg of a server-side fallback chain (gateway path). */
+interface ServerFallbackLeg {
+	slug: string;
+	modelId: string;
+	info: GatewayProviderInfo;
+	plugin: ProviderPlugin;
+}
+
+/**
+ * Cross-vendor server-side fallback via the gateway universal endpoint.
+ *
+ * Unlike same-vendor fallback (which just swaps `model` in one body), legs here
+ * are DIFFERENT providers with possibly different wire formats, so each leg's own
+ * `@ai-sdk` model must shape its native request. Mirrors ai-gateway-provider's
+ * `processModelRequest`: run each leg's builder with a capture `fetch` that
+ * sentinel-throws before the network, reshape each captured request into a
+ * `{ provider, endpoint, headers, query }` entry, dispatch all N as one
+ * `env.AI.gateway(id).run([...])`, then read `cf-aig-step` to find the leg the
+ * gateway actually served and feed the raw response back into that leg's model.
+ */
+function makeServerFallbackModel(params: {
+	binding: Ai;
+	gatewayId: string;
+	gatewayOptions: GatewayOptions;
+	legs: ServerFallbackLeg[];
+	opts: DelegateCallOptions;
+	selection: Selection;
+	callOptions: DelegateCallOptions;
+}): LanguageModelV3 {
+	const { binding, gatewayId, gatewayOptions, legs, opts, selection, callOptions } = params;
+	const first = legs[0]!;
+
+	// A throwaway model only used to read static metadata (provider/modelId/urls);
+	// its fetch is never invoked for those synchronous reads.
+	const refModel = first.plugin.create({
+		modelId: first.modelId,
+		fetch: (async () => {
+			throw new ServerFallbackCaptureStop();
+		}) as typeof globalThis.fetch,
+		...(first.info.baseURL ? { baseURL: first.info.baseURL } : {}),
+	});
+
+	const cache = buildGatewayControls(gatewayOptions, opts);
+
+	const dispatch = async (
+		method: "doGenerate" | "doStream",
+		options: LanguageModelV3CallOptions,
+	): Promise<unknown> => {
+		// 1) Capture each leg's native request without hitting the network.
+		const entries: GatewayEntry[] = [];
+		for (const leg of legs) {
+			let captured: { url: string; init?: RequestInit } | undefined;
+			const captureFetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+				captured = {
+					url: typeof input === "string" ? input : input.toString(),
+					init,
+				};
+				throw new ServerFallbackCaptureStop();
+			}) as typeof globalThis.fetch;
+
+			const model = leg.plugin.create({
+				modelId: leg.modelId,
+				fetch: captureFetch,
+				...(leg.info.baseURL ? { baseURL: leg.info.baseURL } : {}),
+			});
+			try {
+				await (model[method] as (o: LanguageModelV3CallOptions) => Promise<unknown>)(
+					options,
+				);
+			} catch (e) {
+				if (!(e instanceof ServerFallbackCaptureStop)) throw e;
+			}
+			if (!captured) {
+				throw new GatewayDelegateError(
+					"dispatch",
+					`Server-side fallback leg "${leg.slug}" produced no request to dispatch.`,
+				);
+			}
+
+			const url = captured.url;
+			const endpoint = leg.info.transformEndpoint
+				? leg.info.transformEndpoint(url)
+				: new URL(url).pathname.replace(/^\//, "") + (new URL(url).search || "");
+			const body = JSON.parse(asText(captured.init?.body)) as Record<string, unknown>;
+
+			entries.push(
+				buildGatewayEntry({
+					providerId: leg.info.gatewayProviderId,
+					endpoint,
+					initHeaders: captured.init?.headers,
+					body,
+					...(opts.byok ? {} : { stripAuthHeaders: leg.info.authHeaders }),
+					...(opts.extraHeaders ? { extraHeaders: opts.extraHeaders } : {}),
+					cache,
+				}),
+			);
+		}
+
+		// 2) One gateway run with all legs; `cf-aig-step` names the winner.
+		const gw = (binding as unknown as { gateway(id: string): AiGatewayRunner }).gateway(
+			gatewayId,
+		);
+		const abortSignal = (options as { abortSignal?: AbortSignal }).abortSignal;
+		const runOptions: Record<string, unknown> = {};
+		if (abortSignal) runOptions.signal = abortSignal;
+		const resp = await gw.run(entries, runOptions);
+		fireDispatch(resp, selection, callOptions);
+
+		// 3) Feed the raw winner response into its own model so its parser shapes
+		//    the result for that leg's wire format.
+		const step = Number.parseInt(resp.headers.get("cf-aig-step") ?? "0", 10);
+		const winner = legs[step] ?? first;
+		const winnerModel = winner.plugin.create({
+			modelId: winner.modelId,
+			fetch: (async () => resp) as typeof globalThis.fetch,
+			...(winner.info.baseURL ? { baseURL: winner.info.baseURL } : {}),
+		});
+		return (winnerModel[method] as (o: LanguageModelV3CallOptions) => Promise<unknown>)(
+			options,
+		);
+	};
+
+	return {
+		specificationVersion: "v3",
+		provider: refModel.provider,
+		modelId: refModel.modelId,
+		supportedUrls: refModel.supportedUrls,
+		doGenerate(options) {
+			return dispatch("doGenerate", options) as ReturnType<LanguageModelV3["doGenerate"]>;
+		},
+		doStream(options) {
+			return dispatch("doStream", options) as ReturnType<LanguageModelV3["doStream"]>;
+		},
+	} as LanguageModelV3;
 }

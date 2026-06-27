@@ -30,7 +30,7 @@ npx nx dev prompt-chaining
     ```bash
     npx nx dev prompt-chaining
     ```
-- **lint**: Lints the source code using Biome.
+- **lint**: Lints the source code using oxlint.
     ```bash
     npx nx lint prompt-chaining
     ```

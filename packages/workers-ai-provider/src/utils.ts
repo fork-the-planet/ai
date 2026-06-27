@@ -1,6 +1,17 @@
 import type { LanguageModelV3, LanguageModelV3ToolCall } from "@ai-sdk/provider";
+import {
+	getToolNames,
+	isForcedToolChoice,
+	normalizeMessagesForBinding as coreNormalizeMessagesForBinding,
+	parseLeakedToolCalls as coreParseLeakedToolCalls,
+	processText,
+} from "@cloudflare/gateway-core";
 import { generateId } from "ai";
 import type { WorkersAIChatPrompt } from "./workersai-chat-prompt";
+
+// Re-exported from `@cloudflare/gateway-core` (single source of truth) so the
+// existing `workers-ai-provider/src/utils` import paths keep working unchanged.
+export { getToolNames, isForcedToolChoice, processText } from "@cloudflare/gateway-core";
 
 // ---------------------------------------------------------------------------
 // Workers AI quirk workarounds
@@ -13,16 +24,9 @@ import type { WorkersAIChatPrompt } from "./workersai-chat-prompt";
  * - `content` must not be null
  */
 export function normalizeMessagesForBinding(messages: WorkersAIChatPrompt): WorkersAIChatPrompt {
-	return messages.map((msg) => {
-		const normalized = { ...msg };
-
-		// content: null → content: ""
-		if (normalized.content === null || normalized.content === undefined) {
-			(normalized as { content: string }).content = "";
-		}
-
-		return normalized;
-	});
+	return coreNormalizeMessagesForBinding(
+		messages as unknown as Record<string, unknown>[],
+	) as unknown as WorkersAIChatPrompt;
 }
 
 // ---------------------------------------------------------------------------
@@ -525,80 +529,23 @@ export function processPartialToolCalls(partialToolCalls: PartialToolCall[]) {
 // ---------------------------------------------------------------------------
 
 /**
- * Was a specific tool forced for this request?
- *
- * True for both `tool_choice: "required"` and the named-function form
- * `{ type: "function", function: { name } }`.
- */
-export function isForcedToolChoice(toolChoice: unknown): boolean {
-	if (toolChoice === "required") return true;
-	return (
-		typeof toolChoice === "object" &&
-		toolChoice !== null &&
-		(toolChoice as { type?: unknown }).type === "function"
-	);
-}
-
-/**
  * Parse tool calls that a model leaked as JSON text instead of structured
- * `tool_calls`. Shared by the non-streaming salvage and the streaming buffer.
+ * `tool_calls`, assigning AI-SDK tool-call ids.
  *
- * Only JSON objects whose `name` is one of `knownToolNames` are recovered;
- * everything else (prose, harmony channel/role leaks like `{"name":"analysis"}`,
- * hallucinated names) is ignored to avoid fabricating bogus calls.
+ * The recovery logic (which JSON shapes count as a leaked call) lives in
+ * `@cloudflare/gateway-core`; this wrapper only layers the framework id on each
+ * neutral result so the existing `LanguageModelV3ToolCall` shape is preserved.
  */
 export function parseLeakedToolCalls(
 	text: string,
 	knownToolNames: Set<string>,
 ): LanguageModelV3ToolCall[] {
-	let parsed: unknown;
-	try {
-		parsed = JSON.parse(text.trim());
-	} catch {
-		return [];
-	}
-
-	const candidates = Array.isArray(parsed) ? parsed : [parsed];
-	const salvaged: LanguageModelV3ToolCall[] = [];
-
-	for (const candidate of candidates) {
-		if (typeof candidate !== "object" || candidate === null) continue;
-		const obj = candidate as Record<string, unknown>;
-		const name = obj.name;
-		if (typeof name !== "string" || !knownToolNames.has(name)) continue;
-
-		// Arguments may be wrapped (`arguments`/`parameters`) or flattened as
-		// siblings of `name`.
-		let args: unknown;
-		if ("arguments" in obj) {
-			args = obj.arguments;
-		} else if ("parameters" in obj) {
-			args = obj.parameters;
-		} else {
-			const { name: _name, ...rest } = obj;
-			args = rest;
-		}
-
-		salvaged.push({
-			input: typeof args === "string" ? args : JSON.stringify(args ?? {}),
-			toolCallId: createAISDKToolCallId(undefined),
-			type: "tool-call",
-			toolName: name,
-		});
-	}
-
-	return salvaged;
-}
-
-/** Collect the requested tool names from mapped tools. */
-export function getToolNames(
-	tools: Array<{ function: { name?: string } }> | undefined,
-): Set<string> {
-	return new Set(
-		(tools ?? [])
-			.map((tool) => tool.function?.name)
-			.filter((name): name is string => typeof name === "string"),
-	);
+	return coreParseLeakedToolCalls(text, knownToolNames).map((call) => ({
+		input: call.input,
+		toolCallId: createAISDKToolCallId(undefined),
+		type: "tool-call",
+		toolName: call.toolName,
+	}));
 }
 
 /**
@@ -645,42 +592,4 @@ export function salvageToolCallsFromText(
 
 	const salvaged = parseLeakedToolCalls(text, knownToolNames);
 	return salvaged.length > 0 ? salvaged : null;
-}
-
-// ---------------------------------------------------------------------------
-// Text extraction
-// ---------------------------------------------------------------------------
-
-/**
- * Extract text from a Workers AI response, handling multiple response formats:
- * - OpenAI format: { choices: [{ message: { content: "..." } }] }
- * - Native format: { response: "..." }
- * - Structured output quirk: { response: { ... } } (object instead of string)
- * - Structured output quirk: { response: "{ ... }" } (JSON string)
- */
-export function processText(output: Record<string, unknown>): string | undefined {
-	// OpenAI format
-	const choices = output.choices as Array<{ message?: { content?: string | null } }> | undefined;
-	const choiceContent = choices?.[0]?.message?.content;
-	if (choiceContent != null && String(choiceContent).length > 0) {
-		return String(choiceContent);
-	}
-
-	if ("response" in output) {
-		const response = output.response;
-		// Object response (structured output quirk #2)
-		if (typeof response === "object" && response !== null) {
-			return JSON.stringify(response);
-		}
-		// Numeric response (quirk #9)
-		if (typeof response === "number") {
-			return String(response);
-		}
-		// Null response (e.g., tool-call-only responses)
-		if (response === null || response === undefined) {
-			return undefined;
-		}
-		return String(response);
-	}
-	return undefined;
 }

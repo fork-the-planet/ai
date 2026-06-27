@@ -52,17 +52,18 @@ function makeProvider() {
 // Models to test
 // ---------------------------------------------------------------------------
 
+// Aligned with the binding e2e + examples/workers-ai models list.
 const MODELS = [
-	// Recommended models
-	{ id: "@cf/meta/llama-4-scout-17b-16e-instruct", label: "Llama 4 Scout 17B" },
-	{ id: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", label: "Llama 3.3 70B" },
-	{ id: "@cf/openai/gpt-oss-120b", label: "GPT-OSS 120B" },
-	{ id: "@cf/qwen/qwq-32b", label: "QwQ 32B (reasoning)" },
-	// Other popular models
-	{ id: "@cf/meta/llama-3.1-8b-instruct-fast", label: "Llama 3.1 8B Fast" },
-	{ id: "@cf/openai/gpt-oss-20b", label: "GPT-OSS 20B" },
-	{ id: "@cf/qwen/qwen3-30b-a3b-fp8", label: "Qwen3 30B" },
+	{ id: "@cf/zai-org/glm-5.2", label: "GLM 5.2" },
+	{ id: "@cf/nvidia/nemotron-3-120b-a12b", label: "Nemotron 3 120B" },
 	{ id: "@cf/moonshotai/kimi-k2.7-code", label: "Kimi K2.7 Code" },
+	{ id: "@cf/meta/llama-4-scout-17b-16e-instruct", label: "Llama 4 Scout 17B" },
+	{ id: "@cf/google/gemma-4-26b-a4b-it", label: "Gemma 4 26B" },
+	{ id: "@cf/mistralai/mistral-small-3.1-24b-instruct", label: "Mistral Small 3.1" },
+	{ id: "@cf/qwen/qwen3-30b-a3b-fp8", label: "Qwen3 30B" },
+	{ id: "@cf/qwen/qwq-32b", label: "QwQ 32B (reasoning)" },
+	{ id: "@cf/openai/gpt-oss-120b", label: "GPT-OSS 120B" },
+	{ id: "@cf/openai/gpt-oss-20b", label: "GPT-OSS 20B" },
 ] as const;
 
 type ModelId = (typeof MODELS)[number]["id"];
@@ -685,6 +686,21 @@ describe.skipIf(skip())("Workers AI REST E2E", () => {
 			console.log(
 				`  [image] Flux 1 Schnell OK — ${result.images[0].uint8Array.length} bytes`,
 			);
+		});
+
+		// Flux 2 Dev is the example default image model.
+		it("Flux 2 Dev — should generate an image", async () => {
+			const provider = makeProvider();
+
+			const result = await generateImage({
+				model: provider.image("@cf/black-forest-labs/flux-2-dev"),
+				prompt: "A cute cartoon cat sitting on a grassy hill under a blue sky",
+				size: "256x256",
+			});
+
+			expect(result.images).toHaveLength(1);
+			expect(result.images[0].uint8Array.length).toBeGreaterThan(100);
+			console.log(`  [image] Flux 2 Dev OK — ${result.images[0].uint8Array.length} bytes`);
 		});
 	});
 

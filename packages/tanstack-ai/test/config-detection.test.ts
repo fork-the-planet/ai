@@ -134,19 +134,25 @@ describe("validateWorkersAiConfig", () => {
 
 	it("throws for config with only unrelated properties", () => {
 		expect(() =>
-			validateWorkersAiConfig({ foo: "bar" } as unknown as WorkersAiAdapterConfig),
+			validateWorkersAiConfig({
+				foo: "bar",
+			} as unknown as WorkersAiAdapterConfig),
 		).toThrow(/Invalid Workers AI configuration/);
 	});
 
 	it("throws for config with only accountId (missing apiKey)", () => {
 		expect(() =>
-			validateWorkersAiConfig({ accountId: "abc" } as unknown as WorkersAiAdapterConfig),
+			validateWorkersAiConfig({
+				accountId: "abc",
+			} as unknown as WorkersAiAdapterConfig),
 		).toThrow(/Invalid Workers AI configuration/);
 	});
 
 	it("throws for config with only apiKey (missing accountId)", () => {
 		expect(() =>
-			validateWorkersAiConfig({ apiKey: "key" } as unknown as WorkersAiAdapterConfig),
+			validateWorkersAiConfig({
+				apiKey: "key",
+			} as unknown as WorkersAiAdapterConfig),
 		).toThrow(/Invalid Workers AI configuration/);
 	});
 

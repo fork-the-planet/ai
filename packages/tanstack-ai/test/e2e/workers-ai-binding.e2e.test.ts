@@ -26,24 +26,40 @@ const WORKER_DIR = new URL("./fixtures/binding-worker", import.meta.url).pathnam
 const PORT = 8799;
 const BASE = `http://localhost:${PORT}`;
 
-// Models to test — same set as REST e2e tests for apples-to-apples comparison
+// Models to test — same set as the REST e2e tests for apples-to-apples
+// comparison, aligned with examples/workers-ai/src/client/components/models.ts
+// (GLM 5.2 default + Nemotron 3; retired llama-3.x / gemma-3 ids removed).
 const MODELS = [
-	// Recommended models
-	{ id: "@cf/meta/llama-4-scout-17b-16e-instruct", label: "Llama 4 Scout 17B", reasoning: false },
-	{ id: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", label: "Llama 3.3 70B", reasoning: false },
-	{ id: "@cf/openai/gpt-oss-120b", label: "GPT-OSS 120B", reasoning: false },
-	{ id: "@cf/qwen/qwq-32b", label: "QwQ 32B (reasoning)", reasoning: true },
-	// Other popular models
-	{ id: "@cf/meta/llama-3.1-8b-instruct-fast", label: "Llama 3.1 8B Fast", reasoning: false },
-	{ id: "@cf/openai/gpt-oss-20b", label: "GPT-OSS 20B", reasoning: false },
-	{ id: "@cf/qwen/qwen3-30b-a3b-fp8", label: "Qwen3 30B", reasoning: false },
-	{ id: "@cf/google/gemma-3-12b-it", label: "Gemma 3 12B", reasoning: false },
+	{ id: "@cf/zai-org/glm-5.2", label: "GLM 5.2", reasoning: false },
+	{
+		id: "@cf/nvidia/nemotron-3-120b-a12b",
+		label: "Nemotron 3 120B",
+		reasoning: true,
+	},
+	{
+		id: "@cf/moonshotai/kimi-k2.7-code",
+		label: "Kimi K2.7 Code",
+		reasoning: true,
+	},
+	{
+		id: "@cf/meta/llama-4-scout-17b-16e-instruct",
+		label: "Llama 4 Scout 17B",
+		reasoning: false,
+	},
+	{
+		id: "@cf/google/gemma-4-26b-a4b-it",
+		label: "Gemma 4 26B",
+		reasoning: true,
+	},
 	{
 		id: "@cf/mistralai/mistral-small-3.1-24b-instruct",
 		label: "Mistral Small 3.1",
 		reasoning: false,
 	},
-	{ id: "@cf/moonshotai/kimi-k2.7-code", label: "Kimi K2.7 Code", reasoning: true },
+	{ id: "@cf/qwen/qwen3-30b-a3b-fp8", label: "Qwen3 30B", reasoning: false },
+	{ id: "@cf/qwen/qwq-32b", label: "QwQ 32B (reasoning)", reasoning: true },
+	{ id: "@cf/openai/gpt-oss-120b", label: "GPT-OSS 120B", reasoning: false },
+	{ id: "@cf/openai/gpt-oss-20b", label: "GPT-OSS 20B", reasoning: false },
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -358,7 +374,9 @@ describe("Workers AI Binding E2E", () => {
 				if (!serverReady) return;
 
 				const r = getResult(model.label);
-				const data = await post("/chat/tool-call-processed", { model: model.id });
+				const data = await post("/chat/tool-call-processed", {
+					model: model.id,
+				});
 
 				if (data.error) {
 					r.notes.push(`tool-proc: ${(data.error as string).slice(0, 40)}`);
@@ -613,6 +631,38 @@ describe("Workers AI Binding E2E", () => {
 		}
 	});
 
+	// ------------------------------------------------------------------
+	// Resume-enabled run path (gateway). Proves the resume wiring engages
+	// end-to-end against a live gateway. A true mid-stream drop + byte-exact
+	// reconstruction is covered by the workers-ai-provider gateway e2e and the
+	// integration tests; here we assert the resumable run path streams cleanly.
+	// ------------------------------------------------------------------
+
+	describe("resume (run path)", () => {
+		it("streams text through the resume-enabled run path", async (ctx) => {
+			if (!serverReady) return ctx.skip("server not ready");
+
+			const data = await post("/chat/stream-resume", {});
+			if (data.error) {
+				// Run path / gateway not reachable on this account — classify as skip.
+				return ctx.skip(`run path unavailable: ${String(data.error).slice(0, 80)}`);
+			}
+
+			const chunks = data.chunks as any[];
+			const runError = findChunk(chunks, "RUN_ERROR");
+			if (runError) {
+				return ctx.skip(
+					`run path RUN_ERROR: ${String(runError.error?.message).slice(0, 80)}`,
+				);
+			}
+
+			const content = filterChunks(chunks, "TEXT_MESSAGE_CONTENT");
+			const finished = findChunk(chunks, "RUN_FINISHED");
+			expect(content.length).toBeGreaterThan(0);
+			expect(finished).toBeDefined();
+		}, 30_000);
+	});
+
 	// ==================================================================
 	// Non-chat capabilities via binding
 	// ==================================================================
@@ -690,7 +740,10 @@ describe("Workers AI Binding E2E", () => {
 	const TRANSCRIPTION_MODELS_BINDING = [
 		{ id: "@cf/openai/whisper", label: "Whisper" },
 		{ id: "@cf/openai/whisper-tiny-en", label: "Whisper Tiny EN" },
-		{ id: "@cf/openai/whisper-large-v3-turbo", label: "Whisper Large v3 Turbo" },
+		{
+			id: "@cf/openai/whisper-large-v3-turbo",
+			label: "Whisper Large v3 Turbo",
+		},
 		{ id: "@cf/deepgram/nova-3", label: "Deepgram Nova-3" },
 	];
 

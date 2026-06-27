@@ -24,7 +24,7 @@ npx nx dev ui-worker
 
 - **dev**: Starts the development server using Vite.
 - **build**: Builds the project for production using Vite.
-- **lint**: Lints the source code using Biome.
+- **lint**: Lints the source code using oxlint.
 - **preview**: Builds the project and starts a local server to preview the production build.
 - **deploy**: Builds the project and deploys it to Cloudflare using Wrangler.
 - **test**: Runs the test suite using Vitest.

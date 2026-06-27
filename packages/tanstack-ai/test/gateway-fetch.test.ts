@@ -421,7 +421,9 @@ describe("createGatewayFetch", () => {
 
 			const request = mockBinding.run.mock.calls[0]![0];
 			expect(request.query.reasoning_effort).toBe("low");
-			expect(request.query.chat_template_kwargs).toEqual({ enable_thinking: false });
+			expect(request.query.chat_template_kwargs).toEqual({
+				enable_thinking: false,
+			});
 			// model is still stripped (becomes part of endpoint)
 			expect(request.query.model).toBeUndefined();
 		});

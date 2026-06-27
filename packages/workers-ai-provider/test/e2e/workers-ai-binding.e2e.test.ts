@@ -24,17 +24,20 @@ const WORKER_DIR = new URL("./fixtures/binding-worker", import.meta.url).pathnam
 const PORT = 8799;
 const BASE = `http://localhost:${PORT}`;
 
+// Aligned with examples/workers-ai/src/client/components/models.ts so the e2e
+// matrix tracks the models we actually ship/recommend (incl. the GLM 5.2 default
+// and Nemotron 3). The retired llama-3.x ids were dropped.
 const MODELS = [
-	// Recommended models
-	{ id: "@cf/meta/llama-4-scout-17b-16e-instruct", label: "Llama 4 Scout 17B" },
-	{ id: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", label: "Llama 3.3 70B" },
-	{ id: "@cf/openai/gpt-oss-120b", label: "GPT-OSS 120B" },
-	{ id: "@cf/qwen/qwq-32b", label: "QwQ 32B (reasoning)" },
-	// Other popular models
-	{ id: "@cf/meta/llama-3.1-8b-instruct-fast", label: "Llama 3.1 8B Fast" },
-	{ id: "@cf/openai/gpt-oss-20b", label: "GPT-OSS 20B" },
-	{ id: "@cf/qwen/qwen3-30b-a3b-fp8", label: "Qwen3 30B" },
+	{ id: "@cf/zai-org/glm-5.2", label: "GLM 5.2" },
+	{ id: "@cf/nvidia/nemotron-3-120b-a12b", label: "Nemotron 3 120B" },
 	{ id: "@cf/moonshotai/kimi-k2.7-code", label: "Kimi K2.7 Code" },
+	{ id: "@cf/meta/llama-4-scout-17b-16e-instruct", label: "Llama 4 Scout 17B" },
+	{ id: "@cf/google/gemma-4-26b-a4b-it", label: "Gemma 4 26B" },
+	{ id: "@cf/mistralai/mistral-small-3.1-24b-instruct", label: "Mistral Small 3.1" },
+	{ id: "@cf/qwen/qwen3-30b-a3b-fp8", label: "Qwen3 30B" },
+	{ id: "@cf/qwen/qwq-32b", label: "QwQ 32B (reasoning)" },
+	{ id: "@cf/openai/gpt-oss-120b", label: "GPT-OSS 120B" },
+	{ id: "@cf/openai/gpt-oss-20b", label: "GPT-OSS 20B" },
 ] as const;
 
 // ---------------------------------------------------------------------------

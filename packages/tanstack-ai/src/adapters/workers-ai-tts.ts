@@ -84,7 +84,10 @@ export class WorkersAiTTSAdapter extends BaseTTSAdapter<WorkersAiTTSModel> {
 			config,
 			this.model,
 			{ text, ...options },
-			{ label: "Workers AI TTS", signal: (options as { signal?: AbortSignal }).signal },
+			{
+				label: "Workers AI TTS",
+				signal: (options as { signal?: AbortSignal }).signal,
+			},
 		);
 
 		// Workers AI TTS returns audio bytes directly

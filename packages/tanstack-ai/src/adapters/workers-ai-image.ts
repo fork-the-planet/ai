@@ -1,4 +1,5 @@
 import { BaseImageAdapter } from "@tanstack/ai/adapters";
+import { resolveMediaPrompt } from "@tanstack/ai";
 import type { ImageGenerationOptions, ImageGenerationResult } from "@tanstack/ai";
 import type { AiModels, BaseAiTextToImage } from "@cloudflare/workers-types";
 import {
@@ -19,7 +20,9 @@ import type { WorkersAiDirectCredentialsConfig } from "../utils/create-fetcher";
 // ---------------------------------------------------------------------------
 
 export type WorkersAiImageModel =
-	| { [K in keyof AiModels]: AiModels[K] extends BaseAiTextToImage ? K : never }[keyof AiModels]
+	| {
+			[K in keyof AiModels]: AiModels[K] extends BaseAiTextToImage ? K : never;
+	  }[keyof AiModels]
 	| (string & {});
 
 // ---------------------------------------------------------------------------
@@ -52,16 +55,22 @@ export class WorkersAiImageAdapter extends BaseImageAdapter<WorkersAiImageModel>
 			if (h) extra.height = Number(h);
 		}
 
+		// TanStack AI's `prompt` is a multimodal `MediaPrompt`
+		// (`string | MediaPromptPart[]`). Workers AI text-to-image models only
+		// accept a text prompt, so use the SDK's `resolveMediaPrompt` to flatten
+		// it down to its verbatim text (media parts are dropped).
+		const promptText = resolveMediaPrompt(prompt).text;
+
 		if (isDirectBindingConfig(this.adapterConfig)) {
-			return this.generateViaBinding(prompt, extra);
+			return this.generateViaBinding(promptText, extra);
 		}
 
 		if (isDirectCredentialsConfig(this.adapterConfig)) {
-			return this.generateViaRest(prompt, extra);
+			return this.generateViaRest(promptText, extra);
 		}
 
 		// Gateway mode
-		return this.generateViaGateway(prompt, extra);
+		return this.generateViaGateway(promptText, extra);
 	}
 
 	private async generateViaBinding(
@@ -84,7 +93,10 @@ export class WorkersAiImageAdapter extends BaseImageAdapter<WorkersAiImageModel>
 			config,
 			this.model,
 			{ prompt, ...options },
-			{ label: "Workers AI image", signal: (options as { signal?: AbortSignal }).signal },
+			{
+				label: "Workers AI image",
+				signal: (options as { signal?: AbortSignal }).signal,
+			},
 		);
 
 		const buffer = await response.arrayBuffer();

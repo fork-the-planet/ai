@@ -7,7 +7,9 @@ import {
 import { createGatewayFetch, type AiGatewayAdapterConfig } from "../utils/create-fetcher";
 import type { AnySummarizeAdapter } from "@tanstack/ai";
 
-export type AnthropicGatewayConfig = AiGatewayAdapterConfig & { anthropicVersion?: string };
+export type AnthropicGatewayConfig = AiGatewayAdapterConfig & {
+	anthropicVersion?: string;
+};
 
 function buildAnthropicConfig(config: AnthropicGatewayConfig) {
 	return {
