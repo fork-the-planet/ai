@@ -10,7 +10,7 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
-		"agents": "^0.17.0",
+		"agents": "^0.17.1",
 		"jose": "^6.2.3",
 		"zod": "^4.4.3"
 	},

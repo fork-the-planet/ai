@@ -16,7 +16,7 @@
 		"@modelcontextprotocol/sdk": "1.29.0",
 		"@types/node": "^26.0.1",
 		"@types/wait-on": "^5.3.4",
-		"agents": "^0.17.0",
+		"agents": "^0.17.1",
 		"ai": "^6.0.204",
 		"dotenv": "^17.4.2",
 		"get-port": "^7.2.0",

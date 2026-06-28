@@ -25,5 +25,18 @@ minimumReleaseAgeExclude:
   - '@cloudflare/workers-types@4.20260628.1'
   - "@microsoft/api-extractor@7.58.9"
   - "@rushstack/ts-command-line@5.3.10"
+  - '@mantine/charts@9.4.1'
+  - '@mantine/code-highlight@9.4.1'
+  - '@mantine/core@9.4.1'
+  - '@mantine/dates@9.4.1'
+  - '@mantine/form@9.4.1'
+  - '@mantine/hooks@9.4.1'
+  - '@mantine/modals@9.4.1'
+  - '@mantine/notifications@9.4.1'
+  - '@mantine/store@9.4.1'
+  - '@openrouter/sdk@0.13.21'
+  - agents@0.17.1
+  - lucide-react@1.22.0
+  - postcss@8.5.16
 patchedDependencies:
   "@ai-sdk/google-vertex": patches/@ai-sdk__google-vertex.patch

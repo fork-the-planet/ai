@@ -16,10 +16,10 @@
 	"dependencies": {
 		"@stytch/react": "^20.0.11",
 		"@stytch/vanilla-js": "^6.0.11",
-		"agents": "^0.17.0",
+		"agents": "^0.17.1",
 		"commander": "^15.0.0",
 		"hono": "^4.12.27",
-		"lucide-react": "^1.21.0",
+		"lucide-react": "^1.22.0",
 		"react": "^19.2.7",
 		"react-dom": "^19.2.7",
 		"react-router-dom": "^7.18.0",

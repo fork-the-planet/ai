@@ -11,7 +11,7 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
-		"agents": "^0.17.0",
+		"agents": "^0.17.1",
 		"nanoid": "^5.1.16",
 		"react": "^19.2.7",
 		"react-dom": "^19.2.7"
