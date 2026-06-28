@@ -194,7 +194,7 @@
 	},
 	"devDependencies": {
 		"@cloudflare/gateway-core": "workspace:*",
-		"tsdown": "^0.22.2",
+		"tsdown": "^0.22.3",
 		"typescript": "6.0.3"
 	},
 	"peerDependencies": {
@@ -220,6 +220,6 @@
 		"@ai-sdk/openai": "^3.0.71",
 		"@ai-sdk/perplexity": "^3.0.35",
 		"@ai-sdk/xai": "^3.0.95",
-		"@openrouter/ai-sdk-provider": "^2.9.1"
+		"@openrouter/ai-sdk-provider": "^2.10.0"
 	}
 }

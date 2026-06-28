@@ -12,13 +12,13 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
-		"agents": "^0.16.0",
+		"agents": "^0.17.0",
 		"zod": "^4.4.3"
 	},
 	"devDependencies": {
-		"oxfmt": "^0.54.0",
-		"oxlint": "^1.69.0",
+		"oxfmt": "^0.56.0",
+		"oxlint": "^1.71.0",
 		"typescript": "6.0.3",
-		"wrangler": "^4.100.0"
+		"wrangler": "^4.105.0"
 	}
 }

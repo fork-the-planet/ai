@@ -9,6 +9,6 @@
 		"deploy": "uv run pywrangler deploy"
 	},
 	"devDependencies": {
-		"wrangler": "^4.100.0"
+		"wrangler": "^4.105.0"
 	}
 }

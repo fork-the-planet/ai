@@ -10,13 +10,13 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@faker-js/faker": "^10.4.0",
-		"hono": "^4.12.25",
+		"@faker-js/faker": "^10.5.0",
+		"hono": "^4.12.27",
 		"jose": "^6.2.3"
 	},
 	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20260613.1",
+		"@cloudflare/workers-types": "^4.20260628.1",
 		"typescript": "6.0.3",
-		"wrangler": "^4.100.0"
+		"wrangler": "^4.105.0"
 	}
 }

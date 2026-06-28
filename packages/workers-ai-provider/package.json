@@ -70,7 +70,7 @@
 		"@ai-sdk/openai": "^3.0.71",
 		"@ai-sdk/provider": "^3.0.10",
 		"@cloudflare/gateway-core": "workspace:*",
-		"@cloudflare/workers-types": "^4.20260613.1",
+		"@cloudflare/workers-types": "^4.20260628.1",
 		"ai": "^6.0.204",
 		"zod": "^4.4.3"
 	},

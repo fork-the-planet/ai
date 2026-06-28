@@ -11,17 +11,17 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
-		"agents": "^0.16.0",
-		"nanoid": "^5.1.11",
+		"agents": "^0.17.0",
+		"nanoid": "^5.1.16",
 		"react": "^19.2.7",
 		"react-dom": "^19.2.7"
 	},
 	"devDependencies": {
-		"@cloudflare/vite-plugin": "^1.40.2",
-		"@cloudflare/workers-types": "^4.20260613.1",
+		"@cloudflare/vite-plugin": "^1.42.3",
+		"@cloudflare/workers-types": "^4.20260628.1",
 		"@types/react": "^19.2.17",
 		"@types/react-dom": "^19.2.3",
-		"@vitejs/plugin-react": "^6.0.2",
-		"vite": "^8.0.16"
+		"@vitejs/plugin-react": "^6.0.3",
+		"vite": "^8.1.0"
 	}
 }
