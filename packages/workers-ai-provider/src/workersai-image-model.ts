@@ -1,4 +1,5 @@
 import type { ImageModelV3, SharedV3Warning } from "@ai-sdk/provider";
+import { normalizeBindingError } from "./workersai-error";
 import type { WorkersAIImageSettings } from "./workersai-image-settings";
 import type { ImageGenerationModels } from "./workersai-models";
 
@@ -48,19 +49,26 @@ export class WorkersAIImageModel implements ImageModelV3 {
 		}
 
 		const generateImage = async () => {
-			const output = (await this.config.binding.run(
-				this.modelId as keyof AiModels,
-				{
-					height,
-					prompt: prompt ?? "",
-					seed,
-					width,
-				},
-				{
+			const inputs = {
+				height,
+				prompt: prompt ?? "",
+				seed,
+				width,
+			};
+			let output: unknown;
+			try {
+				output = (await this.config.binding.run(this.modelId as keyof AiModels, inputs, {
 					gateway: this.config.gateway,
 					signal: abortSignal,
-				} as AiOptions,
-			)) as unknown;
+				} as AiOptions)) as unknown;
+			} catch (error) {
+				// Normalize binding failures (e.g. 3040 "out of capacity" → 429) into
+				// a retryable APICallError so the AI SDK's maxRetries can engage.
+				throw normalizeBindingError(error, {
+					model: this.modelId,
+					requestBodyValues: inputs,
+				});
+			}
 
 			return toUint8Array(output);
 		};

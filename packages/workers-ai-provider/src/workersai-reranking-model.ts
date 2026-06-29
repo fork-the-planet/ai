@@ -1,4 +1,5 @@
 import type { RerankingModelV3, SharedV3Warning } from "@ai-sdk/provider";
+import { normalizeBindingError } from "./workersai-error";
 import type { WorkersAIRerankingSettings } from "./workersai-reranking-settings";
 import type { RerankingModels } from "./workersai-models";
 
@@ -49,11 +50,21 @@ export class WorkersAIRerankingModel implements RerankingModelV3 {
 			inputs.top_k = topN;
 		}
 
-		const result = (await this.config.binding.run(
-			this.modelId as Parameters<Ai["run"]>[0],
-			inputs as Parameters<Ai["run"]>[1],
-			{ gateway: this.config.gateway, signal: abortSignal } as AiOptions,
-		)) as Record<string, unknown>;
+		let result: Record<string, unknown>;
+		try {
+			result = (await this.config.binding.run(
+				this.modelId as Parameters<Ai["run"]>[0],
+				inputs as Parameters<Ai["run"]>[1],
+				{ gateway: this.config.gateway, signal: abortSignal } as AiOptions,
+			)) as Record<string, unknown>;
+		} catch (error) {
+			// Normalize binding failures (e.g. 3040 "out of capacity" → 429) into a
+			// retryable APICallError so the AI SDK's maxRetries can engage.
+			throw normalizeBindingError(error, {
+				model: this.modelId,
+				requestBodyValues: inputs,
+			});
+		}
 
 		// Workers AI returns { response: [{ id, score }] }
 		const response = result.response as Array<{ id?: number; score?: number }> | undefined;

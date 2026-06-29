@@ -1,3 +1,4 @@
+import { APICallError } from "@ai-sdk/provider";
 import { generateText } from "ai";
 import { HttpResponse, http } from "msw";
 import { setupServer } from "msw/node";
@@ -265,8 +266,72 @@ describe("REST API - Text Generation Tests", () => {
 			generateText({
 				model: workersai(TEST_MODEL),
 				prompt: "Hello",
+				// Disable retries so the (now retryable) error surfaces immediately.
+				maxRetries: 0,
 			}),
 		).rejects.toThrowError("Workers AI API error (500");
+	});
+
+	it("surfaces REST errors as APICallError (429 → retryable)", async () => {
+		server.use(
+			http.post(
+				`https://api.cloudflare.com/client/v4/accounts/${TEST_ACCOUNT_ID}/ai/run/${TEST_MODEL}`,
+				async () =>
+					HttpResponse.json(
+						{ errors: [{ code: 3040, message: "Capacity temporarily exceeded" }] },
+						{ status: 429, headers: { "retry-after": "2" } },
+					),
+			),
+		);
+
+		const workersai = createWorkersAI({
+			accountId: TEST_ACCOUNT_ID,
+			apiKey: TEST_API_KEY,
+		});
+
+		const err = await generateText({
+			model: workersai(TEST_MODEL),
+			prompt: "Hello",
+			maxRetries: 0,
+		}).catch((e) => e);
+
+		expect(APICallError.isInstance(err)).toBe(true);
+		expect((err as APICallError).statusCode).toBe(429);
+		expect((err as APICallError).isRetryable).toBe(true);
+		expect((err as APICallError).responseHeaders?.["retry-after"]).toBe("2");
+	});
+
+	it("auto-retries a retryable REST error and succeeds", async () => {
+		let calls = 0;
+		server.use(
+			http.post(
+				`https://api.cloudflare.com/client/v4/accounts/${TEST_ACCOUNT_ID}/ai/run/${TEST_MODEL}`,
+				async () => {
+					calls++;
+					if (calls === 1) {
+						return HttpResponse.json(
+							{ errors: [{ code: 3040, message: "Capacity temporarily exceeded" }] },
+							{ status: 429, headers: { "retry-after": "0" } },
+						);
+					}
+					return HttpResponse.json({ result: { response: "Recovered" } });
+				},
+			),
+		);
+
+		const workersai = createWorkersAI({
+			accountId: TEST_ACCOUNT_ID,
+			apiKey: TEST_API_KEY,
+		});
+
+		const result = await generateText({
+			model: workersai(TEST_MODEL),
+			prompt: "Hello",
+			maxRetries: 2,
+		});
+
+		expect(result.text).toBe("Recovered");
+		expect(calls).toBe(2);
 	});
 });
 
@@ -931,5 +996,104 @@ describe("REST - reasoning passthrough", () => {
 
 		expect(capturedQuery).toHaveProperty("custom_flag", "yes");
 		expect(capturedQuery).not.toHaveProperty("reasoning_effort");
+	});
+});
+
+// ---------------------------------------------------------------------------
+// Binding mode — error normalization into APICallError (retryability)
+// https://developers.cloudflare.com/workers-ai/platform/errors/
+// ---------------------------------------------------------------------------
+
+describe("Binding - error normalization", () => {
+	const bindingThatThrows = (error: unknown) =>
+		createWorkersAI({
+			binding: {
+				run: async () => {
+					throw error;
+				},
+			} as any,
+		});
+
+	it("maps an out-of-capacity (3040) binding error to a retryable 429 APICallError", async () => {
+		const workersai = bindingThatThrows(
+			new Error("3040: Capacity temporarily exceeded, please try again."),
+		);
+
+		const err = await generateText({
+			model: workersai(TEST_MODEL),
+			prompt: "Hello",
+			maxRetries: 0,
+		}).catch((e) => e);
+
+		expect(APICallError.isInstance(err)).toBe(true);
+		expect((err as APICallError).statusCode).toBe(429);
+		expect((err as APICallError).isRetryable).toBe(true);
+	});
+
+	it("maps a client error (5007) to a non-retryable 400 APICallError", async () => {
+		const workersai = bindingThatThrows(new Error("5007: No such model"));
+
+		const err = await generateText({
+			model: workersai(TEST_MODEL),
+			prompt: "Hello",
+			maxRetries: 0,
+		}).catch((e) => e);
+
+		expect(APICallError.isInstance(err)).toBe(true);
+		expect((err as APICallError).statusCode).toBe(400);
+		expect((err as APICallError).isRetryable).toBe(false);
+	});
+
+	it("wraps an unrecognized binding error as a non-retryable APICallError", async () => {
+		const workersai = bindingThatThrows(new Error("totally unexpected"));
+
+		const err = await generateText({
+			model: workersai(TEST_MODEL),
+			prompt: "Hello",
+			maxRetries: 0,
+		}).catch((e) => e);
+
+		expect(APICallError.isInstance(err)).toBe(true);
+		expect((err as APICallError).statusCode).toBeUndefined();
+		expect((err as APICallError).isRetryable).toBe(false);
+	});
+
+	it("propagates AbortError unchanged (no wrapping, no retry)", async () => {
+		const workersai = bindingThatThrows(
+			Object.assign(new Error("aborted"), { name: "AbortError" }),
+		);
+
+		const err = await generateText({
+			model: workersai(TEST_MODEL),
+			prompt: "Hello",
+			maxRetries: 2,
+		}).catch((e) => e);
+
+		expect(APICallError.isInstance(err)).toBe(false);
+		expect((err as Error).name).toBe("AbortError");
+	});
+
+	it("auto-retries a retryable binding error and succeeds", async () => {
+		let calls = 0;
+		const workersai = createWorkersAI({
+			binding: {
+				run: async () => {
+					calls++;
+					if (calls === 1) {
+						throw new Error("3040: Capacity temporarily exceeded, please try again.");
+					}
+					return { response: "Recovered" };
+				},
+			} as any,
+		});
+
+		const result = await generateText({
+			model: workersai(TEST_MODEL),
+			prompt: "Hello",
+			maxRetries: 2,
+		});
+
+		expect(result.text).toBe("Recovered");
+		expect(calls).toBe(2);
 	});
 });

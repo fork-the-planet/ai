@@ -1,3 +1,4 @@
+import { APICallError } from "@ai-sdk/provider";
 import { rerank } from "ai";
 import { describe, expect, it } from "vitest";
 import { createWorkersAI } from "../src/index";
@@ -139,5 +140,27 @@ describe("Reranking - Provider", () => {
 
 		const model = workersai.reranking("@cf/baai/bge-reranker-v2-m3");
 		expect(model.modelId).toBe("@cf/baai/bge-reranker-v2-m3");
+	});
+
+	it("normalizes an out-of-capacity binding error to a retryable 429 APICallError", async () => {
+		const workersai = createWorkersAI({
+			binding: {
+				run: async () => {
+					throw new Error("3040: Capacity temporarily exceeded, please try again.");
+				},
+			} as any,
+		});
+
+		const err = await workersai
+			.reranking("@cf/baai/bge-reranker-base")
+			.doRerank({
+				query: "q",
+				documents: { type: "text", values: ["a", "b"] },
+			})
+			.catch((e) => e);
+
+		expect(APICallError.isInstance(err)).toBe(true);
+		expect((err as APICallError).statusCode).toBe(429);
+		expect((err as APICallError).isRetryable).toBe(true);
 	});
 });

@@ -2,6 +2,7 @@ import type { TranscriptionModelV3, SharedV3Warning } from "@ai-sdk/provider";
 import type { WorkersAITranscriptionSettings } from "./workersai-transcription-settings";
 import type { TranscriptionModels } from "./workersai-models";
 import { createRunBinary, type CreateRunConfig } from "./utils";
+import { normalizeBindingError } from "./workersai-error";
 
 export type WorkersAITranscriptionConfig = {
 	provider: string;
@@ -57,10 +58,20 @@ export class WorkersAITranscriptionModel implements TranscriptionModelV3 {
 
 		let rawResult: unknown;
 
-		if (isNova3) {
-			rawResult = await this.runNova3(audioBytes, mediaType, abortSignal);
-		} else {
-			rawResult = await this.runWhisper(audioBytes, abortSignal);
+		try {
+			if (isNova3) {
+				rawResult = await this.runNova3(audioBytes, mediaType, abortSignal);
+			} else {
+				rawResult = await this.runWhisper(audioBytes, abortSignal);
+			}
+		} catch (error) {
+			// Normalize binding failures (e.g. 3040 "out of capacity" → 429) into a
+			// retryable APICallError so the AI SDK's maxRetries can engage. The
+			// REST binary path already throws an APICallError, which passes through.
+			throw normalizeBindingError(error, {
+				model: this.modelId,
+				requestBodyValues: { mediaType },
+			});
 		}
 
 		const result = rawResult as Record<string, unknown>;

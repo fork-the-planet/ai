@@ -1,3 +1,4 @@
+import { APICallError } from "@ai-sdk/provider";
 import { generateImage } from "ai";
 import { describe, expect, it } from "vitest";
 import { createWorkersAI } from "../src/index";
@@ -169,5 +170,25 @@ describe("Image Generation - Binding", () => {
 				prompt: "A cat",
 			}),
 		).rejects.toThrow("Unexpected output type from image model");
+	});
+
+	it("normalizes an out-of-capacity binding error to a retryable 429 APICallError", async () => {
+		const workersai = createWorkersAI({
+			binding: {
+				run: async () => {
+					throw new Error("3040: Capacity temporarily exceeded, please try again.");
+				},
+			} as any,
+		});
+
+		const err = await generateImage({
+			model: workersai.image("@cf/black-forest-labs/flux-1-schnell"),
+			prompt: "A cat",
+			maxRetries: 0,
+		}).catch((e) => e);
+
+		expect(APICallError.isInstance(err)).toBe(true);
+		expect((err as APICallError).statusCode).toBe(429);
+		expect((err as APICallError).isRetryable).toBe(true);
 	});
 });

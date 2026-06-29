@@ -13,6 +13,7 @@ import {
 	salvageToolCallsFromText,
 } from "./utils";
 import type { WorkersAIChatSettings } from "./workersai-chat-settings";
+import { normalizeBindingError } from "./workersai-error";
 import type { TextGenerationModels } from "./workersai-models";
 
 type WorkersAIChatConfig = {
@@ -277,14 +278,24 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 		});
 		const runOptions = this.getRunOptions();
 
-		const output = await this.config.binding.run(
-			args.model as keyof AiModels,
-			inputs as AiModels[keyof AiModels]["inputs"],
-			{
-				...runOptions,
-				signal: options.abortSignal,
-			} as AiOptions,
-		);
+		let output: unknown;
+		try {
+			output = await this.config.binding.run(
+				args.model as keyof AiModels,
+				inputs as AiModels[keyof AiModels]["inputs"],
+				{
+					...runOptions,
+					signal: options.abortSignal,
+				} as AiOptions,
+			);
+		} catch (error) {
+			// Normalize binding failures (e.g. 3040 "out of capacity" → 429) into a
+			// retryable APICallError so the AI SDK's maxRetries can engage.
+			throw normalizeBindingError(error, {
+				model: args.model,
+				requestBodyValues: inputs,
+			});
+		}
 
 		if (output instanceof ReadableStream) {
 			throw new Error(
@@ -325,14 +336,24 @@ export class WorkersAIChatLanguageModel implements LanguageModelV3 {
 		});
 		const runOptions = this.getRunOptions();
 
-		const response = await this.config.binding.run(
-			args.model as keyof AiModels,
-			inputs as AiModels[keyof AiModels]["inputs"],
-			{
-				...runOptions,
-				signal: options.abortSignal,
-			} as AiOptions,
-		);
+		let response: unknown;
+		try {
+			response = await this.config.binding.run(
+				args.model as keyof AiModels,
+				inputs as AiModels[keyof AiModels]["inputs"],
+				{
+					...runOptions,
+					signal: options.abortSignal,
+				} as AiOptions,
+			);
+		} catch (error) {
+			// Normalize binding failures (e.g. 3040 "out of capacity" → 429) into a
+			// retryable APICallError so the AI SDK's maxRetries can engage.
+			throw normalizeBindingError(error, {
+				model: args.model,
+				requestBodyValues: inputs,
+			});
+		}
 
 		// If the binding returned a stream, pipe it through the SSE mapper
 		if (response instanceof ReadableStream) {
