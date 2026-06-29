@@ -14,6 +14,7 @@ import {
 	validateWorkersAiConfig,
 } from "../utils/create-fetcher";
 import { workersAiRestFetch } from "../utils/workers-ai-rest";
+import { errorFromResponse, normalizeBindingError, withWorkersAiRetry } from "../utils/errors";
 
 // ---------------------------------------------------------------------------
 // Model type derived from @cloudflare/workers-types
@@ -45,24 +46,34 @@ export class WorkersAiEmbeddingAdapter {
 	}
 
 	async embed(texts: string[]): Promise<WorkersAiEmbeddingResult> {
-		if (isDirectBindingConfig(this.config)) {
-			return this.embedViaBinding(texts);
-		}
+		return withWorkersAiRetry(
+			() => {
+				if (isDirectBindingConfig(this.config)) {
+					return this.embedViaBinding(texts);
+				}
 
-		if (isDirectCredentialsConfig(this.config)) {
-			return this.embedViaRest(texts);
-		}
+				if (isDirectCredentialsConfig(this.config)) {
+					return this.embedViaRest(texts);
+				}
 
-		// Gateway mode
-		return this.embedViaGateway(texts);
+				// Gateway mode
+				return this.embedViaGateway(texts);
+			},
+			{ maxRetries: this.config.maxRetries },
+		);
 	}
 
 	private async embedViaBinding(texts: string[]): Promise<WorkersAiEmbeddingResult> {
 		const ai = (this.config as WorkersAiDirectBindingConfig).binding;
-		const result = (await ai.run(this.model, { text: texts })) as {
-			shape: number[];
-			data: number[][];
-		};
+		let result: { shape: number[]; data: number[][] };
+		try {
+			result = (await ai.run(this.model, { text: texts })) as {
+				shape: number[];
+				data: number[][];
+			};
+		} catch (error) {
+			throw normalizeBindingError(error, "Workers AI embedding");
+		}
 		return { embeddings: result.data };
 	}
 
@@ -97,6 +108,11 @@ export class WorkersAiEmbeddingAdapter {
 				text: texts,
 			}),
 		});
+
+		if (!response.ok) {
+			const errorText = await response.text();
+			throw errorFromResponse(response, errorText, "Workers AI embedding gateway");
+		}
 
 		// Gateway returns Workers AI native format for embeddings
 		const json = (await response.json()) as {

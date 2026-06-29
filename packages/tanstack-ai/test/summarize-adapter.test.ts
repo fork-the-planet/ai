@@ -107,6 +107,22 @@ describe("WorkersAiSummarizeAdapter", () => {
 		expect(callArgs).not.toHaveProperty("max_length");
 	});
 
+	it("normalizes an out-of-capacity (3040) binding error to a retryable 429 error", async () => {
+		const { WorkersAiSummarizeAdapter } = await import("../src/adapters/workers-ai-summarize");
+		const mockBinding = {
+			run: vi.fn().mockRejectedValue(new Error("3040: Capacity temporarily exceeded")),
+			gateway: () => ({ run: () => Promise.resolve(new Response("ok")) }),
+		};
+		const adapter = new WorkersAiSummarizeAdapter(
+			{ binding: mockBinding, maxRetries: 0 } as any,
+			"@cf/facebook/bart-large-cnn",
+		);
+
+		await expect(
+			adapter.summarize({ model: "@cf/facebook/bart-large-cnn", text: "x", logger }),
+		).rejects.toMatchObject({ name: "WorkersAiRequestError", status: 429 });
+	});
+
 	// -----------------------------------------------------------------------
 	// REST path
 	// -----------------------------------------------------------------------
@@ -249,9 +265,13 @@ describe("WorkersAiSummarizeAdapter", () => {
 	});
 
 	it("summarize via gateway: throws on non-ok response", async () => {
+		// 502 is retryable, so return a fresh Response per attempt (a single
+		// Response instance can only have its body read once).
 		const mockGatewayFetch = vi
 			.fn()
-			.mockResolvedValue(new Response("Gateway error", { status: 502 }));
+			.mockImplementation(() =>
+				Promise.resolve(new Response("Gateway error", { status: 502 })),
+			);
 
 		vi.resetModules();
 		vi.doMock("../src/utils/create-fetcher", async (importOriginal) => {

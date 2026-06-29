@@ -42,6 +42,23 @@ describe("WorkersAiTranscriptionAdapter", () => {
 		expect(result.words![0]!.word).toBe("Hello");
 	});
 
+	it("normalizes an out-of-capacity (3040) binding error to a retryable 429 error", async () => {
+		const { WorkersAiTranscriptionAdapter } =
+			await import("../src/adapters/workers-ai-transcription");
+		const mockBinding = {
+			run: vi.fn().mockRejectedValue(new Error("3040: Capacity temporarily exceeded")),
+			gateway: () => ({ run: () => Promise.resolve(new Response("ok")) }),
+		};
+		const adapter = new WorkersAiTranscriptionAdapter(
+			{ binding: mockBinding, maxRetries: 0 } as any,
+			"@cf/openai/whisper",
+		);
+
+		await expect(
+			adapter.transcribe({ model: "@cf/openai/whisper", audio: new ArrayBuffer(10), logger }),
+		).rejects.toMatchObject({ name: "WorkersAiRequestError", status: 429 });
+	});
+
 	it("transcribeViaBinding: handles whisper-large-v3-turbo with segments", async () => {
 		const { WorkersAiTranscriptionAdapter } =
 			await import("../src/adapters/workers-ai-transcription");
@@ -239,9 +256,13 @@ describe("WorkersAiTranscriptionAdapter", () => {
 	});
 
 	it("transcribeViaGateway: throws on non-ok response", async () => {
+		// 502 is retryable, so return a fresh Response per attempt (a single
+		// Response instance can only have its body read once).
 		const mockGatewayFetch = vi
 			.fn()
-			.mockResolvedValue(new Response("Gateway error", { status: 502 }));
+			.mockImplementation(() =>
+				Promise.resolve(new Response("Gateway error", { status: 502 })),
+			);
 
 		vi.resetModules();
 		vi.doMock("../src/utils/create-fetcher", async (importOriginal) => {

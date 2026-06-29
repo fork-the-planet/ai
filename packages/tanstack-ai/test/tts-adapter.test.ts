@@ -37,6 +37,22 @@ describe("WorkersAiTTSAdapter", () => {
 		expect(decoded.charCodeAt(0)).toBe(0x49); // 'I'
 	});
 
+	it("normalizes an out-of-capacity (3040) binding error to a retryable 429 error", async () => {
+		const { WorkersAiTTSAdapter } = await import("../src/adapters/workers-ai-tts");
+		const mockBinding = {
+			run: vi.fn().mockRejectedValue(new Error("3040: Capacity temporarily exceeded")),
+			gateway: () => ({ run: () => Promise.resolve(new Response("ok")) }),
+		};
+		const adapter = new WorkersAiTTSAdapter(
+			{ binding: mockBinding, maxRetries: 0 } as any,
+			"@cf/deepgram/aura-1",
+		);
+
+		await expect(
+			adapter.generateSpeech({ model: "@cf/deepgram/aura-1", text: "hi", logger }),
+		).rejects.toMatchObject({ name: "WorkersAiRequestError", status: 429 });
+	});
+
 	it("generateSpeech via binding: handles ArrayBuffer result", async () => {
 		const { WorkersAiTTSAdapter } = await import("../src/adapters/workers-ai-tts");
 
@@ -237,9 +253,13 @@ describe("WorkersAiTTSAdapter", () => {
 	});
 
 	it("generateSpeech via gateway: throws on non-ok response", async () => {
+		// 502 is retryable, so return a fresh Response per attempt (a single
+		// Response instance can only have its body read once).
 		const mockGatewayFetch = vi
 			.fn()
-			.mockResolvedValue(new Response("Gateway error", { status: 502 }));
+			.mockImplementation(() =>
+				Promise.resolve(new Response("Gateway error", { status: 502 })),
+			);
 
 		vi.resetModules();
 		vi.doMock("../src/utils/create-fetcher", async (importOriginal) => {

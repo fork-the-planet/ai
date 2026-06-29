@@ -170,6 +170,26 @@ describe("WorkersAiImageAdapter", () => {
 		}
 	});
 
+	it("normalizes an out-of-capacity (3040) binding error to a retryable 429 error", async () => {
+		const { WorkersAiImageAdapter } = await import("../src/adapters/workers-ai-image");
+		const mockBinding = {
+			run: vi.fn().mockRejectedValue(new Error("3040: Capacity temporarily exceeded")),
+			gateway: () => ({ run: () => Promise.resolve(new Response("ok")) }),
+		};
+		const adapter = new WorkersAiImageAdapter(
+			{ binding: mockBinding, maxRetries: 0 } as any,
+			"@cf/stabilityai/stable-diffusion-xl-base-1.0" as any,
+		);
+
+		await expect(
+			adapter.generateImages({
+				model: "@cf/stabilityai/stable-diffusion-xl-base-1.0",
+				prompt: "a cat",
+				logger,
+			}),
+		).rejects.toMatchObject({ name: "WorkersAiRequestError", status: 429 });
+	});
+
 	it("generateViaRest: throws on non-ok response", async () => {
 		const { WorkersAiImageAdapter } = await import("../src/adapters/workers-ai-image");
 		const originalFetch = globalThis.fetch;
@@ -231,9 +251,13 @@ describe("WorkersAiImageAdapter", () => {
 	});
 
 	it("generateViaGateway: throws on non-ok response", async () => {
+		// 502 is retryable, so return a fresh Response per attempt (a single
+		// Response instance can only have its body read once).
 		const mockGatewayFetch = vi
 			.fn()
-			.mockResolvedValue(new Response("Gateway error", { status: 502 }));
+			.mockImplementation(() =>
+				Promise.resolve(new Response("Gateway error", { status: 502 })),
+			);
 
 		vi.resetModules();
 		vi.doMock("../src/utils/create-fetcher", async (importOriginal) => {

@@ -48,3 +48,11 @@ export {
 	processText,
 	SSEDecoder,
 } from "./workers-ai";
+export {
+	isAbortError,
+	isRetryableStatus,
+	messageOf,
+	parseWorkersAIErrorCode,
+	WORKERS_AI_ERROR_CODE_TO_STATUS,
+	workersAIStatusFromError,
+} from "./workers-ai-errors";

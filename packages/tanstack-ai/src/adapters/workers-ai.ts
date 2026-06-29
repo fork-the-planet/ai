@@ -93,6 +93,12 @@ function buildWorkersAiClient(config: WorkersAiAdapterConfig): OpenAI {
 		? { "x-session-affinity": config.sessionAffinity }
 		: undefined;
 
+	// Forward the retry budget to the OpenAI SDK, which performs the actual
+	// retrying on the chat path (status-based: 408 / 409 / 429 / >= 500, honoring
+	// Retry-After). When unset, the SDK's own default (2) applies.
+	const retryOptions: { maxRetries?: number } =
+		config.maxRetries !== undefined ? { maxRetries: config.maxRetries } : {};
+
 	if (isDirectBindingConfig(config)) {
 		if (config.resume && !config.gateway) {
 			console.warn(
@@ -103,6 +109,7 @@ function buildWorkersAiClient(config: WorkersAiAdapterConfig): OpenAI {
 		// Plain binding mode: shim translates OpenAI fetch calls to env.AI.run().
 		// When `gateway` is set, the shim uses the resumable run path instead.
 		return new OpenAI({
+			...retryOptions,
 			apiKey: "unused",
 			fetch: createWorkersAiBindingFetch(config.binding, {
 				...(sessionHeaders ? { extraHeaders: sessionHeaders } : {}),
@@ -118,6 +125,7 @@ function buildWorkersAiClient(config: WorkersAiAdapterConfig): OpenAI {
 	if (isDirectCredentialsConfig(config)) {
 		// Plain REST mode: point OpenAI SDK at Workers AI's OpenAI-compatible endpoint
 		return new OpenAI({
+			...retryOptions,
 			baseURL: `https://api.cloudflare.com/client/v4/accounts/${config.accountId}/ai/v1`,
 			apiKey: config.apiKey,
 			defaultHeaders: sessionHeaders,
@@ -127,6 +135,7 @@ function buildWorkersAiClient(config: WorkersAiAdapterConfig): OpenAI {
 	// Gateway mode (existing): use createGatewayFetch
 	const gatewayConfig = config as AiGatewayAdapterConfig;
 	return new OpenAI({
+		...retryOptions,
 		fetch: createGatewayFetch("workers-ai", gatewayConfig, sessionHeaders),
 		apiKey: gatewayConfig.apiKey ?? "unused",
 	});

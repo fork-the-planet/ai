@@ -12,6 +12,7 @@ import {
 } from "../utils/create-fetcher";
 import { workersAiRestFetch } from "../utils/workers-ai-rest";
 import { binaryToBase64, uint8ArrayToBase64 } from "../utils/binary";
+import { errorFromResponse, normalizeBindingError, withWorkersAiRetry } from "../utils/errors";
 
 // ---------------------------------------------------------------------------
 // Model types
@@ -52,15 +53,20 @@ export class WorkersAiTTSAdapter extends BaseTTSAdapter<WorkersAiTTSModel> {
 		if (voice) extra.voice = voice;
 		if (speed != null) extra.speed = speed;
 
-		if (isDirectBindingConfig(this.adapterConfig)) {
-			return this.generateViaBinding(text, format, extra);
-		}
+		return withWorkersAiRetry(
+			() => {
+				if (isDirectBindingConfig(this.adapterConfig)) {
+					return this.generateViaBinding(text, format, extra);
+				}
 
-		if (isDirectCredentialsConfig(this.adapterConfig)) {
-			return this.generateViaRest(text, format, extra);
-		}
+				if (isDirectCredentialsConfig(this.adapterConfig)) {
+					return this.generateViaRest(text, format, extra);
+				}
 
-		return this.generateViaGateway(text, format, extra);
+				return this.generateViaGateway(text, format, extra);
+			},
+			{ maxRetries: this.adapterConfig.maxRetries },
+		);
 	}
 
 	private async generateViaBinding(
@@ -69,7 +75,12 @@ export class WorkersAiTTSAdapter extends BaseTTSAdapter<WorkersAiTTSModel> {
 		options: Record<string, unknown>,
 	): Promise<TTSResult> {
 		const ai = (this.adapterConfig as WorkersAiDirectBindingConfig).binding;
-		const result = await ai.run(this.model, { text, ...options });
+		let result: unknown;
+		try {
+			result = await ai.run(this.model, { text, ...options });
+		} catch (error) {
+			throw normalizeBindingError(error, "Workers AI TTS");
+		}
 
 		return this.normalizeResult(result, format);
 	}
@@ -117,9 +128,7 @@ export class WorkersAiTTSAdapter extends BaseTTSAdapter<WorkersAiTTSModel> {
 
 		if (!response.ok) {
 			const errorText = await response.text();
-			throw new Error(
-				`Workers AI TTS gateway request failed (${response.status}): ${errorText}`,
-			);
+			throw errorFromResponse(response, errorText, "Workers AI TTS gateway");
 		}
 
 		const buffer = await response.arrayBuffer();
