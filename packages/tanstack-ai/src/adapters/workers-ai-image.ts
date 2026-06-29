@@ -13,6 +13,7 @@ import {
 } from "../utils/create-fetcher";
 import { workersAiRestFetch } from "../utils/workers-ai-rest";
 import { binaryToBase64, uint8ArrayToBase64 } from "../utils/binary";
+import { errorFromResponse, normalizeBindingError, withWorkersAiRetry } from "../utils/errors";
 import type { WorkersAiDirectCredentialsConfig } from "../utils/create-fetcher";
 
 // ---------------------------------------------------------------------------
@@ -61,16 +62,21 @@ export class WorkersAiImageAdapter extends BaseImageAdapter<WorkersAiImageModel>
 		// it down to its verbatim text (media parts are dropped).
 		const promptText = resolveMediaPrompt(prompt).text;
 
-		if (isDirectBindingConfig(this.adapterConfig)) {
-			return this.generateViaBinding(promptText, extra);
-		}
+		return withWorkersAiRetry(
+			() => {
+				if (isDirectBindingConfig(this.adapterConfig)) {
+					return this.generateViaBinding(promptText, extra);
+				}
 
-		if (isDirectCredentialsConfig(this.adapterConfig)) {
-			return this.generateViaRest(promptText, extra);
-		}
+				if (isDirectCredentialsConfig(this.adapterConfig)) {
+					return this.generateViaRest(promptText, extra);
+				}
 
-		// Gateway mode
-		return this.generateViaGateway(promptText, extra);
+				// Gateway mode
+				return this.generateViaGateway(promptText, extra);
+			},
+			{ maxRetries: this.adapterConfig.maxRetries },
+		);
 	}
 
 	private async generateViaBinding(
@@ -78,7 +84,12 @@ export class WorkersAiImageAdapter extends BaseImageAdapter<WorkersAiImageModel>
 		options: Record<string, unknown>,
 	): Promise<ImageGenerationResult> {
 		const ai = (this.adapterConfig as WorkersAiDirectBindingConfig).binding;
-		const result = await ai.run(this.model, { prompt, ...options });
+		let result: unknown;
+		try {
+			result = await ai.run(this.model, { prompt, ...options });
+		} catch (error) {
+			throw normalizeBindingError(error, "Workers AI image");
+		}
 
 		const b64 = await binaryToBase64(result, "image");
 		return this.wrapResult(b64);
@@ -124,9 +135,7 @@ export class WorkersAiImageAdapter extends BaseImageAdapter<WorkersAiImageModel>
 
 		if (!response.ok) {
 			const errorText = await response.text();
-			throw new Error(
-				`Workers AI image gateway request failed (${response.status}): ${errorText}`,
-			);
+			throw errorFromResponse(response, errorText, "Workers AI image gateway");
 		}
 
 		const buffer = await response.arrayBuffer();

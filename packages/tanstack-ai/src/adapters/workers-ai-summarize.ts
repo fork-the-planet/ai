@@ -11,6 +11,7 @@ import {
 	validateWorkersAiConfig,
 } from "../utils/create-fetcher";
 import { workersAiRestFetch } from "../utils/workers-ai-rest";
+import { errorFromResponse, normalizeBindingError, withWorkersAiRetry } from "../utils/errors";
 
 // ---------------------------------------------------------------------------
 // Model types
@@ -41,22 +42,32 @@ export class WorkersAiSummarizeAdapter extends BaseSummarizeAdapter<WorkersAiSum
 		const payload: Record<string, unknown> = { input_text: text };
 		if (maxLength != null) payload.max_length = maxLength;
 
-		if (isDirectBindingConfig(this.adapterConfig)) {
-			return this.summarizeViaBinding(payload);
-		}
+		return withWorkersAiRetry(
+			() => {
+				if (isDirectBindingConfig(this.adapterConfig)) {
+					return this.summarizeViaBinding(payload);
+				}
 
-		if (isDirectCredentialsConfig(this.adapterConfig)) {
-			return this.summarizeViaRest(payload);
-		}
+				if (isDirectCredentialsConfig(this.adapterConfig)) {
+					return this.summarizeViaRest(payload);
+				}
 
-		return this.summarizeViaGateway(payload);
+				return this.summarizeViaGateway(payload);
+			},
+			{ maxRetries: this.adapterConfig.maxRetries },
+		);
 	}
 
 	private async summarizeViaBinding(
 		payload: Record<string, unknown>,
 	): Promise<SummarizationResult> {
 		const ai = (this.adapterConfig as WorkersAiDirectBindingConfig).binding;
-		const result = (await ai.run(this.model, payload)) as Record<string, unknown>;
+		let result: Record<string, unknown>;
+		try {
+			result = (await ai.run(this.model, payload)) as Record<string, unknown>;
+		} catch (error) {
+			throw normalizeBindingError(error, "Workers AI summarize");
+		}
 		return this.wrapResult((result.summary as string) ?? "");
 	}
 
@@ -89,9 +100,7 @@ export class WorkersAiSummarizeAdapter extends BaseSummarizeAdapter<WorkersAiSum
 
 		if (!response.ok) {
 			const errorText = await response.text();
-			throw new Error(
-				`Workers AI summarize gateway request failed (${response.status}): ${errorText}`,
-			);
+			throw errorFromResponse(response, errorText, "Workers AI summarize gateway");
 		}
 
 		const data = (await response.json()) as {

@@ -579,6 +579,118 @@ describe("createWorkersAiBindingFetch", () => {
 		expect(doneCount).toBe(1);
 	});
 
+	// -------------------------------------------------------------------------
+	// Error handling — binding throws should surface as HTTP responses so the
+	// OpenAI SDK's status-based retry/error handling engages.
+	// -------------------------------------------------------------------------
+
+	it("should surface a 3040 (out of capacity) binding error as a 429 response", async () => {
+		const binding = mockBinding(
+			vi.fn().mockRejectedValue(new Error("3040: Capacity temporarily exceeded")),
+		);
+		const fetcher = createWorkersAiBindingFetch(binding);
+
+		const response = await fetcher("https://api.openai.com/v1/chat/completions", {
+			method: "POST",
+			body: JSON.stringify({
+				model: "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+				messages: [{ role: "user", content: "Hi" }],
+			}),
+		});
+
+		expect(response.status).toBe(429);
+		expect(await response.text()).toContain("3040");
+	});
+
+	it("should surface a 5007 (no such model) binding error as a 400 response", async () => {
+		const binding = mockBinding(vi.fn().mockRejectedValue(new Error("5007: No such model")));
+		const fetcher = createWorkersAiBindingFetch(binding);
+
+		const response = await fetcher("https://api.openai.com/v1/chat/completions", {
+			method: "POST",
+			body: JSON.stringify({
+				model: "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+				messages: [{ role: "user", content: "Hi" }],
+			}),
+		});
+
+		expect(response.status).toBe(400);
+	});
+
+	it("should re-throw an abort (DOMException) instead of returning a response", async () => {
+		const abort = new DOMException("The operation was aborted", "AbortError");
+		const binding = mockBinding(vi.fn().mockRejectedValue(abort));
+		const fetcher = createWorkersAiBindingFetch(binding);
+
+		await expect(
+			fetcher("https://api.openai.com/v1/chat/completions", {
+				method: "POST",
+				body: JSON.stringify({
+					model: "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+					messages: [{ role: "user", content: "Hi" }],
+				}),
+			}),
+		).rejects.toBe(abort);
+	});
+
+	it("should re-throw an unrecognized binding error (no fabricated status)", async () => {
+		const boom = new Error("unexpected kaboom");
+		const binding = mockBinding(vi.fn().mockRejectedValue(boom));
+		const fetcher = createWorkersAiBindingFetch(binding);
+
+		await expect(
+			fetcher("https://api.openai.com/v1/chat/completions", {
+				method: "POST",
+				body: JSON.stringify({
+					model: "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+					messages: [{ role: "user", content: "Hi" }],
+				}),
+			}),
+		).rejects.toBe(boom);
+	});
+
+	it("should return a non-OK gateway run-path response as-is (not swallow it)", async () => {
+		// Run path (gateway set) uses returnRawResponse. A non-OK response must be
+		// returned verbatim so the OpenAI SDK sees the status + Retry-After and
+		// retries, instead of being parsed into an empty "successful" completion.
+		const binding = mockBinding(
+			vi.fn().mockResolvedValue(
+				new Response("rate limited", {
+					status: 429,
+					headers: { "retry-after": "2" },
+				}),
+			),
+		);
+		const fetcher = createWorkersAiBindingFetch(binding, { gateway: "my-gateway" });
+
+		const response = await fetcher("https://api.openai.com/v1/chat/completions", {
+			method: "POST",
+			body: JSON.stringify({
+				model: "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+				messages: [{ role: "user", content: "Hi" }],
+			}),
+		});
+
+		expect(response.status).toBe(429);
+		expect(response.headers.get("retry-after")).toBe("2");
+		expect(await response.text()).toBe("rate limited");
+	});
+
+	it("should surface a thrown gateway run-path binding error as a mapped response", async () => {
+		const binding = mockBinding(vi.fn().mockRejectedValue(new Error("3040: out of capacity")));
+		const fetcher = createWorkersAiBindingFetch(binding, { gateway: "my-gateway" });
+
+		const response = await fetcher("https://api.openai.com/v1/chat/completions", {
+			method: "POST",
+			body: JSON.stringify({
+				model: "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+				messages: [{ role: "user", content: "Hi" }],
+			}),
+		});
+
+		expect(response.status).toBe(429);
+	});
+
 	it("should return 400 when no body is provided", async () => {
 		const binding = mockBinding(vi.fn());
 		const fetcher = createWorkersAiBindingFetch(binding);

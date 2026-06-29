@@ -1,4 +1,5 @@
 import type { WorkersAiDirectCredentialsConfig } from "./create-fetcher";
+import { errorFromResponse } from "./errors";
 
 /**
  * Workers AI REST API base URL.
@@ -41,7 +42,7 @@ export async function workersAiRestFetch(
 	if (!response.ok) {
 		const errorText = await response.text();
 		const label = options?.label ?? "Workers AI";
-		throw new Error(`${label} request failed (${response.status}): ${errorText}`);
+		throw errorFromResponse(response, errorText, label);
 	}
 
 	return response;
@@ -81,7 +82,7 @@ export async function workersAiRestFetchBinary(
 	if (!response.ok) {
 		const errorText = await response.text();
 		const label = options?.label ?? "Workers AI";
-		throw new Error(`${label} request failed (${response.status}): ${errorText}`);
+		throw errorFromResponse(response, errorText, label);
 	}
 
 	return response;

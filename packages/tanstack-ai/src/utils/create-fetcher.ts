@@ -10,6 +10,7 @@ import {
 	type ResumeExpiredPolicy,
 	SSEDecoder,
 } from "@cloudflare/gateway-core";
+import { bindingErrorToResponse } from "./errors";
 
 // ---------------------------------------------------------------------------
 // AI Gateway types (for third-party providers + Workers AI through gateway)
@@ -152,6 +153,17 @@ export type WorkersAiAdapterConfig = (
 	 * Routes requests with the same key to the same backend replica.
 	 */
 	sessionAffinity?: string;
+	/**
+	 * Maximum number of automatic retries for transient failures (HTTP 408 /
+	 * 409 / 429 / >= 500, including the Workers AI "out of capacity" 3040 code).
+	 *
+	 * - **Chat** (`createWorkersAi`): forwarded to the OpenAI SDK client, which
+	 *   does the retrying. Defaults to the OpenAI SDK default (2).
+	 * - **Non-chat** adapters (embedding, image, TTS, transcription, summarize):
+	 *   used by this package's own bounded exponential-backoff retry. Defaults
+	 *   to 2. Set to `0` to disable retries.
+	 */
+	maxRetries?: number;
 };
 
 // ---------------------------------------------------------------------------
@@ -519,7 +531,19 @@ export function createWorkersAiBindingFetch(
 			if (options.extraHeaders) runOptions.extraHeaders = options.extraHeaders;
 			if (signal) runOptions.signal = signal;
 
-			const raw = (await binding.run(model, inputs, runOptions)) as Response;
+			let raw: Response;
+			try {
+				raw = (await binding.run(model, inputs, runOptions)) as Response;
+			} catch (error) {
+				return bindingErrorToResponse(error);
+			}
+
+			// A non-OK response is an error, never a valid stream. Return it as-is so
+			// the OpenAI SDK sees the status (and any `Retry-After`) and retries
+			// 4xx/5xx appropriately, instead of us swallowing it via `raw.json()`
+			// into an empty "successful" completion.
+			if (!raw.ok) return raw;
+
 			const runId = raw.headers?.get?.("cf-aig-run-id") ?? null;
 			const contentType = raw.headers?.get?.("content-type") ?? "";
 			const isStreamResponse =
@@ -563,11 +587,18 @@ export function createWorkersAiBindingFetch(
 		if (options?.extraHeaders) runOptions.extraHeaders = options.extraHeaders;
 		if (signal) runOptions.signal = signal;
 
-		const result = await binding.run(
-			model,
-			inputs,
-			Object.keys(runOptions).length > 0 ? runOptions : undefined,
-		);
+		let result: unknown;
+		try {
+			result = await binding.run(
+				model,
+				inputs,
+				Object.keys(runOptions).length > 0 ? runOptions : undefined,
+			);
+		} catch (error) {
+			// Surface binding failures as HTTP responses so the OpenAI SDK's
+			// status-based retry engages (e.g. 3040 "out of capacity" → 429).
+			return bindingErrorToResponse(error);
+		}
 
 		if (stream && result instanceof ReadableStream) {
 			// Workers AI returns an SSE stream with `data: {"response":"chunk"}` format.

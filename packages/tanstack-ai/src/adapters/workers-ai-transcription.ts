@@ -12,6 +12,7 @@ import {
 } from "../utils/create-fetcher";
 import { workersAiRestFetch, workersAiRestFetchBinary } from "../utils/workers-ai-rest";
 import { uint8ArrayToBase64 } from "../utils/binary";
+import { errorFromResponse, normalizeBindingError, withWorkersAiRetry } from "../utils/errors";
 
 // ---------------------------------------------------------------------------
 // Model types
@@ -66,19 +67,24 @@ export class WorkersAiTranscriptionAdapter extends BaseTranscriptionAdapter<Work
 		// - Other Whisper models (binding): { audio: number[] }
 		const audioPayload = this.buildAudioPayload(audioBytes, audio);
 
-		if (isDirectBindingConfig(this.adapterConfig)) {
-			return this.transcribeViaBinding(audioPayload, extra);
-		}
+		return withWorkersAiRetry(
+			() => {
+				if (isDirectBindingConfig(this.adapterConfig)) {
+					return this.transcribeViaBinding(audioPayload, extra);
+				}
 
-		if (isDirectCredentialsConfig(this.adapterConfig)) {
-			// Nova-3 REST requires raw binary audio, not JSON
-			if (this.model === "@cf/deepgram/nova-3") {
-				return this.transcribeViaRestBinary(audioBytes, audio, extra);
-			}
-			return this.transcribeViaRest(audioPayload, extra);
-		}
+				if (isDirectCredentialsConfig(this.adapterConfig)) {
+					// Nova-3 REST requires raw binary audio, not JSON
+					if (this.model === "@cf/deepgram/nova-3") {
+						return this.transcribeViaRestBinary(audioBytes, audio, extra);
+					}
+					return this.transcribeViaRest(audioPayload, extra);
+				}
 
-		return this.transcribeViaGateway(audioPayload, extra);
+				return this.transcribeViaGateway(audioPayload, extra);
+			},
+			{ maxRetries: this.adapterConfig.maxRetries },
+		);
 	}
 
 	/**
@@ -110,10 +116,15 @@ export class WorkersAiTranscriptionAdapter extends BaseTranscriptionAdapter<Work
 		options: Record<string, unknown>,
 	): Promise<TranscriptionResult> {
 		const ai = (this.adapterConfig as WorkersAiDirectBindingConfig).binding;
-		const result = (await ai.run(this.model, {
-			...audioPayload,
-			...options,
-		})) as Record<string, unknown>;
+		let result: Record<string, unknown>;
+		try {
+			result = (await ai.run(this.model, {
+				...audioPayload,
+				...options,
+			})) as Record<string, unknown>;
+		} catch (error) {
+			throw normalizeBindingError(error, "Workers AI transcription");
+		}
 		return this.normalizeResult(result);
 	}
 
@@ -194,9 +205,7 @@ export class WorkersAiTranscriptionAdapter extends BaseTranscriptionAdapter<Work
 
 		if (!response.ok) {
 			const errorText = await response.text();
-			throw new Error(
-				`Workers AI transcription gateway request failed (${response.status}): ${errorText}`,
-			);
+			throw errorFromResponse(response, errorText, "Workers AI transcription gateway");
 		}
 
 		const data = (await response.json()) as Record<string, unknown>;
