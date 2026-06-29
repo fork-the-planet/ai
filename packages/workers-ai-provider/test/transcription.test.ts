@@ -1,3 +1,4 @@
+import { APICallError } from "@ai-sdk/provider";
 import { experimental_transcribe as transcribe } from "ai";
 import { describe, expect, it } from "vitest";
 import { createWorkersAI } from "../src/index";
@@ -231,5 +232,26 @@ describe("Transcription - Provider", () => {
 
 		expect(t1.modelId).toBe(t2.modelId);
 		expect(t1.provider).toBe("workersai.transcription");
+	});
+
+	it("normalizes an out-of-capacity binding error to a retryable 429 APICallError", async () => {
+		const workersai = createWorkersAI({
+			binding: {
+				run: async () => {
+					throw new Error("3040: Capacity temporarily exceeded, please try again.");
+				},
+			} as any,
+		});
+
+		const err = await transcribe({
+			model: workersai.transcription("@cf/openai/whisper"),
+			audio: new Uint8Array([0x52, 0x49, 0x46, 0x46]),
+			mediaType: "audio/wav",
+			maxRetries: 0,
+		}).catch((e) => e);
+
+		expect(APICallError.isInstance(err)).toBe(true);
+		expect((err as APICallError).statusCode).toBe(429);
+		expect((err as APICallError).isRetryable).toBe(true);
 	});
 });

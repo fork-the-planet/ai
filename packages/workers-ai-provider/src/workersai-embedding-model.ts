@@ -4,6 +4,7 @@ import type {
 	EmbeddingModelV3Result,
 } from "@ai-sdk/provider";
 import { TooManyEmbeddingValuesForCallError } from "@ai-sdk/provider";
+import { normalizeBindingError } from "./workersai-error";
 import type { EmbeddingModels } from "./workersai-models";
 
 export type WorkersAIEmbeddingConfig = {
@@ -72,17 +73,27 @@ export class WorkersAIEmbeddingModel implements EmbeddingModelV3 {
 			...passthroughOptions
 		} = this.settings;
 
-		const response = await this.config.binding.run(
-			this.modelId as keyof AiModels,
-			{
-				text: values,
-			},
-			{
-				gateway: this.config.gateway ?? gateway,
-				signal: abortSignal,
-				...passthroughOptions,
-			} as AiOptions,
-		);
+		let response: unknown;
+		try {
+			response = await this.config.binding.run(
+				this.modelId as keyof AiModels,
+				{
+					text: values,
+				},
+				{
+					gateway: this.config.gateway ?? gateway,
+					signal: abortSignal,
+					...passthroughOptions,
+				} as AiOptions,
+			);
+		} catch (error) {
+			// Normalize binding failures (e.g. 3040 "out of capacity" → 429) into a
+			// retryable APICallError so the AI SDK's maxRetries can engage.
+			throw normalizeBindingError(error, {
+				model: this.modelId,
+				requestBodyValues: { text: values },
+			});
+		}
 
 		return {
 			embeddings: (response as { data: number[][] }).data,

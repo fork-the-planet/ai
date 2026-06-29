@@ -1,3 +1,4 @@
+import { APICallError } from "@ai-sdk/provider";
 import { experimental_generateSpeech as generateSpeech } from "ai";
 import { describe, expect, it } from "vitest";
 import { createWorkersAI } from "../src/index";
@@ -149,6 +150,52 @@ describe("Speech - Binding", () => {
 				text: "Test",
 			}),
 		).rejects.toThrow(/Unexpected output type/);
+	});
+
+	it("normalizes an out-of-capacity binding error to a retryable 429 APICallError", async () => {
+		const workersai = createWorkersAI({
+			binding: {
+				run: async () => {
+					throw new Error("3040: Capacity temporarily exceeded, please try again.");
+				},
+			} as any,
+		});
+
+		const err = await generateSpeech({
+			model: workersai.speech("@cf/deepgram/aura-1"),
+			text: "Test",
+			maxRetries: 0,
+		}).catch((e) => e);
+
+		expect(APICallError.isInstance(err)).toBe(true);
+		expect((err as APICallError).statusCode).toBe(429);
+		expect((err as APICallError).isRetryable).toBe(true);
+	});
+
+	it("surfaces a REST error instead of decoding the error body as audio", async () => {
+		// REST speech uses returnRawResponse, so the shim returns the raw (non-OK)
+		// Response. Without the guard, the error body would become "audio".
+		const workersai = createWorkersAI({
+			accountId: "acc",
+			apiKey: "key",
+			fetch: async () =>
+				new Response(
+					JSON.stringify({
+						errors: [{ code: 3040, message: "Capacity temporarily exceeded" }],
+					}),
+					{ status: 429, statusText: "Too Many Requests" },
+				),
+		});
+
+		const err = await generateSpeech({
+			model: workersai.speech("@cf/deepgram/aura-1"),
+			text: "Test",
+			maxRetries: 0,
+		}).catch((e) => e);
+
+		expect(APICallError.isInstance(err)).toBe(true);
+		expect((err as APICallError).statusCode).toBe(429);
+		expect((err as APICallError).isRetryable).toBe(true);
 	});
 });
 

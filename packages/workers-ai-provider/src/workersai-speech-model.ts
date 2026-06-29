@@ -1,4 +1,5 @@
 import type { SpeechModelV3, SharedV3Warning } from "@ai-sdk/provider";
+import { apiCallErrorFromResponse, normalizeBindingError } from "./workersai-error";
 import type { WorkersAISpeechSettings } from "./workersai-speech-settings";
 import type { SpeechModels } from "./workersai-models";
 
@@ -56,19 +57,40 @@ export class WorkersAISpeechModel implements SpeechModelV3 {
 		if (voice) inputs.voice = voice;
 		if (speed != null) inputs.speed = speed;
 
-		const result = await this.config.binding.run(
-			this.modelId as Parameters<Ai["run"]>[0],
-			inputs as Parameters<Ai["run"]>[1],
-			{
-				gateway: this.config.gateway,
-				signal: abortSignal,
-				// returnRawResponse prevents the createRun REST shim from trying
-				// to JSON.parse binary audio. Real env.AI bindings don't recognize
-				// this option — it has no effect, and the binding returns the normal
-				// binary result (Uint8Array/ReadableStream) which toUint8Array handles.
-				returnRawResponse: true,
-			} as AiOptions,
-		);
+		let result: unknown;
+		try {
+			result = await this.config.binding.run(
+				this.modelId as Parameters<Ai["run"]>[0],
+				inputs as Parameters<Ai["run"]>[1],
+				{
+					gateway: this.config.gateway,
+					signal: abortSignal,
+					// returnRawResponse prevents the createRun REST shim from trying
+					// to JSON.parse binary audio. Real env.AI bindings don't recognize
+					// this option — it has no effect, and the binding returns the normal
+					// binary result (Uint8Array/ReadableStream) which toUint8Array handles.
+					returnRawResponse: true,
+				} as AiOptions,
+			);
+		} catch (error) {
+			// Normalize binding failures (e.g. 3040 "out of capacity" → 429) into a
+			// retryable APICallError so the AI SDK's maxRetries can engage.
+			throw normalizeBindingError(error, {
+				model: this.modelId,
+				requestBodyValues: inputs,
+			});
+		}
+
+		// The REST shim uses `returnRawResponse`, so it does NOT throw on a non-OK
+		// status — it hands back the raw Response. Without this guard the error body
+		// would be decoded as "audio". Surface it as a (retryable-aware) APICallError.
+		if (result instanceof Response && !result.ok) {
+			const errorBody = await result.text().catch(() => "<unable to read response body>");
+			throw apiCallErrorFromResponse(result, errorBody, {
+				url: `workers-ai:run/${this.modelId}`,
+				requestBodyValues: inputs,
+			});
+		}
 
 		// Workers AI TTS returns binary audio in various formats:
 		// - Binding: Uint8Array, ArrayBuffer, ReadableStream, or { audio: base64 }

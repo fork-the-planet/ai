@@ -8,6 +8,7 @@ import {
 } from "@cloudflare/gateway-core";
 import { generateId } from "ai";
 import type { WorkersAIChatPrompt } from "./workersai-chat-prompt";
+import { apiCallErrorFromResponse } from "./workersai-error";
 
 // Re-exported from `@cloudflare/gateway-core` (single source of truth) so the
 // existing `workers-ai-provider/src/utils` import paths keep working unchanged.
@@ -155,7 +156,9 @@ export function createRun(config: CreateRunConfig): AiRun {
 			signal: signal as AbortSignal | undefined,
 		});
 
-		// Check for HTTP errors before processing
+		// Check for HTTP errors before processing. Surface as an APICallError so
+		// the AI SDK can classify retryability from the status (429 / 5xx → retry)
+		// and honor any Retry-After header.
 		if (!response.ok && !returnRawResponse) {
 			let errorBody: string;
 			try {
@@ -163,9 +166,10 @@ export function createRun(config: CreateRunConfig): AiRun {
 			} catch {
 				errorBody = "<unable to read response body>";
 			}
-			throw new Error(
-				`Workers AI API error (${response.status} ${response.statusText}): ${errorBody}`,
-			);
+			throw apiCallErrorFromResponse(response, errorBody, {
+				url,
+				requestBodyValues: inputs,
+			});
 		}
 
 		if (returnRawResponse) {
@@ -204,9 +208,10 @@ export function createRun(config: CreateRunConfig): AiRun {
 				} catch {
 					errorBody = "<unable to read response body>";
 				}
-				throw new Error(
-					`Workers AI API error (${retryResponse.status} ${retryResponse.statusText}): ${errorBody}`,
-				);
+				throw apiCallErrorFromResponse(retryResponse, errorBody, {
+					url,
+					requestBodyValues: inputs,
+				});
 			}
 
 			const retryData = await retryResponse.json<{
@@ -261,9 +266,10 @@ export async function createRunBinary(
 		} catch {
 			errorBody = "<unable to read response body>";
 		}
-		throw new Error(
-			`Workers AI API error (${response.status} ${response.statusText}): ${errorBody}`,
-		);
+		throw apiCallErrorFromResponse(response, errorBody, {
+			url,
+			requestBodyValues: { contentType, byteLength: audioBytes.byteLength },
+		});
 	}
 
 	const data = await response.json<{ result?: Record<string, unknown> }>();

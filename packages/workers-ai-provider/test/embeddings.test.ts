@@ -1,3 +1,4 @@
+import { APICallError } from "@ai-sdk/provider";
 import { embed, embedMany } from "ai";
 import { HttpResponse, http } from "msw";
 import { setupServer } from "msw/node";
@@ -152,5 +153,24 @@ describe("Binding - Embedding Tests", () => {
 				values: ["one", "two", "three"],
 			}),
 		).rejects.toThrow("Too many values");
+	});
+
+	it("normalizes an out-of-capacity binding error to a retryable 429 APICallError", async () => {
+		const workersai = createWorkersAI({
+			binding: {
+				run: async () => {
+					throw new Error("3040: Capacity temporarily exceeded, please try again.");
+				},
+			} as any,
+		});
+
+		const err = await workersai
+			.embedding(TEST_EMBEDDING_MODEL)
+			.doEmbed({ values: ["x"] })
+			.catch((e) => e);
+
+		expect(APICallError.isInstance(err)).toBe(true);
+		expect((err as APICallError).statusCode).toBe(429);
+		expect((err as APICallError).isRetryable).toBe(true);
 	});
 });
